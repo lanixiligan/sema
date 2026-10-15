@@ -356,7 +356,7 @@ Never split frames from the same recording between training and testing; never q
 | Swap setup steps 2b and 2c | Data step before the camera permission prompt, or keep camera first | Before 3.1 |
 | What "Next letter" picks | Teaching order, or next unmastered letter | 3.3 |
 | Practice unlock threshold | 3 mastered letters is a starting guess | 3.4 |
-| First 8 letters | Visually distinct shortlist, adjusted by the confusion matrix | 2.1 |
+| First 8 letters | Decided: B, C, D, F, I, L, W, Y; to be revisited after 2.2's confusion matrix | Done (2.1) |
 | Use the Kaggle images | Own recordings only, or plus extracted Kaggle landmarks | 2.2, after seeing results without it |
 | Hosting | Decided: Vercel | Done (end of Phase 1) |
 | Left-hand flip source | The detected hand, or the user's signing-hand setting (then the detected hand only drives the "Switch your setting?" note). Leaning toward the setting | After 1.2's handedness check and the recorder's mismatch counts (2.1) |

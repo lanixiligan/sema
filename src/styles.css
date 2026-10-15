@@ -261,3 +261,74 @@ body {
 .benchmark-row .button-quiet {
   margin-top: 0;
 }
+
+/* Recorder page (record.html) */
+.consent h1 {
+  margin: 0 0 16px;
+  font-size: 1.5rem;
+}
+
+.consent-text p {
+  margin: 0 0 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 16px;
+  color: var(--muted-text);
+}
+
+.field input {
+  max-width: 240px;
+  padding: 8px 10px;
+  font: inherit;
+  color: var(--deep-cobalt);
+  background: #fff;
+  border: 1px solid var(--muted-text);
+  border-radius: 8px;
+}
+
+.check {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-top: 12px;
+}
+
+.consent .button {
+  margin-top: 24px;
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.field input:focus-visible,
+.check input:focus-visible {
+  outline: 3px solid var(--deep-sky);
+  outline-offset: 2px;
+}
+
+.saved-session p,
+.session-bar {
+  margin: 0 0 16px;
+}
+
+.session-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  color: var(--muted-text);
+}
+
+.session-bar .button-quiet {
+  margin-top: 0;
+}
+
+.hand-status {
+  color: var(--muted-text);
+}
