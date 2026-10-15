@@ -66,6 +66,7 @@ export default function App() {
             <label className="camera-picker">
               Camera
               <select
+                name="camera"
                 value={deviceId ?? ''}
                 onChange={(event) => switchCamera(event.target.value)}
               >
@@ -116,6 +117,7 @@ export default function App() {
               <label>
                 Hand model runs on{' '}
                 <select
+                  name="delegate"
                   value={preferredDelegate}
                   onChange={(event) => setPreferredDelegate(event.target.value)}
                 >
@@ -123,13 +125,6 @@ export default function App() {
                   <option value="CPU">CPU</option>
                 </select>
               </label>
-              {/* TEMPORARY: for checking MediaPipe's handedness label. */}
-              <p>
-                MediaPipe's raw label:{' '}
-                {hand.rawLabel
-                  ? `${hand.rawLabel} (score ${hand.rawScore.toFixed(2)})`
-                  : 'no hand'}
-              </p>
             </details>
           </>
         )}

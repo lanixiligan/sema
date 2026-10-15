@@ -197,7 +197,3 @@ body {
   border: 1px solid var(--muted-text);
   border-radius: 6px;
 }
-
-.dev-settings p {
-  margin: 12px 0 0;
-}

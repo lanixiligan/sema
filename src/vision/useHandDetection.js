@@ -7,12 +7,7 @@ import { getDetectionErrorMessage } from './visionMessages.js'
 // readout would flicker whenever a single frame misses the hand.
 const HAND_LOST_AFTER_MS = 300
 
-const NO_STATS = {
-  detectionFps: null,
-  detectionMs: null,
-  rawLabel: null, // MediaPipe's own handedness label, for the debug readout
-  rawScore: null,
-}
+const NO_STATS = { detectionFps: null, detectionMs: null }
 
 // Runs hand detection on each new video frame while `isRunning` is true,
 // draws the result on the canvas, and reports what it found.
@@ -39,7 +34,6 @@ export function useHandDetection({ videoRef, canvasRef, landmarkerRef, isRunning
 
     let lastHandSeenAt = 0
     let shownLabel = null
-    let latestHandedness = null
 
     let windowStart = performance.now()
     let detections = 0
@@ -81,9 +75,8 @@ export function useHandDetection({ videoRef, canvasRef, landmarkerRef, isRunning
       const landmarks = result.landmarks[0]
       if (landmarks) {
         lastHandSeenAt = now
-        latestHandedness = result.handedness[0][0]
         drawHand(canvas, landmarks, video.videoWidth, video.videoHeight)
-        const label = toPhysicalHand(latestHandedness.categoryName)
+        const label = toPhysicalHand(result.handedness[0][0].categoryName)
         if (label !== shownLabel) {
           shownLabel = label
           setHandLabel(label)
@@ -91,7 +84,6 @@ export function useHandDetection({ videoRef, canvasRef, landmarkerRef, isRunning
       } else if (shownLabel && now - lastHandSeenAt > HAND_LOST_AFTER_MS) {
         clearHand(canvas)
         shownLabel = null
-        latestHandedness = null
         setHandLabel(null)
       }
 
@@ -100,8 +92,6 @@ export function useHandDetection({ videoRef, canvasRef, landmarkerRef, isRunning
         setStats({
           detectionFps: (detections * 1000) / (now - windowStart),
           detectionMs: detectionMsTotal / detections,
-          rawLabel: latestHandedness?.categoryName ?? null,
-          rawScore: latestHandedness?.score ?? null,
         })
         windowStart = now
         detections = 0
