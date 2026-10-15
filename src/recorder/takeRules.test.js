@@ -134,9 +134,9 @@ describe('judgeTake', () => {
     )
   })
 
-  it('says frames never arrived when the camera was too slow', () => {
+  it('says frames never arrived when the camera or hand tracking was too slow', () => {
     expect(judgeTake({ kept: 21, mismatched: 0, droppedNoHand: 0 }).reason).toBe(
-      '21 of 30 frames matched: 9 never arrived (the camera may be slow)',
+      '21 of 30 frames matched: 9 never arrived (the camera or hand tracking was too slow)',
     )
   })
 })

@@ -73,7 +73,7 @@ export function judgeTake({ kept, mismatched, droppedNoHand }, expected = EXPECT
   if (droppedNoHand > 0) parts.push(`${droppedNoHand} had no hand`)
   if (mismatched > 0) parts.push(`${mismatched} had the other hand detected`)
   const missing = expected - kept - droppedNoHand
-  if (missing > 0) parts.push(`${missing} never arrived (the camera may be slow)`)
+  if (missing > 0) parts.push(`${missing} never arrived (the camera or hand tracking was too slow)`)
   const reason = `${matched} of ${expected} frames matched` + (parts.length ? `: ${parts.join(', ')}` : '')
   return { status: 'rejected', reason }
 }
