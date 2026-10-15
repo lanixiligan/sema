@@ -19,7 +19,7 @@ function validFile() {
   let s = newSession({
     person: 'p03',
     session: '2026-11-02a',
-    consent: { train: true, publish: false },
+    consent: { train: true },
     date: '2026-11-02',
     browser: 'Chrome 155',
   })
@@ -64,9 +64,8 @@ describe('checkSession', () => {
     expect(broken((f) => { f.samples[1].raw[5] = null })[0]).toMatch(/Sample 1: raw must be 63 numbers/)
   })
 
-  it('needs consent to train, a publish answer and a date', () => {
+  it('needs consent to train and a date', () => {
     expect(broken((f) => { f.consent.train = false })).toContain('consent.train must be true')
-    expect(broken((f) => { delete f.consent.publish })).toContain('consent.publish must be true or false')
     expect(broken((f) => { f.consent.date = 'today' })).toContain('consent.date must be a date like 2026-11-02')
   })
 

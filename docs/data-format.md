@@ -20,7 +20,7 @@ Check a file before keeping it: `npm run check-session -- <file>`.
   "session": "2026-11-02a",
   "browser": "Chrome 155",
   "cameraFps": 30.0,
-  "consent": { "train": true, "publish": false, "date": "2026-11-02" },
+  "consent": { "train": true, "date": "2026-11-02" },
   "recordings": [
     {
       "recording": "p03-2026-11-02a-W-left-2",
@@ -66,9 +66,8 @@ Check a file before keeping it: `npm run check-session -- <file>`.
 | `person`, `session` | The participant code (`p03`) and session ID (`2026-11-02a`). Session IDs can repeat across people. |
 | `browser` | Browser and major version, e.g. `"Chrome 155"`. |
 | `cameraFps` | Median of the recordings' `cameraFps`. |
-| `consent.train` | Always `true`: "My recordings may be used to train Sema" is required. |
-| `consent.publish` | `true` only if the participant ticked "My recordings may be published in a public dataset". A published dataset would include only these sessions. |
-| `consent.date` | The day the consent boxes were answered. |
+| `consent.train` | Always `true`: "My recordings may be used to train Sema" must be ticked to record. Training and testing Sema is the only use; recordings are never published. |
+| `consent.date` | The day consent was given. |
 
 The header's `person`, `session` and `language` only label the file. **Each sample's
 own `person`, `session` and `language` are authoritative.**

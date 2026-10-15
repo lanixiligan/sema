@@ -30,7 +30,7 @@ function session() {
   return newSession({
     person: 'p03',
     session: '2026-11-02a',
-    consent: { train: true, publish: false },
+    consent: { train: true },
     date: '2026-11-02',
     browser: 'Chrome 155',
   })
@@ -92,10 +92,16 @@ describe('newSession', () => {
       session: '2026-11-02a',
       browser: 'Chrome 155',
       cameraFps: null,
-      consent: { train: true, publish: false, date: '2026-11-02' },
+      consent: { train: true, date: '2026-11-02' },
       recordings: [],
       samples: [],
     })
+  })
+})
+
+describe('consent', () => {
+  it('records training consent and its date only: recordings are never published', () => {
+    expect(Object.keys(session().consent)).toEqual(['train', 'date'])
   })
 })
 

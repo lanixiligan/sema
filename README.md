@@ -137,9 +137,8 @@ over HTTPS, which the camera requires. No base path is needed. Every push to
 
 Landmark recordings collected for training go in `data/raw/`, which is gitignored: they
 stay private and are backed up by Lanix, never committed to this public repository.
-Participants choose separately whether their recordings may be used to train Sema
-(required) and published in a public dataset (optional), and can ask Lanix to delete
-their recordings at any time. What is public: the code, evaluation results, confusion
+Participants consent to one use only: training and testing Sema. Recordings are never
+published, and participants can ask Lanix to delete theirs at any time. What is public: the code, evaluation results, confusion
 matrices and trained classifier weights.
 
 ## Recording sessions
@@ -162,8 +161,8 @@ computer and send you the downloaded file.
 video or photos; they're identified by a code, not their name; everything stays in
 their browser until they download the file, and nothing is uploaded; Lanix keeps the
 file private and uses it to train and test Sema; they can ask Lanix to delete their
-recordings at any time. Training use is required; publication in a public dataset is a
-separate, optional choice.
+recordings at any time. They consent to one use, training Sema; recordings are never
+published.
 
 **Before keeping a file,** check it:
 

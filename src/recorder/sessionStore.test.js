@@ -17,7 +17,7 @@ function fakeStorage({ failWrites = false } = {}) {
 const session = newSession({
   person: 'p03',
   session: '2026-11-02a',
-  consent: { train: true, publish: false },
+  consent: { train: true },
   date: '2026-11-02',
   browser: 'Chrome 155',
 })

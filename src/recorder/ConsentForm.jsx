@@ -6,7 +6,6 @@ export default function ConsentForm({ today, onStart }) {
   const [person, setPerson] = useState('')
   const [sessionId, setSessionId] = useState(() => nextSessionId(today, loadUsedSessionIds()))
   const [train, setTrain] = useState(false)
-  const [publish, setPublish] = useState(false)
 
   const code = normalizePersonCode(person)
   const codeOk = isValidPersonCode(code)
@@ -14,7 +13,7 @@ export default function ConsentForm({ today, onStart }) {
 
   function submit(event) {
     event.preventDefault()
-    if (canStart) onStart({ person: code, sessionId: sessionId.trim(), consent: { train, publish } })
+    if (canStart) onStart({ person: code, sessionId: sessionId.trim(), consent: { train } })
   }
 
   return (
@@ -28,8 +27,9 @@ export default function ConsentForm({ today, onStart }) {
         </p>
         <p>
           Everything stays in this browser until you download the file at the end; nothing is
-          uploaded. You then send the file to Lanix, who keeps it private and uses it to train
-          and test Sema's letter recognition. Ask Lanix to delete your recordings at any time.
+          uploaded. You then send the file to Lanix, who keeps it private and uses it only to
+          train and test Sema's letter recognition; it is never published. Ask Lanix to delete
+          your recordings at any time.
           You can stop whenever you like, and "Delete this session" removes what's stored in
           this browser.
         </p>
@@ -50,11 +50,7 @@ export default function ConsentForm({ today, onStart }) {
 
       <label className="check">
         <input type="checkbox" name="train" checked={train} onChange={(e) => setTrain(e.target.checked)} />
-        <span>My recordings may be used to train Sema. (required)</span>
-      </label>
-      <label className="check">
-        <input type="checkbox" name="publish" checked={publish} onChange={(e) => setPublish(e.target.checked)} />
-        <span>My recordings may be published in a public dataset. (optional)</span>
+        <span>My recordings may be used to train Sema.</span>
       </label>
 
       <button type="submit" className="button" disabled={!canStart}>

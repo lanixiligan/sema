@@ -48,7 +48,7 @@ Milestones after that:
 | Tests | Vitest (dev dependency, approved) |
 | Pilot-only letters | A, S, M, N, T, marked `"pilotOnly": true` in `letters.json`: recorded in the pilot to measure handedness stability, excluded from 2.2's first training set |
 | Data policy | `data/raw/` is gitignored and kept private (Lanix backs it up); never committed to the public repository |
-| Consent | Two choices: may be used to train Sema (required), may be published in a public dataset (optional, unticked by default) |
+| Consent | One choice: may be used to train Sema (required to record). Recordings are never published |
 
 ## 1. User flow
 
@@ -56,10 +56,9 @@ Milestones after that:
    what is saved (positions of 21 hand points, no video or photos), that people are
    identified by a code like `p03`, that the file is downloaded to their own computer and
    then sent to Lanix, that nothing is uploaded, and that they can ask Lanix to delete
-   their recordings at any time. The person enters their code and answers two consent
-   checkboxes: "May be used to train Sema" (required) and "May be published in a public
-   dataset" (optional, unticked by default). Recording stays disabled until the code is
-   entered and the first box is ticked.
+   their recordings at any time, and that recordings are never published. The person
+   enters their code and ticks "My recordings may be used to train Sema". Recording stays
+   disabled until the code is entered and the box is ticked.
 2. **Session ID.** Filled in automatically as today's date plus a letter (`2026-11-02a`),
    using the next unused letter in this browser for that day. It can be edited. Session
    IDs may repeat across people; recording IDs include the person, so they don't.
@@ -91,7 +90,7 @@ One JSON file per session. Format version 1, normalization version 1.
   "session": "2026-11-02a",
   "browser": "Chrome 155",
   "cameraFps": 30.0,
-  "consent": { "train": true, "publish": false, "date": "2026-11-02" },
+  "consent": { "train": true, "date": "2026-11-02" },
   "recordings": [
     {
       "recording": "p03-2026-11-02a-W-left-2",
@@ -130,8 +129,8 @@ One JSON file per session. Format version 1, normalization version 1.
 **Header fields.** `format` is bumped whenever this layout changes. `normalization` is
 bumped whenever the normalization (section 3) changes. `browser` is the browser name and
 major version. `cameraFps` is the median of the recordings' `cameraFps`. `consent.train`
-(always `true`, since it's required) and `consent.publish` record the two consent
-checkboxes; `consent.date` is the day they were answered. The header's `person`, `session` and `language` only label
+(always `true`, since it's required to record) records the consent checkbox;
+`consent.date` is the day it was ticked. The header's `person`, `session` and `language` only label
 the file: **each sample's own `person`, `session` and `language` are authoritative.**
 
 **Recordings.** One entry per take, including rejected ones. `status` is `"accepted"` or
@@ -288,17 +287,17 @@ Consent text:
 > photos. Your recordings are labelled with a code (like p03), never your name.
 >
 > Everything stays in this browser until you download the file at the end; nothing is
-> uploaded. You then send the file to Lanix, who keeps it private and uses it to train and
-> test Sema's letter recognition. Ask Lanix to delete your recordings at any time. You can
-> stop whenever you like, and "Delete this session" removes what's stored in this browser.
+> uploaded. You then send the file to Lanix, who keeps it private and uses it only to
+> train and test Sema's letter recognition; it is never published. Ask Lanix to delete
+> your recordings at any time. You can stop whenever you like, and "Delete this session"
+> removes what's stored in this browser.
 >
-> - [ ] My recordings may be used to train Sema. *(required)*
-> - [ ] My recordings may be published in a public dataset. *(optional)*
+> - [ ] My recordings may be used to train Sema.
 
 **Data policy.** Recorded sessions live in `data/raw/`, which is gitignored: they are kept
-private and backed up by Lanix, never committed to the public repository. Publishing a
-dataset later would include only sessions with `consent.publish: true`. What stays public:
-the code, evaluation results, confusion matrices and trained weights.
+private and backed up by Lanix, never committed to the public repository, and never
+published. What stays public: the code, evaluation results, confusion matrices and
+trained weights.
 
 `record.html` has `noindex` so search engines don't list it.
 
@@ -311,8 +310,7 @@ Checks:
 
 1. `format` and `normalization` are known versions (1 and 1).
 2. Every sample's `raw` and `landmarks` have exactly 63 numbers.
-3. `consent.train` is `true`, `consent.publish` is `true` or `false`, and `consent.date`
-   is a date.
+3. `consent.train` is `true` and `consent.date` is a date.
 4. No recording ID appears twice within the file, or in any other file in `data/raw/`
    (the file itself is skipped if it is already there).
 5. Every sample's `recording` has an entry in `recordings` with status `accepted`, and
@@ -336,7 +334,7 @@ only reads files and prints.
 - Sampler: one sample per interval by time; a 20 fps camera still gives ~30; nothing is
   sampled during settling.
 - Session file: recording IDs (`p03-2026-11-02a-W-left-2`); rejected takes appear in
-  `recordings` without samples; header and consent fields (`train`, `publish`, `date`)
+  `recordings` without samples; header and consent fields (`train`, `date`)
   are filled in.
 - Checker: each check fails on a file built to break it.
 

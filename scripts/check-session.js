@@ -19,7 +19,6 @@ export function checkSession(file, otherRecordingIds = new Set()) {
 
   const consent = file.consent ?? {}
   if (consent.train !== true) errors.push('consent.train must be true')
-  if (typeof consent.publish !== 'boolean') errors.push('consent.publish must be true or false')
   if (!/^\d{4}-\d{2}-\d{2}$/.test(consent.date ?? '')) errors.push('consent.date must be a date like 2026-11-02')
 
   const recordings = file.recordings ?? []
