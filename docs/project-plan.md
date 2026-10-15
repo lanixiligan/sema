@@ -12,7 +12,7 @@ Owner: Lanix Iligan (CS student, portfolio project). Lanix is learning as they b
 | 1 | Hand tracking | In progress (end-of-phase deploy not done yet) |
 | 1.1 | Hand detection | Done |
 | 1.2 | Overlay | Done (skeleton and left/right label checked by hand in Chrome) |
-| 1.3 | Hand loss and performance | In progress: no flicker and frame edges handled; the README performance table has no numbers yet |
+| 1.3 | Hand loss and performance | Done (benchmark results in the README) |
 | 2 | Recognition | Not started |
 | 3 | Integrate the designed screens | Not started |
 | 4 | Expand the letters and finalize | Not started |

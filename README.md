@@ -55,7 +55,7 @@ them from a CDN:
 
 ## Performance
 
-Measured on: Fedora KDE Plasma, Ryzen 5 3600, GTX 1660 Super, 8 GB RAM.
+Measured on 2026-10-15: Fedora KDE Plasma, Ryzen 5 3600, GTX 1660 Super, 8 GB RAM.
 
 Camera at 640 × 480. Measured with the built-in benchmark:
 
@@ -74,10 +74,10 @@ apps and run it again.
 
 | Browser | Delegate | Camera fps | Detection fps | Detection median (ms) | Detection p95 (ms) | Detection mean (ms) |
 | ------- | -------- | ---------- | ------------- | --------------------- | ------------------ | ------------------- |
-| Chrome  | GPU      |            |               |                       |                    |                     |
-| Chrome  | CPU      |            |               |                       |                    |                     |
-| Firefox | GPU      |            |               |                       |                    |                     |
-| Firefox | CPU      |            |               |                       |                    |                     |
+| Chrome 155 | GPU | 30.0 | 30.0 | 11.6 | 13.3 | 11.6 |
+| Chrome 155 | CPU | 30.0 | 29.8 | 27.1 | 35.0 | 28.3 |
+| Firefox 157 | GPU | 30.0 | 30.0 | 10.0 | 13.0 | 10.4 |
+| Firefox 157 | CPU | 22.7 | 22.5 | 32.0 | 37.0 | 32.9 |
 
 - **Camera fps** counts the frames the browser showed in the window
   (`presentedFrames`), so it stays accurate when detection is slow.
