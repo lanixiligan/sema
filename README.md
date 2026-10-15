@@ -35,7 +35,8 @@ privacy-focused browsers (such as LibreWolf) don't give to pages; the app says s
 if that happens.
 
 Other scripts: `npm run build` (production build into `dist/`), `npm run preview`
-(serve that build), `npm run lint`.
+(serve that build), `npm run lint`, `npm test` (unit tests, Vitest) and
+`npm run check-session -- <file>` (checks a recorded session file).
 
 ## MediaPipe files
 
@@ -129,6 +130,9 @@ MediaPipe WebAssembly into `public/`), then `npm run build`, and serves `dist/`
 over HTTPS, which the camera requires. No base path is needed. Every push to
 `main` deploys again.
 
+`vercel.json` turns on `cleanUrls`, so the recorder (`record.html`) is served at
+`/record`. A future single-page-app rewrite (Phase 3) must exclude `/record`.
+
 ## Recorded data
 
 Landmark recordings collected for training go in `data/raw/`, which is gitignored: they
@@ -137,6 +141,45 @@ Participants choose separately whether their recordings may be used to train Sem
 (required) and published in a public dataset (optional), and can ask Lanix to delete
 their recordings at any time. What is public: the code, evaluation results, confusion
 matrices and trained classifier weights.
+
+## Recording sessions
+
+The recorder collects labelled hand landmarks for training (milestone 2.1). It's a
+separate page: `/record` on the live site, `http://localhost:5173/record.html` in
+development. The file format is described in [docs/data-format.md](docs/data-format.md).
+
+**In person:** open the page, let the participant read the consent text, enter their
+code (`p03`) and tick the boxes. Start the camera, then for each letter and hand in the
+table choose the cell and click **Record**: a 3-2-1 countdown, "Hold…" for 3.5 seconds,
+then the result. Aim for 3 saved takes per cell; the hint under each take says where to
+hold the hand (centre, closer, off to one side). **Undo last take** removes a mistake.
+At the end, click **Download session file**.
+
+**Remotely:** send the participant the `/record` link. They do the same on their own
+computer and send you the downloaded file.
+
+**What participants are told:** only the positions of 21 hand points are saved, no
+video or photos; they're identified by a code, not their name; everything stays in
+their browser until they download the file, and nothing is uploaded; Lanix keeps the
+file private and uses it to train and test Sema; they can ask Lanix to delete their
+recordings at any time. Training use is required; publication in a public dataset is a
+separate, optional choice.
+
+**Before keeping a file,** check it:
+
+```sh
+npm run check-session -- path/to/sema-asl-p03-2026-11-02a.json
+```
+
+It checks the format and normalization versions, that every frame has 63 numbers, the
+consent, and that no recording ID is used twice (in the file or in `data/raw/`), then
+prints the accepted and rejected takes per letter and hand. If it says OK, move the file
+into `data/raw/` (private, gitignored).
+
+**The letter list** is `public/languages/asl/letters.json`. Training letters are entries
+like `{ "letter": "B", "instructions": "…" }` (instructions describe the right hand);
+pilot-only letters have `"pilotOnly": true`. They're recorded in the pilot but left out
+of the first training set.
 
 ## Console messages you can ignore
 
@@ -184,17 +227,35 @@ browsers require before they allow camera access.
 ## Project structure
 
 ```
+record.html                     the recorder page (/record)
+vercel.json                     cleanUrls, so the recorder is at /record
 public/
   models/hand_landmarker.task   the hand model (in git)
   mediapipe/wasm/               MediaPipe WebAssembly (copied on npm install)
+  languages/asl/letters.json    letters to record, with how to form each
 scripts/
   copy-mediapipe.js             copies the WebAssembly files into public/
+  check-session.js              checks a recorded session file
 src/
   camera/
     useCamera.js                start/stop/switch the webcam, camera list, errors
     useVideoStats.js            real resolution and camera frames per second
     cameraMessages.js           plain-language camera error messages
+    frameCounter.js             reads the browser's frame counter (camera fps)
+  recorder/
+    main.jsx                    the recorder page's entry point
+    RecorderApp.jsx             consent, camera, grid, take panel, download
+    ConsentForm.jsx             participant code, session ID, consent
+    RecordingGrid.jsx           letter × hand table of saved takes
+    TakePanel.jsx               instructions, Record, countdown, result
+    useRecording.js             one take: countdown, settle, capture, result
+    takeRules.js                take timing, sampling and the pass rule
+    letters.js                  loads letters.json
+    sessionFile.js              builds the session file
+    sessionStore.js             autosave in the browser, download
   vision/
+    normalizeHand.js            turns 21 landmarks into 63 shape numbers
+    browserName.js              "Chrome 155", "Firefox 157"
     loadHandLandmarker.js       loads the model; GPU first, CPU fallback
     useHandLandmarker.js        creates, recreates and closes the landmarker
     useHandDetection.js         per-frame detection loop and readouts
@@ -209,5 +270,8 @@ src/
   styles.css                    all styles and color variables
 docs/
   project-plan.md               the development plan and its status
+  data-format.md                the recorded session file format
+  recorder-design.md            the recorder's design (milestone 2.1)
+  recorder-implementation-plan.md  how the recorder was built, task by task
 CLAUDE.md                       project notes and conventions for Claude Code
 ```

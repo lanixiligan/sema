@@ -56,6 +56,7 @@ The development plan is `docs/project-plan.md`.
 src/
   camera/     webcam logic: useCamera hook, error messages, video stats
   vision/     hand tracking: model loading, detection loop, drawing, handedness
+  recorder/   the recorder page (record.html): consent, takes, session file
   App.jsx
   main.jsx
   styles.css
@@ -116,6 +117,22 @@ src/
 - Expected console noise: MediaPipe prints `INFO: Created TensorFlow Lite XNNPACK
   delegate for CPU.` via `console.error`, plus some yellow warnings. They are not
   bugs.
+
+## Recorder conventions
+
+- Session files follow `docs/data-format.md`. Bump `format` when the layout changes and
+  `normalization` when `src/vision/normalizeHand.js` changes; `scripts/check-session.js`
+  lists the versions it accepts.
+- The left-hand flip uses the detected hand, for now (an open decision in the plan).
+- Take timing and the sampling interval are constants in `src/recorder/takeRules.js`;
+  a take passes when `kept − mismatched ≥ 24`.
+- `data/raw/` is gitignored and private; never commit recorded sessions.
+- `vercel.json` (`cleanUrls`) serves the recorder at `/record`. JSON can't hold
+  comments, so the warning lives here: any future single-page-app rewrite (Phase 3)
+  must exclude `/record`.
+- `npm test` runs Vitest; keep pure logic in small modules with tests next to them.
+- Letters come from `public/languages/asl/letters.json`; `pilotOnly` letters are
+  recorded in the pilot but excluded from 2.2's first training set.
 
 ## Visual design
 
