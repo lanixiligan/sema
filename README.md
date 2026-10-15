@@ -129,6 +129,15 @@ MediaPipe WebAssembly into `public/`), then `npm run build`, and serves `dist/`
 over HTTPS, which the camera requires. No base path is needed. Every push to
 `main` deploys again.
 
+## Recorded data
+
+Landmark recordings collected for training go in `data/raw/`, which is gitignored: they
+stay private and are backed up by Lanix, never committed to this public repository.
+Participants choose separately whether their recordings may be used to train Sema
+(required) and published in a public dataset (optional), and can ask Lanix to delete
+their recordings at any time. What is public: the code, evaluation results, confusion
+matrices and trained classifier weights.
+
 ## Console messages you can ignore
 
 MediaPipe prints its own logs to the console. These are normal:

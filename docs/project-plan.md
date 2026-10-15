@@ -286,7 +286,7 @@ sema/
     main.jsx           entry point
     styles.css         all styles and color variables
   training/            Python scripts: train, evaluate, export weights (not created yet)
-  data/raw/            exported landmark JSON, one file per session (not created yet)
+  data/raw/            exported landmark JSON, one file per session (gitignored, private; not created yet)
   docs/                project-plan.md; later evaluation results, confusion matrices
   README.md
   CLAUDE.md
@@ -298,7 +298,7 @@ Create each folder only in the phase that needs it.
 
 **Language as data.** Everything ASL-specific lives under `public/languages/asl/`. Adding FSL means adding `public/languages/fsl/`, not changing code.
 
-**Git habits:** one branch per milestone (e.g. `phase-1-tracking`), merged when its "Done when" list is ticked; small commits that say what changed; landmark JSON is small enough to commit, video is never stored.
+**Git habits:** one branch per milestone (e.g. `phase-1-tracking`), merged when its "Done when" list is ticked; small commits that say what changed. Recorded landmark JSON stays private: `data/raw/` is gitignored and backed up by Lanix; video is never stored. The code, evaluation results, confusion matrices and trained weights stay public.
 
 ## 9. Look
 
