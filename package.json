@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "copy-mediapipe": "node scripts/copy-mediapipe.js",
     "postinstall": "npm run copy-mediapipe",
-    "test": "vitest run"
+    "test": "vitest run",
+    "check-session": "node scripts/check-session.js"
   },
   "dependencies": {
     "@mediapipe/tasks-vision": "^1.1.1",
