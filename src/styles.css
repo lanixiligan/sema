@@ -197,3 +197,67 @@ body {
   border: 1px solid var(--muted-text);
   border-radius: 6px;
 }
+
+.benchmark {
+  margin-top: 20px;
+}
+
+.benchmark p {
+  margin: 12px 0 0;
+}
+
+.button-quiet {
+  margin-top: 8px;
+  padding: 6px 12px;
+  font: inherit;
+  color: var(--deep-sky);
+  background: #fff;
+  border: 1px solid var(--deep-sky);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.button-quiet:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.button-quiet:focus-visible {
+  outline: 3px solid var(--deep-sky);
+  outline-offset: 2px;
+}
+
+.benchmark-results {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  margin: 16px 0 0;
+}
+
+.benchmark-results dd {
+  margin: 0;
+  font-weight: 600;
+  color: var(--deep-cobalt);
+  font-variant-numeric: tabular-nums;
+}
+
+.benchmark-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-top: 12px;
+}
+
+.benchmark-row code {
+  padding: 6px 8px;
+  overflow-x: auto;
+  color: var(--deep-cobalt);
+  background: #fff;
+  border: 1px solid rgb(20 44 72 / 0.15);
+  border-radius: 6px;
+}
+
+.benchmark-row .button-quiet {
+  margin-top: 0;
+}

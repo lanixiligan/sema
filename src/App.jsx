@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { useCamera } from './camera/useCamera.js'
 import { useVideoStats } from './camera/useVideoStats.js'
+import BenchmarkPanel from './vision/BenchmarkPanel.jsx'
 import { useHandDetection } from './vision/useHandDetection.js'
 import { useHandLandmarker } from './vision/useHandLandmarker.js'
 import { LOADING_HAND_MODEL } from './vision/visionMessages.js'
@@ -14,11 +15,14 @@ export default function App() {
   const canvasRef = useRef(null)
   const [preferredDelegate, setPreferredDelegate] = useState('GPU')
   const handModel = useHandLandmarker(isLive, preferredDelegate)
+  const isDetecting = isLive && handModel.status === 'ready'
+  const measurementsRef = useRef(null) // filled only while a benchmark runs
   const hand = useHandDetection({
     videoRef,
     canvasRef,
     landmarkerRef: handModel.landmarkerRef,
-    isRunning: isLive && handModel.status === 'ready',
+    measurementsRef,
+    isRunning: isDetecting,
   })
 
   return (
@@ -125,6 +129,12 @@ export default function App() {
                   <option value="CPU">CPU</option>
                 </select>
               </label>
+              <BenchmarkPanel
+                videoRef={videoRef}
+                measurementsRef={measurementsRef}
+                canRun={isDetecting}
+                delegate={handModel.delegate}
+              />
             </details>
           </>
         )}

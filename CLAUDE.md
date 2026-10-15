@@ -107,6 +107,12 @@ src/
   raised (right hand → "Right"). `toPhysicalHand` in `src/vision/handedness.js`
   passes it through unchanged. If frames are ever mirrored before detection, swap
   it. Re-check after upgrading MediaPipe.
+- Performance numbers come from the benchmark in Developer settings
+  (`useBenchmark.js`, `benchmarkStats.js`, `BenchmarkPanel.jsx`): 2 s warm-up, 10 s
+  window, camera fps from `presentedFrames`, detection median/p95/mean. A run is
+  rejected if a hand was found in under 90% of frames, the tab was hidden, or the
+  camera or model changed. The detection loop records into `measurementsRef` only
+  while a run is recording.
 - Expected console noise: MediaPipe prints `INFO: Created TensorFlow Lite XNNPACK
   delegate for CPU.` via `console.error`, plus some yellow warnings. They are not
   bugs.

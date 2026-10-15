@@ -57,15 +57,35 @@ them from a CDN:
 
 Measured on: Fedora KDE Plasma, Ryzen 5 3600, GTX 1660 Super, 8 GB RAM.
 
-To measure: start the camera, hold one hand in view, pick the delegate under
-**Developer settings**, wait about 5 seconds, then read the values under the video.
+Camera at 640 × 480. Measured with the built-in benchmark:
 
-| Browser  | Delegate | Camera fps | Detection fps | Avg detection time (ms) |
-| -------- | -------- | ---------- | ------------- | ----------------------- |
-| Chrome   | GPU      |            |               |                         |
-| Chrome   | CPU      |            |               |                         |
-| Firefox  | GPU      |            |               |                         |
-| Firefox  | CPU      |            |               |                         |
+1. Start the camera and open **Developer settings** under the video.
+2. Pick the delegate and wait until **Runs on** shows it.
+3. Hold one hand in view, keep the tab in front and DevTools closed, and click
+   **Run benchmark**. It waits 2 seconds to warm up, then measures every frame
+   for 10 seconds.
+4. Click **Copy row** and paste it over the matching row below.
+
+A run doesn't count (no row is offered) if your hand was found in fewer than 90%
+of frames, because detection is slower with a hand in view, or if the tab was
+hidden, the camera stopped or the model reloaded during the run. Run each
+combination twice; if the two medians differ by more than about 10%, close other
+apps and run it again.
+
+| Browser | Delegate | Camera fps | Detection fps | Detection median (ms) | Detection p95 (ms) | Detection mean (ms) |
+| ------- | -------- | ---------- | ------------- | --------------------- | ------------------ | ------------------- |
+| Chrome  | GPU      |            |               |                       |                    |                     |
+| Chrome  | CPU      |            |               |                       |                    |                     |
+| Firefox | GPU      |            |               |                       |                    |                     |
+| Firefox | CPU      |            |               |                       |                    |                     |
+
+- **Camera fps** counts the frames the browser showed in the window
+  (`presentedFrames`), so it stays accurate when detection is slow.
+- **Detection fps** is detections per second over the same window.
+- **Median** is the typical detection time, **p95** the time 95% of frames beat
+  (it shows slow spikes), **mean** the average. Firefox rounds its clock more
+  coarsely than Chrome; the benchmark shows the step, and when it's coarse the
+  mean is the more precise number.
 
 Detection runs at most once per camera frame, so detection fps can't be higher
 than camera fps. It runs on the page's main thread, so it drops below camera fps
@@ -131,6 +151,9 @@ src/
     loadHandLandmarker.js       loads the model; GPU first, CPU fallback
     useHandLandmarker.js        creates, recreates and closes the landmarker
     useHandDetection.js         per-frame detection loop and readouts
+    useBenchmark.js             runs the performance benchmark
+    benchmarkStats.js           median, percentiles and the README table row
+    BenchmarkPanel.jsx          the benchmark in Developer settings
     drawHand.js                 draws the skeleton on the canvas
     handedness.js               MediaPipe's Left/Right label -> the hand raised
     visionMessages.js           plain-language hand-tracking messages

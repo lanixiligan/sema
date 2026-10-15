@@ -11,7 +11,15 @@ const NO_STATS = { detectionFps: null, detectionMs: null }
 
 // Runs hand detection on each new video frame while `isRunning` is true,
 // draws the result on the canvas, and reports what it found.
-export function useHandDetection({ videoRef, canvasRef, landmarkerRef, isRunning }) {
+// While a benchmark is recording, measurementsRef.current is an array and
+// every frame's detection time is appended to it.
+export function useHandDetection({
+  videoRef,
+  canvasRef,
+  landmarkerRef,
+  measurementsRef,
+  isRunning,
+}) {
   const [handLabel, setHandLabel] = useState(null) // null means no hand
   const [stats, setStats] = useState(NO_STATS)
   const [error, setError] = useState(null)
@@ -68,11 +76,14 @@ export function useHandDetection({ videoRef, canvasRef, landmarkerRef, isRunning
         setError(getDetectionErrorMessage(err))
         return // stop the loop
       }
+      const detectionMs = performance.now() - now
       detections += 1
-      detectionMsTotal += performance.now() - now
+      detectionMsTotal += detectionMs
 
       // With numHands: 1 there is at most one hand, at index 0.
       const landmarks = result.landmarks[0]
+      measurementsRef.current?.push({ ms: detectionMs, hand: Boolean(landmarks) })
+
       if (landmarks) {
         lastHandSeenAt = now
         drawHand(canvas, landmarks, video.videoWidth, video.videoHeight)
@@ -111,7 +122,7 @@ export function useHandDetection({ videoRef, canvasRef, landmarkerRef, isRunning
       setStats(NO_STATS)
       setError(null)
     }
-  }, [videoRef, canvasRef, landmarkerRef, isRunning])
+  }, [videoRef, canvasRef, landmarkerRef, measurementsRef, isRunning])
 
   return { handLabel, ...stats, error }
 }
