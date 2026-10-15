@@ -11,11 +11,20 @@ landmarks to teach the ASL alphabet. Built by a student for their portfolio and 
 - The author tests by hand in Chrome. Their everyday browser, LibreWolf, gives pages
   no WebGL, so MediaPipe can't run there.
 
+## Plan
+
+The development plan is `docs/project-plan.md`.
+
+- Read only the section for the current phase; don't build ahead.
+- When a milestone's "Done when" list is fully ticked, update the Status table and
+  tick the boxes in the same commit.
+- Don't change decisions in the plan without asking Lanix first.
+
 ## Phases
 
 - **Phase 0 (done):** a page that shows the webcam. Start/Stop, camera picker,
   real resolution and fps readouts, plain-language errors.
-- **Phase 1 (done):** hand tracking with MediaPipe Hand Landmarker in `src/vision/`:
+- **Phase 1 (in progress):** hand tracking with MediaPipe Hand Landmarker in `src/vision/`:
   detection loop, mirrored skeleton overlay, hand found/lost with handedness,
   detection fps and time, GPU/CPU delegate with fallback.
 - **Phase 2 (next, not started):** recording, landmark normalization, classifier.

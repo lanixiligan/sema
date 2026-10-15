@@ -10,6 +10,8 @@ and draws its 21 landmarks on top. It shows whether a hand is found and which on
 the camera and detection frame rates, and the average detection time. Letter
 recognition comes in later phases.
 
+Development plan: [docs/project-plan.md](docs/project-plan.md)
+
 ## Run it
 
 You need Node.js 20.19+ or 22.12+ (check with `node -v`).
