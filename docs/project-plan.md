@@ -235,7 +235,7 @@ Not separate pages: the "Right hand" pill in the top bar opens a small menu (swi
 
 - Ask "Which hand do you sign with?", not "Are you left-handed?"; some people sign with the other hand.
 - The answer controls: reference photos mirrored for left-hand signers, instructions saying "your left/right hand", and which hand the app expects.
-- It does not control the classifier flip: that uses the hand MediaPipe actually detects, so recognition works if the user switches hands.
+- Which hand drives the left-hand flip before classifying (the detected hand or this setting) is an open decision; see section 11.
 - If the detected hand differs from the setting, show a short note ("You're signing with your right hand. Switch your setting?") instead of marking the attempt wrong.
 - Changing it in the top-bar hand menu updates reference photos immediately and keeps progress.
 
@@ -359,6 +359,7 @@ Never split frames from the same recording between training and testing; never q
 | First 8 letters | Visually distinct shortlist, adjusted by the confusion matrix | 2.1 |
 | Use the Kaggle images | Own recordings only, or plus extracted Kaggle landmarks | 2.2, after seeing results without it |
 | Hosting | Decided: Vercel | Done (end of Phase 1) |
+| Left-hand flip source | The detected hand, or the user's signing-hand setting (then the detected hand only drives the "Switch your setting?" note). Leaning toward the setting | After 1.2's handedness check and the recorder's mismatch counts (2.1) |
 | What "finalized" means | All 26 working, or all 26 included with some marked lower confidence (leaning second) | 4.1 |
 
 **Definition of finalized (American version):** lessons, practice and progress work end to end; tested on at least 5 people not in the data, with results and failures written up; deployed with a README that states its limits.
