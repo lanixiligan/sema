@@ -132,6 +132,13 @@ export function undoLastTake(session) {
   }
 }
 
+// True if the session has takes that aren't in the last downloaded file.
+// Sessions are never changed in place (every take or undo makes a new
+// object), so "the same object" means "nothing changed since that download".
+export function needsDownload(session, downloaded) {
+  return session !== null && session.recordings.length > 0 && session !== downloaded
+}
+
 export function sessionFileName(session) {
   return `sema-${session.language}-${session.person}-${session.session}.json`
 }

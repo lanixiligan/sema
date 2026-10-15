@@ -8,7 +8,7 @@ import ConsentForm from './ConsentForm.jsx'
 import RecordingGrid from './RecordingGrid.jsx'
 import TakePanel from './TakePanel.jsx'
 import { useLetters } from './letters.js'
-import { acceptedCount, addTake, newSession, undoLastTake } from './sessionFile.js'
+import { acceptedCount, addTake, needsDownload, newSession, undoLastTake } from './sessionFile.js'
 import { clearSession, downloadSession, loadSession, rememberSessionId, saveSession } from './sessionStore.js'
 import { useRecording } from './useRecording.js'
 
@@ -19,7 +19,7 @@ export default function RecorderApp() {
   const [saved, setSaved] = useState(loadSession) // offered back when the page opens
   const [session, setSession] = useState(null)
   const [storageOk, setStorageOk] = useState(true)
-  const [downloadedTakes, setDownloadedTakes] = useState(0)
+  const [downloaded, setDownloaded] = useState(null) // the session object last downloaded
   const letters = useLetters()
 
   const { videoRef, status, error, start, stop } = useCamera()
@@ -40,7 +40,9 @@ export default function RecorderApp() {
     videoRef,
     listenerRef,
     isDetecting,
-    onTakeDone: (take) => updateSession(addTake(session, take)),
+    onTakeDone: (take) => {
+      if (session) updateSession(addTake(session, take))
+    },
   })
 
   // Every change to the session is saved in the browser straight away.
@@ -52,13 +54,13 @@ export default function RecorderApp() {
   function startSession({ person, sessionId, consent }) {
     rememberSessionId(sessionId)
     setSaved(null)
-    setDownloadedTakes(0)
+    setDownloaded(null)
     updateSession(newSession({ person, session: sessionId, consent, date: today(), browser: browserName() }))
   }
 
   function download(current) {
     downloadSession(current)
-    setDownloadedTakes(current.recordings.length)
+    setDownloaded(current)
   }
 
   function deleteSession() {
@@ -66,16 +68,20 @@ export default function RecorderApp() {
     startFresh()
   }
 
-  // Back to the consent form, with nothing saved in the browser.
+  // Back to the consent form, with nothing saved in the browser. The camera
+  // is turned off (the video element goes away with the session view) so the
+  // light goes off before the next person consents.
   function startFresh() {
+    stop()
+    setCell(null)
     clearSession()
     setSession(null)
     setSaved(null)
-    setDownloadedTakes(0)
+    setDownloaded(null)
   }
 
   // Warn before leaving if there are takes that haven't been downloaded.
-  const unsaved = session !== null && session.recordings.length > downloadedTakes
+  const unsaved = needsDownload(session, downloaded)
   useEffect(() => {
     if (!unsaved) return
     function warn(event) {
@@ -100,7 +106,7 @@ export default function RecorderApp() {
               <button type="button" className="button-quiet" onClick={() => download(saved)}>Download</button>
               <button type="button" className="button-quiet" onClick={deleteSession}>Delete</button>
               {/* A new session needs the old one downloaded or deleted first. */}
-              {downloadedTakes === saved.recordings.length && (
+              {!needsDownload(saved, downloaded) && (
                 <button type="button" className="button-quiet" onClick={startFresh}>Start a new session</button>
               )}
             </div>
@@ -115,8 +121,12 @@ export default function RecorderApp() {
               <span>
                 Session {session.person} · {session.session} · {session.recordings.length} takes
               </span>
-              <button type="button" className="button-quiet" onClick={() => download(session)}>Download session file</button>
-              <button type="button" className="button-quiet" onClick={deleteSession}>Delete this session</button>
+              <button type="button" className="button-quiet" disabled={recording.busy} onClick={() => download(session)}>
+                Download session file
+              </button>
+              <button type="button" className="button-quiet" disabled={recording.busy} onClick={deleteSession}>
+                Delete this session
+              </button>
             </div>
             {!storageOk && (
               <p className="error" role="alert">

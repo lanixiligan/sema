@@ -5,6 +5,7 @@ import {
   attemptCount,
   isValidPersonCode,
   makeRecordingId,
+  needsDownload,
   newSession,
   nextSessionId,
   normalizePersonCode,
@@ -183,5 +184,31 @@ describe('undoLastTake', () => {
 describe('sessionFileName', () => {
   it('names the file after the person and session', () => {
     expect(sessionFileName(session())).toBe('sema-asl-p03-2026-11-02a.json')
+  })
+})
+
+describe('needsDownload', () => {
+  it('is false with no session, or a session with no takes yet', () => {
+    expect(needsDownload(null, null)).toBe(false)
+    expect(needsDownload(session(), null)).toBe(false)
+  })
+
+  it('is true for takes that were never downloaded', () => {
+    expect(needsDownload(addTake(session(), take()), null)).toBe(true)
+  })
+
+  it('is false right after downloading that exact session', () => {
+    const s = addTake(session(), take())
+    expect(needsDownload(s, s)).toBe(false)
+  })
+
+  it('is true again after Undo, even though there are fewer takes', () => {
+    const downloaded = addTake(addTake(session(), take()), take())
+    expect(needsDownload(undoLastTake(downloaded), downloaded)).toBe(true)
+  })
+
+  it('is true after Undo and a new take bring the count back', () => {
+    const downloaded = addTake(addTake(session(), take()), take())
+    expect(needsDownload(addTake(undoLastTake(downloaded), take()), downloaded)).toBe(true)
   })
 })
