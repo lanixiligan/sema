@@ -71,10 +71,25 @@ function runTestFrame(landmarker) {
   landmarker.detectForVideo(canvas, performance.now())
 }
 
+// MediaPipe uses WebGL2 to read video frames even when the model runs on the
+// CPU, so without it hand tracking can't work at all. Some privacy-focused
+// browsers (LibreWolf, for one) don't give pages WebGL. MediaPipe draws into
+// an OffscreenCanvas where there is one, so test the same kind of canvas.
+function hasWebGL2() {
+  const canvas = self.OffscreenCanvas
+    ? new OffscreenCanvas(1, 1)
+    : document.createElement('canvas')
+  return canvas.getContext('webgl2') !== null
+}
+
 // Creates a HandLandmarker, trying the GPU first if asked. If the GPU can't
-// be used (no WebGL2, missing GPU features, driver trouble), falls back to
-// the CPU. Resolves to { landmarker, delegate, gpuFailed }.
+// be used (missing GPU features, driver trouble), falls back to the CPU.
+// Resolves to { landmarker, delegate, gpuFailed }.
 export async function loadHandLandmarker(preferredDelegate) {
+  if (!hasWebGL2()) {
+    throw namedError('WebGLUnavailableError', 'This browser offers no WebGL2 context')
+  }
+
   if (preferredDelegate === 'GPU') {
     try {
       const landmarker = await createHandLandmarker('GPU')

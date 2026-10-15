@@ -8,6 +8,8 @@ const MESSAGES_BY_ERROR_NAME = {
     'The hand model file is missing, so hand tracking is off. It should be at public/models/hand_landmarker.task.',
   OfflineError:
     "Couldn't download the hand model. Check your connection, then reload the page.",
+  WebGLUnavailableError:
+    "Hand tracking needs WebGL, which this browser isn't providing. Privacy-focused browsers such as LibreWolf often block it, so try Chrome or Firefox.",
 }
 
 export function getVisionErrorMessage(error) {
