@@ -106,5 +106,10 @@ export function useRecording({ videoRef, listenerRef, isDetecting, onTakeDone })
     tick()
   }
 
-  return { ...state, busy: BUSY.includes(state.phase), start }
+  // Clears a finished take's result, e.g. after Undo removed that take.
+  function dismiss() {
+    if (!takeRef.current) setState({ phase: 'idle' })
+  }
+
+  return { ...state, busy: BUSY.includes(state.phase), start, dismiss }
 }

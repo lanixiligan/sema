@@ -6,6 +6,7 @@ import { useHandLandmarker } from '../vision/useHandLandmarker.js'
 import { LOADING_HAND_MODEL } from '../vision/visionMessages.js'
 import ConsentForm from './ConsentForm.jsx'
 import RecordingGrid from './RecordingGrid.jsx'
+import TakeOverlay from './TakeOverlay.jsx'
 import TakePanel from './TakePanel.jsx'
 import { useLetters } from './letters.js'
 import { acceptedCount, addTake, needsDownload, newSession, undoLastTake } from './sessionFile.js'
@@ -92,14 +93,37 @@ export default function RecorderApp() {
     return () => window.removeEventListener('beforeunload', warn)
   }, [unsaved])
 
+  const canRecord = isDetecting && cell !== null && !recording.busy
+
+  function undo() {
+    updateSession(undoLastTake(session))
+    recording.dismiss() // the result banner described the take just removed
+  }
+
   return (
     <>
-      <header className="top-bar">Sema recorder</header>
-      <main className="page">
+      <header className="top-bar">
+        <span>Sema recorder</span>
+        {session && (
+          <div className="session-bar">
+            <span>
+              Session {session.person} · {session.session} · {countTakes(session)}
+            </span>
+            <button type="button" className="button-quiet" disabled={recording.busy} onClick={() => download(session)}>
+              Download session file
+            </button>
+            <button type="button" className="button-quiet" disabled={recording.busy} onClick={deleteSession}>
+              Delete this session
+            </button>
+          </div>
+        )}
+      </header>
+
+      <main className={session ? 'page page-wide' : 'page'}>
         {!session && saved && (
           <section className="saved-session">
             <p>
-              Continue session {saved.person} · {saved.session} ({saved.recordings.length} takes)?
+              Continue session {saved.person} · {saved.session} ({countTakes(saved)})?
             </p>
             <div className="controls">
               <button type="button" className="button" onClick={() => setSession(saved)}>Continue</button>
@@ -117,86 +141,103 @@ export default function RecorderApp() {
 
         {session && (
           <>
-            <div className="session-bar">
-              <span>
-                Session {session.person} · {session.session} · {session.recordings.length} takes
-              </span>
-              <button type="button" className="button-quiet" disabled={recording.busy} onClick={() => download(session)}>
-                Download session file
-              </button>
-              <button type="button" className="button-quiet" disabled={recording.busy} onClick={deleteSession}>
-                Delete this session
-              </button>
-            </div>
             {!storageOk && (
               <p className="error" role="alert">
                 Progress isn't being saved here; download the file before closing.
               </p>
             )}
-
-            <div className="stage">
-              <video ref={videoRef} className="video" autoPlay playsInline muted />
-              <canvas ref={canvasRef} className="overlay" />
-              {!isLive && (
-                <p className="stage-message">{status === 'starting' ? 'Waiting for the camera…' : 'Camera is off'}</p>
-              )}
-            </div>
-            <div className="controls">
-              {status === 'idle' ? (
-                <button type="button" className="button" onClick={start}>Start camera</button>
-              ) : (
-                <button type="button" className="button" onClick={stop}>
-                  {status === 'starting' ? 'Cancel' : 'Stop camera'}
-                </button>
-              )}
-              {isLive && <span className="hand-status">{describeHand(handModel.status, hand.handLabel)}</span>}
-            </div>
-            {error && <p className="error" role="alert">{error}</p>}
-            {isLive && (handModel.error || hand.error) && (
-              <p className="error" role="alert">{handModel.error || hand.error}</p>
-            )}
-
             {letters.status === 'error' && (
               <p className="error" role="alert">Couldn't load the letter list (public/languages/asl/letters.json).</p>
             )}
             {letters.status === 'ready' && letters.training.length === 0 && (
               <p className="error">No training letters configured yet.</p>
             )}
-            {letters.status === 'ready' && (
-              <div className="recorder-work">
-                <RecordingGrid
-                  training={letters.training}
-                  pilot={letters.pilot}
-                  session={session}
-                  selected={cell}
-                  onSelect={setCell}
-                  disabled={recording.busy}
-                />
-                <div>
-                  <TakePanel
-                    cell={cell}
-                    instructions={cell ? letters.instructions[cell.letter] : undefined}
-                    accepted={cell ? acceptedCount(session, cell.letter, cell.hand) : 0}
-                    recording={recording}
-                    canRecord={isDetecting && cell !== null && !recording.busy}
-                    onRecord={() => recording.start(cell.letter, cell.hand)}
-                  />
-                  <button
-                    type="button"
-                    className="button-quiet"
-                    disabled={session.recordings.length === 0 || recording.busy}
-                    onClick={() => updateSession(undoLastTake(session))}
-                  >
-                    Undo last take
-                  </button>
+
+            {/* Left: the camera, with the take's status on top of it, and the
+                controls. Right: the chosen letter and the grid. Everything a
+                take needs fits on one desktop screen. */}
+            <div className="recorder-layout">
+              <div className="recorder-main">
+                <div className="stage">
+                  <video ref={videoRef} className="video" autoPlay playsInline muted />
+                  <canvas ref={canvasRef} className="overlay" />
+                  {!isLive && (
+                    <p className="stage-message">{status === 'starting' ? 'Waiting for the camera…' : 'Camera is off'}</p>
+                  )}
+                  <TakeOverlay recording={recording} cell={cell} />
                 </div>
+
+                <div className="controls">
+                  {status === 'idle' && (
+                    <button type="button" className="button" onClick={start}>Start camera</button>
+                  )}
+                  {status === 'starting' && (
+                    <button type="button" className="button" onClick={stop}>Cancel</button>
+                  )}
+                  {isLive && (
+                    <>
+                      <button
+                        type="button"
+                        className="button"
+                        disabled={!canRecord}
+                        onClick={() => recording.start(cell.letter, cell.hand)}
+                      >
+                        Record
+                      </button>
+                      <span className="hand-status">{describeHand(handModel.status, hand.handLabel)}</span>
+                    </>
+                  )}
+                  <span className="controls-quiet">
+                    <button
+                      type="button"
+                      className="button-quiet"
+                      disabled={session.recordings.length === 0 || recording.busy}
+                      onClick={undo}
+                    >
+                      Undo last take
+                    </button>
+                    {isLive && (
+                      <button type="button" className="button-quiet" disabled={recording.busy} onClick={stop}>
+                        Stop camera
+                      </button>
+                    )}
+                  </span>
+                </div>
+                {error && <p className="error" role="alert">{error}</p>}
+                {isLive && (handModel.error || hand.error) && (
+                  <p className="error" role="alert">{handModel.error || hand.error}</p>
+                )}
               </div>
-            )}
+
+              <aside className="recorder-side">
+                <TakePanel
+                  cell={cell}
+                  instructions={cell ? letters.instructions[cell.letter] : undefined}
+                  image={cell ? letters.images[cell.letter] : undefined}
+                  accepted={cell ? acceptedCount(session, cell.letter, cell.hand) : 0}
+                />
+                {letters.status === 'ready' && (
+                  <RecordingGrid
+                    training={letters.training}
+                    pilot={letters.pilot}
+                    session={session}
+                    selected={cell}
+                    onSelect={setCell}
+                    disabled={recording.busy}
+                  />
+                )}
+              </aside>
+            </div>
           </>
         )}
       </main>
     </>
   )
+}
+
+function countTakes(session) {
+  const n = session.recordings.length
+  return n === 1 ? '1 take' : `${n} takes`
 }
 
 function describeHand(modelStatus, handLabel) {

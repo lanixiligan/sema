@@ -29,24 +29,28 @@ export default function RecordingGrid({ training, pilot, session, selected, onSe
   )
 
   return (
-    <table className="recording-grid">
-      <thead>
-        <tr>
-          <th scope="col">Letter</th>
-          <th scope="col">Left</th>
-          <th scope="col">Right</th>
-        </tr>
-      </thead>
-      <tbody>
-        {training.map(row)}
-        {row('none')}
-        {pilot.length > 0 && (
+    <div className="recording-grid-wrap">
+      <table className="recording-grid">
+        <thead>
           <tr>
-            <th scope="colgroup" colSpan={3} className="grid-group">Pilot only</th>
+            <th scope="col">Letter</th>
+            <th scope="col">Left</th>
+            <th scope="col">Right</th>
           </tr>
-        )}
-        {pilot.map(row)}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {training.map(row)}
+          {row('none')}
+        </tbody>
+      </table>
+      {pilot.length > 0 && (
+        <details className="pilot-letters">
+          <summary>Pilot letters ({pilot.length})</summary>
+          <table className="recording-grid">
+            <tbody>{pilot.map(row)}</tbody>
+          </table>
+        </details>
+      )}
+    </div>
   )
 }

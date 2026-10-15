@@ -3,19 +3,22 @@ import { useEffect, useState } from 'react'
 // The letter list lives in public/languages/asl/letters.json, so changing
 // which letters are recorded doesn't need a code change. Entries marked
 // pilotOnly are recorded in the pilot but left out of 2.2's first training set.
-// A letter can carry "instructions": how to form it, described for the right hand.
+// A letter can carry "instructions" (how to form it, described for the right
+// hand) and an "image": a reference picture's path inside public/languages/asl/.
 export function splitLetters(entries) {
   const training = []
   const pilot = []
   const instructions = {}
+  const images = {}
   for (const entry of entries ?? []) {
     const letter = entry?.letter
     if (typeof letter !== 'string' || !/^[A-Z]$/.test(letter)) continue
     if (training.includes(letter) || pilot.includes(letter)) continue
     ;(entry.pilotOnly ? pilot : training).push(letter)
     if (typeof entry.instructions === 'string') instructions[letter] = entry.instructions
+    if (typeof entry.image === 'string') images[letter] = entry.image
   }
-  return { training, pilot, instructions }
+  return { training, pilot, instructions, images }
 }
 
 export function classLabel(letter) {
@@ -23,7 +26,7 @@ export function classLabel(letter) {
 }
 
 export function useLetters() {
-  const [state, setState] = useState({ status: 'loading', training: [], pilot: [], instructions: {} })
+  const [state, setState] = useState({ status: 'loading', training: [], pilot: [], instructions: {}, images: {} })
 
   useEffect(() => {
     let cancelled = false
@@ -36,7 +39,7 @@ export function useLetters() {
         if (!cancelled) setState({ status: 'ready', ...splitLetters(data.letters) })
       })
       .catch(() => {
-        if (!cancelled) setState({ status: 'error', training: [], pilot: [], instructions: {} })
+        if (!cancelled) setState({ status: 'error', training: [], pilot: [], instructions: {}, images: {} })
       })
     return () => {
       cancelled = true

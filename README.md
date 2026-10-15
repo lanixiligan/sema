@@ -178,7 +178,9 @@ into `data/raw/` (private, gitignored).
 **The letter list** is `public/languages/asl/letters.json`. Training letters are entries
 like `{ "letter": "B", "instructions": "…" }` (instructions describe the right hand);
 pilot-only letters have `"pilotOnly": true`. They're recorded in the pilot but left out
-of the first training set.
+of the first training set. A letter can also have `"image": "reference/B.svg"`, a reference
+picture inside `public/languages/asl/`; until then the recorder shows a placeholder.
+Left-hand cells show the picture mirrored.
 
 ## Console messages you can ignore
 

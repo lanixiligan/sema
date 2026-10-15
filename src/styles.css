@@ -4,6 +4,7 @@
   --deep-sky: #1a75a3; /* buttons and links on light surfaces, with white text */
   --cloud-white: #f5f7f8; /* page background */
   --amber: #b45309; /* warning text on light backgrounds */
+  --amber-on-dark: #e8a23a; /* warning text on dark surfaces (the video) */
   --muted-text: #52637a;
 
   color-scheme: light;
@@ -25,6 +26,11 @@ body {
 }
 
 .top-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 24px;
   padding: 14px 24px;
   font-size: 1.125rem;
   font-weight: 600;
@@ -333,17 +339,167 @@ body {
   color: var(--muted-text);
 }
 
-.recorder-work {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 24px 40px;
-  margin-top: 24px;
+/* Recorder session view: camera on the left, letter card and grid on the right. */
+.page-wide {
+  max-width: 1200px;
 }
 
-@media (max-width: 640px) {
-  .recorder-work {
+.top-bar .session-bar {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 400;
+}
+
+.recorder-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 32px;
+  align-items: start;
+}
+
+@media (max-width: 1000px) {
+  .recorder-layout {
     grid-template-columns: 1fr;
   }
+}
+
+.recorder-main .controls {
+  margin-top: 16px;
+}
+
+.controls-quiet {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.controls-quiet .button-quiet {
+  margin-top: 0;
+}
+
+/* The take's status, on top of the video (not mirrored). */
+.take-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.take-countdown {
+  display: grid;
+  place-items: center;
+  width: 120px;
+  height: 120px;
+  margin: 0;
+  font-size: 4rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--cloud-white);
+  background: rgb(20 44 72 / 0.75);
+  border-radius: 50%;
+}
+
+.take-hold {
+  margin: 0;
+  padding: 12px 32px;
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--cloud-white);
+  background: rgb(20 44 72 / 0.75);
+  border-radius: 999px;
+}
+
+.take-banner {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  left: 16px;
+  margin: 0;
+  padding: 12px 16px;
+  font-weight: 600;
+  text-align: center;
+  color: var(--cloud-white);
+  background: rgb(20 44 72 / 0.9);
+  border-radius: 10px;
+}
+
+.take-banner-saved {
+  color: var(--bright-sky);
+}
+
+.take-banner-warning {
+  color: var(--amber-on-dark);
+}
+
+/* The card for the chosen letter. */
+.take-card h2 {
+  margin: 0 0 12px;
+  font-size: 1.25rem;
+}
+
+.take-card p {
+  margin: 0 0 10px;
+}
+
+.take-card a {
+  color: var(--deep-sky);
+}
+
+.take-card-empty {
+  color: var(--muted-text);
+}
+
+.take-hint {
+  font-weight: 600;
+}
+
+.take-note {
+  color: var(--muted-text);
+}
+
+.reference-figure {
+  margin: 0 0 12px;
+}
+
+.reference {
+  display: grid;
+  place-items: center;
+  height: 150px;
+  margin: 0 0 12px;
+  overflow: hidden;
+  background: #fff;
+  border-radius: 12px;
+}
+
+.reference-figure .reference {
+  margin-bottom: 4px;
+}
+
+.reference img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.reference img.mirrored {
+  transform: scaleX(-1);
+}
+
+.reference-figure figcaption {
+  font-size: 0.8125rem;
+  color: var(--muted-text);
+}
+
+.reference-placeholder {
+  font-size: 0.875rem;
+  color: var(--muted-text);
+  border: 2px dashed var(--muted-text);
+}
+
+/* The letter × hand grid. */
+.recording-grid-wrap {
+  margin-top: 20px;
 }
 
 .recording-grid {
@@ -352,19 +508,18 @@ body {
 
 .recording-grid th,
 .recording-grid td {
-  padding: 4px 8px;
+  padding: 2px 6px;
   text-align: left;
 }
 
-.recording-grid .grid-group {
-  padding-top: 16px;
-  font-weight: 600;
-  color: var(--muted-text);
+.recording-grid th[scope='row'] {
+  width: 96px;
+  white-space: nowrap;
 }
 
 .cell-button {
-  min-width: 64px;
-  padding: 6px 10px;
+  min-width: 60px;
+  padding: 4px 10px;
   font: inherit;
   font-variant-numeric: tabular-nums;
   color: var(--deep-cobalt);
@@ -385,34 +540,18 @@ body {
   cursor: default;
 }
 
-.cell-button:focus-visible {
+.cell-button:focus-visible,
+.pilot-letters summary:focus-visible {
   outline: 3px solid var(--deep-sky);
   outline-offset: 2px;
 }
 
-.take-panel h2 {
-  margin: 0 0 8px;
-  font-size: 1.25rem;
+.pilot-letters {
+  margin-top: 12px;
 }
 
-.take-panel p {
-  margin: 0 0 12px;
-}
-
-.take-panel a {
-  color: var(--deep-sky);
-}
-
-.take-countdown {
-  font-size: 3rem;
+.pilot-letters summary {
   font-weight: 600;
-}
-
-.take-hold {
-  font-size: 1.5rem;
-  font-weight: 600;
-}
-
-.take-note {
   color: var(--muted-text);
+  cursor: pointer;
 }

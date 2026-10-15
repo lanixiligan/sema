@@ -5,7 +5,7 @@ describe('splitLetters', () => {
   it('separates training letters from pilot-only letters', () => {
     expect(
       splitLetters([{ letter: 'B' }, { letter: 'A', pilotOnly: true }, { letter: 'L' }, { letter: 'S', pilotOnly: true }]),
-    ).toEqual({ training: ['B', 'L'], pilot: ['A', 'S'], instructions: {} })
+    ).toEqual({ training: ['B', 'L'], pilot: ['A', 'S'], instructions: {}, images: {} })
   })
 
   it('ignores entries that are not a single capital letter, and duplicates', () => {
@@ -13,6 +13,7 @@ describe('splitLetters', () => {
       training: ['C'],
       pilot: [],
       instructions: {},
+      images: {},
     })
   })
 
@@ -24,6 +25,19 @@ describe('splitLetters', () => {
         { letter: 'C', instructions: 42 },
       ]).instructions,
     ).toEqual({ B: 'Flat hand, four fingers straight up' })
+  })
+})
+
+describe('reference images', () => {
+  it('collects the image path for each letter that has one', () => {
+    expect(
+      splitLetters([
+        { letter: 'B', image: 'reference/B.svg' },
+        { letter: 'C' },
+        { letter: 'A', pilotOnly: true, image: 'reference/A.svg' },
+        { letter: 'D', image: 7 },
+      ]).images,
+    ).toEqual({ B: 'reference/B.svg', A: 'reference/A.svg' })
   })
 })
 
