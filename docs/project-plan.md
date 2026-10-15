@@ -9,7 +9,7 @@ Owner: Lanix Iligan (CS student, portfolio project). Lanix is learning as they b
 | Phase | Name | Status |
 | --- | --- | --- |
 | 0 | Render the webcam | Done |
-| 1 | Hand tracking | In progress (end-of-phase deploy not done yet) |
+| 1 | Hand tracking | Done (deployed on Vercel and tested on the live site) |
 | 1.1 | Hand detection | Done |
 | 1.2 | Overlay | Done (skeleton and left/right label checked by hand in Chrome) |
 | 1.3 | Hand loss and performance | Done (benchmark results in the README) |
@@ -63,7 +63,7 @@ Everything the user touches runs in the browser in JavaScript. Python appears on
 | Classifier at runtime | Own small model, about 30 lines of JS reading weights from a JSON file; no ML library in the app | Browser | 2 |
 | Training | Python + NumPy + scikit-learn (+ matplotlib for charts), plain scripts in a venv | Dev machine, offline | 2 |
 | Storage | `localStorage`, accessed only through a `progressStore` module | Browser | 3 |
-| Hosting | GitHub Pages, Netlify or Vercel (static, HTTPS) | Web | 1 (first deploy) |
+| Hosting | Vercel (static, HTTPS); GitHub Pages and Netlify were the alternatives | Web | 1 (first deploy) |
 
 **Deliberately left out:** a backend, database and accounts (until Phase 5); TensorFlow.js; the Python `mediapipe` package; any image-based model.
 
@@ -131,7 +131,7 @@ Use codes like `p03`, not names. Tell participants what is stored (hand point co
 ```text
 Phase 0  Render the webcam ............ done
    gate
-Phase 1  Hand tracking ................ in progress
+Phase 1  Hand tracking ................ done
    gate
 Phase 2  Recognition (8 letters + "no letter")
    gate  ← the most important: if easy letters fail on unseen people, fix the data before any UI
@@ -358,7 +358,7 @@ Never split frames from the same recording between training and testing; never q
 | Practice unlock threshold | 3 mastered letters is a starting guess | 3.4 |
 | First 8 letters | Visually distinct shortlist, adjusted by the confusion matrix | 2.1 |
 | Use the Kaggle images | Own recordings only, or plus extracted Kaggle landmarks | 2.2, after seeing results without it |
-| Hosting | GitHub Pages, Netlify or Vercel | End of Phase 1 |
+| Hosting | Decided: Vercel | Done (end of Phase 1) |
 | What "finalized" means | All 26 working, or all 26 included with some marked lower confidence (leaning second) | 4.1 |
 
 **Definition of finalized (American version):** lessons, practice and progress work end to end; tested on at least 5 people not in the data, with results and failures written up; deployed with a README that states its limits.
