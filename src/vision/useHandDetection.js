@@ -11,13 +11,16 @@ const NO_STATS = { detectionFps: null, detectionMs: null }
 
 // Runs hand detection on each new video frame while `isRunning` is true,
 // draws the result on the canvas, and reports what it found.
-// While a benchmark is recording, measurementsRef.current is an array and
-// every frame's detection time is appended to it.
+// Optional hooks for other tools: while a benchmark is recording,
+// measurementsRef.current is an array that every frame's detection time is
+// appended to; while the recorder is taking, listenerRef.current is a
+// function called with every detection.
 export function useHandDetection({
   videoRef,
   canvasRef,
   landmarkerRef,
   measurementsRef,
+  listenerRef,
   isRunning,
 }) {
   const [handLabel, setHandLabel] = useState(null) // null means no hand
@@ -82,7 +85,14 @@ export function useHandDetection({
 
       // With numHands: 1 there is at most one hand, at index 0.
       const landmarks = result.landmarks[0]
-      measurementsRef.current?.push({ ms: detectionMs, hand: Boolean(landmarks) })
+      measurementsRef?.current?.push({ ms: detectionMs, hand: Boolean(landmarks) })
+      listenerRef?.current?.({
+        landmarks: landmarks ?? null,
+        handedness: result.handedness[0]?.[0] ?? null,
+        width: video.videoWidth,
+        height: video.videoHeight,
+        time: now,
+      })
 
       if (landmarks) {
         lastHandSeenAt = now
@@ -122,7 +132,7 @@ export function useHandDetection({
       setStats(NO_STATS)
       setError(null)
     }
-  }, [videoRef, canvasRef, landmarkerRef, measurementsRef, isRunning])
+  }, [videoRef, canvasRef, landmarkerRef, measurementsRef, listenerRef, isRunning])
 
   return { handLabel, ...stats, error }
 }
