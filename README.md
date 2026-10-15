@@ -12,6 +12,10 @@ recognition comes in later phases.
 
 Development plan: [docs/project-plan.md](docs/project-plan.md)
 
+Mirroring: only the display is mirrored; MediaPipe gets the camera's frames
+un-mirrored, so its Left/Right label already names the hand the user raised (right
+hand → "Right") and is used unchanged (checked by hand in Chrome, 2026-10-15).
+
 ## Run it
 
 You need Node.js 20.19+ or 22.12+ (check with `node -v`).
@@ -55,7 +59,8 @@ them from a CDN:
 
 ## Performance
 
-Measured on 2026-10-15: Fedora KDE Plasma, Ryzen 5 3600, GTX 1660 Super, 8 GB RAM.
+Measured on 2026-10-15: Fedora KDE Plasma (Wayland), Ryzen 5 3600, GTX 1660 Super
+(NVIDIA proprietary driver), 8 GB RAM.
 
 Camera at 640 × 480. Measured with the built-in benchmark:
 
@@ -67,10 +72,13 @@ Camera at 640 × 480. Measured with the built-in benchmark:
 4. Click **Copy row** and paste it over the matching row below.
 
 A run doesn't count (no row is offered) if your hand was found in fewer than 90%
-of frames, because detection is slower with a hand in view, or if the tab was
-hidden, the camera stopped or the model reloaded during the run. Run each
+of frames, because detection does different work with and without a hand in view,
+or if the tab was hidden, the camera stopped or the model reloaded during the run. Run each
 combination twice; if the two medians differ by more than about 10%, close other
 apps and run it again.
+
+GPU is the default and has plenty of headroom in both browsers; on CPU, Chrome
+just keeps up and Firefox drops to about 22 fps.
 
 | Browser | Delegate | Camera fps | Detection fps | Detection median (ms) | Detection p95 (ms) | Detection mean (ms) |
 | ------- | -------- | ---------- | ------------- | --------------------- | ------------------ | ------------------- |
@@ -78,6 +86,8 @@ apps and run it again.
 | Chrome 155 | CPU | 30.0 | 29.8 | 27.1 | 35.0 | 28.3 |
 | Firefox 157 | GPU | 30.0 | 30.0 | 10.0 | 13.0 | 10.4 |
 | Firefox 157 | CPU | 22.7 | 22.5 | 32.0 | 37.0 | 32.9 |
+
+Each row is a single benchmark run. The second runs haven't been done yet.
 
 - **Camera fps** counts the frames the browser showed in the window
   (`presentedFrames`), so it stays accurate when detection is slow.
@@ -160,4 +170,7 @@ src/
   App.jsx                       the page
   main.jsx                      entry point
   styles.css                    all styles and color variables
+docs/
+  project-plan.md               the development plan and its status
+CLAUDE.md                       project notes and conventions for Claude Code
 ```
