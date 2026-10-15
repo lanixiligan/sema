@@ -332,3 +332,87 @@ body {
 .hand-status {
   color: var(--muted-text);
 }
+
+.recorder-work {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 24px 40px;
+  margin-top: 24px;
+}
+
+@media (max-width: 640px) {
+  .recorder-work {
+    grid-template-columns: 1fr;
+  }
+}
+
+.recording-grid {
+  border-collapse: collapse;
+}
+
+.recording-grid th,
+.recording-grid td {
+  padding: 4px 8px;
+  text-align: left;
+}
+
+.recording-grid .grid-group {
+  padding-top: 16px;
+  font-weight: 600;
+  color: var(--muted-text);
+}
+
+.cell-button {
+  min-width: 64px;
+  padding: 6px 10px;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  color: var(--deep-cobalt);
+  background: #fff;
+  border: 1px solid var(--muted-text);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.cell-button[aria-pressed='true'] {
+  color: #fff;
+  background: var(--deep-sky);
+  border-color: var(--deep-sky);
+}
+
+.cell-button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.cell-button:focus-visible {
+  outline: 3px solid var(--deep-sky);
+  outline-offset: 2px;
+}
+
+.take-panel h2 {
+  margin: 0 0 8px;
+  font-size: 1.25rem;
+}
+
+.take-panel p {
+  margin: 0 0 12px;
+}
+
+.take-panel a {
+  color: var(--deep-sky);
+}
+
+.take-countdown {
+  font-size: 3rem;
+  font-weight: 600;
+}
+
+.take-hold {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.take-note {
+  color: var(--muted-text);
+}

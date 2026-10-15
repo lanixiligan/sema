@@ -5,9 +5,12 @@ import { useHandDetection } from '../vision/useHandDetection.js'
 import { useHandLandmarker } from '../vision/useHandLandmarker.js'
 import { LOADING_HAND_MODEL } from '../vision/visionMessages.js'
 import ConsentForm from './ConsentForm.jsx'
+import RecordingGrid from './RecordingGrid.jsx'
+import TakePanel from './TakePanel.jsx'
 import { useLetters } from './letters.js'
-import { newSession } from './sessionFile.js'
+import { acceptedCount, addTake, newSession, undoLastTake } from './sessionFile.js'
 import { clearSession, downloadSession, loadSession, rememberSessionId, saveSession } from './sessionStore.js'
+import { useRecording } from './useRecording.js'
 
 // "2026-11-02" in the person's own time zone.
 const today = () => new Date().toLocaleDateString('en-CA')
@@ -31,6 +34,13 @@ export default function RecorderApp() {
     landmarkerRef: handModel.landmarkerRef,
     listenerRef,
     isRunning: isDetecting,
+  })
+  const [cell, setCell] = useState(null) // { letter, hand } chosen in the grid
+  const recording = useRecording({
+    videoRef,
+    listenerRef,
+    isDetecting,
+    onTakeDone: (take) => updateSession(addTake(session, take)),
   })
 
   // Every change to the session is saved in the browser straight away.
@@ -142,7 +152,36 @@ export default function RecorderApp() {
             {letters.status === 'ready' && letters.training.length === 0 && (
               <p className="error">No training letters configured yet.</p>
             )}
-            {/* Task 7 adds the recording grid and the take panel here. */}
+            {letters.status === 'ready' && (
+              <div className="recorder-work">
+                <RecordingGrid
+                  training={letters.training}
+                  pilot={letters.pilot}
+                  session={session}
+                  selected={cell}
+                  onSelect={setCell}
+                  disabled={recording.busy}
+                />
+                <div>
+                  <TakePanel
+                    cell={cell}
+                    instructions={cell ? letters.instructions[cell.letter] : undefined}
+                    accepted={cell ? acceptedCount(session, cell.letter, cell.hand) : 0}
+                    recording={recording}
+                    canRecord={isDetecting && cell !== null && !recording.busy}
+                    onRecord={() => recording.start(cell.letter, cell.hand)}
+                  />
+                  <button
+                    type="button"
+                    className="button-quiet"
+                    disabled={session.recordings.length === 0 || recording.busy}
+                    onClick={() => updateSession(undoLastTake(session))}
+                  >
+                    Undo last take
+                  </button>
+                </div>
+              </div>
+            )}
           </>
         )}
       </main>
