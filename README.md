@@ -48,3 +48,8 @@ React, Vite, plain JavaScript and CSS, with MediaPipe Hand Landmarker running in
   (`@mediapipe/tasks-vision`, Apache-2.0) finds the hand points.
 - Fonts: Plus Jakarta Sans, JetBrains Mono and a subset of Noto Sans Mono, under the SIL Open
   Font License 1.1. The licences are in `public/fonts/`.
+
+## License
+
+Sema's own code is under the [MIT License](LICENSE). The fonts and MediaPipe keep their own
+licences, listed under Credits.
