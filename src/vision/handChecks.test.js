@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { EDGE_MARGIN, checkHand } from './handChecks.js'
+import { EDGE_MARGIN, checkHand, isWholeHand } from './handChecks.js'
 
 // 21 points spread over the middle of the frame.
 const centred = Array.from({ length: 21 }, (_, i) => ({ x: 0.3 + i * 0.01, y: 0.3 + i * 0.01, z: 0 }))
@@ -26,5 +26,19 @@ describe('checkHand', () => {
 
   it('needs every fingertip inside the frame', () => {
     expect(checkHand(detection('Right', moved(8, { x: -0.01 })), 'right').wholeHand).toBe(false)
+  })
+})
+
+describe('isWholeHand', () => {
+  it('is true when every point is inside the edges', () => {
+    expect(isWholeHand(centred)).toBe(true)
+  })
+
+  it('is false when the wrist is too close to the bottom', () => {
+    expect(isWholeHand(moved(0, { y: 1 - EDGE_MARGIN / 2 }))).toBe(false)
+  })
+
+  it('is false without points', () => {
+    expect(isWholeHand(null)).toBe(false)
   })
 })

@@ -30,6 +30,8 @@ export default function CameraCheckPage({ signingHand, onSwitchHand, onDone }) {
     landmarkerRef: handModel.landmarkerRef,
     listenerRef,
     isRunning: isDetecting,
+    // With both hands up, the checks follow the signing hand, and only it gets points.
+    wantedHand: signingHand,
   })
 
   // The detection loop calls the listener on every frame. State only changes

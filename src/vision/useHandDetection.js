@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { clearHand, drawHand } from './drawHand.js'
+import { isWholeHand } from './handChecks.js'
 import { toPhysicalHand } from './handedness.js'
+import { pickHand } from './pickHand.js'
 import { getDetectionErrorMessage } from './visionMessages.js'
 
 // How long the hand must be missing before we say "No hand". Without this the
@@ -15,6 +17,9 @@ const NO_STATS = { detectionFps: null, detectionMs: null }
 // measurementsRef.current is an array that every frame's detection time is
 // appended to; while the recorder is taking, listenerRef.current is a
 // function called with every detection.
+// wantedHand ('left' or 'right', optional): with two hands in view, that one
+// is used (pickHand.js); it's the only hand drawn, and the other is reported
+// but not drawn. Without it, the first hand found is used and drawn.
 export function useHandDetection({
   videoRef,
   canvasRef,
@@ -22,13 +27,22 @@ export function useHandDetection({
   measurementsRef,
   listenerRef,
   isRunning,
+  wantedHand,
 }) {
   const [handLabel, setHandLabel] = useState(null) // null means no hand
+  // Every point of the hand, wrist included, inside the frame (handChecks.js).
+  const [wholeHand, setWholeHand] = useState(false)
   const [stats, setStats] = useState(NO_STATS)
   const [error, setError] = useState(null)
   // MediaPipe rejects a timestamp that isn't larger than the previous one.
   // A ref, so it survives the loop stopping and starting again.
   const lastTimestampRef = useRef(0)
+  // The loop reads the wanted hand from a ref on every frame, so switching
+  // hands doesn't stop and restart detection.
+  const wantedHandRef = useRef(wantedHand)
+  useEffect(() => {
+    wantedHandRef.current = wantedHand
+  }, [wantedHand])
 
   useEffect(() => {
     const video = videoRef.current
@@ -45,6 +59,7 @@ export function useHandDetection({
 
     let lastHandSeenAt = 0
     let shownLabel = null
+    let shownWhole = false
 
     let windowStart = performance.now()
     let detections = 0
@@ -83,12 +98,13 @@ export function useHandDetection({
       detections += 1
       detectionMsTotal += detectionMs
 
-      // With numHands: 1 there is at most one hand, at index 0.
-      const landmarks = result.landmarks[0]
+      // Up to two hands are found; from here on, only the picked one counts.
+      const picked = pickHand(result, wantedHandRef.current)
+      const landmarks = picked?.landmarks
       measurementsRef?.current?.push({ ms: detectionMs, hand: Boolean(landmarks) })
       listenerRef?.current?.({
         landmarks: landmarks ?? null,
-        handedness: result.handedness[0]?.[0] ?? null,
+        handedness: picked?.handedness ?? null,
         width: video.videoWidth,
         height: video.videoHeight,
         time: now,
@@ -96,16 +112,28 @@ export function useHandDetection({
 
       if (landmarks) {
         lastHandSeenAt = now
-        drawHand(canvas, landmarks, video.videoWidth, video.videoHeight)
-        const label = toPhysicalHand(result.handedness[0][0].categoryName)
+        const label = toPhysicalHand(picked.handedness.categoryName)
+        // The other hand is cleared straight away: no points on the wrong hand.
+        const wanted = wantedHandRef.current
+        if (!wanted || label.toLowerCase() === wanted) drawHand(canvas, landmarks, video.videoWidth, video.videoHeight)
+        else clearHand(canvas)
+        // State changes only when the result does, so the page doesn't
+        // re-render on every frame.
         if (label !== shownLabel) {
           shownLabel = label
           setHandLabel(label)
+        }
+        const whole = isWholeHand(landmarks)
+        if (whole !== shownWhole) {
+          shownWhole = whole
+          setWholeHand(whole)
         }
       } else if (shownLabel && now - lastHandSeenAt > HAND_LOST_AFTER_MS) {
         clearHand(canvas)
         shownLabel = null
         setHandLabel(null)
+        shownWhole = false
+        setWholeHand(false)
       }
 
       // Report averages about once a second.
@@ -129,10 +157,11 @@ export function useHandDetection({
       else cancelAnimationFrame(callbackId)
       clearHand(canvas)
       setHandLabel(null)
+      setWholeHand(false)
       setStats(NO_STATS)
       setError(null)
     }
   }, [videoRef, canvasRef, landmarkerRef, measurementsRef, listenerRef, isRunning])
 
-  return { handLabel, ...stats, error }
+  return { handLabel, wholeHand, ...stats, error }
 }

@@ -151,7 +151,13 @@ src/
 - MediaPipe web needs WebGL2 even on the CPU delegate. `loadHandLandmarker` checks
   for WebGL2 first, then tries GPU and falls back to CPU. Each new landmarker runs
   one blank test frame, because some GPU failures only appear on the first frame.
-- `runningMode: 'VIDEO'`, `numHands: 1`. Call `detectForVideo` once per new video
+- `runningMode: 'VIDEO'`, `numHands: 2` (since 2026-10-16; before, 1). With one, MediaPipe
+  keeps tracking the first hand it finds and never sees the other, so the chosen hand went
+  unseen whenever the other came first. `pickHand` (`src/vision/pickHand.js`) keeps one
+  hand: the page's `wantedHand` if found, else the first. Only that hand is drawn and
+  passed on. Benchmark numbers from before this change were measured with one hand, so
+  they aren't comparable; re-run the benchmark before relying on them.
+- Call `detectForVideo` once per new video
   frame (`requestVideoFrameCallback`). Timestamps must strictly increase:
   `Math.max(performance.now(), last + 1)`.
 - The detection loop reads the landmarker from a ref on every frame. Set the ref to

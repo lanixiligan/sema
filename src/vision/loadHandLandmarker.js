@@ -48,7 +48,7 @@ async function createHandLandmarker(delegate) {
   const landmarker = await HandLandmarker.createFromOptions(wasmFiles, {
     baseOptions: { modelAssetBuffer: modelBytes, delegate },
     runningMode: 'VIDEO', // frames of one continuous video, so it can track
-    numHands: 1,
+    numHands: 2, // so the wanted hand is found even when the other came first (pickHand.js)
   })
   try {
     runTestFrame(landmarker)
