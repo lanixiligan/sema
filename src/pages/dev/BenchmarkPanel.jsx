@@ -3,7 +3,7 @@ import { toTableRow } from '../../vision/benchmarkStats.js'
 import { BENCHMARK_SECONDS, MIN_HAND_SHARE, useBenchmark } from '../../vision/useBenchmark.js'
 
 // Developer tool: measures camera and detection speed under fixed conditions
-// and gives a row for the README's performance table.
+// and gives a row for the performance table in docs/benchmarks.md.
 export default function BenchmarkPanel({ videoRef, measurementsRef, canRun, delegate }) {
   const benchmark = useBenchmark({ videoRef, measurementsRef, canRun, delegate })
   const [copyStatus, setCopyStatus] = useState(null) // null | 'copied' | 'failed'
