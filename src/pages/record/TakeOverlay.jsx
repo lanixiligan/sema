@@ -1,8 +1,10 @@
 import { EXPECTED_SAMPLES } from '../../recorder/takeRules.js'
 
-// What sits on top of the video: a bar along the top (the take's phase on the
-// left, "18 / 30 frames" on the right while capturing), the big countdown in
-// the middle, and a progress bar along the bottom while capturing. It's its
+// What sits on top of the video: a bar along the top (the take's phase, or
+// what Sema sees, centred and large enough to read while signing, and
+// "18 / 30 frames" on the right while capturing), the big countdown in the
+// middle, and a progress bar along the bottom while capturing. While a take
+// waits for the hand, the bar says what's missing (idleText). It's its
 // own layer outside the mirrored video, so the text reads normally.
 export default function TakeOverlay({ recording, idleText }) {
   const capturing = recording.phase === 'capturing'
@@ -43,6 +45,8 @@ function phaseText(recording) {
   switch (recording.phase) {
     case 'countdown':
       return `Get ready… ${recording.secondsLeft}`
+    case 'waiting':
+      return null // the bar shows idleText: what Sema is waiting for
     case 'settling':
     case 'capturing':
       return 'Hold…'

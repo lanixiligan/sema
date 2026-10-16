@@ -1,9 +1,13 @@
 import { normalizeHand } from '../vision/normalizeHand.js'
 import { toPhysicalHand } from '../vision/handedness.js'
 
-// One take: a countdown, a short pause so the hand can finish forming the
-// shape, then the capture window.
+// One take: a countdown, then a wait until the take's hand is whole in view
+// (it may already be), a short pause so the hand can finish forming the
+// shape, then the capture window. The countdown leaves time to start the take
+// with one hand and raise the other.
 export const COUNTDOWN_MS = 3000
+// After the countdown, how long to wait for the hand before cancelling.
+export const WAIT_FOR_HAND_MS = 10000
 export const SETTLE_MS = 500
 export const CAPTURE_MS = 3000
 // One sample per this many milliseconds of capture. J and Z may need faster
@@ -19,17 +23,23 @@ export const TAKES_TARGET = 3
 export const POSITION_HINTS = ['centre of the frame', 'a little closer', 'off to one side']
 export const LIFEPRINT_URL = 'https://www.lifeprint.com/asl101/fingerspelling/'
 
+// Times are milliseconds since the take started. readyAt is when, after the
+// countdown, the take's hand was first whole in view: null until then.
+
 // How far through capture a take is, from 0 to 1, for the progress bar under
-// the video. 0 during the countdown and settle; 1 once capture is over.
-export function captureProgress(elapsed) {
-  const intoCapture = elapsed - COUNTDOWN_MS - SETTLE_MS
+// the video. 0 until capture starts; 1 once it's over.
+export function captureProgress(elapsed, readyAt) {
+  if (readyAt === null) return 0
+  const intoCapture = elapsed - readyAt - SETTLE_MS
   return Math.min(1, Math.max(0, intoCapture / CAPTURE_MS))
 }
 
-export function takePhase(elapsedMs) {
-  if (elapsedMs < COUNTDOWN_MS) return 'countdown'
-  if (elapsedMs < COUNTDOWN_MS + SETTLE_MS) return 'settling'
-  if (elapsedMs < COUNTDOWN_MS + SETTLE_MS + CAPTURE_MS) return 'capturing'
+export function takePhase(elapsed, readyAt) {
+  if (elapsed < COUNTDOWN_MS) return 'countdown'
+  if (readyAt === null) return elapsed - COUNTDOWN_MS < WAIT_FOR_HAND_MS ? 'waiting' : 'timedOut'
+  const sinceReady = elapsed - readyAt
+  if (sinceReady < SETTLE_MS) return 'settling'
+  if (sinceReady < SETTLE_MS + CAPTURE_MS) return 'capturing'
   return 'done'
 }
 

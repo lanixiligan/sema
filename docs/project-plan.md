@@ -254,7 +254,7 @@ About Sema and Privacy (to re-read those pages)
            unlocked: random letters, 10 rounds → End → 4
 ```
 
-Not separate pages: the "Right hand" pill in the top bar opens a small menu (switch Left/Right, Reset progress; About Sema moves into it when it's built); camera problems (blocked, busy, unplugged) appear inside the camera area. Each setup step has Back and Continue and a "Step N of 3" indicator. The lesson design's "First time" camera-check state is superseded by the camera check step.
+Not separate pages: the "Right hand" pill in the top bar opens a small menu (Reset progress; About Sema moves into it when it's built); switching Left/Right lives in the camera controls at the bottom of each camera view instead, so a learner can try the other hand right where they sign (decided 2026-10-16): on Record it picks the hand for the next take, and on Learn and Practice it will change the signing-hand setting; camera problems (blocked, busy, unplugged) appear inside the camera area. Each setup step has Back and Continue and a "Step N of 3" indicator. The lesson design's "First time" camera-check state is superseded by the camera check step.
 
 **The signing-hand question (3.2):**
 

@@ -10,6 +10,7 @@ import {
   judgeTake,
   sampleSlot,
   takePhase,
+  WAIT_FOR_HAND_MS,
   tallyTake,
 } from './takeRules.js'
 
@@ -44,13 +45,30 @@ describe('constants', () => {
 })
 
 describe('takePhase', () => {
-  it('moves through countdown, settling, capturing and done', () => {
-    expect(takePhase(0)).toBe('countdown')
-    expect(takePhase(COUNTDOWN_MS - 1)).toBe('countdown')
-    expect(takePhase(COUNTDOWN_MS)).toBe('settling')
-    expect(takePhase(COUNTDOWN_MS + SETTLE_MS)).toBe('capturing')
-    expect(takePhase(COUNTDOWN_MS + SETTLE_MS + CAPTURE_MS - 1)).toBe('capturing')
-    expect(takePhase(COUNTDOWN_MS + SETTLE_MS + CAPTURE_MS)).toBe('done')
+  it('moves through countdown, settling, capturing and done when the hand is ready in time', () => {
+    const readyAt = COUNTDOWN_MS
+    expect(takePhase(0, null)).toBe('countdown')
+    expect(takePhase(COUNTDOWN_MS - 1, null)).toBe('countdown')
+    expect(takePhase(COUNTDOWN_MS, readyAt)).toBe('settling')
+    expect(takePhase(COUNTDOWN_MS + SETTLE_MS, readyAt)).toBe('capturing')
+    expect(takePhase(COUNTDOWN_MS + SETTLE_MS + CAPTURE_MS - 1, readyAt)).toBe('capturing')
+    expect(takePhase(COUNTDOWN_MS + SETTLE_MS + CAPTURE_MS, readyAt)).toBe('done')
+  })
+
+  it('waits after the countdown until the hand is ready', () => {
+    expect(takePhase(COUNTDOWN_MS, null)).toBe('waiting')
+    expect(takePhase(COUNTDOWN_MS + WAIT_FOR_HAND_MS - 1, null)).toBe('waiting')
+  })
+
+  it('times out when the hand never comes', () => {
+    expect(takePhase(COUNTDOWN_MS + WAIT_FOR_HAND_MS, null)).toBe('timedOut')
+  })
+
+  it('counts settling and capturing from when the hand was ready', () => {
+    const readyAt = COUNTDOWN_MS + 2000
+    expect(takePhase(readyAt + SETTLE_MS - 1, readyAt)).toBe('settling')
+    expect(takePhase(readyAt + SETTLE_MS, readyAt)).toBe('capturing')
+    expect(takePhase(readyAt + SETTLE_MS + CAPTURE_MS, readyAt)).toBe('done')
   })
 })
 
@@ -144,9 +162,11 @@ describe('judgeTake', () => {
 
 describe('captureProgress', () => {
   it('is 0 before capture, 1 after, and in between during it', () => {
-    expect(captureProgress(0)).toBe(0)
-    expect(captureProgress(COUNTDOWN_MS + SETTLE_MS)).toBe(0)
-    expect(captureProgress(COUNTDOWN_MS + SETTLE_MS + CAPTURE_MS / 2)).toBe(0.5)
-    expect(captureProgress(COUNTDOWN_MS + SETTLE_MS + CAPTURE_MS * 2)).toBe(1)
+    const readyAt = COUNTDOWN_MS + 1000
+    expect(captureProgress(0, null)).toBe(0)
+    expect(captureProgress(COUNTDOWN_MS + 5000, null)).toBe(0) // still waiting for the hand
+    expect(captureProgress(readyAt + SETTLE_MS, readyAt)).toBe(0)
+    expect(captureProgress(readyAt + SETTLE_MS + CAPTURE_MS / 2, readyAt)).toBe(0.5)
+    expect(captureProgress(readyAt + SETTLE_MS + CAPTURE_MS * 2, readyAt)).toBe(1)
   })
 })

@@ -49,8 +49,38 @@ export function SettingsIcon({ size = 16 }) {
   )
 }
 
-// A small chevron for text links: right by default, or left (Back) or down.
-const CHEVRON_TURN = { right: 0, down: 90, left: 180 }
+// A cross, for removing something (a take, on Record).
+export function CloseIcon({ size = 12 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+      <path d="M3 3l6 6M9 3l-6 6" />
+    </svg>
+  )
+}
+
+// A video camera: a rounded body with the lens cone on the right.
+export function VideoIcon({ size = 20 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="2" y="5" width="11" height="10" rx="2" />
+      <path d="M13 8.5l5-3v9l-5-3" />
+    </svg>
+  )
+}
+
+// The same camera, struck through: the camera is off.
+export function VideoOffIcon({ size = 20 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="2" y="5" width="11" height="10" rx="2" />
+      <path d="M13 8.5l5-3v9l-5-3" />
+      <path d="M2.5 2.5l15 15" />
+    </svg>
+  )
+}
+
+// A small chevron for text links: right by default, or left (Back), down or up.
+const CHEVRON_TURN = { right: 0, down: 90, left: 180, up: 270 }
 
 export function ChevronIcon({ direction = 'right', size = 12 }) {
   return (

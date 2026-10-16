@@ -11,21 +11,27 @@ import {
   tallyTake,
 } from './takeRules.js'
 
-const BUSY = ['countdown', 'settling', 'capturing', 'saving']
+const BUSY = ['countdown', 'waiting', 'settling', 'capturing', 'saving']
 
-// One take at a time: countdown, a short settle, capture, then the result is
-// handed to onTakeDone. Frames arrive through listenerRef from the detection
-// loop; a timer drives the phases and checks the take is still valid.
-export function useRecording({ videoRef, listenerRef, isDetecting, onTakeDone }) {
+// One take at a time: countdown, a wait until the take's hand is whole in
+// view (isHandReady), a short settle, capture, then the result is handed to
+// onTakeDone. Frames arrive through listenerRef from the detection loop; a
+// timer drives the phases and checks the take is still valid.
+export function useRecording({ videoRef, listenerRef, isDetecting, isHandReady, onTakeDone }) {
   const [state, setState] = useState({ phase: 'idle' })
   const takeRef = useRef(null)
   // Refs so the timer always sees the latest values without restarting.
   const isDetectingRef = useRef(isDetecting)
+  const isHandReadyRef = useRef(isHandReady)
   const onTakeDoneRef = useRef(onTakeDone)
 
   useEffect(() => {
     isDetectingRef.current = isDetecting
   }, [isDetecting])
+
+  useEffect(() => {
+    isHandReadyRef.current = isHandReady
+  }, [isHandReady])
 
   useEffect(() => {
     onTakeDoneRef.current = onTakeDone
@@ -38,12 +44,23 @@ export function useRecording({ videoRef, listenerRef, isDetecting, onTakeDone })
     if (takeRef.current) return
     const video = videoRef.current
     const startAt = performance.now()
-    const captureAt = startAt + COUNTDOWN_MS + SETTLE_MS
-    const take = { frames: [], lastSlot: -1, fpsStart: null, fpsRequested: false, hidden: false, stop: null }
+    // readyAt (ms since start) and captureAt (a performance.now() time) are
+    // set when the hand is first ready after the countdown.
+    const take = {
+      frames: [],
+      lastSlot: -1,
+      readyAt: null,
+      captureAt: null,
+      fpsStart: null,
+      fpsRequested: false,
+      hidden: false,
+      stop: null,
+    }
     let timer = null
 
     function onDetection(detection) {
-      const t = detection.time - captureAt
+      if (take.captureAt === null) return // not capturing yet
+      const t = detection.time - take.captureAt
       const slot = sampleSlot(t, take.lastSlot)
       if (slot === null) return
       take.lastSlot = slot
@@ -84,12 +101,17 @@ export function useRecording({ videoRef, listenerRef, isDetecting, onTakeDone })
     }
 
     function tick() {
-      if (take.hidden) return discard("The tab was hidden, which pauses the camera. This take wasn't saved.")
-      if (!isDetectingRef.current) {
-        return discard("The camera stopped or the hand model reloaded. This take wasn't saved.")
-      }
+      if (take.hidden) return discard('Cancelled: the tab was hidden.')
+      if (!isDetectingRef.current) return discard('Cancelled: the camera stopped.')
       const elapsed = performance.now() - startAt
-      const phase = takePhase(elapsed)
+      if (take.readyAt === null && elapsed >= COUNTDOWN_MS && isHandReadyRef.current) {
+        take.readyAt = elapsed
+        take.captureAt = startAt + elapsed + SETTLE_MS
+      }
+      const phase = takePhase(elapsed, take.readyAt)
+      if (phase === 'timedOut') {
+        return discard(`Cancelled: no ${hand} hand in view.`)
+      }
       if (phase === 'capturing' && !take.fpsRequested) {
         take.fpsRequested = true
         nextFrameCount(video).then((count) => {
@@ -104,7 +126,7 @@ export function useRecording({ videoRef, listenerRef, isDetecting, onTakeDone })
         secondsLeft: Math.ceil((COUNTDOWN_MS - elapsed) / 1000),
         // For "18 / 30 frames" and the bar under the video while capturing.
         kept: take.frames.filter((f) => f.hasHand).length,
-        progress: captureProgress(elapsed),
+        progress: captureProgress(elapsed, take.readyAt),
       })
     }
 

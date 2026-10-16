@@ -10,7 +10,7 @@ import {
   nextSessionId,
   normalizePersonCode,
   sessionFileName,
-  undoLastTake,
+  deleteTake,
 } from './sessionFile.js'
 
 function frame(detected = 'left', t = 0) {
@@ -172,20 +172,26 @@ describe('addTake', () => {
   })
 })
 
-describe('undoLastTake', () => {
-  it('removes the last entry and its samples, and the next take reuses its number', () => {
-    let s = addTake(session(), take())
-    s = addTake(s, take())
-    s = undoLastTake(s)
-    expect(s.recordings).toHaveLength(1)
-    expect(s.samples.every((x) => x.recording === 'p03-2026-11-02a-W-left-1')).toBe(true)
-    s = addTake(s, take())
-    const ids = s.recordings.map((r) => r.recording)
-    expect(new Set(ids).size).toBe(ids.length)
+describe('deleteTake', () => {
+  const ids = (s) => s.recordings.map((r) => r.recording)
+
+  it('removes one take and its samples, and keeps the others', () => {
+    let s = addTake(addTake(addTake(session(), take()), take()), take())
+    s = deleteTake(s, 'p03-2026-11-02a-W-left-2')
+    expect(ids(s)).toEqual(['p03-2026-11-02a-W-left-1', 'p03-2026-11-02a-W-left-3'])
+    expect(s.samples.some((x) => x.recording === 'p03-2026-11-02a-W-left-2')).toBe(false)
+    expect(s.samples.some((x) => x.recording === 'p03-2026-11-02a-W-left-3')).toBe(true)
   })
 
-  it('does nothing on an empty session', () => {
-    expect(undoLastTake(session()).recordings).toEqual([])
+  it('never reuses a take number still in the session', () => {
+    let s = addTake(addTake(addTake(session(), take()), take()), take())
+    s = addTake(deleteTake(s, 'p03-2026-11-02a-W-left-2'), take())
+    expect(ids(s)).toEqual(['p03-2026-11-02a-W-left-1', 'p03-2026-11-02a-W-left-3', 'p03-2026-11-02a-W-left-4'])
+  })
+
+  it('does nothing for a take that is not there', () => {
+    const s = addTake(session(), take())
+    expect(deleteTake(s, 'nope')).toBe(s)
   })
 })
 
@@ -210,13 +216,15 @@ describe('needsDownload', () => {
     expect(needsDownload(s, s)).toBe(false)
   })
 
-  it('is true again after Undo, even though there are fewer takes', () => {
+  const deleteLast = (s) => deleteTake(s, s.recordings.at(-1).recording)
+
+  it('is true again after a delete, even though there are fewer takes', () => {
     const downloaded = addTake(addTake(session(), take()), take())
-    expect(needsDownload(undoLastTake(downloaded), downloaded)).toBe(true)
+    expect(needsDownload(deleteLast(downloaded), downloaded)).toBe(true)
   })
 
-  it('is true after Undo and a new take bring the count back', () => {
+  it('is true after a delete and a new take bring the count back', () => {
     const downloaded = addTake(addTake(session(), take()), take())
-    expect(needsDownload(addTake(undoLastTake(downloaded), take()), downloaded)).toBe(true)
+    expect(needsDownload(addTake(deleteLast(downloaded), take()), downloaded)).toBe(true)
   })
 })

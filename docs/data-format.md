@@ -83,7 +83,7 @@ the hand or the letter.
 | `recording` | `<person>-<session>-<letter>-<hand>-<take>`. Unique within a session and across `data/raw/`. |
 | `letter` | `"A"`–`"Z"`, or `"none"` for the "no letter" class. |
 | `hand` | The hand the participant was asked to use: `"left"` or `"right"`. |
-| `take` | Attempt number for this letter and hand, counting rejected attempts. |
+| `take` | Take number for this letter and hand: one more than the highest so far, counting rejected attempts. A deleted take leaves a gap; numbers are never reused within a session. |
 | `status` | `"accepted"` or `"rejected"`. |
 | `reason` | Why a take was rejected, e.g. `"18 of 30 frames matched: 8 had no hand, 4 had the other hand"`; `null` if accepted. |
 | `kept` | Sampled frames with a hand (saved as samples if accepted). |

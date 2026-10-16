@@ -162,12 +162,13 @@ development. The file format is described in [docs/data-format.md](docs/data-for
 
 **In person:** finish setup once on the laptop, then open Record. The participant
 reads "Help train Sema" and "What gets saved", enters their code (`p03`), ticks the
-training box and clicks **Start recording**. The camera then starts by itself. Pick the hand (it starts on the signing
-hand) and a letter tile, and click **Record take**: a 3-2-1 countdown, "Hold…" with a
-frame count for 3.5 seconds, then the result beside the video. Aim for 3 kept takes per
-letter and hand; the letter card says where to hold the hand (centre of the frame, a
-little closer, off to one side). **Undo last take** removes a mistake. At the end,
-click **Finish and download**; the last page names the file and offers **Start a new
+training box and clicks **Start recording**. The camera then starts by itself. Pick a
+letter in the column on the left and the hand (Left | Right, on the video; it starts on
+the signing hand), then press **Space** with the other hand: a 3-2-1 countdown, a wait
+until that hand is whole in view, "Hold…" with a frame count, then the result beside the
+video. Aim for 3 kept takes per letter and hand; the letter card says where to hold the
+hand (centre of the frame, a little closer, off to one side). Each kept take has its own
+delete button. At the end, click **Finish and download** (above the video); the last page names the file and offers **Start a new
 session** for the next person.
 
 **Remotely:** send the participant the `/record` link. They do the same on their own
@@ -284,11 +285,12 @@ src/
     record/
       RecordPage.jsx            the Record page: consent, recording and finished steps
       ConsentForm.jsx           participant code, session ID, consent to train Sema
-      HandToggle.jsx            Hand: Left | Right
+      CameraControls.jsx        the pill on the video: camera on/off, camera list, Left | Right
       TakePanel.jsx             the letter card: how to form it, take and position
       TakeResult.jsx            the last take's result, beside the video
       TakeOverlay.jsx           countdown, "Hold…", frame count and progress bar
-      RecordingGrid.jsx         one row of letter tiles for the chosen hand
+      LetterList.jsx            the letters column: kept takes as dots, pilot letters apart
+      TakeList.jsx              the chosen letter's kept takes, each with Delete
       FinishedStep.jsx          after Finish and download: thanks and the file name
     learn/LearnPage.jsx         Learn, a placeholder until the lessons (Phase 3.3)
     practice/

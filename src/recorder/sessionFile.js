@@ -50,10 +50,16 @@ function takesFor(session, letter, hand) {
   return session.recordings.filter((r) => r.letter === letter && r.hand === hand)
 }
 
-// All attempts, accepted or rejected: take numbers count attempts so that
-// every recording ID in a session is unique.
+// All attempts still in the session, accepted or rejected.
 export function attemptCount(session, letter, hand) {
   return takesFor(session, letter, hand).length
+}
+
+// One more than the highest take number for this letter and hand, counting
+// rejected attempts. Deleting a take can leave a gap, but a number still in
+// the session is never reused, so every recording ID stays unique.
+function nextTakeNumber(session, letter, hand) {
+  return Math.max(0, ...takesFor(session, letter, hand).map((r) => r.take)) + 1
 }
 
 export function acceptedCount(session, letter, hand) {
@@ -70,7 +76,7 @@ function median(values) {
 // take: { letter, hand, counts: { kept, mismatched, droppedNoHand }, status,
 // reason, cameraFps, frames } where frames come from takeRules.frameFromDetection.
 export function addTake(session, take) {
-  const number = attemptCount(session, take.letter, take.hand) + 1
+  const number = nextTakeNumber(session, take.letter, take.hand)
   const recording = makeRecordingId({
     person: session.person,
     session: session.session,
@@ -122,20 +128,20 @@ export function addTake(session, take) {
   }
 }
 
-export function undoLastTake(session) {
-  const last = session.recordings.at(-1)
-  if (!last) return session
-  const recordings = session.recordings.slice(0, -1)
+// Removes one take (by its recording ID) and its samples.
+export function deleteTake(session, recordingId) {
+  if (!session.recordings.some((r) => r.recording === recordingId)) return session
+  const recordings = session.recordings.filter((r) => r.recording !== recordingId)
   return {
     ...session,
     cameraFps: median(recordings.map((r) => r.cameraFps).filter((v) => v !== null)),
     recordings,
-    samples: session.samples.filter((s) => s.recording !== last.recording),
+    samples: session.samples.filter((s) => s.recording !== recordingId),
   }
 }
 
 // True if the session has takes that aren't in the last downloaded file.
-// Sessions are never changed in place (every take or undo makes a new
+// Sessions are never changed in place (every take or delete makes a new
 // object), so "the same object" means "nothing changed since that download".
 export function needsDownload(session, downloaded) {
   return session !== null && session.recordings.length > 0 && session !== downloaded

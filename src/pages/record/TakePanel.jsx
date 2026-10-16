@@ -1,18 +1,18 @@
 import { LIFEPRINT_URL, POSITION_HINTS, TAKES_TARGET } from '../../recorder/takeRules.js'
 
-// The letter card: the letter in a dark tile, how to form it, which take this
-// is and where to hold the hand, and a link to check the shape on Lifeprint.
+// The letter card: the reference picture on top, then how to form the letter,
+// where to hold the hand for the next take, and a link to check the shape on
+// Lifeprint.
 export default function TakePanel({ cell, isPilot, instructions, image, accepted }) {
   const isNone = cell.letter === 'none'
   const title = isNone ? 'No letter' : `Letter ${cell.letter}${isPilot ? ' (pilot)' : ''}`
-  const takeLine =
-    accepted < TAKES_TARGET
-      ? `Take ${accepted + 1} of ${TAKES_TARGET} · ${POSITION_HINTS[accepted]}`
-      : `Extra take · any position`
+  // Where to hold the hand for the next take; the takes themselves are shown
+  // under the card (TakeList).
+  const takeLine = accepted < TAKES_TARGET ? `Next take: ${POSITION_HINTS[accepted]}` : 'All takes done'
 
   return (
-    <section className="letter-card" aria-label="Current letter">
-      <LetterTile letter={cell.letter} image={image} mirrored={cell.hand === 'left'} />
+    <section className="letter-card letter-card-record" aria-label="Current letter">
+      <ReferenceImage letter={cell.letter} image={image} mirrored={cell.hand === 'left'} />
       <div className="letter-card-text">
         <div className="letter-card-title">{title}</div>
         <div className="letter-card-instructions">
@@ -26,7 +26,7 @@ export default function TakePanel({ cell, isPilot, instructions, image, accepted
         <div className="letter-card-take">{takeLine}</div>
         {!isNone && (
           <a className="letter-card-link" href={LIFEPRINT_URL} target="_blank" rel="noreferrer">
-            Check the shape on Lifeprint ↗
+            See it on Lifeprint ↗
           </a>
         )}
       </div>
@@ -34,12 +34,13 @@ export default function TakePanel({ cell, isPilot, instructions, image, accepted
   )
 }
 
-// The letter itself, or its reference picture once letters.json has one
-// ("image", a path inside public/languages/asl/), mirrored for the left hand.
-function LetterTile({ letter, image, mirrored }) {
+// The reference picture once letters.json has one ("image", a path inside
+// public/languages/asl/), mirrored for the left hand. Until then, a
+// placeholder with the letter itself.
+function ReferenceImage({ letter, image, mirrored }) {
   if (image) {
     return (
-      <div className="letter-tile">
+      <div className="reference-image">
         <img
           src={`${import.meta.env.BASE_URL}languages/asl/${image}`}
           alt={`Reference handshape for ${letter}`}
@@ -49,8 +50,11 @@ function LetterTile({ letter, image, mirrored }) {
     )
   }
   return (
-    <div className="letter-tile" aria-hidden="true">
-      {letter === 'none' ? '–' : letter}
+    <div className="reference-image reference-image-empty">
+      <span className="reference-image-letter" aria-hidden="true">
+        {letter === 'none' ? '–' : letter}
+      </span>
+      <span className="reference-image-note">Photo coming soon</span>
     </div>
   )
 }
