@@ -1851,6 +1851,86 @@ body {
   }
 }
 
+/* Two columns, the text on the left and its picture or choice on the right
+   (About Sema, Signing hand). On About the text's left edge lines up with
+   Back below it. */
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+  gap: var(--space-8);
+  align-items: center;
+  width: 100%;
+}
+
+.split-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+/* About's picture (AboutPreview.jsx): the camera frame, the letter card under it. */
+.about-preview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  text-align: left;
+}
+
+/* A shade darker than the page, so the frame reads as a camera view. */
+.about-preview-frame {
+  background: var(--night);
+  border: 1px solid var(--progress-track);
+  border-radius: 20px;
+}
+
+.about-preview-hand {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* drawHand.js's colours, and its widths a third thicker (in 640-pixel units). */
+.about-preview-outline,
+.about-preview-bones {
+  fill: none;
+  stroke-linecap: round;
+}
+
+.about-preview-outline {
+  stroke: var(--hand-outline);
+  stroke-width: 8;
+}
+
+.about-preview-bones {
+  stroke: var(--bright-sky);
+  stroke-width: 4;
+}
+
+.about-preview-joint {
+  fill: var(--cloud-white);
+  stroke: var(--hand-outline);
+  stroke-width: 2;
+}
+
+/* A step lighter than the page around it. */
+.about-preview-card {
+  background: var(--surface-soft);
+}
+
+/* Narrow windows: the picture under the text. */
+@media (max-width: 899px) {
+  .split {
+    grid-template-columns: 1fr;
+    gap: var(--space-7);
+  }
+
+  .about-preview {
+    max-width: 480px;
+  }
+}
+
 /* ---------- Signing hand (SigningHandPage.jsx) ---------- */
 
 .hand-choice {
@@ -1889,6 +1969,50 @@ body {
 
 .hand-choice-icon.mirrored {
   transform: scaleX(-1);
+}
+
+/* Two columns, as wide as About Sema's: the text and Back/Continue on the
+   left, the choice on the right. Grid areas name the
+   cells, so the page's order (text, choice, buttons, for Tab) can differ from
+   where things sit. */
+.signing-hand {
+  grid-template-areas:
+    'text side'
+    'actions side';
+  row-gap: var(--space-6);
+  max-width: calc(var(--page-max) - 2 * var(--page-gutter));
+}
+
+.signing-hand-text {
+  grid-area: text;
+  align-self: end;
+  max-width: 440px;
+}
+
+.signing-hand-actions {
+  grid-area: actions;
+  align-self: start;
+  max-width: 440px;
+}
+
+.signing-hand-choice {
+  grid-area: side;
+}
+
+/* Bigger cards here, where they fill a column. */
+.signing-hand .hand-choice button {
+  padding: var(--space-7) var(--space-3);
+}
+
+.signing-hand .hand-choice button[aria-pressed='true'] {
+  padding: calc(var(--space-7) - 1px) calc(var(--space-3) - 1px);
+}
+
+/* Narrow windows: one column, in the page's order. */
+@media (max-width: 899px) {
+  .signing-hand {
+    grid-template-areas: 'text' 'side' 'actions';
+  }
 }
 
 /* ---------- Camera check (CameraCheckPage.jsx) ---------- */
