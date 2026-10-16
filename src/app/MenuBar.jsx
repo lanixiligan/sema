@@ -1,27 +1,22 @@
 import Link from './Link.jsx'
-import PreviewPill from './PreviewPill.jsx'
 import { PATHS } from './router.js'
+import SettingsMenu from './SettingsMenu.jsx'
+import TopBar from './TopBar.jsx'
 
 const MENU = [
   { page: 'record', label: 'Record' },
-  { page: 'learn', label: 'Learn', preview: true },
-  { page: 'practice', label: 'Practice', preview: true },
+  { page: 'learn', label: 'Learn' },
+  { page: 'practice', label: 'Practice' },
 ]
 
-// The top bar on the main pages: Sema with its Preview pill, the menu, and on
-// the right whatever the page passes in (Record shows its session there).
+// The top bar on the main pages, with the menu, and on the right whatever the
+// page passes in (Record shows its session there), then the settings menu.
 // The current page's link gets aria-current="page": screen readers announce
 // it as the current page, and the CSS underlines it.
 export default function MenuBar({ active, children }) {
   return (
-    <header className="menu-bar">
-      <div className="menu-bar-left">
-        <div className="brand">
-          <Link to={PATHS.welcome} className="brand-name">
-            Sema
-          </Link>
-          <PreviewPill />
-        </div>
+    <TopBar
+      nav={
         <nav aria-label="Main" className="menu">
           {MENU.map((item) => (
             <Link
@@ -30,12 +25,13 @@ export default function MenuBar({ active, children }) {
               aria-current={item.page === active ? 'page' : undefined}
             >
               {item.label}
-              {item.preview && <PreviewPill inMenu />}
             </Link>
           ))}
         </nav>
-      </div>
-      <div className="menu-bar-status">{children}</div>
-    </header>
+      }
+    >
+      {children}
+      <SettingsMenu />
+    </TopBar>
   )
 }

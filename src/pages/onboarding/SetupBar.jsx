@@ -1,30 +1,28 @@
-import PreviewPill from '../../app/PreviewPill.jsx'
+import TopBar from '../../app/TopBar.jsx'
 
-// The top bar on the setup pages: Sema with its Preview pill, and "Step N of 3"
-// with three segments that fill in as you go. The segments are a progress bar
-// for screen readers (role="progressbar"), as in the design.
+const STEPS = [1, 2]
+
+// The top bar on the setup pages, with "Step N of 2" and two segments that
+// fill in as you go (the intro pages before them have no step count). The segments are a progress bar for screen readers
+// (role="progressbar").
 export default function SetupBar({ step }) {
   return (
-    <header className="setup-bar">
-      <div className="brand">
-        <span className="brand-name">Sema</span>
-        <PreviewPill />
-      </div>
+    <TopBar>
       <div className="setup-step">
-        Step {step} of 3
+        Step {step} of {STEPS.length}
         <div
           className="setup-segments"
           role="progressbar"
           aria-label="Setup progress"
           aria-valuemin="1"
-          aria-valuemax="3"
+          aria-valuemax={STEPS.length}
           aria-valuenow={step}
         >
-          {[1, 2, 3].map((n) => (
+          {STEPS.map((n) => (
             <span key={n} className={n <= step ? 'done' : undefined} />
           ))}
         </div>
       </div>
-    </header>
+    </TopBar>
   )
 }

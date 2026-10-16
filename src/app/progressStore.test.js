@@ -21,11 +21,16 @@ describe('progressStore', () => {
     expect(loadProgress()).toEqual(NEW_VISITOR)
   })
 
-  it('saves and loads the signing hand and setup', () => {
+  it('saves and loads the signing hand, setup and theme', () => {
     vi.stubGlobal('localStorage', fakeStorage())
-    const progress = { version: PROGRESS_VERSION, signingHand: 'left', setupDone: true }
+    const progress = { version: PROGRESS_VERSION, signingHand: 'left', setupDone: true, theme: 'dark' }
     expect(saveProgress(progress)).toBe(true)
     expect(loadProgress()).toEqual(progress)
+  })
+
+  it('gives settings saved before the theme existed the default theme', () => {
+    vi.stubGlobal('localStorage', fakeStorage(saved({ version: PROGRESS_VERSION, signingHand: 'left', setupDone: true })))
+    expect(loadProgress().theme).toBe('system')
   })
 
   it('treats unreadable JSON as a new visitor', () => {

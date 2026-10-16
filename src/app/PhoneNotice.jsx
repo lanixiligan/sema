@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import PreviewPill from './PreviewPill.jsx'
 
 // Shown instead of the app on small screens (App decides when): Sema's pages
 // are designed for a computer with a webcam. "Continue on this phone" shows
@@ -19,9 +18,9 @@ export default function PhoneNotice({ onContinue }) {
 
   return (
     <div className="phone-notice">
-      <header className="brand">
-        <span className="brand-name">Sema</span>
-        <PreviewPill />
+      <header className="phone-notice-bar">
+        <span className="wordmark">Sema</span>
+        <span className="preview-note">Preview</span>
       </header>
 
       <main className="phone-notice-main">

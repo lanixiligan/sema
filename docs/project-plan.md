@@ -227,13 +227,24 @@ Still to do:
 ```text
 Open Sema
  ├─ setup not done → 1 Welcome
- │                    → 2a Setup: how Sema works (what stays on the device)
- │                    → 2b Setup: signing hand (Left / Right)
- │                    → 2c Setup: camera check (preview, hand checks, camera picker)
- │                    → Record for now (later: 3 Lesson, first letter)
- └─ setup done     → Record for now (later: 4 Alphabet home)
+ │                    → 2 About Sema                  /about         (dark, no step count)
+ │                    → 3 How Sema works              /how-it-works  (dark, no step count)
+ │                    → 4 Signing hand                /setup/hand    Step 1 of 3
+ │                    → 5 How Sema handles your data  /privacy       Step 2 of 3 (dark)
+ │                    → 6 Camera check                /setup/camera  Step 3 of 3
+ │                    → Record /record for now (later: 3 Lesson, first letter)
+ └─ setup done     → Record for now (later: 4 Alphabet home); pages 1–6 don't show again
 
-Menu on the main pages: Record | Learn (Preview) | Practice (Preview)
+Dark pages (About Sema, How Sema works, the data page) are dark in every theme;
+their lines appear one by one, with Continue last. The camera starts only on
+the camera check and on Record's recording step; the camera check's Continue
+needs both checks to pass. Anyone opening a later page before setup is done
+goes back to Welcome. /privacy has Continue and Back during setup, and only
+Back once setup is done.
+
+Menu on the main pages: Record | Learn | Practice, and a settings menu on the
+right: Theme (Light / Dark / System, default System, saved in this browser),
+About Sema and Privacy (to re-read those pages)
 
 3 Lesson   trying → hint → try again
            success → Next letter (3)  or  Back to alphabet (4)
@@ -243,7 +254,7 @@ Menu on the main pages: Record | Learn (Preview) | Practice (Preview)
            unlocked: random letters, 10 rounds → End → 4
 ```
 
-Not separate pages: the "Right hand" pill in the top bar opens a small menu (switch Left/Right, Reset progress); camera problems (blocked, busy, unplugged) appear inside the camera area; Welcome has an expandable "How Sema handles your camera" note. Each setup step has Back and Continue and a "Step N of 3" indicator. The lesson design's "First time" camera-check state is superseded by step 2c.
+Not separate pages: the "Right hand" pill in the top bar opens a small menu (switch Left/Right, Reset progress; About Sema moves into it when it's built); camera problems (blocked, busy, unplugged) appear inside the camera area. Each setup step has Back and Continue and a "Step N of 3" indicator. The lesson design's "First time" camera-check state is superseded by the camera check step.
 
 **The signing-hand question (3.2):**
 
@@ -253,7 +264,7 @@ Not separate pages: the "Right hand" pill in the top bar opens a small menu (swi
 - If the detected hand differs from the setting, show a short note ("You're signing with your right hand. Switch your setting?") instead of marking the attempt wrong.
 - Changing it in the top-bar hand menu updates reference photos immediately and keeps progress.
 
-**Data step copy (2a, "How Sema works"), as designed:** "Your video never leaves this device" (hand detection runs in the browser; nothing uploaded or recorded); "No account, no analytics, no tracking"; "Progress is saved in this browser only" (signing hand and letters in local storage; Reset progress or clearing site data removes them); footnote: like any website, the host may keep standard technical logs such as IP addresses.
+**Data copy (originally step 2a; now the /privacy intro page, with its own wording in `PrivacyPage.jsx`):** "Your video never leaves this device" (hand detection runs in the browser; nothing uploaded or recorded); "No account, no analytics, no tracking"; "Progress is saved in this browser only" (signing hand and letters in local storage; Reset progress or clearing site data removes them); footnote: like any website, the host may keep standard technical logs such as IP addresses.
 
 ### Phase 4: expand the letters and finalize
 
@@ -370,7 +381,7 @@ Never split frames from the same recording between training and testing; never q
 
 | Decision | Options | Decide by |
 | --- | --- | --- |
-| Order of the setup steps | Decided: the data step ("How Sema works") comes first, before the camera permission prompt; then signing hand, then camera check | Done (3.1, 2026-10-15) |
+| Order of the setup steps | Decided: the data step ("How Sema works") comes first, before the camera permission prompt; then signing hand, then camera check. Revised 2026-10-16: About Sema and How Sema works come first, then signing hand (step 1 of 3), the data page (step 2 of 3, just before the camera permission prompt) and the camera check (step 3 of 3) | Done (3.1, 2026-10-15; revised 2026-10-16) |
 | What "Next letter" picks | Teaching order, or next unmastered letter | 3.3 |
 | Practice unlock threshold | 3 mastered letters is a starting guess | 3.4 |
 | First 8 letters | Decided: B, C, D, F, I, L, W, Y; to be revisited after 2.2's confusion matrix | Done (2.1) |

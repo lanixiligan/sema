@@ -1,13 +1,26 @@
-import MenuBar from '../../app/MenuBar.jsx'
+import PlaceholderPage from '../../components/PlaceholderPage.jsx'
+import { useLetters } from '../../recorder/letters.js'
+import { mixLetters } from './mixLetters.js'
 
-// A stand-in until Task 9 builds the Practice placeholder from Lanix's copy.
+// Practice, until it arrives after Learn (Phase 3.4). The art is a staggered
+// row of the training letters in mixed order, because practice mixes letters.
 export default function PracticePage() {
+  const letters = useLetters()
+
   return (
-    <>
-      <MenuBar active="practice" />
-      <main className="page">
-        <p>The practice page isn't built yet.</p>
-      </main>
-    </>
+    <PlaceholderPage
+      active="practice"
+      title="Practice is on its way"
+      art={
+        // The row keeps its height while letters.json loads, so nothing jumps.
+        <div className="placeholder-tiles" aria-hidden="true">
+          {mixLetters(letters.training).map((letter) => (
+            <span key={letter}>{letter}</span>
+          ))}
+        </div>
+      }
+    >
+      Practice mixes letters you've learned, so it comes after Learn.
+    </PlaceholderPage>
   )
 }

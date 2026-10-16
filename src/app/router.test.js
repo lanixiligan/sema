@@ -22,10 +22,16 @@ describe('resolveRoute', () => {
     }
   })
 
-  it('lets a new visitor open Welcome, the first setup steps and /dev', () => {
-    for (const page of ['welcome', 'howSemaWorks', 'signingHand', 'dev']) {
+  it('lets a new visitor open Welcome, the intro pages, the signing hand and /dev', () => {
+    for (const page of ['welcome', 'about', 'howSemaWorks', 'privacy', 'signingHand', 'dev']) {
       expect(resolveRoute(PATHS[page], newVisitor)).toEqual({ page })
     }
+  })
+
+  it('serves the intro pages at their own addresses', () => {
+    expect(resolveRoute('/about', newVisitor)).toEqual({ page: 'about' })
+    expect(resolveRoute('/how-it-works', newVisitor)).toEqual({ page: 'howSemaWorks' })
+    expect(resolveRoute('/privacy', returning)).toEqual({ page: 'privacy' })
   })
 
   it('asks for the signing hand before the camera check', () => {

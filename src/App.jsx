@@ -4,10 +4,14 @@ import PhoneNotice from './app/PhoneNotice.jsx'
 import { navigate, usePathname } from './app/navigation.js'
 import { loadProgress, saveProgress } from './app/progressStore.js'
 import { PATHS, resolveRoute } from './app/router.js'
+import { applyTheme, followTheme, systemThemeQuery } from './app/theme.js'
+import { ThemeChoiceContext } from './app/themeChoice.js'
+import AboutPage from './pages/onboarding/AboutPage.jsx'
 import CameraCheckPage from './pages/onboarding/CameraCheckPage.jsx'
 import DevPage from './pages/dev/DevPage.jsx'
 import LearnPage from './pages/learn/LearnPage.jsx'
 import HowSemaWorksPage from './pages/onboarding/HowSemaWorksPage.jsx'
+import PrivacyPage from './pages/onboarding/PrivacyPage.jsx'
 import SigningHandPage from './pages/onboarding/SigningHandPage.jsx'
 import WelcomePage from './pages/onboarding/WelcomePage.jsx'
 import PracticePage from './pages/practice/PracticePage.jsx'
@@ -34,6 +38,10 @@ export default function App() {
     if (route.redirect) navigate(route.redirect, { replace: true })
   }, [route.redirect])
 
+  // Shows the chosen theme, and with System keeps following the system's
+  // setting while the app is open. Runs again when the choice changes.
+  useEffect(() => followTheme(progress.theme, systemThemeQuery(), applyTheme), [progress.theme])
+
   // Settings changes are saved straight away. If the browser refuses, the app
   // carries on; the settings just won't survive a reload.
   function updateProgress(changes) {
@@ -53,26 +61,35 @@ export default function App() {
   // (such as the camera) starts.
   if (showPhoneNotice) return <PhoneNotice onContinue={() => setShowPhoneNotice(false)} />
 
+  const themeChoice = { theme: progress.theme, setTheme: (theme) => updateProgress({ theme }) }
+
   return (
-    <CameraProvider>
-      {route.page && (
-        <Page
-          name={route.page}
-          signingHand={progress.signingHand}
-          onChooseHand={(hand) => updateProgress({ signingHand: hand })}
-          onFinishSetup={finishSetup}
-        />
-      )}
-    </CameraProvider>
+    <ThemeChoiceContext value={themeChoice}>
+      <CameraProvider>
+        {route.page && (
+          <Page
+            name={route.page}
+            signingHand={progress.signingHand}
+            setupDone={progress.setupDone}
+            onChooseHand={(hand) => updateProgress({ signingHand: hand })}
+            onFinishSetup={finishSetup}
+          />
+        )}
+      </CameraProvider>
+    </ThemeChoiceContext>
   )
 }
 
-function Page({ name, signingHand, onChooseHand, onFinishSetup }) {
+function Page({ name, signingHand, setupDone, onChooseHand, onFinishSetup }) {
   switch (name) {
     case 'welcome':
       return <WelcomePage />
+    case 'about':
+      return <AboutPage setupDone={setupDone} />
     case 'howSemaWorks':
-      return <HowSemaWorksPage />
+      return <HowSemaWorksPage setupDone={setupDone} />
+    case 'privacy':
+      return <PrivacyPage setupDone={setupDone} />
     case 'signingHand':
       return <SigningHandPage signingHand={signingHand} onChoose={onChooseHand} />
     case 'cameraCheck':

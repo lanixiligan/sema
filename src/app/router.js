@@ -3,7 +3,10 @@
 // router library. navigation.js is the part that talks to the browser.
 export const PATHS = {
   welcome: '/',
-  howSemaWorks: '/setup/how-it-works',
+  // The three intro pages, for new visitors (anyone can re-read them).
+  about: '/about',
+  howSemaWorks: '/how-it-works',
+  privacy: '/privacy',
   signingHand: '/setup/hand',
   cameraCheck: '/setup/camera',
   record: '/record',

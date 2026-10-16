@@ -1,13 +1,14 @@
-import MenuBar from '../../app/MenuBar.jsx'
+import PlaceholderPage from '../../components/PlaceholderPage.jsx'
 
-// A stand-in until Task 9 builds the Learn placeholder from Lanix's copy.
+// Learn, until the lessons arrive (Phase 3.3).
 export default function LearnPage() {
   return (
-    <>
-      <MenuBar active="learn" />
-      <main className="page">
-        <p>The learn page isn't built yet.</p>
-      </main>
-    </>
+    <PlaceholderPage
+      active="learn"
+      title="Learn is on its way"
+    >
+      Lessons need letter recognition, and your recordings are helping build it. For now, the most useful thing
+      you can do is record a few letters.
+    </PlaceholderPage>
   )
 }

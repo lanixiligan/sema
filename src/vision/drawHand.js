@@ -1,10 +1,22 @@
 import { HandLandmarker } from '@mediapipe/tasks-vision'
 
-const BONE_COLOR = '#36a7d9' // Bright Sky
-const JOINT_COLOR = '#f5f7f8' // Cloud White
-// A dark outline under everything keeps the skeleton visible over any
-// background or skin tone.
-const OUTLINE_COLOR = '#0c1d30'
+// The colours are the CSS tokens in styles.css (--bright-sky bones,
+// --cloud-white joints, --hand-outline under both, which keeps the skeleton
+// visible over any background or skin tone). A canvas can't use CSS variables
+// directly, so they're read from the stylesheet once, on the first drawing.
+let colors = null
+
+function handColors(canvas) {
+  if (!colors) {
+    const css = getComputedStyle(canvas)
+    colors = {
+      bone: css.getPropertyValue('--bright-sky').trim(),
+      joint: css.getPropertyValue('--cloud-white').trim(),
+      outline: css.getPropertyValue('--hand-outline').trim(),
+    }
+  }
+  return colors
+}
 
 // Draws one hand's 21 landmarks and the bones between them.
 // The canvas is mirrored by CSS exactly like the video, so we draw in the
@@ -38,11 +50,12 @@ export function drawHand(canvas, landmarks, videoWidth, videoHeight) {
   const unit = videoWidth / 640
 
   // All outlines first, then all bones, so no outline cuts across a bone.
-  strokeBones(ctx, points, OUTLINE_COLOR, 6 * unit)
-  strokeBones(ctx, points, BONE_COLOR, 3 * unit)
+  const { bone, joint, outline } = handColors(canvas)
+  strokeBones(ctx, points, outline, 6 * unit)
+  strokeBones(ctx, points, bone, 3 * unit)
 
-  ctx.fillStyle = JOINT_COLOR
-  ctx.strokeStyle = OUTLINE_COLOR
+  ctx.fillStyle = joint
+  ctx.strokeStyle = outline
   ctx.lineWidth = 1.5 * unit
   for (const point of points) {
     ctx.beginPath()

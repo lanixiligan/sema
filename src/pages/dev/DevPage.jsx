@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import TopBar from '../../app/TopBar.jsx'
 import { useCamera } from '../../camera/useCamera.js'
 import { useVideoStats } from '../../camera/useVideoStats.js'
 import BenchmarkPanel from './BenchmarkPanel.jsx'
@@ -31,7 +32,7 @@ export default function DevPage() {
 
   return (
     <>
-      <header className="top-bar">Sema · developer page</header>
+      <TopBar>Developer page</TopBar>
 
       <main className="page">
         <div className="stage">

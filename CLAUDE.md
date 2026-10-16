@@ -60,11 +60,12 @@ The development plan is `docs/project-plan.md`.
 
 ```
 src/
-  app/          the shell: router, navigation, menu, Preview pill, phone notice,
+  app/          the shell: router, navigation, top bar and menu, phone notice,
                 camera provider, settings store
   components/   parts used by more than one page folder (CameraStage, icons)
   pages/
-    onboarding/ Welcome, How Sema works, Signing hand, Camera check (+ SetupBar)
+    onboarding/ Welcome; the intro pages About Sema, How Sema works and How Sema
+                handles your data (+ IntroLayout); Signing hand, Camera check (+ SetupBar)
     record/     the Record page and its parts
     learn/      the Learn placeholder
     practice/   the Practice placeholder
@@ -99,6 +100,13 @@ src/
 - The signing hand and "setup done" are kept by `src/app/progressStore.js`
   (`localStorage` key `sema.progress`, with a version number). Pages never touch
   `localStorage` directly; `App.jsx` holds the settings and passes them down.
+- The theme (Light / Dark / System, default System) is saved in the same store and chosen in
+  the settings menu (`src/app/SettingsMenu.jsx`). `src/app/theme.js` sets `data-theme` on
+  `<html>`; a small script in `index.html` sets it before the first paint. In `styles.css`,
+  rules use colour roles (`--bg`, `--text`, `--accent`…), with a light set on `:root` and a
+  dark set on `[data-theme='dark']` and `.on-dark`. Palette colours are used directly only
+  where a colour never changes (the camera frame, hand drawings). The About Sema, How Sema
+  works and data pages are `.on-dark`, so they're dark in every theme.
 - The camera check's rules (signing hand found, whole hand with the wrist in view) are
   in `src/vision/handChecks.js`. Its error titles and texts come from the design and
   live in `cameraMessages.js` and `visionMessages.js`; `useCamera` returns an
@@ -186,14 +194,12 @@ src/
 
 ## Design reference
 
-- `docs/design/` holds Lanix's design exports: a PNG and a `.dc.html` source per page,
-  plus a `README.md`. It is **local-only**: gitignored, never committed or pushed, and it
-  may not exist on other machines.
-- Before every proposed commit, check `git status --short` and confirm nothing under
-  `docs/design/` is staged.
-- Read its `README.md` first. Take exact text, colours, spacing and the list of states
-  from the `.dc.html` files, and the overall look from the PNGs. If they disagree, ask
-  Lanix. Don't guess layouts.
+- The built pages are the design now. `docs/design/` (Lanix's exports from the design
+  canvas) is no longer used and isn't in the project. New pages follow the existing
+  pages' palette, type, spacing and shell; Lanix reviews the result and asks for
+  tweaks.
+- Take screenshots of a page (headless Chrome) and check them before calling a page
+  done.
 
 ## Visual design
 

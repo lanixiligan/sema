@@ -267,14 +267,20 @@ src/
   components/                   parts used by more than one page folder
     CameraStage.jsx             a camera view; the camera is on while one is shown
     StageProblem.jsx            a camera or hand-tracking problem shown over the video
+    HandPoints.jsx              the tracked-hand drawing (Welcome, and Learn with dashed bones)
+    PlaceholderPage.jsx         the layout of a page that isn't available yet
     icons.jsx                   line icons
   pages/                        one folder per part of the app; they don't import each other
     onboarding/
       WelcomePage.jsx           1 Welcome
-      HowSemaWorksPage.jsx      setup step 1: what Sema does with what it sees
-      SigningHandPage.jsx       setup step 2: which hand you sign with
-      CameraCheckPage.jsx       setup step 3: camera preview and the two hand checks
-      SetupBar.jsx              "Step N of 3" on the setup pages
+      AboutPage.jsx             intro 1: what Sema is (/about)
+      HowSemaWorksPage.jsx      intro 2: the three steps of a lesson (/how-it-works)
+      PrivacyPage.jsx           intro 3: how Sema handles your data (/privacy)
+      IntroLayout.jsx           the dark frame the intro pages share
+      useStaggeredReveal.js     the intro pages' one-by-one reveal (+ test)
+      SigningHandPage.jsx       setup step 1: which hand you sign with
+      CameraCheckPage.jsx       setup step 2: camera preview and the two hand checks
+      SetupBar.jsx              "Step N of 2" on the setup pages
     record/
       RecordPage.jsx            the Record page: consent, recording and finished steps
       ConsentForm.jsx           participant code, session ID, consent to train Sema
@@ -284,8 +290,10 @@ src/
       TakeOverlay.jsx           countdown, "Hold…", frame count and progress bar
       RecordingGrid.jsx         one row of letter tiles for the chosen hand
       FinishedStep.jsx          after Finish and download: thanks and the file name
-    learn/LearnPage.jsx         Learn (a placeholder for now)
-    practice/PracticePage.jsx   Practice (a placeholder for now)
+    learn/LearnPage.jsx         Learn, a placeholder until the lessons (Phase 3.3)
+    practice/
+      PracticePage.jsx          Practice, a placeholder until Phase 3.4
+      mixLetters.js             the mixed letter order in its art
     dev/
       DevPage.jsx               the Phase 1 hand-tracking page and benchmark (/dev)
       BenchmarkPanel.jsx        the benchmark in Developer settings

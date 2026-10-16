@@ -2576,6 +2576,13 @@ Check with the shared harness:
 - Proposed commit message: `feat(preview): add Learn and Practice placeholders (Phase 3, done early: the menu links to them before 3.3–3.4)`
 - Wait.
 
+
+**Built (2026-10-16), from the existing pages (Lanix no longer uses `docs/design/`):**
+
+- **`src/components/PlaceholderPage.jsx`:** the shared layout. It has the menu, then a centred column with the page's art, Lanix's heading and text, and **Go to Record**.
+- **Learn:** the art is the tracked hand from Welcome with dashed bones: Sema finds the points but can't name the letter yet. The drawing moved from Welcome into `src/components/HandPoints.jsx`, with a `dashed` option.
+- **Practice:** the art is a staggered row of the training letters from `letters.json`, in mixed order (`mixLetters`, tested), because practice mixes letters.
+- **Checked:** 94 unit tests, lint and build. Screenshots at 1440×900 and 1024×700 look right. The menu marks the right page, **Go to Record** opens `/record`, Welcome's drawing is unchanged, and there are no console errors.
 ---
 
 ### Task 10: Whole-branch check and review

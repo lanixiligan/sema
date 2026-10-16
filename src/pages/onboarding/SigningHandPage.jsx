@@ -10,7 +10,7 @@ const HANDS = [
   { id: 'right', name: 'Right' },
 ]
 
-// Setup step 2 of 3: which hand the person signs with. It starts on the saved
+// Setup step 1 of 2: which hand the person signs with. It starts on the saved
 // choice, or Right for a new visitor (as designed). The choice is saved when
 // they press Continue.
 export default function SigningHandPage({ signingHand, onChoose }) {
@@ -23,14 +23,13 @@ export default function SigningHandPage({ signingHand, onChoose }) {
 
   return (
     <div className="setup-page">
-      <SetupBar step={2} />
+      <SetupBar step={1} />
       <main className="setup-main">
         <section className="setup-section">
           <div>
-            <h1 className="setup-title">Which hand will you sign with?</h1>
+            <h1 className="setup-title">Which hand will you use?</h1>
             <p className="setup-lead">
-              It doesn't have to be the hand you write with. Reference photos and instructions will match your
-              choice, and you can change it anytime.
+              Choose the hand you’ll use to practice. Sema will adjust the reference images and instructions to match your choice. You can change this anytime.
             </p>
           </div>
 
@@ -39,7 +38,7 @@ export default function SigningHandPage({ signingHand, onChoose }) {
             {HANDS.map(({ id, name }) => (
               <button key={id} type="button" aria-pressed={hand === id} onClick={() => setHand(id)}>
                 <span className={id === 'left' ? 'hand-choice-icon mirrored' : 'hand-choice-icon'} aria-hidden="true">
-                  <HandIcon size={44} strokeWidth={1.1} />
+                  <HandIcon size={48} />
                 </span>
                 {name}
               </button>
@@ -47,7 +46,7 @@ export default function SigningHandPage({ signingHand, onChoose }) {
           </div>
 
           <div className="setup-actions">
-            <Link to={PATHS.howSemaWorks} className="back-link">
+            <Link to={PATHS.privacy} className="back-link">
               Back
             </Link>
             <button type="button" className="primary-button" onClick={next}>

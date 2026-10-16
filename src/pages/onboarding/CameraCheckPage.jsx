@@ -13,7 +13,7 @@ import { CAMERA_CHECK_NO_WEBGL, CAMERA_CHECK_TRACKING_FAILED_TITLE } from '../..
 
 const NO_HAND = { hand: 'none', wholeHand: false }
 
-// Setup step 3 of 3: the camera starts by itself (CameraStage), and two checks
+// Setup step 2 of 2: the camera starts by itself (CameraStage), and two checks
 // say whether Sema sees the signing hand and all of it, wrist included.
 // Continue is open unless the camera or hand tracking failed: the checks are
 // guidance, as in the design ("When both checks turn blue, you're ready").
@@ -55,7 +55,7 @@ export default function CameraCheckPage({ signingHand, onSwitchHand, onDone }) {
 
   return (
     <div className="setup-page">
-      <SetupBar step={3} />
+      <SetupBar step={2} />
       <main className="camera-check">
         <section className="camera-check-text">
           <div>
