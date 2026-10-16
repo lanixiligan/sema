@@ -602,7 +602,14 @@ body {
   aspect-ratio: 4 / 3;
   overflow: hidden;
   background: var(--deep-cobalt);
-  border-radius: 16px;
+  /* The corners. border-radius with overflow: hidden doesn't always clip the
+     video: Chrome can draw a (mirrored) video on the graphics card as its own
+     layer, which escapes that clipping, leaving square corners. clip-path
+     cuts everything inside, that layer included. Frames with bigger corners
+     set --stage-radius. */
+  --stage-radius: 16px;
+  border-radius: var(--stage-radius);
+  clip-path: inset(0 round var(--stage-radius));
 }
 
 /* The video and the hand overlay must stay exactly on top of each other, so
@@ -1133,7 +1140,7 @@ body {
   /* The camera's own 4:3 shape, as wide as the column, but never taller than
      the window leaves room for (top bar, session row, padding). */
   max-height: calc(100dvh - 180px);
-  border-radius: 20px;
+  --stage-radius: 20px;
 }
 
 .record-side {
@@ -2175,7 +2182,7 @@ body {
 .about-preview-frame {
   background: var(--night);
   border: 1px solid var(--progress-track);
-  border-radius: 20px;
+  --stage-radius: 20px;
 }
 
 .about-preview-hand {
@@ -2403,7 +2410,7 @@ body {
 .camera-check-stage {
   aspect-ratio: auto;
   height: 560px;
-  border-radius: 20px;
+  --stage-radius: 20px;
 }
 
 .camera-checks {
