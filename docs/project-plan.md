@@ -14,7 +14,9 @@ Owner: Lanix Iligan (CS student, portfolio project). Lanix is learning as they b
 | 1.2 | Overlay | Done (skeleton and left/right label checked by hand in Chrome) |
 | 1.3 | Hand loss and performance | Done (benchmark results in the README) |
 | 2 | Recognition | Not started |
-| 3 | Integrate the designed screens | Not started |
+| 3 | Integrate the designed pages | 3.1 being done early on `phase-2-1-recorder`; the rest not started |
+| 3.1 | App shell, Welcome and setup | Built early on `phase-2-1-recorder` (not merged): the recorder became the app's main page after setup |
+| 3.3–3.4 | Lessons, alphabet home, practice | Not started; planned for `phase-3-preview` (Learn and Practice are placeholders until then) |
 | 4 | Expand the letters and finalize | Not started |
 | 5 | Authentication (after finalization) | Parked |
 | 6 | Filipino Sign Language (after finalization) | Parked |
@@ -43,7 +45,7 @@ These are settled. Changing one changes the sections that depend on it, so ask b
 | Browser only | No backend, database or accounts until Phase 5. Video never leaves the device |
 | Both hands | Fingerspelling uses the signer's dominant hand. Setup asks which hand the user signs with (changeable later). Left-hand landmarks are flipped to look like a right hand before classifying |
 | Privacy page, not terms or a cookie banner | Sema stores only `localStorage` data needed for the app to work (signing hand, progress) and has no analytics or tracking, so no cookie banner. A plain "How Sema handles your camera" note covers privacy |
-| Minimal UI | Calm, lots of space, one obvious action per screen, no decoration. Minimal without becoming unclear |
+| Minimal UI | Calm, lots of space, one obvious action per page, no decoration. Minimal without becoming unclear |
 | Stack | React + Vite + plain JavaScript. No TypeScript, UI framework or CSS framework. No new dependencies without asking Lanix |
 
 **Developer machine:** Fedora KDE Plasma on Wayland, Ryzen 5 3600, GTX 1660 Super (NVIDIA driver in use, WebGL hardware-accelerated in Chromium), 8 GB RAM. Memory is the real constraint: keep processes light, prefer scripts to notebooks, and don't run heavy jobs alongside the dev server. Lanix sometimes works from GitHub Codespaces (`server.allowedHosts: ['.app.github.dev']` is set in `vite.config.js`); the browser, camera and hand detection always run on the local computer.
@@ -135,7 +137,7 @@ Phase 1  Hand tracking ................ done
    gate
 Phase 2  Recognition (8 letters + "no letter")
    gate  ← the most important: if easy letters fail on unseen people, fix the data before any UI
-Phase 3  Integrate the designed screens
+Phase 3  Integrate the designed pages
    gate
 Phase 4  Expand the letters and finalize
    gate → American version FINALIZED (section 11)
@@ -198,28 +200,40 @@ Deploy once at the end of Phase 1 to prove the camera works over HTTPS on a real
 | 2.3 | Classifier in JS reading the weights; accept a letter only when most of the last few frames agree; show "not sure" below a confidence threshold | Inference, smoothing, thresholds | Held letters are recognized live; a relaxed hand shows no letter |
 | 2.4 | Per-finger check: each finger extended or curled and where the thumb sits, compared with a written target per letter; show only the most important fix | Joint angles from landmarks | A wrong shape gives the right hint for all 8 letters, checked by Lanix and ideally a signer |
 
-### Phase 3: integrate the designed screens
+### Phase 3: integrate the designed pages
 
-Turn the designed screens into working React pages with Phase 2's recognition plugged in. The visual reference is the "Sema Desktop UI" design canvas on claude.ai; it's private to Lanix, so Lanix will provide the screens (exports or screenshots) when Phase 3 starts. Don't guess designs before then.
+Turn the designed pages into working React pages with Phase 2's recognition plugged in. The visual reference is the "Sema Desktop UI" design canvas on claude.ai, which is private to Lanix. Lanix's exports are in `docs/design/`: a PNG and a `.dc.html` source per page, plus a README. That folder is local-only: gitignored, never committed, and it may not exist on other machines. Don't guess designs that aren't there.
+
+**Done early (2026-10-15).** The recorder became the app's main page after setup, so some Phase 3 work is built on `phase-2-1-recorder` ([implementation plan](recorder-implementation-plan.md), tasks 6–9):
+
+- **3.1:** the shell, routes, palette, self-hosted fonts and camera provider, plus the menu (Record, Learn and Practice, the last two marked Preview).
+- **3.2, the setup part:** the signing-hand question, its storage, and returning visitors skipping setup.
+
+Still to do:
+
+- **On `phase-3-preview`:** Lesson, Alphabet and Practice (3.3–3.4). Until then the menu's Learn and Practice open placeholders.
+- **Rest of 3.2:** the top-bar hand menu, Reset progress and per-letter progress.
 
 | # | Build | Concepts to explain | Done when |
 | --- | --- | --- | --- |
-| 3.1 | App shell and page sequence: routes for Welcome, the three setup steps (hand, camera, data), Lesson, Alphabet and Practice; the top bar; the palette as CSS variables; self-hosted fonts; the camera kept at app level (a React provider) so it stays on between screens | Routing, React context and providers, design tokens | Every designed screen is reachable in the planned order, and refreshing keeps you on the same screen |
-| 3.2 | Signing hand and progress: the hand question, the top-bar hand menu, Reset progress, and a `progressStore` module (load and save over `localStorage`; per-letter status and last-changed time; a version number) so Phase 5 can add accounts without touching screens. Returning users skip Welcome and setup | Persistence, designing a data shape | Progress and hand setting survive a reload; Reset clears them; no screen touches `localStorage` directly |
-| 3.3 | Lesson screen: reference photo and steps, live recognition (2.3), the single hint (2.4), hold to confirm, Next letter. Camera problems appear inside the camera area; first-time camera checks live in setup step 2b | Composing earlier phases into one product | A new user finishes 8 lessons without help |
-| 3.4 | Alphabet home and Practice: the letter grid and its states, the Continue strip, Practice unlocked after 3 mastered letters with an empty state before that | Empty states, unlock rules | All screens work end to end |
-| 3.5 | Privacy and polish: "How Sema handles your camera" including the local-storage sentence; keyboard use, contrast and screen-reader labels; a final comparison against the design | Accessibility basics | Every screen works by keyboard and passes the contrast checks |
+| 3.1 | App shell and page sequence: routes for Welcome, the three setup steps (how Sema works, signing hand, camera check), Record, Lesson, Alphabet and Practice; the top bar and menu; the palette as CSS variables; self-hosted fonts; the camera kept at app level (a React provider) so it stays on between pages. **Started early on `phase-2-1-recorder`** (see above) | Routing, React context and providers, design tokens | Every designed page is reachable in the planned order, and refreshing keeps you on the same page |
+| 3.2 | Signing hand and progress: the hand question, the top-bar hand menu, Reset progress, and a `progressStore` module (load and save over `localStorage`; per-letter status and last-changed time; a version number) so Phase 5 can add accounts without touching pages. Returning users skip Welcome and setup | Persistence, designing a data shape | Progress and hand setting survive a reload; Reset clears them; no page touches `localStorage` directly |
+| 3.3 | Lesson page: reference photo and steps, live recognition (2.3), the single hint (2.4), hold to confirm, Next letter. Camera problems appear inside the camera area; first-time camera checks live in setup step 2c | Composing earlier phases into one product | A new user finishes 8 lessons without help |
+| 3.4 | Alphabet home and Practice: the letter grid and its states, the Continue strip, Practice unlocked after 3 mastered letters with an empty state before that | Empty states, unlock rules | All pages work end to end |
+| 3.5 | Privacy and polish: "How Sema handles your camera" including the local-storage sentence; keyboard use, contrast and page-reader labels; a final comparison against the design | Accessibility basics | Every page works by keyboard and passes the contrast checks |
 
 **Page sequence:**
 
 ```text
 Open Sema
  ├─ setup not done → 1 Welcome
- │                    → 2a Setup: signing hand (Left / Right)
- │                    → 2b Setup: camera (preview, light/distance/hand checks, camera picker)
- │                    → 2c Setup: your data (what stays on the device)
- │                    → 3 Lesson (first letter)
- └─ setup done     → 4 Alphabet home
+ │                    → 2a Setup: how Sema works (what stays on the device)
+ │                    → 2b Setup: signing hand (Left / Right)
+ │                    → 2c Setup: camera check (preview, hand checks, camera picker)
+ │                    → Record for now (later: 3 Lesson, first letter)
+ └─ setup done     → Record for now (later: 4 Alphabet home)
+
+Menu on the main pages: Record | Learn (Preview) | Practice (Preview)
 
 3 Lesson   trying → hint → try again
            success → Next letter (3)  or  Back to alphabet (4)
@@ -229,7 +243,7 @@ Open Sema
            unlocked: random letters, 10 rounds → End → 4
 ```
 
-Not separate pages: the "Right hand" pill in the top bar opens a small menu (switch Left/Right, Reset progress); camera problems (blocked, busy, unplugged) appear inside the camera area; Welcome has an expandable "How Sema handles your camera" note. Each setup step has Back and Continue and a "Step N of 3" indicator. The lesson design's "First time" camera-check state is superseded by step 2b.
+Not separate pages: the "Right hand" pill in the top bar opens a small menu (switch Left/Right, Reset progress); camera problems (blocked, busy, unplugged) appear inside the camera area; Welcome has an expandable "How Sema handles your camera" note. Each setup step has Back and Continue and a "Step N of 3" indicator. The lesson design's "First time" camera-check state is superseded by step 2c.
 
 **The signing-hand question (3.2):**
 
@@ -239,7 +253,7 @@ Not separate pages: the "Right hand" pill in the top bar opens a small menu (swi
 - If the detected hand differs from the setting, show a short note ("You're signing with your right hand. Switch your setting?") instead of marking the attempt wrong.
 - Changing it in the top-bar hand menu updates reference photos immediately and keeps progress.
 
-**Data step copy (2c), as designed:** "Your video never leaves this device" (hand detection runs in the browser; nothing uploaded or recorded); "No account, no analytics, no tracking"; "Progress is saved in this browser only" (signing hand and letters in local storage; Reset progress or clearing site data removes them); footnote: like any website, the host may keep standard technical logs such as IP addresses.
+**Data step copy (2a, "How Sema works"), as designed:** "Your video never leaves this device" (hand detection runs in the browser; nothing uploaded or recorded); "No account, no analytics, no tracking"; "Progress is saved in this browser only" (signing hand and letters in local storage; Reset progress or clearing site data removes them); footnote: like any website, the host may keep standard technical logs such as IP addresses.
 
 ### Phase 4: expand the letters and finalize
 
@@ -256,7 +270,7 @@ Optional, guest-first sign-in so progress and settings follow a user across brow
 | # | Build | Done when |
 | --- | --- | --- |
 | 5.1 | Choose the backend (leaning Supabase, which uses PostgreSQL; Firebase is the alternative) and set up Google sign-in | Sign in and sign out work |
-| 5.2 | A cloud version of `progressStore`; screens unchanged | Progress saved while signed in appears in a second browser |
+| 5.2 | A cloud version of `progressStore`; pages unchanged | Progress saved while signed in appears in a second browser |
 | 5.3 | Merge on sign-in: upload guest progress, keep the better result per letter; skip the hand question when saved settings exist | Guest progress is never lost by signing in |
 | 5.4 | Access rules (Supabase row level security or Firestore rules): each user reads and writes only their own data | A second test account can't read the first's data |
 | 5.5 | "Delete my account and data"; update privacy text; check the Philippines' Data Privacy Act of 2012 | Deleting an account removes everything stored for it |
@@ -280,14 +294,17 @@ sema/
     camera/            webcam start/stop, device picker, error messages, video stats (Phase 0)
     vision/            landmarker setup, detection loop, drawing, handedness (Phase 1);
                        normalization and hand flip planned here, not built yet
+    recorder/          the recorder: takes, session file, Record page (2.1)
     recognition/       classifier, smoothing, finger checks (Phase 2, not created yet)
-    screens/           welcome, setup, lesson, alphabet, practice (Phase 3, not created yet)
-    App.jsx            the page
+    app/               shell: router, shared camera, menu, settings store (3.1, being built early on the recorder branch)
+    pages/           welcome, setup, lesson, alphabet, practice (welcome and setup being built early on the recorder branch)
+    App.jsx            the page; becomes the shell that picks the page for the address (3.1)
     main.jsx           entry point
     styles.css         all styles and color variables
   training/            Python scripts: train, evaluate, export weights (not created yet)
   data/raw/            exported landmark JSON, one file per session (gitignored, private; not created yet)
-  docs/                project-plan.md; later evaluation results, confusion matrices
+  docs/                project-plan.md, recorder docs; later evaluation results, confusion matrices
+  docs/design/         Lanix's design exports (local-only, gitignored; may not exist on other machines)
   README.md
   CLAUDE.md
 ```
@@ -315,7 +332,7 @@ Minimal and calm. Palette as CSS variables:
 | Amber | `#B45309` (light), `#E8A23A` (on dark); tint `#FDF1E3` with text `#7A3A06` | Warnings, "try again" states |
 | Error red | `#B42318` | Destructive actions, errors |
 
-Never carry meaning by colour alone (e.g. missed practice rounds are hollow amber bars, not just a different hue). Font in the designs: Plus Jakarta Sans (self-host in Phase 3).
+Never carry meaning by colour alone (e.g. missed practice rounds are hollow amber bars, not just a different hue). Fonts in the designs: Plus Jakarta Sans for text and JetBrains Mono for codes and counts, self-hosted in `public/fonts/` with their OFL licences (done early with 3.1).
 
 ## 10. Testing and evaluation
 
@@ -324,7 +341,7 @@ Only numbers measured on people who weren't in the training data count; report t
 | What | How | When |
 | --- | --- | --- |
 | Camera behavior | Manually trigger each Phase 0 error in Firefox and Chromium | Phase 0 |
-| Frame rate and detection time | On-screen readouts, recorded in the README per browser and delegate | Phase 1 |
+| Frame rate and detection time | On-page readouts, recorded in the README per browser and delegate | Phase 1 |
 | Landmark math | Vitest unit tests for normalization and the left-hand flip | Phase 2 |
 | Accuracy per letter | Leave-one-person-out evaluation and a confusion matrix | 2.2, and after each letter group in 4.1 |
 | False accepts | Relaxed hands, half-formed shapes and wrong letters must not be accepted | 2.3 onward |
@@ -353,7 +370,7 @@ Never split frames from the same recording between training and testing; never q
 
 | Decision | Options | Decide by |
 | --- | --- | --- |
-| Swap setup steps 2b and 2c | Data step before the camera permission prompt, or keep camera first | Before 3.1 |
+| Order of the setup steps | Decided: the data step ("How Sema works") comes first, before the camera permission prompt; then signing hand, then camera check | Done (3.1, 2026-10-15) |
 | What "Next letter" picks | Teaching order, or next unmastered letter | 3.3 |
 | Practice unlock threshold | 3 mastered letters is a starting guess | 3.4 |
 | First 8 letters | Decided: B, C, D, F, I, L, W, Y; to be revisited after 2.2's confusion matrix | Done (2.1) |

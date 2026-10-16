@@ -2,77 +2,173 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build the recorder page that collects labelled hand-landmark sessions for training (milestone 2.1, build part M1), plus the session checker.
+**Goal:** Collect labelled hand-landmark sessions for training (milestone 2.1, build part M1), with the recorder as the app's main page after a short setup. Because of that, the Phase 3.1 shell, Welcome and setup pages are built early, on this branch.
 
-**Architecture:** A second Vite page (`record.html`, `/record` on Vercel) with its own React root in `src/recorder/`, reusing the camera and MediaPipe hooks from `src/camera/` and `src/vision/`. Pure logic (normalization, take rules, session file, checker) lives in small modules with Vitest tests; React components and hooks stay thin on top. Sessions autosave to `localStorage` and download as one JSON file.
+**Architecture:** One Vite page with one React root. A small hand-written router (the browser's History API) picks a page from the address: Welcome, three setup steps, Record, Learn and Practice placeholders, and an unlisted `/dev` page (the Phase 1 tracking page with its benchmark). A `CameraProvider` at the top of the app owns the camera and the hand model, so moving between pages doesn't close the camera or reload the model. The recorder's pure logic (tasks 1–5) is unchanged; its UI becomes the Record page inside the shell. Vercel rewrites every path to `index.html`.
 
 **Tech Stack:** React 19, Vite 8 (Rolldown), plain JavaScript, `@mediapipe/tasks-vision` 1.1.1, Vitest 5 (dev only), Node 22.
 
-**Spec:** [docs/recorder-design.md](recorder-design.md). Read it before starting; this plan implements it.
+**Spec:** [docs/recorder-design.md](recorder-design.md) for the recorder; [docs/project-plan.md](project-plan.md), Phase 3.1–3.2, for the shell and setup. Page designs are in `docs/design/` (local-only, see below).
+
+**Revised 2026-10-15.** The first version of this plan built the recorder as a second page (`record.html`). Its tasks 6–9 (page shell and consent, takes and grid, docs, end-to-end check) were built on this branch in commits `0adff55..9e6618c`. Tasks 6–10 below replace them: they move that code into the app instead of starting over.
+
+## Steps
+
+| Step | What | Tasks | Status |
+| --- | --- | --- | --- |
+| 1 | Recorder logic | 1–5 | Done (`2355af5..4098323`), unchanged |
+| 2 | App shell: routing, palette tokens, fonts, camera provider, menu, Preview pill, phone notice | 6 | |
+| 3 | Welcome and setup: camera checks, error states, other-hand state, signing-hand storage | 7 | |
+| 4 | Record page inside the shell | 8 | |
+| 5 | Learn and Practice placeholders | 9 | |
+| — | Whole-branch check and review | 10 | |
+
+Tasks 6–9 are Phase 3 work done early. Their commit messages say so, and why:
+
+| Task | Proposed commit message |
+| --- | --- |
+| 6 | `feat(shell): add app shell and menu (Phase 3.1, done early: the recorder now lives inside the app after setup)` |
+| 7 | `feat(setup): add Welcome and the setup steps (Phase 3.1–3.2, done early: setup now leads into the recorder)` |
+| 8 | `feat(record): move the recorder into the app shell (Phase 3.1, done early: Record is the main page after setup)` |
+| 9 | `feat(preview): add Learn and Practice placeholders (Phase 3, done early: the menu links to them before 3.3–3.4)` |
 
 ## Before you start
 
-- **Prerequisites (from the spec):** do not start until Lanix has filled in the training letters in `public/languages/asl/letters.json` (Task 6 creates the file with only the pilot-only letters if it doesn't exist) and has approved this plan.
-- **Git:** do **not** commit or push unless Lanix explicitly asks. Each task ends with a "Report" step instead: show `git status --short`, summarize the change, and suggest a commit message. Work on the current branch unless Lanix says otherwise.
-- **Explain as you go** (CLAUDE.md): Lanix is learning; say what each piece does and why, especially browser and React concepts.
+- **Approval:** don't start a task until Lanix has approved this plan.
+- **Git (Lanix's rules):**
+  - Never commit, push or merge unless Lanix explicitly says so.
+  - After each task, stop and show what changed (`git status --short` plus a summary), how to test it, and the proposed commit message. Then wait.
+  - `docs/design/` must never be committed or pushed. It's gitignored. Before every proposed commit, run `git status --short` and `git diff --cached --name-only`, and confirm nothing under `docs/design/` is listed.
+- **Designs:** UI steps take their layout from `docs/design/`.
+  - Read `docs/design/README.md` first.
+  - The page's `.dc.html` file gives the exact text, colours, spacing and list of states. The PNG shows the overall look.
+  - If the two disagree, ask Lanix. Don't guess layouts.
+  - The folder is local-only and may not exist on another machine.
+  - The `.dc.html` files arrived on 2026-10-15. Their names differ from the PNGs': `Welcome` (1), `SetupData` (2a), `Setup` (2b), `SetupCamera` (2c), `Record` (3), `Unsupported` (the phone notice). `Learn.dc.html` and `Practice.dc.html` are for `phase-3-preview`; don't build them here.
+- **Explain as you go** (CLAUDE.md): Lanix is learning. Say what each piece does and why, especially browser and React concepts.
+
+## Folder layout (reorganized 2026-10-15, after Task 7)
+
+- `src/app/`: the shell (router, navigation, `Link`, menu, Preview pill, phone notice, camera provider, settings store).
+- `src/components/`: anything used by more than one page folder (`CameraStage`, `icons.jsx`).
+- `src/pages/onboarding/`, `record/`, `learn/`, `practice/`, `dev/`: one folder per part of the app, with the parts only it uses. **Page folders never import from each other.**
+- `src/recorder/`, `src/vision/`, `src/camera/`: logic with no page (take rules, `useRecording`, session file and storage, letters, normalization, hand checks, camera hooks).
+- Tasks 6 and 7 were built before the reorganization. Their steps below use the new paths and names: `RecorderApp` became `RecordPage`, `HowItWorksPage` became `HowSemaWorksPage`, and the router key `howItWorks` became `howSemaWorks` (the address is still `/setup/how-it-works`). `BenchmarkPanel.jsx` moved from `src/vision/` to `src/pages/dev/`.
 
 ## Global Constraints
 
-- React + Vite + plain JavaScript (`.js` / `.jsx`); no TypeScript, no UI or CSS framework.
-- Only one new dependency: `vitest` as a dev dependency (approved). Anything else: ask Lanix first.
-- Serve every asset from the app itself, never from a CDN.
-- React `StrictMode` stays on; code must survive its double mount in development.
-- `npm run lint` (oxlint) must report no warnings; `npm run build` must pass.
-- Colors only from the CSS variables in `src/styles.css`; never Bright Sky (`--bright-sky`) as text, borders or focus rings on light surfaces.
-- Format version `1`, normalization version `1`; bump `normalization` whenever normalization changes.
-- Sampling constants: `COUNTDOWN_MS = 3000`, `SETTLE_MS = 500`, `CAPTURE_MS = 3000`, `SAMPLE_INTERVAL_MS = 100`, `MIN_MATCHED_SHARE = 0.8`; a take passes when `kept − mismatched ≥ 24`.
-- Recording ID: `<person>-<session>-<letter>-<hand>-<take>`, e.g. `p03-2026-11-02a-W-left-2`; letters `"A"`–`"Z"` or `"none"`; hands `"left"` / `"right"`.
-- The left-hand flip uses the **detected hand, for now** (an open decision in the plan); word comments and docs that way.
-- `data/raw/` is gitignored and private; never commit recorded sessions.
-- `record.html` carries `<meta name="robots" content="noindex">`.
-- Consent text: exactly the wording in the spec's section 7.
+- **Stack:**
+  - React + Vite + plain JavaScript (`.js` / `.jsx`). No TypeScript, no UI framework, no CSS framework.
+  - No router library: routing is `src/app/router.js` plus `src/app/navigation.js`.
+  - New dependencies need Lanix's approval. Approved so far: `@mediapipe/tasks-vision`, `vitest` (dev).
+- **Assets:** serve every asset from the app itself, never from a CDN. Fonts are files in `public/fonts/`, with no Google Fonts link.
+- **React:** `StrictMode` stays on, and code must survive its double mount in development.
+- **Checks:** `npm test`, `npm run lint` (oxlint, no warnings) and `npm run build` must all pass.
+- **Pages and routing:**
+  - One Vite entry (`index.html`). No `record.html`, no `noindex`.
+  - `vercel.json` rewrites every path to `/index.html`. Vercel serves real files first, so `/models/`, `/mediapipe/` and `/languages/` are unaffected.
+- **Storage:** pages never touch `localStorage` directly.
+  - Settings go through `src/app/progressStore.js` (key `sema.progress`).
+  - Recorder sessions go through `src/recorder/sessionStore.js` (key `sema.recorder.session`).
+- **Camera:**
+  - The camera and the hand model live in `CameraProvider`. Pages don't call `useCamera` or `useHandLandmarker` themselves.
+  - The exception is the unlisted `/dev` page, which keeps its own so its delegate picker and benchmark work as before.
+  - The camera starts by itself on arriving at 2c and at Record's recording step (getting there, plus the browser's permission prompt, is the consent). It's off on Welcome, 2a, 2b and Record's consent and finished steps, and off whenever no camera view is on screen.
+- **Colours:** use only CSS variables from `src/styles.css`. Never use Bright Sky (`--bright-sky`) for text, borders or focus rings on light surfaces.
+- **Copy rules** (project plan):
+  - Never say Sema understands signs: it matches shapes.
+  - Say "ASL fingerspelling", never just "sign language".
+- **Recorder (unchanged from the first version):**
+  - Format version `1`, normalization version `1`.
+  - Take rules: `COUNTDOWN_MS = 3000`, `SETTLE_MS = 500`, `CAPTURE_MS = 3000`, `SAMPLE_INTERVAL_MS = 100`, `MIN_MATCHED_SHARE = 0.8`. A take passes when `kept − mismatched ≥ 24`.
+  - Recording ID: `<person>-<session>-<letter>-<hand>-<take>`.
+  - The left-hand flip uses the **detected hand, for now**.
+  - `data/raw/` is private and gitignored.
+  - Consent text is exactly the spec's section 7.
 
 ## Review Focus
 
-Inputs and conditions the spec implies but doesn't spell out, most likely to bite first. Each has a test in the task that owns the code.
+Tasks 1–5 already have tests for their five risks:
 
-1. **A long session outgrows `localStorage`** (a full pilot is ~84 takes, about 3 million characters): saving must fail softly, show the warning, and keep recording. Test in Task 3 (`saveSession` returns `false` when `setItem` throws).
-2. **A corrupt or older session in `localStorage`** (invalid JSON, another format version): opening the page must not crash; the saved session is simply not offered. Test in Task 3 (`loadSession` returns `null`).
-3. **A slow camera** (auto-exposure at 20 fps, or worse at 7 fps): 20 fps must still give 30 samples; at 7 fps the take must be rejected with a reason that says frames never arrived, not a confusing "21 of 21". Tests in Task 2 (sampler at 20 and 7 fps; reason text).
-4. **Undo, then record again**: take numbers are reused only after their entry is removed, so recording IDs stay unique and the checker passes. Test in Task 3.
-5. **A participant code typed as `P03` or with spaces**: accepted as `p03`; `p3` or `x03` rejected. Test in Task 3 (`normalizePersonCode` + `isValidPersonCode`).
+- a session too big for `localStorage`
+- a corrupt or old saved session
+- a slow camera
+- undo, then record again
+- participant codes typed as `P03`
+
+These five remain for the new tasks, most likely first. Each has a test in the task that owns the code.
+
+1. **Opening a deep link or refreshing** (`/record`, `/setup/camera`) on Vercel or in `vite preview`. The same page should load, and a new visitor should be sent to Welcome. Tests: router unit tests (Tasks 6 and 7), and a refresh check on `vite preview` (Tasks 6 and 10).
+2. **Leaving a camera page while the camera is starting or live** (the menu, Back, the browser's Back button). The light must go off, and no stream may be left running. Test: Task 6's check, which navigates away during "starting" and while live, then counts live tracks.
+3. **A corrupt or old `sema.progress`** (invalid JSON, another version, `setupDone` without a hand, storage blocked). The visitor is treated as new, with no crash. Test: Task 7's `progressStore` tests.
+4. **The other hand on the camera check** (signing hand Right, MediaPipe sees Left). This shows the other-hand state, not a pass. Test: Task 7's `handChecks` tests.
+5. **Leaving Record mid-take through the menu.** The take is discarded, not logged, and the session survives. Coming back offers it again. Test: Task 8's check.
 
 ## File map
 
-| File | Status | Responsibility |
-| --- | --- | --- |
-| `package.json` | modify | `vitest` dev dependency; scripts `test`, `check-session` |
-| `src/vision/normalizeHand.js` (+ `.test.js`) | create | Normalization (spec §3) |
-| `src/camera/frameCounter.js` (+ `.test.js`) | create | Read `presentedFrames`; fps between two readings |
-| `src/recorder/takeRules.js` (+ `.test.js`) | create | Take timing, sampler, frame conversion, counts, pass/reject |
-| `src/recorder/sessionFile.js` (+ `.test.js`) | create | Build the session object (pure) |
-| `src/recorder/sessionStore.js` (+ `.test.js`) | create | `localStorage` autosave/restore, used session IDs, download |
-| `scripts/check-session.js` (+ `.test.js`) | create | Session checker (spec §8) |
-| `src/vision/useHandDetection.js` | modify | Optional `listenerRef`; optional `measurementsRef` |
-| `src/vision/browserName.js` | create | `browserName()`, moved from `useBenchmark.js` |
-| `src/vision/useBenchmark.js` | modify | Import `browserName` |
-| `record.html` | create | Second page, `noindex` |
-| `vite.config.js` | modify | Build both pages |
-| `vercel.json` | create | `cleanUrls` so the page is at `/record` |
-| `public/languages/asl/letters.json` | create if missing | Letter list (pilot-only letters to start) |
-| `src/recorder/letters.js` (+ `.test.js`) | create | Split letters into training and pilot; load the file |
-| `src/recorder/main.jsx` | create | React root |
-| `src/recorder/RecorderApp.jsx` | create | Page: consent → session, camera, grid, take, export |
-| `src/recorder/ConsentForm.jsx` | create | Code, session ID, two consent checkboxes |
-| `src/recorder/RecordingGrid.jsx` | create | Letter × hand grid |
-| `src/recorder/TakePanel.jsx` | create | Instructions, Record, take status |
-| `src/recorder/useRecording.js` | create | One take as a state machine |
-| `src/styles.css` | modify | Recorder styles |
-| `docs/data-format.md` | create | Format reference |
-| `README.md`, `CLAUDE.md` | modify | Recording sessions; conventions; `/record` routing warning |
-| `.gitignore` | verify | `data/raw/` present |
+Done in tasks 1–5 (unchanged):
+
+- `package.json`
+- `src/vision/normalizeHand.js`, `src/camera/frameCounter.js`
+- `src/recorder/takeRules.js`, `sessionFile.js`, `sessionStore.js`
+- `scripts/check-session.js`
+- `src/vision/useHandDetection.js` (listener), `src/vision/browserName.js`, `src/vision/useBenchmark.js`
+
+All of these have tests.
+
+Already on the branch from the first version's tasks 6–8, and reworked below:
+
+- `src/pages/record/RecordPage.jsx`, `ConsentForm.jsx`, `RecordingGrid.jsx`, `TakePanel.jsx`, `TakeOverlay.jsx` (moved there in the reorganization)
+- `src/recorder/useRecording.js`, `letters.js`
+- `public/languages/asl/letters.json`
+- `docs/data-format.md`, README and CLAUDE.md sections
+
+| File | Task | Status | Responsibility |
+| --- | --- | --- | --- |
+| `.gitignore` | (docs commit) | modify | `docs/design/` (Lanix's local design reference) |
+| `record.html`, `src/recorder/main.jsx` | 6 | delete | Replaced by the `/record` route |
+| `vite.config.js` | 6 | modify | Back to one entry |
+| `vercel.json` | 6 | modify | Rewrite every path to `/index.html` |
+| `src/app/router.js` (+ `.test.js`) | 6, 7 | create | Path → page, and redirects |
+| `src/app/navigation.js`, `src/app/Link.jsx` | 6 | create | `usePathname`, `navigate` (History API); `<Link>` |
+| `src/camera/useCamera.js` | 6 | modify | `attachVideo` callback ref, so a new page's `<video>` picks up the running stream |
+| `src/app/sharedCamera.js`, `src/app/CameraProvider.jsx` | 6 | create | The context and `useSharedCamera()`; the provider owning camera and hand model, stopping the camera when no view is on screen |
+| `src/components/CameraStage.jsx` | 6 | create | The camera view (video, overlay canvas, children), registered with the provider |
+| `src/app/MenuBar.jsx`, `PreviewPill.jsx`, `PhoneNotice.jsx` | 6 | create | Menu (Record, Learn, Preview, Practice, Preview), the Preview pill, the phone notice |
+| `src/App.jsx` | 6, 7 | rewrite | The shell: picks the page; holds settings (Task 7) |
+| `src/pages/dev/DevPage.jsx` | 6 | create | The old `App.jsx` page, moved to `/dev` unchanged |
+| `src/pages/NotBuiltYet.jsx` | 6 | create, then replaced | Stand-in for pages of later tasks; replaced in the reorganization by one stand-in each in `learn/` and `practice/` |
+| `src/components/icons.jsx` | 7 | create | Line icons used by more than one page folder |
+| `src/pages/dev/BenchmarkPanel.jsx` | reorganization | move from `src/vision/` | The benchmark's panel, used only by `/dev` |
+| `public/fonts/*` | 6 | create | Plus Jakarta Sans and JetBrains Mono (`.woff2`) with their OFL licences |
+| `src/styles.css` | 6–9 | modify | Tokens, fonts, shell and page styles |
+| `src/app/progressStore.js` (+ `.test.js`) | 7 | create | Signing hand and "setup done" in `localStorage` |
+| `src/vision/handChecks.js` (+ `.test.js`) | 7 | create | The camera step's two checks |
+| `src/pages/onboarding/SetupBar.jsx` | 7 | create | "Sema · Preview" and "Step N of 3" |
+| `src/pages/onboarding/WelcomePage.jsx`, `HowSemaWorksPage.jsx`, `SigningHandPage.jsx`, `CameraCheckPage.jsx` | 7 | create | Pages 1, 2a, 2b, 2c |
+| `src/pages/record/RecordPage.jsx` | 8 | modify (moved and renamed from `src/recorder/RecorderApp.jsx` in the reorganization) | Page 3 |
+| `src/pages/record/HandToggle.jsx`, `TakeResult.jsx` | 8 | create | Hand toggle; last take's result card |
+| `src/pages/record/RecordingGrid.jsx`, `TakePanel.jsx`, `TakeOverlay.jsx`, `ConsentForm.jsx`; `src/recorder/useRecording.js` | 8 | modify | The new Record layout |
+| `src/pages/learn/LearnPage.jsx`, `src/pages/practice/PracticePage.jsx` | 9 | replace the stand-ins | Preview placeholders |
+| `README.md`, `CLAUDE.md`, `docs/project-plan.md`, `docs/data-format.md` | 6–9 | modify | Docs travel with the code that makes them true |
+
+## Shared: end-to-end harness (scratch, never committed)
+
+Tasks 6–10 check the running app in headless Chrome with a fake camera, in the session's scratchpad (`$SP`). This is the harness from the first version's Task 9.
+
+- **Fake camera videos:** make two y4m files from MediaPipe's `victory.jpg` with `make_video.py`:
+  - `hand-only.y4m`: a hand in every frame
+  - `hand-mixed.y4m`: a hand for 0.5 s, then empty for 2.5 s, looping
+- **Chrome:** `google-chrome --headless=new --remote-debugging-port=<port> --user-data-dir=$SP/e2e/chromeN --no-first-run --use-fake-device-for-media-stream --use-file-for-fake-video-capture=<y4m> --use-fake-ui-for-media-stream about:blank`
+- **Driver:** a Node script over the Chrome DevTools Protocol (`Target.createTarget`, `Runtime.evaluate`, `Page.navigate`, `Browser.setDownloadBehavior`), with helpers `evaluate`, `waitFor`, `click(label)` and `type(name, value)`.
+- **Live tracks:** before navigating, inject a wrapper with `Page.addScriptToEvaluateOnNewDocument`. It wraps `navigator.mediaDevices.getUserMedia`, so every stream the page opens lands in `window.__streams`. Then count `window.__streams.flatMap((s) => s.getTracks()).filter((t) => t.readyState === 'live').length`. This sees streams no `<video>` shows, and it keeps test code out of the app.
+- **Cleanup:** kill Chrome and Vite by PID, never with `pkill -f` and the scratchpad path (that matches the shell itself).
 
 ---
+
+## Step 1: recorder logic (done, unchanged)
+
+Tasks 1–5 are kept as written and built (`2355af5..4098323`). Their "Report" steps predate Lanix's current git rules (above), which apply from Task 6 on.
 
 ### Task 1: Vitest and hand normalization
 
@@ -85,13 +181,13 @@ Inputs and conditions the spec implies but doesn't spell out, most likely to bit
 - Consumes: nothing.
 - Produces: `normalizeHand(raw, { width, height, hand }) → number[63] | null` where `raw` is 21 `{ x, y, z }` objects (MediaPipe `NormalizedLandmark`) and `hand` is `'left'` or `'right'`; `NORMALIZATION_VERSION = 1`.
 
-- [ ] **Step 1: Install Vitest and add the test script**
+- [x] **Step 1: Install Vitest and add the test script**
 
 Run: `npm install --save-dev vitest@^5.0.4`
 Then in `package.json` `"scripts"`, add `"test": "vitest run"`.
 Expected: `npm ls vitest` shows `vitest@5.x`; no peer-dependency errors (Vitest 5 supports Vite `^8.0.0`).
 
-- [ ] **Step 2: Write the failing tests**
+- [x] **Step 2: Write the failing tests**
 
 Create `src/vision/normalizeHand.test.js`:
 
@@ -193,12 +289,12 @@ describe('normalizeHand', () => {
 })
 ```
 
-- [ ] **Step 3: Run the tests to see them fail**
+- [x] **Step 3: Run the tests to see them fail**
 
 Run: `npm test -- src/vision/normalizeHand.test.js`
 Expected: FAIL, "Failed to resolve import ./normalizeHand.js" (or similar: the module doesn't exist).
 
-- [ ] **Step 4: Implement**
+- [x] **Step 4: Implement**
 
 Create `src/vision/normalizeHand.js`:
 
@@ -243,12 +339,12 @@ export function normalizeHand(raw, { width, height, hand }) {
 }
 ```
 
-- [ ] **Step 5: Run the tests to see them pass**
+- [x] **Step 5: Run the tests to see them pass**
 
 Run: `npm test -- src/vision/normalizeHand.test.js`
 Expected: PASS, 10 tests.
 
-- [ ] **Step 6: Report**
+- [x] **Step 6: Report**
 
 Run `npm run lint` (no warnings) and `git status --short`. Explain to Lanix what normalization does and what each test proves. Suggested commit message: `Add hand normalization and Vitest`. Do not commit unless Lanix asks.
 
@@ -272,7 +368,7 @@ Run `npm run lint` (no warnings) and `git status --short`. Explain to Lanix what
   - `tallyTake(frames, hand) → { kept, mismatched, droppedNoHand }`
   - `judgeTake(counts, expected?) → { status: 'accepted' | 'rejected', reason: string | null }`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/camera/frameCounter.test.js`:
 
@@ -440,12 +536,12 @@ describe('judgeTake', () => {
 })
 ```
 
-- [ ] **Step 2: Run the tests to see them fail**
+- [x] **Step 2: Run the tests to see them fail**
 
 Run: `npm test -- src/camera/frameCounter.test.js src/recorder/takeRules.test.js`
 Expected: FAIL, modules not found.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Create `src/camera/frameCounter.js`:
 
@@ -558,12 +654,12 @@ export function judgeTake({ kept, mismatched, droppedNoHand }, expected = EXPECT
 }
 ```
 
-- [ ] **Step 4: Run the tests to see them pass**
+- [x] **Step 4: Run the tests to see them pass**
 
 Run: `npm test -- src/camera/frameCounter.test.js src/recorder/takeRules.test.js`
 Expected: PASS (2 + 15 tests).
 
-- [ ] **Step 5: Report**
+- [x] **Step 5: Report**
 
 `npm run lint`, `git status --short`. Explain sampling by time and the pass rule. Suggested commit message: `Add take rules and frame counter for the recorder`.
 
@@ -589,7 +685,7 @@ Expected: PASS (2 + 15 tests).
   - `sessionFileName(session) → string`
 - Produces (`sessionStore.js`): `saveSession(session) → boolean`, `loadSession() → Session | null`, `clearSession()`, `loadUsedSessionIds() → string[]`, `rememberSessionId(id)`, `downloadSession(session)`.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/recorder/sessionFile.test.js`:
 
@@ -862,12 +958,12 @@ describe('sessionStore', () => {
 })
 ```
 
-- [ ] **Step 2: Run the tests to see them fail**
+- [x] **Step 2: Run the tests to see them fail**
 
 Run: `npm test -- src/recorder/sessionFile.test.js src/recorder/sessionStore.test.js`
 Expected: FAIL, modules not found.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Create `src/recorder/sessionFile.js`:
 
@@ -1087,12 +1183,12 @@ export function downloadSession(session) {
 }
 ```
 
-- [ ] **Step 4: Run the tests to see them pass**
+- [x] **Step 4: Run the tests to see them pass**
 
 Run: `npm test -- src/recorder/sessionFile.test.js src/recorder/sessionStore.test.js`
 Expected: PASS (13 + 7 tests).
 
-- [ ] **Step 5: Report**
+- [x] **Step 5: Report**
 
 `npm run lint`, `git status --short`. Explain why take numbers count attempts and why storage fails softly. Suggested commit message: `Add the recorder's session file and browser storage`.
 
@@ -1108,7 +1204,7 @@ Expected: PASS (13 + 7 tests).
 - Consumes: `newSession`, `addTake` (Task 3) in tests only.
 - Produces: `KNOWN_FORMATS`, `KNOWN_NORMALIZATIONS`, `checkSession(file, otherRecordingIds = new Set()) → { errors: string[], table: Array<{ letter, hand, accepted, rejected }> }`, `formatTable(table) → string`; CLI `npm run check-session -- <file>`.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `scripts/check-session.test.js`:
 
@@ -1204,12 +1300,12 @@ describe('checkSession', () => {
 })
 ```
 
-- [ ] **Step 2: Run the tests to see them fail**
+- [x] **Step 2: Run the tests to see them fail**
 
 Run: `npm test -- scripts/check-session.test.js`
 Expected: FAIL, module not found.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Create `scripts/check-session.js`:
 
@@ -1333,14 +1429,14 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
 
 In `package.json` `"scripts"`, add `"check-session": "node scripts/check-session.js"`.
 
-- [ ] **Step 4: Run the tests to see them pass**
+- [x] **Step 4: Run the tests to see them pass**
 
 Run: `npm test -- scripts/check-session.test.js`
 Expected: PASS, 7 tests.
 Then run: `npm run check-session` with no file.
 Expected: exits with the usage message (code 2).
 
-- [ ] **Step 5: Report**
+- [x] **Step 5: Report**
 
 `npm run lint`, `git status --short`. Suggested commit message: `Add the session checker`.
 
@@ -1357,7 +1453,7 @@ Expected: exits with the usage message (code 2).
 - Consumes: nothing new.
 - Produces: `useHandDetection({ videoRef, canvasRef, landmarkerRef, measurementsRef?, listenerRef?, isRunning })`; while `listenerRef.current` is a function, it is called after every detection with `{ landmarks: NormalizedLandmark[] | null, handedness: { categoryName, score } | null, width, height, time }` (`time` is the `performance.now()` value when that detection started). `browserName() → string` from `src/vision/browserName.js`.
 
-- [ ] **Step 1: Make both refs optional and call the listener**
+- [x] **Step 1: Make both refs optional and call the listener**
 
 In `src/vision/useHandDetection.js`:
 
@@ -1386,7 +1482,7 @@ In `src/vision/useHandDetection.js`:
 
 4. Change the effect's dependency list to `[videoRef, canvasRef, landmarkerRef, measurementsRef, listenerRef, isRunning]`.
 
-- [ ] **Step 2: Move browserName**
+- [x] **Step 2: Move browserName**
 
 Create `src/vision/browserName.js` with the `browserName` function moved verbatim from `src/vision/useBenchmark.js`, exported:
 
@@ -1408,1120 +1504,1114 @@ export function browserName() {
 
 In `src/vision/useBenchmark.js`, delete the `browserName` function and add `import { browserName } from './browserName.js'` after the existing imports.
 
-- [ ] **Step 3: Verify nothing changed for the main page**
+- [x] **Step 3: Verify nothing changed for the main page**
 
 Run: `npm run lint` (no warnings), `npm test` (all pass), `npm run build` (passes).
 Then run `npm run dev`, open `http://localhost:5173` in Chrome, start the camera, check that the skeleton, readouts and Developer settings → Run benchmark still work.
 
-- [ ] **Step 4: Report**
+- [x] **Step 4: Report**
 
 `git status --short`. Suggested commit message: `Let other tools listen to hand detection; share browserName`.
 
 ---
 
-### Task 6: Recorder page shell, consent and session
+## Steps 2–5: the app around the recorder
+
+### Task 6 (step 2): App shell — routing, camera provider, menu, tokens
+
+Phase 3.1, done early. After this task, the recorder opens at `/record` inside the app, with the menu, and the Phase 1 page moves to `/dev`. Welcome and setup are still stand-ins, so there are no setup redirects yet.
 
 **Files:**
-- Create: `record.html`, `vercel.json`, `src/recorder/main.jsx`, `src/recorder/RecorderApp.jsx`, `src/recorder/ConsentForm.jsx`, `src/recorder/letters.js`, `src/recorder/letters.test.js`
-- Create if missing: `public/languages/asl/letters.json`
-- Modify: `vite.config.js`, `src/styles.css`
-- Verify: `.gitignore` contains `data/raw/`
+
+- **Create:**
+  - `src/app/router.js`, `src/app/router.test.js`
+  - `src/app/navigation.js`, `src/app/Link.jsx`
+  - `src/app/sharedCamera.js`, `src/app/CameraProvider.jsx`, `src/components/CameraStage.jsx`
+  - `src/app/MenuBar.jsx`, `src/app/PreviewPill.jsx`, `src/app/PhoneNotice.jsx`
+  - `src/pages/dev/DevPage.jsx`, `src/pages/NotBuiltYet.jsx`
+  - `public/fonts/PlusJakartaSans-Variable.woff2`, `JetBrainsMono-Medium.woff2`, `OFL-PlusJakartaSans.txt`, `OFL-JetBrainsMono.txt`
+- **Modify:**
+  - `src/App.jsx`, `src/camera/useCamera.js`, `src/pages/record/RecordPage.jsx`
+  - `src/styles.css`, `vite.config.js`, `vercel.json`
+  - `README.md`, `CLAUDE.md`
+- **Delete:** `record.html`, `src/recorder/main.jsx`
+
+**Design source:**
+
+- `docs/design/Record.dc.html`: the menu bar, the Preview pills and the palette.
+- `docs/design/Unsupported.dc.html`: the phone notice, shown below about 900px wide.
 
 **Interfaces:**
-- Consumes: Task 3 (`newSession`, `nextSessionId`, `normalizePersonCode`, `isValidPersonCode`, storage functions); `browserName` (Task 5); `useCamera`, `useHandLandmarker`, `useHandDetection`, `LOADING_HAND_MODEL` (existing).
-- Produces: `splitLetters(entries) → { training: string[], pilot: string[] }`, `classLabel(letter) → string`, `useLetters() → { status: 'loading' | 'ready' | 'error', training, pilot }`; `ConsentForm({ today, onStart })` calling `onStart({ person, sessionId, consent: { train, publish } })`; `RecorderApp` (Task 7 extends it).
 
-- [ ] **Step 1: Write the failing letters test**
+- **Consumes:**
+  - `useCamera()`, extended here with `attachVideo`
+  - `useHandLandmarker(isLive, delegate)` and `useHandDetection({ videoRef, canvasRef, landmarkerRef, listenerRef, isRunning })` (existing)
+- **Produces:**
+  - `PATHS`: `{ welcome, howSemaWorks, signingHand, cameraCheck, record, learn, practice, dev }` → paths
+  - `resolveRoute(pathname) → { page } | { redirect }`. Task 7 adds a second parameter.
+  - `navigate(path, { replace })`, `usePathname() → string`, `<Link to>`
+  - `useSharedCamera() → { videoRef, attachVideo, status, error, cameras, deviceId, start, stop, switchCamera, handModel, registerView }`
+  - `<CameraStage canvasRef className? children>`
+  - `<MenuBar active children>`: `active` is `'record' | 'learn' | 'practice' | null`; `children` sit on the bar's right
+  - `<PreviewPill>`, `<PhoneNotice>`
 
-Create `src/recorder/letters.test.js`:
+- [ ] **Step 1: Write the failing router test**
+
+Create `src/app/router.test.js`:
 
 ```js
 import { describe, expect, it } from 'vitest'
-import { classLabel, splitLetters } from './letters.js'
+import { PATHS, resolveRoute } from './router.js'
 
-describe('splitLetters', () => {
-  it('separates training letters from pilot-only letters', () => {
-    expect(
-      splitLetters([{ letter: 'B' }, { letter: 'A', pilotOnly: true }, { letter: 'L' }, { letter: 'S', pilotOnly: true }]),
-    ).toEqual({ training: ['B', 'L'], pilot: ['A', 'S'] })
+describe('resolveRoute', () => {
+  it('finds the page for each path', () => {
+    for (const [page, path] of Object.entries(PATHS)) {
+      expect(resolveRoute(path)).toEqual({ page })
+    }
   })
 
-  it('ignores entries that are not a single capital letter, and duplicates', () => {
-    expect(splitLetters([{ letter: 'b' }, { letter: 'AB' }, {}, { letter: 'C' }, { letter: 'C' }])).toEqual({
-      training: ['C'],
-      pilot: [],
-    })
+  it('ignores a trailing slash', () => {
+    expect(resolveRoute('/record/')).toEqual({ page: 'record' })
   })
-})
 
-describe('classLabel', () => {
-  it('names the no-letter class', () => {
-    expect(classLabel('none')).toBe('No letter')
-    expect(classLabel('W')).toBe('W')
+  it('sends unknown paths to Welcome', () => {
+    expect(resolveRoute('/nope')).toEqual({ redirect: '/' })
+    expect(resolveRoute('/record.html')).toEqual({ redirect: '/' })
   })
 })
 ```
 
-Run: `npm test -- src/recorder/letters.test.js`
-Expected: FAIL, module not found.
+- [ ] **Step 2: Run it**
 
-- [ ] **Step 2: Implement letters.js**
+Run: `npm test -- src/app/router.test.js`
+Expected: FAIL, `Failed to resolve import "./router.js"`.
 
-Create `src/recorder/letters.js`:
+- [ ] **Step 3: Write the router**
+
+Create `src/app/router.js`:
+
+```js
+// The app's pages and the address of each. A small router of our own: with
+// a handful of fixed paths, the browser's History API is all we need, so no
+// router library. navigation.js is the part that talks to the browser.
+export const PATHS = {
+  welcome: '/',
+  howSemaWorks: '/setup/how-it-works',
+  signingHand: '/setup/hand',
+  cameraCheck: '/setup/camera',
+  record: '/record',
+  learn: '/learn',
+  practice: '/practice',
+  dev: '/dev',
+}
+
+// Which page a path shows, as { page: 'record' }, or { redirect: '/' } to
+// send the person somewhere else. A trailing slash is ignored.
+export function resolveRoute(pathname) {
+  const path = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname
+  const page = Object.keys(PATHS).find((name) => PATHS[name] === path)
+  if (!page) return { redirect: PATHS.welcome }
+  return { page }
+}
+```
+
+- [ ] **Step 4: Run it**
+
+Run: `npm test -- src/app/router.test.js`
+Expected: PASS (3 tests).
+
+- [ ] **Step 5: Navigation and links**
+
+Create `src/app/navigation.js`:
 
 ```js
 import { useEffect, useState } from 'react'
 
-// The letter list lives in public/languages/asl/letters.json, so changing
-// which letters are recorded doesn't need a code change. Entries marked
-// pilotOnly are recorded in the pilot but left out of 2.2's first training set.
-export function splitLetters(entries) {
-  const training = []
-  const pilot = []
-  for (const entry of entries ?? []) {
-    const letter = entry?.letter
-    if (typeof letter !== 'string' || !/^[A-Z]$/.test(letter)) continue
-    if (training.includes(letter) || pilot.includes(letter)) continue
-    ;(entry.pilotOnly ? pilot : training).push(letter)
-  }
-  return { training, pilot }
+// Changing pages without reloading the page:
+// - navigate(path) changes the address with history.pushState (a new history
+//   entry, so Back works) or history.replaceState (no new entry, for redirects);
+// - the browser fires 'popstate' when the person presses Back or Forward;
+// - pushState itself fires nothing, so navigate() sends an event of our own.
+const NAVIGATE_EVENT = 'sema:navigate'
+
+export function navigate(path, { replace = false } = {}) {
+  if (path === window.location.pathname) return
+  if (replace) window.history.replaceState(null, '', path)
+  else window.history.pushState(null, '', path)
+  window.scrollTo(0, 0) // a new page starts at the top
+  window.dispatchEvent(new Event(NAVIGATE_EVENT))
 }
 
-export function classLabel(letter) {
-  return letter === 'none' ? 'No letter' : letter
-}
-
-export function useLetters() {
-  const [state, setState] = useState({ status: 'loading', training: [], pilot: [] })
-
+// The current path. The component re-renders whenever it changes.
+export function usePathname() {
+  const [pathname, setPathname] = useState(window.location.pathname)
   useEffect(() => {
-    let cancelled = false
-    fetch(`${import.meta.env.BASE_URL}languages/asl/letters.json`)
-      .then((response) => {
-        if (!response.ok) throw new Error(`letters.json: ${response.status}`)
-        return response.json()
-      })
-      .then((data) => {
-        if (!cancelled) setState({ status: 'ready', ...splitLetters(data.letters) })
-      })
-      .catch(() => {
-        if (!cancelled) setState({ status: 'error', training: [], pilot: [] })
-      })
+    const update = () => setPathname(window.location.pathname)
+    window.addEventListener('popstate', update)
+    window.addEventListener(NAVIGATE_EVENT, update)
     return () => {
-      cancelled = true
+      window.removeEventListener('popstate', update)
+      window.removeEventListener(NAVIGATE_EVENT, update)
     }
   }, [])
-
-  return state
+  return pathname
 }
 ```
 
-Run: `npm test -- src/recorder/letters.test.js`
-Expected: PASS, 3 tests.
+Create `src/app/Link.jsx`:
 
-- [ ] **Step 3: Letter list, second page, build config**
+```jsx
+import { navigate } from './navigation.js'
 
-If `public/languages/asl/letters.json` does not exist, create it (Lanix adds the training letters as `{ "letter": "B" }` entries):
-
-```json
-{
-  "language": "asl",
-  "letters": [
-    { "letter": "A", "pilotOnly": true },
-    { "letter": "S", "pilotOnly": true },
-    { "letter": "M", "pilotOnly": true },
-    { "letter": "N", "pilotOnly": true },
-    { "letter": "T", "pilotOnly": true }
-  ]
+// A normal link (<a href>) that changes pages without reloading the page.
+// Ctrl-, Cmd-, Shift- and middle-clicks are left to the browser, so "open in a
+// new tab" still works.
+export default function Link({ to, ...props }) {
+  function handleClick(event) {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+    event.preventDefault()
+    navigate(to)
+  }
+  return <a href={to} onClick={handleClick} {...props} />
 }
 ```
 
-Create `record.html`:
+- [ ] **Step 6: Let a new `<video>` pick up the running stream**
 
-```html
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="robots" content="noindex" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>Sema recorder</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/recorder/main.jsx"></script>
-  </body>
-</html>
-```
-
-Create `vercel.json`:
-
-```json
-{
-  "cleanUrls": true
-}
-```
-
-Replace `vite.config.js` with:
+In `src/camera/useCamera.js`, change the React import to `import { useCallback, useEffect, useRef, useState } from 'react'`. Then add this after `requestIdRef`:
 
 ```js
-import react from '@vitejs/plugin-react'
-import { fileURLToPath } from 'node:url'
-import { defineConfig } from 'vite'
-
-// https://vite.dev/config/
-export default defineConfig({
-  plugins: [react()],
-  server: {
-    // GitHub Codespaces serves forwarded ports from https://<name>-5173.app.github.dev.
-    // Vite blocks unknown hostnames by default (protection against DNS rebinding),
-    // so allow that domain and its subdomains. Not needed for localhost.
-    allowedHosts: ['.app.github.dev'],
-  },
-  build: {
-    // Two pages: the app and the recorder (record.html, /record on Vercel).
-    rolldownOptions: {
-      input: {
-        main: fileURLToPath(new URL('./index.html', import.meta.url)),
-        record: fileURLToPath(new URL('./record.html', import.meta.url)),
-      },
-    },
-  },
-})
+  // A callback ref for the <video> on screen. React calls it with the element
+  // when a page shows its video, and with null when that page goes away.
+  // Giving a new element the running stream lets the picture carry on from one
+  // page to the next. useCallback keeps it the same function between
+  // renders, so React doesn't detach and re-attach it every time.
+  const attachVideo = useCallback((video) => {
+    videoRef.current = video
+    if (video && video.srcObject !== streamRef.current) video.srcObject = streamRef.current
+  }, [])
 ```
 
-Run: `git check-ignore -v data/raw/test.json`
-Expected: a line naming `.gitignore` and `data/raw/`. If nothing prints, add `data/raw/` to `.gitignore` with the comment `# Recorded landmark data: private, never committed (see README, "Recorded data")`.
+In `startCamera`, replace `videoRef.current.srcObject = stream` with:
 
-- [ ] **Step 4: React root and consent form**
-
-Create `src/recorder/main.jsx`:
-
-```jsx
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import '../styles.css'
-import RecorderApp from './RecorderApp.jsx'
-
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <RecorderApp />
-  </StrictMode>,
-)
+```js
+    // The page's video may not be on screen yet; attachVideo hands it the
+    // stream when it is.
+    if (videoRef.current) videoRef.current.srcObject = stream
 ```
 
-Create `src/recorder/ConsentForm.jsx` (consent wording from the spec's section 7):
+Add `attachVideo,` to the returned object, after `videoRef,`.
+
+- [ ] **Step 7: The shared camera**
+
+Create `src/app/sharedCamera.js`:
+
+```js
+import { createContext, useContext } from 'react'
+
+// The shared camera and hand model, filled in by CameraProvider. This is its
+// own file because a component file should export only components (so React's
+// Fast Refresh can reload it while you edit).
+export const CameraContext = createContext(null)
+
+export function useSharedCamera() {
+  return useContext(CameraContext)
+}
+```
+
+Create `src/app/CameraProvider.jsx`:
 
 ```jsx
-import { useState } from 'react'
-import { isValidPersonCode, nextSessionId, normalizePersonCode } from './sessionFile.js'
-import { loadUsedSessionIds } from './sessionStore.js'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCamera } from '../camera/useCamera.js'
+import { useHandLandmarker } from '../vision/useHandLandmarker.js'
+import { CameraContext } from './sharedCamera.js'
 
-export default function ConsentForm({ today, onStart }) {
-  const [person, setPerson] = useState('')
-  const [sessionId, setSessionId] = useState(() => nextSessionId(today, loadUsedSessionIds()))
-  const [train, setTrain] = useState(false)
-  const [publish, setPublish] = useState(false)
+// The camera and the hand model, shared by every page through React context.
+// They live here, at the top of the app, so changing pages doesn't close the
+// camera or reload the hand model. Pages read them with useSharedCamera().
+export default function CameraProvider({ children }) {
+  const camera = useCamera()
+  const handModel = useHandLandmarker(camera.status === 'live', 'GPU')
 
-  const code = normalizePersonCode(person)
-  const codeOk = isValidPersonCode(code)
-  const canStart = codeOk && sessionId.trim() !== '' && train
+  // How many camera views (CameraStage) are on screen. The camera is on while
+  // there is one: arriving on a page with a camera view starts it (getting
+  // there, plus the browser's permission prompt, is the person's consent), and
+  // when the last view goes away it stops, so the light is never on without a
+  // picture. When one page's view replaces another's, React applies both
+  // changes in one update, so the count never touches 0 and the camera stays on.
+  const [views, setViews] = useState(0)
+  const registerView = useCallback(() => {
+    setViews((n) => n + 1)
+    return () => setViews((n) => n - 1)
+  }, [])
 
-  function submit(event) {
-    event.preventDefault()
-    if (canStart) onStart({ person: code, sessionId: sessionId.trim(), consent: { train, publish } })
-  }
+  // Start only when views appear (0 → 1), not on every render while they're
+  // there: after an error or a Stop, the camera waits for a button click.
+  const hadViews = useRef(false)
+  const { status, start, stop } = camera
+  useEffect(() => {
+    const hasViews = views > 0
+    if (hasViews && !hadViews.current && status === 'idle') start()
+    if (!hasViews && status !== 'idle') stop()
+    hadViews.current = hasViews
+  }, [views, status, start, stop])
 
   return (
-    <form className="consent" onSubmit={submit}>
-      <h1>Record hand shapes for Sema</h1>
-      <div className="consent-text">
-        <p>
-          Sema is a student project that teaches ASL fingerspelling. This page records the
-          positions of 21 points on your hand while you sign letters. It does not save video
-          or photos. Your recordings are labelled with a code (like p03), never your name.
-        </p>
-        <p>
-          Everything stays in this browser until you download the file at the end; nothing is
-          uploaded. You then send the file to Lanix, who keeps it private and uses it to train
-          and test Sema's letter recognition. Ask Lanix to delete your recordings at any time.
-          You can stop whenever you like, and "Delete this session" removes what's stored in
-          this browser.
-        </p>
-      </div>
-
-      <label className="field">
-        Your code
-        <input name="person" value={person} placeholder="p03" autoComplete="off" onChange={(e) => setPerson(e.target.value)} />
-      </label>
-      {person !== '' && !codeOk && (
-        <p className="error">Use the code Lanix gave you: p followed by at least two digits, like p03.</p>
-      )}
-
-      <label className="field">
-        Session
-        <input name="session" value={sessionId} autoComplete="off" onChange={(e) => setSessionId(e.target.value)} />
-      </label>
-
-      <label className="check">
-        <input type="checkbox" name="train" checked={train} onChange={(e) => setTrain(e.target.checked)} />
-        <span>My recordings may be used to train Sema. (required)</span>
-      </label>
-      <label className="check">
-        <input type="checkbox" name="publish" checked={publish} onChange={(e) => setPublish(e.target.checked)} />
-        <span>My recordings may be published in a public dataset. (optional)</span>
-      </label>
-
-      <button type="submit" className="button" disabled={!canStart}>
-        Start session
-      </button>
-    </form>
+    <CameraContext.Provider value={{ ...camera, handModel, registerView }}>{children}</CameraContext.Provider>
   )
 }
 ```
 
-- [ ] **Step 5: RecorderApp: saved session, consent, session bar, camera**
-
-Create `src/recorder/RecorderApp.jsx`:
+Create `src/components/CameraStage.jsx`:
 
 ```jsx
-import { useEffect, useRef, useState } from 'react'
-import { useCamera } from '../camera/useCamera.js'
-import { browserName } from '../vision/browserName.js'
-import { useHandDetection } from '../vision/useHandDetection.js'
-import { useHandLandmarker } from '../vision/useHandLandmarker.js'
-import { LOADING_HAND_MODEL } from '../vision/visionMessages.js'
-import ConsentForm from './ConsentForm.jsx'
-import { useLetters } from './letters.js'
-import { newSession } from './sessionFile.js'
-import { clearSession, downloadSession, loadSession, rememberSessionId, saveSession } from './sessionStore.js'
+import { useEffect } from 'react'
+import { useSharedCamera } from '../app/sharedCamera.js'
 
-// "2026-11-02" in the person's own time zone.
-const today = () => new Date().toLocaleDateString('en-CA')
+// The camera view: the shared camera's video, the hand overlay canvas, and
+// whatever the page puts on top (children). While it's on screen the camera
+// is on (see CameraProvider). The video and the canvas share one CSS rule that
+// mirrors them (.video and .overlay in styles.css).
+export default function CameraStage({ canvasRef, className = 'stage', children }) {
+  const { attachVideo, registerView } = useSharedCamera()
+  useEffect(() => registerView(), [registerView])
+  return (
+    <div className={className}>
+      <video ref={attachVideo} className="video" autoPlay playsInline muted />
+      <canvas ref={canvasRef} className="overlay" />
+      {children}
+    </div>
+  )
+}
+```
 
-export default function RecorderApp() {
-  const [saved, setSaved] = useState(loadSession) // offered back when the page opens
-  const [session, setSession] = useState(null)
-  const [storageOk, setStorageOk] = useState(true)
-  const [downloadedTakes, setDownloadedTakes] = useState(0)
-  const letters = useLetters()
+- [ ] **Step 8: Menu bar, Preview pill, phone notice**
 
-  const { videoRef, status, error, start, stop } = useCamera()
-  const isLive = status === 'live'
-  const canvasRef = useRef(null)
-  const listenerRef = useRef(null)
-  const handModel = useHandLandmarker(isLive, 'GPU')
-  const isDetecting = isLive && handModel.status === 'ready'
-  const hand = useHandDetection({
-    videoRef,
-    canvasRef,
-    landmarkerRef: handModel.landmarkerRef,
-    listenerRef,
-    isRunning: isDetecting,
-  })
+Build these from `Record.dc.html` (menu bar) and `Unsupported.dc.html` (phone notice). If a `.dc.html` and its PNG disagree, ask Lanix.
 
-  // Every change to the session is saved in the browser straight away.
-  function updateSession(next) {
-    setSession(next)
-    setStorageOk(saveSession(next))
-  }
+- **`MenuBar({ active, children })`** renders:
+  - `<header>` with "Sema" and `<PreviewPill />`
+  - `<nav aria-label="Main">` with three `<Link>`s: Record (`PATHS.record`), Learn (`PATHS.learn`) with a Preview pill, and Practice (`PATHS.practice`) with a Preview pill
+  - the link for `active` gets `aria-current="page"`, so the underline is styled from `[aria-current='page']` rather than a separate class
+  - `children` in a right-hand slot (Record puts its session status there in Task 8)
+- **`PreviewPill({ inMenu })`**: "Preview" beside the name (`--ice-tint`, 12px), and a smaller grey "preview" in the menu (`--chip`, 11px), both as designed.
+- **`PhoneNotice({ onContinue })`**: the design's full screen, with "Sema is made for computers, for now", **Copy link** (copies the address; the label becomes "Link copied") and **Continue on this phone** (shows the app). `App` shows it instead of the app when the page is under 900px wide **when the page opens**: a phone doesn't change size, and a computer whose window is made narrow later shouldn't lose its page mid-take. Because it replaces the app rather than covering it, nothing behind it (such as the camera) starts.
 
-  function startSession({ person, sessionId, consent }) {
-    rememberSessionId(sessionId)
-    setSaved(null)
-    setDownloadedTakes(0)
-    updateSession(newSession({ person, session: sessionId, consent, date: today(), browser: browserName() }))
-  }
+- [ ] **Step 9: Palette tokens and fonts**
 
-  function download(current) {
-    downloadSession(current)
-    setDownloadedTakes(current.recordings.length)
-  }
+- **Tokens:** add the tokens the designs use to `:root` in `src/styles.css`, with names and values from the `.dc.html` files. The project plan's section 9 lists the expected ones: Ice Blue `#B8E8F5` with tint `#E3F4FA`, muted text on dark `#A9BCD0`, amber tint `#FDF1E3` with text `#7A3A06`, and error red `#B42318`. Keep the existing variable names, and add a comment per token saying where it may be used.
+- **Fonts (approved 2026-10-15):**
+  - Self-host the design's fonts as `.woff2` files in `public/fonts/`, with their licence (`OFL.txt`) beside them, and declare them with `@font-face` (`font-display: swap`) in `src/styles.css`.
+  - Plus Jakarta Sans comes from its official repository, plus the monospace font the `.dc.html` names. The PNGs use a monospace for "σῆμα · a sign", "18 / 30 frames" and "p03 · 2026-11-02a".
+  - Check that the monospace covers Greek, for "σῆμα".
+  - These are asset files, not npm packages, so they don't add a dependency.
+  - Built: `PlusJakartaSans-Variable.woff2` (61 KB, converted from the official 2.7.1 variable TTF; one file for weights 200–800) and `JetBrainsMono-Medium.woff2` (94 KB, the official 2.304 webfont), with `OFL-PlusJakartaSans.txt` and `OFL-JetBrainsMono.txt`. Neither licence has a Reserved Font Name, so converting the format is allowed.
+  - Greek: JetBrains Mono has σ, μ and α but not "ῆ" (U+1FC6, Greek Extended). Plus Jakarta Sans has no Greek. In "σῆμα", the ῆ falls back to the system monospace font (Noto Sans Mono on Lanix's Fedora). Lanix decides what to do about it before Task 7's Welcome page.
 
-  function deleteSession() {
-    if (!window.confirm('Delete this session from this browser? Download it first if you want to keep it.')) return
-    startFresh()
-  }
+- [ ] **Step 10: The shell, `/dev` and stand-ins**
 
-  // Back to the consent form, with nothing saved in the browser.
-  function startFresh() {
-    clearSession()
-    setSession(null)
-    setSaved(null)
-    setDownloadedTakes(0)
-  }
+Move the current page to `/dev` unchanged: create `src/pages/dev/DevPage.jsx` with the body of today's `src/App.jsx`. Rename the component to `DevPage`, fix the import paths (`../camera/…`, `../vision/…`), and make the top bar read `Sema · developer page`. It keeps its own `useCamera` and `useHandLandmarker`, so its delegate picker and benchmark work as before.
 
-  // Warn before leaving if there are takes that haven't been downloaded.
-  const unsaved = session !== null && session.recordings.length > downloadedTakes
-  useEffect(() => {
-    if (!unsaved) return
-    function warn(event) {
-      event.preventDefault()
-      event.returnValue = ''
-    }
-    window.addEventListener('beforeunload', warn)
-    return () => window.removeEventListener('beforeunload', warn)
-  }, [unsaved])
+Create `src/pages/NotBuiltYet.jsx` (later replaced, in the folder reorganization, by one stand-in each in `src/pages/learn/` and `src/pages/practice/`, so page folders don't share files):
 
+```jsx
+import MenuBar from '../app/MenuBar.jsx'
+
+// A stand-in for pages that later tasks build (Welcome and setup in Task 7,
+// Learn and Practice in Task 9). Deleted in Task 9.
+export default function NotBuiltYet({ name }) {
   return (
     <>
-      <header className="top-bar">Sema recorder</header>
+      <MenuBar active={name} />
       <main className="page">
-        {!session && saved && (
-          <section className="saved-session">
-            <p>
-              Continue session {saved.person} · {saved.session} ({saved.recordings.length} takes)?
-            </p>
-            <div className="controls">
-              <button type="button" className="button" onClick={() => setSession(saved)}>Continue</button>
-              <button type="button" className="button-quiet" onClick={() => download(saved)}>Download</button>
-              <button type="button" className="button-quiet" onClick={deleteSession}>Delete</button>
-              {/* A new session needs the old one downloaded or deleted first. */}
-              {downloadedTakes === saved.recordings.length && (
-                <button type="button" className="button-quiet" onClick={startFresh}>Start a new session</button>
-              )}
-            </div>
-          </section>
-        )}
-
-        {!session && !saved && <ConsentForm today={today()} onStart={startSession} />}
-
-        {session && (
-          <>
-            <div className="session-bar">
-              <span>
-                Session {session.person} · {session.session} · {session.recordings.length} takes
-              </span>
-              <button type="button" className="button-quiet" onClick={() => download(session)}>Download session file</button>
-              <button type="button" className="button-quiet" onClick={deleteSession}>Delete this session</button>
-            </div>
-            {!storageOk && (
-              <p className="error" role="alert">
-                Progress isn't being saved here; download the file before closing.
-              </p>
-            )}
-
-            <div className="stage">
-              <video ref={videoRef} className="video" autoPlay playsInline muted />
-              <canvas ref={canvasRef} className="overlay" />
-              {!isLive && (
-                <p className="stage-message">{status === 'starting' ? 'Waiting for the camera…' : 'Camera is off'}</p>
-              )}
-            </div>
-            <div className="controls">
-              {status === 'idle' ? (
-                <button type="button" className="button" onClick={start}>Start camera</button>
-              ) : (
-                <button type="button" className="button" onClick={stop}>
-                  {status === 'starting' ? 'Cancel' : 'Stop camera'}
-                </button>
-              )}
-              {isLive && <span className="hand-status">{describeHand(handModel.status, hand.handLabel)}</span>}
-            </div>
-            {error && <p className="error" role="alert">{error}</p>}
-            {isLive && (handModel.error || hand.error) && (
-              <p className="error" role="alert">{handModel.error || hand.error}</p>
-            )}
-
-            {letters.status === 'error' && (
-              <p className="error" role="alert">Couldn't load the letter list (public/languages/asl/letters.json).</p>
-            )}
-            {letters.status === 'ready' && letters.training.length === 0 && (
-              <p className="error">No training letters configured yet.</p>
-            )}
-            {/* Task 7 adds the recording grid and the take panel here. */}
-          </>
-        )}
+        <p>The {name} page isn't built yet.</p>
       </main>
     </>
   )
 }
+```
 
-function describeHand(modelStatus, handLabel) {
-  if (modelStatus === 'loading' || modelStatus === 'idle') return LOADING_HAND_MODEL
-  if (modelStatus === 'error') return 'Hand tracking is off'
-  return handLabel ? `Hand found (${handLabel})` : 'No hand'
+Replace `src/App.jsx`:
+
+```jsx
+import { useEffect, useState } from 'react'
+import CameraProvider from './app/CameraProvider.jsx'
+import PhoneNotice from './app/PhoneNotice.jsx'
+import { navigate, usePathname } from './app/navigation.js'
+import { resolveRoute } from './app/router.js'
+import RecordPage from './pages/record/RecordPage.jsx'
+import DevPage from './pages/DevPage.jsx'
+import NotBuiltYet from './pages/NotBuiltYet.jsx' // later: LearnPage and PracticePage stand-ins
+
+// Pages narrower than this get the phone notice (from the design).
+const SMALL_SCREEN = '(max-width: 899px)'
+
+// The app shell: reads the address, picks the page, and wraps every page
+// in the shared camera. Changing pages never reloads the page.
+export default function App() {
+  const pathname = usePathname()
+  const route = resolveRoute(pathname)
+  // Checked once, when the page opens: a phone doesn't change size, and a
+  // computer whose window is made narrow later shouldn't lose its page.
+  const [showPhoneNotice, setShowPhoneNotice] = useState(() => window.matchMedia(SMALL_SCREEN).matches)
+
+  // An address with no page of its own is replaced rather than added to the
+  // history, so Back doesn't land on it again.
+  useEffect(() => {
+    if (route.redirect) navigate(route.redirect, { replace: true })
+  }, [route.redirect])
+
+  // The notice replaces the app rather than covering it, so nothing behind it
+  // (such as the camera) starts.
+  if (showPhoneNotice) return <PhoneNotice onContinue={() => setShowPhoneNotice(false)} />
+
+  return <CameraProvider>{route.page && <Page name={route.page} />}</CameraProvider>
+}
+
+function Page({ name }) {
+  switch (name) {
+    case 'record':
+      return <RecordPage />
+    case 'dev':
+      return <DevPage />
+    default:
+      return <NotBuiltYet name={name} />
+  }
 }
 ```
 
-- [ ] **Step 6: Styles**
+- [ ] **Step 11: The recorder uses the shared camera**
 
-Append to `src/styles.css`:
+In `src/pages/record/RecordPage.jsx`:
 
-```css
-/* Recorder page (record.html) */
-.consent h1 {
-  margin: 0 0 16px;
-  font-size: 1.5rem;
-}
+- Replace the `useCamera()` and `useHandLandmarker(isLive, 'GPU')` lines with `const { videoRef, status, error, start, stop, handModel } = useSharedCamera()`.
+- Replace `<header className="top-bar">…</header>` with `<MenuBar active="record">`. Put the existing session bar inside it, as children.
+- Replace the `.stage` div's `<video>` and `<canvas>` with `<CameraStage canvasRef={canvasRef}>`, keeping `stage-message` and `TakeOverlay` as children.
 
-.consent-text p {
-  margin: 0 0 12px;
-}
+Leave everything else as is; the new Record layout is Task 8.
 
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-top: 16px;
-  color: var(--muted-text);
-}
+- [ ] **Step 12: One HTML file, and the Vercel rewrite**
 
-.field input {
-  max-width: 240px;
-  padding: 8px 10px;
-  font: inherit;
-  color: var(--deep-cobalt);
-  background: #fff;
-  border: 1px solid var(--muted-text);
-  border-radius: 8px;
-}
+- Delete `record.html` and `src/recorder/main.jsx`.
+- In `vite.config.js`, remove the `build` block and the `fileURLToPath` import.
+- Replace `vercel.json` with:
 
-.check {
-  display: flex;
-  gap: 8px;
-  align-items: flex-start;
-  margin-top: 12px;
-}
-
-.consent .button {
-  margin-top: 24px;
-}
-
-.button:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-
-.field input:focus-visible,
-.check input:focus-visible {
-  outline: 3px solid var(--deep-sky);
-  outline-offset: 2px;
-}
-
-.saved-session p,
-.session-bar {
-  margin: 0 0 16px;
-}
-
-.session-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 16px;
-  color: var(--muted-text);
-}
-
-.session-bar .button-quiet {
-  margin-top: 0;
-}
-
-.hand-status {
-  color: var(--muted-text);
+```json
+{
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }
 ```
+
+Vercel serves real files before applying rewrites, so the model, MediaPipe's files and `letters.json` still load. `vite` and `vite preview` already serve `index.html` for unknown paths.
+
+- [ ] **Step 13: Docs**
+
+- **README:**
+  - "Deploy (Vercel)": `vercel.json` rewrites every path to `index.html`, so refreshing any page loads the app, which shows the right page. Real files are served first. Remove the `cleanUrls` and "must exclude `/record`" lines.
+  - "Recording sessions": the address is `/record` in development too (no `.html`).
+  - Benchmark: it's on `/dev`, under Developer settings.
+  - Project structure: remove `record.html` and `src/recorder/main.jsx`; add `src/app/` and `src/pages/`.
+- **CLAUDE.md:**
+  - Phases: Phase 2 is in progress (the recorder is on `phase-2-1-recorder`); Phase 3.1 is being done early there.
+  - Folder structure: add `app/` (router, navigation, shared camera, menu) and `pages/`; remove "don't create `src/pages/` early".
+  - Replace the `/record` routing warning with a routing section:
+    - routes are in `src/app/router.js`
+    - `vercel.json` rewrites every path to `index.html`
+    - don't add a second HTML page
+  - Camera conventions:
+    - the camera and hand model live in `CameraProvider`
+    - pages show the camera through `CameraStage`
+    - the camera stops when no `CameraStage` is on screen
+    - `/dev` keeps its own camera
+
+- [ ] **Step 14: Verify**
+
+Run: `npm test && npm run lint && npm run build && ls dist/*.html`
+Expected: all tests pass, no lint warnings, the build passes, and only `dist/index.html` is listed.
+
+Check with the shared harness, on `npx vite --port 5199` and again on `npx vite preview --port 5198` after the build:
+
+- `/record`, `/record/` and `/dev` load their pages directly, including after `Page.reload`.
+- `/nope` and `/record.html` end at `/`, and the redirect adds no history entry (a new tab opened on `about:blank` has `history.length === 2` afterwards, not 3).
+- Clicking Learn in the menu changes the address without a reload: `window.__marker = 1` set before the click is still there after it. Back returns to `/record`.
+- A `click` event dispatched on a menu link with `ctrlKey: true` is not `defaultPrevented`.
+- The recorder still works end to end with `hand-only.y4m`: consent, Start camera, "Hand found", one accepted take, Download, and `npm run check-session` OK.
+- The camera starts by itself when the session view opens (1 live track, one `getUserMedia` call even in StrictMode); there's none on the consent step.
+- Light off: leaving Record through the menu → 0 live tracks; coming back to the session offer → still 0; Stop camera → 0, and it stays off. Click Start camera and then Learn straight away, while it's still starting → 0 live tracks after 3 s.
+- Phone notice: at 390 × 844 the notice shows with nothing behind it; Continue on this phone shows the app.
+- Headless Chrome only: hide WebGL float textures with `Page.addScriptToEvaluateOnNewDocument`, so MediaPipe falls back to its CPU delegate. Its GPU delegate runs in slow software emulation there, and takes fail with "never arrived".
+- `/dev`: Start camera → "Hand found"; Developer settings shows the benchmark.
+- No console errors apart from MediaPipe's known noise.
+
+- [ ] **Step 15: Report and stop**
+
+- Run `git status --short` and `git diff --cached --name-only`, and confirm nothing under `docs/design/` is listed.
+- Summarize the change, and give Lanix the Chrome checks:
+  - open `/record` and refresh
+  - use the menu and the Back button
+  - Stop the camera by leaving Record, and check the light goes off
+  - `/dev` and its benchmark still work
+- Proposed commit message: `feat(shell): add app shell and menu (Phase 3.1, done early: the recorder now lives inside the app after setup)`
+- Wait for Lanix's go-ahead.
+
+---
+
+### Task 7 (step 3): Welcome and setup
+
+Phase 3.1, and the signing-hand part of 3.2, done early. After this task:
+
+- a new visitor goes Welcome → How Sema works → Signing hand → Camera check → Record
+- a returning visitor opens on Record
+
+**Files:**
+
+- **Create:**
+  - `src/app/progressStore.js`, `src/app/progressStore.test.js`
+  - `src/vision/handChecks.js`, `src/vision/handChecks.test.js`
+  - `src/pages/onboarding/SetupBar.jsx`
+  - `src/pages/onboarding/WelcomePage.jsx`, `src/pages/onboarding/HowSemaWorksPage.jsx`, `src/pages/onboarding/SigningHandPage.jsx`, `src/pages/onboarding/CameraCheckPage.jsx`
+- **Modify:** `src/app/router.js`, `src/app/router.test.js`, `src/App.jsx`, `src/styles.css`, `README.md`, `CLAUDE.md`, `docs/project-plan.md`
+
+**Design source** (in `docs/design/`):
+
+| Page | File |
+| --- | --- |
+| Welcome | `Welcome.dc.html` |
+| How Sema works | `SetupData.dc.html` |
+| Signing hand | `Setup.dc.html` |
+| Camera check | `SetupCamera.dc.html` (states: working, other hand, blocked, busy, no camera, stopped, no WebGL) |
+
+Before writing each page's JSX, list its states in the ledger: default, selected, disabled Continue, camera starting, checks pending or passed, other hand, each error.
+
+**Interfaces:**
+
+- **Consumes** (from Task 6): `PATHS`, `navigate`, `Link`, `useSharedCamera`, `CameraStage`, `PreviewPill`; plus `useHandDetection` and `toPhysicalHand` (existing).
+- **Produces:**
+  - `loadProgress() → { version: 1, signingHand: 'left' | 'right' | null, setupDone: boolean }`, `saveProgress(progress) → boolean`, `NEW_VISITOR`, `PROGRESS_VERSION`
+  - `resolveRoute(pathname, { signingHand, setupDone }) → { page } | { redirect }`
+  - `checkHand(detection, signingHand) → { hand: 'none' | 'match' | 'other', wholeHand: boolean }`, `EDGE_MARGIN`
+  - `<SetupBar step>`: `step` is 1, 2 or 3
+
+- [ ] **Step 1: Write the failing settings test**
+
+Create `src/app/progressStore.test.js`:
+
+```js
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { NEW_VISITOR, PROGRESS_VERSION, loadProgress, saveProgress } from './progressStore.js'
+
+function fakeStorage(initial = {}, { failWrites = false } = {}) {
+  const data = new Map(Object.entries(initial))
+  return {
+    getItem: (key) => (data.has(key) ? data.get(key) : null),
+    setItem: (key, value) => {
+      if (failWrites) throw new DOMException('Quota exceeded', 'QuotaExceededError')
+      data.set(key, String(value))
+    },
+  }
+}
+const saved = (value) => ({ 'sema.progress': JSON.stringify(value) })
+
+afterEach(() => vi.unstubAllGlobals())
+
+describe('progressStore', () => {
+  it('starts as a new visitor', () => {
+    vi.stubGlobal('localStorage', fakeStorage())
+    expect(loadProgress()).toEqual(NEW_VISITOR)
+  })
+
+  it('saves and loads the signing hand and setup', () => {
+    vi.stubGlobal('localStorage', fakeStorage())
+    const progress = { version: PROGRESS_VERSION, signingHand: 'left', setupDone: true }
+    expect(saveProgress(progress)).toBe(true)
+    expect(loadProgress()).toEqual(progress)
+  })
+
+  it('treats unreadable JSON as a new visitor', () => {
+    vi.stubGlobal('localStorage', fakeStorage({ 'sema.progress': '{not json' }))
+    expect(loadProgress()).toEqual(NEW_VISITOR)
+  })
+
+  it('treats another version as a new visitor', () => {
+    vi.stubGlobal('localStorage', fakeStorage(saved({ version: 99, signingHand: 'left', setupDone: true })))
+    expect(loadProgress()).toEqual(NEW_VISITOR)
+  })
+
+  it('ignores an unknown hand, and setup marked done without a hand', () => {
+    vi.stubGlobal('localStorage', fakeStorage(saved({ version: PROGRESS_VERSION, signingHand: 'both', setupDone: true })))
+    expect(loadProgress()).toEqual(NEW_VISITOR)
+  })
+
+  it('treats blocked storage as a new visitor', () => {
+    vi.stubGlobal('localStorage', {
+      getItem: () => {
+        throw new DOMException('Blocked', 'SecurityError')
+      },
+    })
+    expect(loadProgress()).toEqual(NEW_VISITOR)
+  })
+
+  it('reports a refused save', () => {
+    vi.stubGlobal('localStorage', fakeStorage({}, { failWrites: true }))
+    expect(saveProgress({ version: PROGRESS_VERSION, signingHand: 'right', setupDone: false })).toBe(false)
+  })
+})
+```
+
+- [ ] **Step 2: Run it**
+
+Run: `npm test -- src/app/progressStore.test.js`
+Expected: FAIL, `Failed to resolve import "./progressStore.js"`.
+
+- [ ] **Step 3: Write the settings store**
+
+Create `src/app/progressStore.js`:
+
+```js
+// Sema's settings, kept in this browser's localStorage so they survive a
+// reload: the signing hand and whether setup is done. Pages never touch
+// localStorage themselves; they go through this module, so per-letter
+// progress (3.2) or accounts (Phase 5) can be added in one place.
+const KEY = 'sema.progress'
+const HANDS = ['left', 'right']
+
+export const PROGRESS_VERSION = 1
+export const NEW_VISITOR = { version: PROGRESS_VERSION, signingHand: null, setupDone: false }
+
+// The saved settings, or NEW_VISITOR if there are none, they can't be read,
+// or they're from another version. localStorage itself can throw (site data
+// blocked), hence the try.
+export function loadProgress() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(KEY))
+    if (saved?.version !== PROGRESS_VERSION) return NEW_VISITOR
+    const signingHand = HANDS.includes(saved.signingHand) ? saved.signingHand : null
+    // Setup can't be done without a signing hand.
+    return { version: PROGRESS_VERSION, signingHand, setupDone: saved.setupDone === true && signingHand !== null }
+  } catch {
+    return NEW_VISITOR
+  }
+}
+
+// Saves the settings. Returns false if the browser refused (storage full or
+// blocked): the app keeps working, it just won't remember after a reload.
+export function saveProgress(progress) {
+  try {
+    localStorage.setItem(KEY, JSON.stringify(progress))
+    return true
+  } catch {
+    return false
+  }
+}
+```
+
+- [ ] **Step 4: Run it**
+
+Run: `npm test -- src/app/progressStore.test.js`
+Expected: PASS (7 tests).
+
+- [ ] **Step 5: Write the failing setup-route tests**
+
+Replace `src/app/router.test.js`:
+
+```js
+import { describe, expect, it } from 'vitest'
+import { PATHS, resolveRoute } from './router.js'
+
+const newVisitor = { signingHand: null, setupDone: false }
+const choseHand = { signingHand: 'left', setupDone: false }
+const returning = { signingHand: 'right', setupDone: true }
+
+describe('resolveRoute', () => {
+  it('opens every page but Welcome for a returning visitor', () => {
+    for (const [page, path] of Object.entries(PATHS)) {
+      if (page !== 'welcome') expect(resolveRoute(path, returning)).toEqual({ page })
+    }
+  })
+
+  it('sends a returning visitor from Welcome to Record', () => {
+    expect(resolveRoute('/', returning)).toEqual({ redirect: '/record' })
+  })
+
+  it('sends a new visitor from Record, Learn and Practice to Welcome', () => {
+    for (const path of ['/record', '/learn', '/practice']) {
+      expect(resolveRoute(path, newVisitor)).toEqual({ redirect: '/' })
+    }
+  })
+
+  it('lets a new visitor open Welcome, the first setup steps and /dev', () => {
+    for (const page of ['welcome', 'howSemaWorks', 'signingHand', 'dev']) {
+      expect(resolveRoute(PATHS[page], newVisitor)).toEqual({ page })
+    }
+  })
+
+  it('asks for the signing hand before the camera check', () => {
+    expect(resolveRoute('/setup/camera', newVisitor)).toEqual({ redirect: '/setup/hand' })
+    expect(resolveRoute('/setup/camera', choseHand)).toEqual({ page: 'cameraCheck' })
+  })
+
+  it('ignores a trailing slash', () => {
+    expect(resolveRoute('/record/', returning)).toEqual({ page: 'record' })
+  })
+
+  it('sends unknown paths to Welcome', () => {
+    expect(resolveRoute('/nope', newVisitor)).toEqual({ redirect: '/' })
+    expect(resolveRoute('/record.html', returning)).toEqual({ redirect: '/' })
+  })
+})
+```
+
+Run: `npm test -- src/app/router.test.js`
+Expected: FAIL. Three tests fail: "sends a returning visitor from Welcome to Record", "sends a new visitor from Record, Learn and Practice to Welcome", and "asks for the signing hand before the camera check".
+
+- [ ] **Step 6: Add the setup rules**
+
+In `src/app/router.js`, replace `resolveRoute` with:
+
+```js
+// Pages that need setup finished first.
+const NEEDS_SETUP = ['record', 'learn', 'practice']
+
+// Which page a path shows, as { page: 'record' }, or { redirect: '/' } to
+// send the person somewhere else. `progress` is the saved settings
+// (progressStore): a new visitor goes through setup first, and a returning one
+// skips Welcome. A trailing slash is ignored.
+export function resolveRoute(pathname, { signingHand, setupDone }) {
+  const path = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname
+  const page = Object.keys(PATHS).find((name) => PATHS[name] === path)
+  if (!page) return { redirect: PATHS.welcome }
+  if (page === 'welcome' && setupDone) return { redirect: PATHS.record }
+  if (NEEDS_SETUP.includes(page) && !setupDone) return { redirect: PATHS.welcome }
+  if (page === 'cameraCheck' && !signingHand) return { redirect: PATHS.signingHand }
+  return { page }
+}
+```
+
+Run: `npm test -- src/app/router.test.js`
+Expected: PASS (7 tests).
+
+- [ ] **Step 7: Write the failing camera-check test**
+
+Create `src/vision/handChecks.test.js`:
+
+```js
+import { describe, expect, it } from 'vitest'
+import { EDGE_MARGIN, checkHand } from './handChecks.js'
+
+// 21 points spread over the middle of the frame.
+const centred = Array.from({ length: 21 }, (_, i) => ({ x: 0.3 + i * 0.01, y: 0.3 + i * 0.01, z: 0 }))
+const detection = (label, landmarks = centred) => ({ landmarks, handedness: { categoryName: label, score: 0.97 } })
+const moved = (index, point) => centred.map((p, i) => (i === index ? { ...p, ...point } : p))
+
+describe('checkHand', () => {
+  it('finds no hand when there is none', () => {
+    expect(checkHand({ landmarks: null, handedness: null }, 'right')).toEqual({ hand: 'none', wholeHand: false })
+  })
+
+  it('matches the signing hand', () => {
+    expect(checkHand(detection('Right'), 'right')).toEqual({ hand: 'match', wholeHand: true })
+    expect(checkHand(detection('Left'), 'left')).toEqual({ hand: 'match', wholeHand: true })
+  })
+
+  it('notices the other hand', () => {
+    expect(checkHand(detection('Left'), 'right').hand).toBe('other')
+  })
+
+  it('needs the wrist inside the frame', () => {
+    expect(checkHand(detection('Right', moved(0, { y: 1 - EDGE_MARGIN / 2 })), 'right').wholeHand).toBe(false)
+  })
+
+  it('needs every fingertip inside the frame', () => {
+    expect(checkHand(detection('Right', moved(8, { x: -0.01 })), 'right').wholeHand).toBe(false)
+  })
+})
+```
+
+Run: `npm test -- src/vision/handChecks.test.js`
+Expected: FAIL, `Failed to resolve import "./handChecks.js"`.
+
+- [ ] **Step 8: Write the checks**
+
+Create `src/vision/handChecks.js`:
+
+```js
+import { toPhysicalHand } from './handedness.js'
+
+// How far inside the frame's edges every hand point must be for "whole hand in
+// view", as a fraction of the frame (0.02 = 2%).
+export const EDGE_MARGIN = 0.02
+
+// The camera step's two checks for one detection result (the object
+// useHandDetection gives its listener).
+// hand: 'none' (no hand), 'match' (the signing hand) or 'other' (the other one).
+// wholeHand: every point, wrist included, is inside the frame.
+export function checkHand(detection, signingHand) {
+  if (!detection?.landmarks || !detection.handedness) return { hand: 'none', wholeHand: false }
+  const detected = toPhysicalHand(detection.handedness.categoryName).toLowerCase()
+  const inside = (value) => value >= EDGE_MARGIN && value <= 1 - EDGE_MARGIN
+  return {
+    hand: detected === signingHand ? 'match' : 'other',
+    wholeHand: detection.landmarks.every((point) => inside(point.x) && inside(point.y)),
+  }
+}
+```
+
+Run: `npm test -- src/vision/handChecks.test.js`
+Expected: PASS (5 tests).
+
+- [ ] **Step 9: The shell keeps the settings**
+
+In `src/App.jsx`:
+
+```jsx
+  const [progress, setProgress] = useState(loadProgress)
+  // Settings changes are saved straight away. If the browser refuses, the app
+  // carries on; the settings just won't survive a reload.
+  function updateProgress(changes) {
+    const next = { ...progress, ...changes }
+    setProgress(next)
+    saveProgress(next)
+  }
+  const route = resolveRoute(pathname, progress)
+```
+
+Then add these pages to the `Page` switch, passing what each needs:
+
+- `welcome` → `<WelcomePage />`
+- `howSemaWorks` → `<HowSemaWorksPage />`
+- `signingHand` → `<SigningHandPage signingHand onChoose={(hand) => updateProgress({ signingHand: hand })} />`
+- `cameraCheck` → `<CameraCheckPage signingHand onSwitchHand onDone />`
+  - `onDone` calls `updateProgress({ setupDone: true })`, then `navigate(PATHS.record)`
+  - `onSwitchHand` exists only if the other-hand state offers a switch
+- `record` → `<RecordPage signingHand={progress.signingHand} />`
+
+The setting and the navigation happen in one click, so React applies them in one render. The router never sees one without the other.
+
+- [ ] **Step 10: The pages**
+
+Build each from its `.dc.html`, in order, checking each in the browser before the next.
+
+- **`SetupBar({ step })`:** "Sema" plus `<PreviewPill />` on the left; "Step N of 3" and three segments on the right. The segments are decoration for the text, so give them `aria-hidden`.
+- **`WelcomePage`:**
+  - **Left panel:** the hand illustration, "σῆμα · a sign" and the tagline. If the `.dc.html` contains the illustration as SVG, use that; otherwise ask Lanix rather than draw one.
+  - **Right panel:** name, pill, descriptor, heading, the "No account…" line, the "still being built" note, and **Get started** (a `<Link>` to `PATHS.howSemaWorks`, styled as the primary button).
+  - **"How Sema handles your camera":** a `<details>` with the design's text.
+- **`HowSemaWorksPage`** (Step 1 of 3): the four points and the footnote.
+  - **Back** → `PATHS.welcome`; **Continue** → `PATHS.signingHand`.
+  - The second point's text is "Hand detection runs in your browser. Your video is never uploaded or recorded." (decided 2026-10-15; the `.dc.html` already says so).
+- **`SigningHandPage`** (Step 2 of 3): Left and Right are two toggle buttons with `aria-pressed`, in a `role="group"`, as in the design. A new visitor starts on Right (the design's default).
+  - **Starting choice:** the saved hand. What a new visitor starts with comes from the `.dc.html` states.
+  - **Continue:** calls `onChoose(hand)`, then `navigate(PATHS.cameraCheck)`. It's disabled until a hand is chosen, if the design says so.
+  - **Back:** → `PATHS.howSemaWorks`.
+- **`CameraCheckPage`** (Step 3 of 3):
+  - **Camera:** `useSharedCamera()` provides it; `<CameraStage>` shows the view; `useHandDetection` runs with a `listenerRef` whose function calls `checkHand(detection, signingHand)`. Only call `setState` when the result changes, so it doesn't re-render 30 times a second.
+  - **Steady checks:** keep the last result until `useHandDetection` reports the hand lost (its 300 ms rule).
+  - **Status strip:** the two checks, the signing hand found and the whole hand in view, with the design's wording; it says "Right hand" or "Left hand" from the setting.
+  - **Camera picker:** the provider's `cameras`, `deviceId` and `switchCamera`.
+  - **Starting the camera:** it starts by itself when the page opens (`CameraStage` + `CameraProvider`, Task 6). After an error, offer a button to try again.
+  - **States to cover**, with text from the `.dc.html`, or else the existing messages:
+    - starting
+    - checks pending
+    - checks passed
+    - the other hand
+    - camera blocked, busy, not found, insecure page, or unplugged (`cameraMessages.js`)
+    - hand tracking failed, including no WebGL (`visionMessages.js`)
+  - **Continue:** `onDone()`. As designed, it's open unless the camera or hand tracking failed; the checks are guidance ("When both checks turn blue, you're ready").
+  - **Back:** → `PATHS.signingHand`.
+
+- [ ] **Step 11: Docs**
+
+- **README:** the first-run flow (Welcome → How Sema works → Signing hand → Camera check → Record). Returning visitors open on Record. Clearing site data starts setup again.
+- **CLAUDE.md:**
+  - settings live in `src/app/progressStore.js`; pages never touch `localStorage`
+  - the setup redirects live in `router.js`
+  - the camera check's rules live in `src/vision/handChecks.js`
+- **`docs/project-plan.md`:** set the 3.1 row's status. Leave the 3.2 hand menu, Reset progress and per-letter progress as not started.
+
+- [ ] **Step 12: Verify**
+
+Run: `npm test && npm run lint && npm run build`
+Expected: all pass, no warnings.
+
+Check with the shared harness (fresh Chrome profile, `hand-only.y4m`):
+
+- `/` shows Welcome. Get started → `/setup/how-it-works` ("Step 1 of 3") → Continue → `/setup/hand` ("Step 2 of 3").
+- Choosing a hand and pressing Continue goes to `/setup/camera` ("Step 3 of 3"). Each step's Back returns to the one before, and the hand choice is kept.
+- The camera check with the hand that MediaPipe detects in the video: both checks pass. With the other hand chosen: the other-hand state shows.
+- Continue → `/record`, and `localStorage['sema.progress']` is `{"version":1,"signingHand":…,"setupDone":true}`.
+- Reload at `/` → `/record`. With a fresh profile: `/record` → `/`, and `/setup/camera` → `/setup/hand`.
+- **Camera blocked:** a Chrome started without `--use-fake-ui-for-media-stream` plus `Browser.setPermission({ permission: { name: 'videoCapture' }, setting: 'denied' })` shows the blocked message in the camera area.
+- **No WebGL:** `Page.addScriptToEvaluateOnNewDocument` wrapping `HTMLCanvasElement.prototype.getContext` to return `null` for `'webgl2'` shows the WebGL message.
+- Back from the camera check → 0 live tracks.
+
+- [ ] **Step 13: Report and stop**
+
+- Run `git status --short` and `git diff --cached --name-only`, and confirm nothing under `docs/design/` is listed.
+- Summarize the change and give Lanix the Chrome checks:
+  - the setup flow with a real left and right hand
+  - the other-hand state
+  - a blocked camera (site settings)
+  - reload on each step
+  - a returning visit
+- Proposed commit message: `feat(setup): add Welcome and the setup steps (Phase 3.1–3.2, done early: setup now leads into the recorder)`
+- Wait.
+
+
+**Built (2026-10-15), with these rulings:**
+
+- **Extra files:** `src/components/icons.jsx` (icons shared by several pages); `cameraErrorKind` in `cameraMessages.js` with `cameraMessages.test.js`. `useCamera` returns `errorKind` and `useHandLandmarker` returns `errorName`, so the camera check can show the design's text per problem. The camera check's titles and texts live in `cameraMessages.js` and `visionMessages.js`.
+- **Greek subset (Lanix's decision):** `public/fonts/NotoSansMono-Greek-Medium.woff2` (3,180 bytes, Noto Sans Mono 2.014 Medium, only σ ῆ μ α) with `OFL-NotoSansMono.txt`. It's first in `--font-mono`, with a `unicode-range`, so it's only downloaded where those letters appear.
+- **"Sign with my left hand instead"** switches the setting on the spot and stays on the camera check. The design links back to step 2, but the button's words promise the switch itself.
+- **Wording the design doesn't show (for Lanix to confirm):** the hand check before any hand appears ("Waiting for your right hand"); the whole-hand check once it passes ("Whole hand in view"); the title for camera errors the design doesn't list, such as an insecure page ("The camera didn't start", followed by the existing message); and the title for hand-tracking failures other than no WebGL ("Hand tracking couldn't start", followed by the existing message).
+- **Camera picker:** before permission it shows the design's "Default webcam"; a long camera name is cut off with "…" instead of widening the column.
+- **Checks:** 44 headless checks pass on `vite` and `vite preview`. The fake camera's photo shows the whole hand, so the "wrist out of frame" warning is covered by `handChecks.test.js` but not in the browser.
+---
+
+### Task 8 (step 4): Record page inside the shell
+
+Phase 3.1, done early. This is the recorder's new layout from the design. The take logic, session file and storage stay as they are.
+
+**Files:**
+
+- **Already moved:** `src/recorder/RecorderApp.jsx` → `src/pages/record/RecordPage.jsx` (`git mv` in the reorganization, so the history follows)
+- **Create:** `src/pages/record/HandToggle.jsx`, `src/pages/record/TakeResult.jsx`
+- **Modify:**
+  - page parts: `src/pages/record/RecordingGrid.jsx`, `TakePanel.jsx`, `TakeOverlay.jsx`, `ConsentForm.jsx`
+  - logic: `src/recorder/useRecording.js`, `takeRules.js`, `takeRules.test.js`
+  - shell and styles: `src/App.jsx`, `src/styles.css`
+  - docs: `README.md`, `docs/data-format.md` (only if the reason wording changes)
+
+**Design source:** `docs/design/Record.dc.html` (states: consent, recording, finished).
+
+**Ask Lanix before building** (the design and the approved spec disagree):
+
+- **Consent: decided (Lanix, 2026-10-16).** Training only, as in commit `b7c39ee`; the design's "published in a public dataset" box is out of scope. The page uses the design's consent wording otherwise.
+- File name: decided (2026-10-15). Keep the spec's `sema-asl-p03-2026-11-02a.json`; the design's shorter name is outdated.
+
+- **States:** list them in the ledger first: consent, saved session offered, camera off, countdown, hold, saving, accepted, not kept, discarded, storage failed, letters failed to load, all done.
+- **Consent page:** if the design has no consent or saved-session state, ask Lanix whether to keep the current forms restyled with the new tokens.
+
+**Interfaces:**
+
+- **Consumes:**
+  - `useSharedCamera`, `CameraStage`, `MenuBar` (Task 6)
+  - `signingHand` from `App` (Task 7)
+  - `useRecording`, `sessionFile`, `sessionStore`, `letters` (existing)
+- **Produces:**
+  - `RecordPage({ signingHand })`
+  - `HandToggle({ hand, onChange, disabled })`
+  - `RecordingGrid({ training, pilot, session, hand, selected, onSelect, disabled })`
+  - `captureProgress(elapsedMs) → number between 0 and 1`
+  - `useRecording` returns `kept` (frames with a hand so far) during capture
+
+- [ ] **Step 1: Write the failing capture-progress test**
+
+Add to `src/recorder/takeRules.test.js`:
+
+```js
+describe('captureProgress', () => {
+  it('is 0 before capture, 1 after, and in between during it', () => {
+    expect(captureProgress(0)).toBe(0)
+    expect(captureProgress(COUNTDOWN_MS + SETTLE_MS)).toBe(0)
+    expect(captureProgress(COUNTDOWN_MS + SETTLE_MS + CAPTURE_MS / 2)).toBe(0.5)
+    expect(captureProgress(COUNTDOWN_MS + SETTLE_MS + CAPTURE_MS * 2)).toBe(1)
+  })
+})
+```
+
+Add `captureProgress` to that file's import from `./takeRules.js`, and import `COUNTDOWN_MS`, `SETTLE_MS` and `CAPTURE_MS` if they aren't imported already.
+
+Run: `npm test -- src/recorder/takeRules.test.js`
+Expected: FAIL, `captureProgress is not a function`.
+
+- [ ] **Step 2: Write it**
+
+Add to `src/recorder/takeRules.js`:
+
+```js
+// How far through capture a take is, from 0 to 1, for the progress bar under
+// the video. 0 during the countdown and settle; 1 once capture is over.
+export function captureProgress(elapsed) {
+  const intoCapture = elapsed - COUNTDOWN_MS - SETTLE_MS
+  return Math.min(1, Math.max(0, intoCapture / CAPTURE_MS))
+}
+```
+
+Run: `npm test -- src/recorder/takeRules.test.js`
+Expected: PASS.
+
+- [ ] **Step 3: Live counts from the take**
+
+In `useRecording.js`'s `tick`, add `kept: take.frames.length` and `progress: captureProgress(elapsed)` to the `setState` call. The overlay's "18 / 30 frames" uses `kept` and `EXPECTED_SAMPLES`.
+
+The `.dc.html` decides whether the number is frames with a hand (`kept`) or matched frames (`kept` minus the other hand). If it's matched, also count `mismatched` per frame in `onDetection` using `frameFromDetection`'s `detected`. Record the choice as a ledger ruling.
+
+- [ ] **Step 4: Wording from the design**
+
+Compare the recorder's texts with the `.dc.html`:
+
+- the position hints (`POSITION_HINTS`: today "Closer to the camera"; the PNG says "a little closer")
+- the rejection reason (today "4 had the other hand detected"; the PNG says "4 had the other hand")
+- "Take N of 3"
+
+Where the design's text is different:
+
+- **Position hints:** change the constant and the tests that quote it.
+- **Rejection reason:** it's also saved in the session file's `reason`. Change `judgeTake` and its test, plus the example in `docs/data-format.md` and in the spec's §5. Nothing reads `reason` back (`check-session` doesn't), so the format version stays 1.
+
+- [ ] **Step 5: The Record page**
+
+The page is already at `src/pages/record/RecordPage.jsx` (moved and renamed in the folder reorganization). Build the layout from the `.dc.html`:
+
+- **Menu bar, right side:** the session (`p03 · 2026-11-02a`) and its save state ("Saved in this browser · 14 takes"). When saving failed, show the warning instead.
+- **Stage** (`<CameraStage>`):
+  - the countdown and "Hold…" (`TakeOverlay`)
+  - "18 / 30 frames"
+  - the capture progress bar (`recording.progress`)
+  - the camera-off and starting messages
+- **Under the stage:** "Only hand points are saved. No video."
+- **Side column:**
+  - **`HandToggle`** (Left / Right, as a radio group). It starts on `signingHand`. Switching it doesn't change the setting: the recorder collects both hands.
+  - **The letter card** (`TakePanel`).
+  - **`TakeResult`**: the last take's result, saved or not kept with its reason. This moves off the video.
+  - **Record take** and **Undo last take**.
+- **Bottom:**
+  - `RecordingGrid` for the chosen hand: "Right hand · takes kept", one tile per class (training letters, None, then pilot letters marked as pilot)
+  - the legend
+  - the pilot note
+  - **Finish and download**
+- **Choosing a tile:** sets `cell = { letter, hand }`. Switching hands keeps the letter. Which tile starts selected, and whether the page moves on after the third kept take, come from the design's states.
+- **Kept as they are:** the consent step first, the saved-session offer, Delete, Start a new session, the "Leave site?" warning, and Delete/Download disabled mid-take. The `.dc.html` places them.
+
+- [ ] **Step 6: Docs**
+
+- **README "Recording sessions":**
+  - People open Sema, finish setup, and land on Record.
+  - In person: Lanix sets up the laptop once; each participant consents on Record.
+  - Remotely: send the site's address.
+  - The hand toggle starts on the signing hand.
+- **`docs/data-format.md`:** only if step 4 changed the reason wording.
 
 - [ ] **Step 7: Verify**
 
-Run: `npm run lint` (no warnings), `npm test` (all pass), `npm run build`.
-Expected: build output lists both `dist/index.html` and `dist/record.html`.
-Then `npm run dev` and open `http://localhost:5173/record.html` in Chrome:
-- The consent form shows; Start session stays disabled until a valid code is typed and the first box is ticked; `P03` is accepted.
-- After starting, the session bar shows; refreshing the page offers "Continue session p03 · …"; Delete asks for confirmation and clears it; after Download, "Start a new session" appears and returns to the consent form.
-- Start camera shows the mirrored video and skeleton.
-- `http://localhost:5173/` (main page) still works.
+Run: `npm test && npm run lint && npm run build`
+Expected: all pass, no warnings.
 
-- [ ] **Step 8: Report**
+Check with the shared harness, setup done first through `localStorage` (`sema.progress` = `{"version":1,"signingHand":"right","setupDone":true}`):
 
-`git status --short`. Explain the two-page build and why `/record.html` is the dev URL (Vercel's `cleanUrls` serves it at `/record`). Suggested commit message: `Add the recorder page with consent and session storage`.
+- `/record` shows consent. With a code and the box ticked, the session view opens with the hand toggle on Right.
+- **`hand-only.y4m`:** on the hand MediaPipe detects, a take is accepted and the tile shows 1/3. On the other hand, the take is not kept, with the other-hand reason in the result card.
+- **`hand-mixed.y4m`:** the take is not kept, with "had no hand".
+- During capture, the overlay shows "N / 30 frames" and the bar grows.
+- Undo removes the last take. Finish and download saves the file, and `npm run check-session` on it prints OK.
+- Clicking Learn mid-take, then Record: the take is not in the file, the session is offered back, and on Learn there are 0 live tracks.
+- Reload → the session is offered back.
 
+- [ ] **Step 8: Report and stop**
+
+- Run `git status --short` and `git diff --cached --name-only`, and confirm nothing under `docs/design/` is listed.
+- Summarize the change and give Lanix the Chrome checks:
+  - a few real takes with each hand
+  - the result card
+  - the "Leave site?" warning
+  - Finish and download, plus the checker
+- Proposed commit message: `feat(record): move the recorder into the app shell (Phase 3.1, done early: Record is the main page after setup)`
+- Wait.
+
+
+**Built (2026-10-16), when Lanix asked for the Record page to match the website:**
+
+- **Consent step:** the design's wording ("Help train Sema", "What gets saved") with only the training box. The design's optional publishing box is left out: publishing is out of scope (Lanix, 2026-10-16), so the session file keeps `consent: { train, date }`.
+- **Wording from the design:** position hints ("centre of the frame", "a little closer", "off to one side"), and "4 had the other hand" in the rejection reason (the data format and spec follow). The format stays 1.
+- **Live counts:** "N / 30 frames" counts frames with a hand so far; the bar shows capture time (`captureProgress`, tested).
+- **Selected letter:** until a tile is picked, it's the first letter that still needs takes for the chosen hand. Starting a take pins it, so its result stays in view.
+- **Not in the design, added (for Lanix to confirm):** a "Last take kept" note (ice tint); the saved-session offer ("Continue your session?") in the design's style; "Keep recording" on the finished step; a note under left-hand instructions ("Described for the right hand; mirror it for your left."); a dark gradient behind the text over the video, so it stays readable on a bright picture. There's no Stop camera and no Delete during recording: the design has neither (Delete is on the finished step and the saved-session offer).
+- **Shared:** `src/components/StageProblem.jsx` (camera and hand-tracking problems over the video, also used by the camera check) and `CheckIcon`.
+- **Checked:** 92 unit tests, lint and build; a headless Chrome run through consent, a kept and a not-kept take, Finish and download (the file passes `check-session`), with no console errors. The Task 6 and 7 check scripts were lost with the session's temp folder and weren't re-run.
 ---
 
-### Task 7: Takes, grid, take panel, undo
+### Task 9 (step 5): Learn and Practice placeholders
+
+Phase 3, done early. The menu's Learn and Practice open real pages that say they're coming. The lessons and practice themselves are 3.3–3.4, on `phase-3-preview`.
 
 **Files:**
-- Create: `src/recorder/useRecording.js`, `src/recorder/RecordingGrid.jsx`, `src/recorder/TakePanel.jsx`
-- Modify: `src/recorder/RecorderApp.jsx`, `src/styles.css`
+
+- **Replace the stand-ins:** `src/pages/learn/LearnPage.jsx`, `src/pages/practice/PracticePage.jsx`
+- **Modify:** `src/App.jsx`, `src/styles.css`, `docs/project-plan.md`, `README.md`
+
+**Design source:** none: `Learn.dc.html` and `Practice.dc.html` are for `phase-3-preview`. Lanix gave the copy (2026-10-15). Both use the same shell and menu as the other pages, with the content centred:
+
+- **Learn:** heading "Learn is on its way"; text "Lessons need letter recognition, and your recordings are helping build it. For now, the most useful thing you can do is record a few letters."; button "Go to Record".
+- **Practice:** heading "Practice is on its way"; text "Practice mixes letters you've learned, so it comes after Learn."; button "Go to Record".
 
 **Interfaces:**
-- Consumes: Task 2 (`takePhase`, `sampleSlot`, `frameFromDetection`, `tallyTake`, `judgeTake`, `COUNTDOWN_MS`, `SETTLE_MS`, `TAKES_TARGET`, `POSITION_HINTS`, `LIFEPRINT_URL`), `nextFrameCount`, `fpsBetween`; Task 3 (`addTake`, `undoLastTake`, `acceptedCount`); Task 5 listener; Task 6 (`classLabel`, `RecorderApp`).
-- Produces: `useRecording({ videoRef, listenerRef, isDetecting, onTakeDone }) → { phase, letter, hand, secondsLeft, result, message, busy, start(letter, hand) }` where `phase` is `'idle' | 'countdown' | 'settling' | 'capturing' | 'saving' | 'review' | 'discarded'` and `onTakeDone(take)` receives the object `addTake` expects.
 
-- [ ] **Step 1: useRecording**
+- **Consumes:** `MenuBar`, `Link`, `PATHS` (Task 6).
+- **Produces:** `LearnPage()`, `PracticePage()`.
 
-Create `src/recorder/useRecording.js`:
+- [ ] **Step 1: The pages**
 
-```js
-import { useEffect, useRef, useState } from 'react'
-import { fpsBetween, nextFrameCount } from '../camera/frameCounter.js'
-import {
-  COUNTDOWN_MS,
-  SETTLE_MS,
-  frameFromDetection,
-  judgeTake,
-  sampleSlot,
-  takePhase,
-  tallyTake,
-} from './takeRules.js'
+Each renders `<MenuBar active="learn">` (or `"practice"`) and the placeholder from Lanix's copy. Neither uses the camera, so opening one turns the camera off (no `CameraStage`). `App.jsx` already routes to both.
 
-const BUSY = ['countdown', 'settling', 'capturing', 'saving']
+- [ ] **Step 2: Docs**
 
-// One take at a time: countdown, a short settle, capture, then the result is
-// handed to onTakeDone. Frames arrive through listenerRef from the detection
-// loop; a timer drives the phases and checks the take is still valid.
-export function useRecording({ videoRef, listenerRef, isDetecting, onTakeDone }) {
-  const [state, setState] = useState({ phase: 'idle' })
-  const takeRef = useRef(null)
-  // Refs so the timer always sees the latest values without restarting.
-  const isDetectingRef = useRef(isDetecting)
-  const onTakeDoneRef = useRef(onTakeDone)
+- **`docs/project-plan.md`:** Learn and Practice are placeholders until 3.3–3.4 on `phase-3-preview`.
+- **README:** a line on what the menu holds for now.
 
-  useEffect(() => {
-    isDetectingRef.current = isDetecting
-  }, [isDetecting])
+- [ ] **Step 3: Verify**
 
-  useEffect(() => {
-    onTakeDoneRef.current = onTakeDone
-  })
+Run: `npm test && npm run lint && npm run build && grep -rn "isn't built yet" src || echo none`
+Expected: all pass, and the grep prints `none`.
 
-  // If the page goes away mid-take, stop the timer and the listener.
-  useEffect(() => () => takeRef.current?.stop(), [])
+Check with the shared harness:
 
-  function start(letter, hand) {
-    if (takeRef.current) return
-    const video = videoRef.current
-    const startAt = performance.now()
-    const captureAt = startAt + COUNTDOWN_MS + SETTLE_MS
-    const take = { frames: [], lastSlot: -1, fpsStart: null, fpsRequested: false, hidden: false, stop: null }
-    let timer = null
+- Record → Learn → Practice through the menu: each sets `aria-current="page"` on its own link only.
+- Refreshing `/learn` and `/practice` keeps the page.
+- With the camera on in Record, opening Learn leaves 0 live tracks.
 
-    function onDetection(detection) {
-      const t = detection.time - captureAt
-      const slot = sampleSlot(t, take.lastSlot)
-      if (slot === null) return
-      take.lastSlot = slot
-      take.frames.push(frameFromDetection(detection, Math.round(t)))
-    }
+- [ ] **Step 4: Report and stop**
 
-    function onVisibilityChange() {
-      if (document.hidden) take.hidden = true
-    }
-
-    take.stop = () => {
-      clearInterval(timer)
-      document.removeEventListener('visibilitychange', onVisibilityChange)
-      if (listenerRef.current === onDetection) listenerRef.current = null
-      if (takeRef.current === take) takeRef.current = null
-    }
-
-    function discard(message) {
-      take.stop()
-      setState({ phase: 'discarded', letter, hand, message })
-    }
-
-    async function finish() {
-      take.stop()
-      setState({ phase: 'saving', letter, hand })
-      const fpsEnd = await nextFrameCount(video)
-      const counts = tallyTake(take.frames, hand)
-      const result = {
-        letter,
-        hand,
-        counts,
-        ...judgeTake(counts),
-        cameraFps: fpsBetween(take.fpsStart, fpsEnd),
-        frames: take.frames,
-      }
-      onTakeDoneRef.current(result)
-      setState({ phase: 'review', letter, hand, result })
-    }
-
-    function tick() {
-      if (take.hidden) return discard("The tab was hidden, which pauses the camera. This take wasn't saved.")
-      if (!isDetectingRef.current) {
-        return discard("The camera stopped or the hand model reloaded. This take wasn't saved.")
-      }
-      const elapsed = performance.now() - startAt
-      const phase = takePhase(elapsed)
-      if (phase === 'capturing' && !take.fpsRequested) {
-        take.fpsRequested = true
-        nextFrameCount(video).then((count) => {
-          take.fpsStart = count
-        })
-      }
-      if (phase === 'done') return finish()
-      setState({ phase, letter, hand, secondsLeft: Math.ceil((COUNTDOWN_MS - elapsed) / 1000) })
-    }
-
-    takeRef.current = take
-    listenerRef.current = onDetection
-    document.addEventListener('visibilitychange', onVisibilityChange)
-    timer = setInterval(tick, 100)
-    tick()
-  }
-
-  return { ...state, busy: BUSY.includes(state.phase), start }
-}
-```
-
-- [ ] **Step 2: Grid and take panel**
-
-Create `src/recorder/RecordingGrid.jsx`:
-
-```jsx
-import { classLabel } from './letters.js'
-import { acceptedCount } from './sessionFile.js'
-import { TAKES_TARGET } from './takeRules.js'
-
-const HANDS = ['left', 'right']
-
-export default function RecordingGrid({ training, pilot, session, selected, onSelect, disabled }) {
-  const row = (letter) => (
-    <tr key={letter}>
-      <th scope="row">{classLabel(letter)}</th>
-      {HANDS.map((hand) => {
-        const isSelected = selected?.letter === letter && selected?.hand === hand
-        return (
-          <td key={hand}>
-            <button
-              type="button"
-              className="cell-button"
-              aria-pressed={isSelected}
-              aria-label={`${classLabel(letter)}, ${hand} hand`}
-              disabled={disabled}
-              onClick={() => onSelect({ letter, hand })}
-            >
-              {acceptedCount(session, letter, hand)} / {TAKES_TARGET}
-            </button>
-          </td>
-        )
-      })}
-    </tr>
-  )
-
-  return (
-    <table className="recording-grid">
-      <thead>
-        <tr>
-          <th scope="col">Letter</th>
-          <th scope="col">Left</th>
-          <th scope="col">Right</th>
-        </tr>
-      </thead>
-      <tbody>
-        {training.map(row)}
-        {row('none')}
-        {pilot.length > 0 && (
-          <tr>
-            <th scope="colgroup" colSpan={3} className="grid-group">Pilot only</th>
-          </tr>
-        )}
-        {pilot.map(row)}
-      </tbody>
-    </table>
-  )
-}
-```
-
-Create `src/recorder/TakePanel.jsx`:
-
-```jsx
-import { classLabel } from './letters.js'
-import { LIFEPRINT_URL, POSITION_HINTS } from './takeRules.js'
-
-export default function TakePanel({ cell, accepted, recording, canRecord, onRecord }) {
-  if (!cell) return <p className="take-panel">Choose a letter and a hand in the table.</p>
-
-  const title = cell.letter === 'none' ? 'No letter' : `Letter ${classLabel(cell.letter)}`
-  const hint = accepted < POSITION_HINTS.length ? POSITION_HINTS[accepted] : 'Any position'
-  const isThisCell = recording.letter === cell.letter && recording.hand === cell.hand
-
-  return (
-    <section className="take-panel">
-      <h2>
-        {title}, {cell.hand} hand
-      </h2>
-      {cell.letter === 'none' ? (
-        <p>Relax your hand, half-form shapes and move it around.</p>
-      ) : (
-        <p>
-          <a href={LIFEPRINT_URL} target="_blank" rel="noreferrer">How to sign the letters (Lifeprint)</a>
-        </p>
-      )}
-      <p>
-        Take {accepted + 1}: {hint}.
-      </p>
-      <button type="button" className="button" disabled={!canRecord} onClick={onRecord}>
-        Record
-      </button>
-      <div aria-live="polite">{isThisCell && <TakeStatus recording={recording} />}</div>
-    </section>
-  )
-}
-
-function TakeStatus({ recording }) {
-  switch (recording.phase) {
-    case 'countdown':
-      return <p className="take-countdown">{recording.secondsLeft}</p>
-    case 'settling':
-    case 'capturing':
-      return <p className="take-hold">Hold…</p>
-    case 'saving':
-      return <p>Saving…</p>
-    case 'review':
-      return <TakeResult result={recording.result} />
-    case 'discarded':
-      return <p className="error">{recording.message}</p>
-    default:
-      return null
-  }
-}
-
-function TakeResult({ result }) {
-  const { kept, mismatched } = result.counts
-  if (result.status === 'accepted') {
-    const other = mismatched > 0 ? `, ${mismatched} with the other hand detected` : ''
-    return <p>Saved: {kept} frames with a hand{other}.</p>
-  }
-  return <p className="error">Not saved: {result.reason}. Try again.</p>
-}
-```
-
-- [ ] **Step 3: Wire them into RecorderApp**
-
-In `src/recorder/RecorderApp.jsx`:
-
-1. Add imports:
-
-```jsx
-import RecordingGrid from './RecordingGrid.jsx'
-import TakePanel from './TakePanel.jsx'
-import { acceptedCount, addTake, newSession, undoLastTake } from './sessionFile.js'
-import { useRecording } from './useRecording.js'
-```
-
-(replace the existing `import { newSession } from './sessionFile.js'` line with the third line above).
-
-2. After the `useHandDetection(...)` call, add:
-
-```jsx
-  const [cell, setCell] = useState(null) // { letter, hand } chosen in the grid
-  const recording = useRecording({
-    videoRef,
-    listenerRef,
-    isDetecting,
-    onTakeDone: (take) => updateSession(addTake(session, take)),
-  })
-```
-
-3. Replace the line `{/* Task 7 adds the recording grid and the take panel here. */}` with:
-
-```jsx
-            {letters.status === 'ready' && (
-              <div className="recorder-work">
-                <RecordingGrid
-                  training={letters.training}
-                  pilot={letters.pilot}
-                  session={session}
-                  selected={cell}
-                  onSelect={setCell}
-                  disabled={recording.busy}
-                />
-                <div>
-                  <TakePanel
-                    cell={cell}
-                    accepted={cell ? acceptedCount(session, cell.letter, cell.hand) : 0}
-                    recording={recording}
-                    canRecord={isDetecting && cell !== null && !recording.busy}
-                    onRecord={() => recording.start(cell.letter, cell.hand)}
-                  />
-                  <button
-                    type="button"
-                    className="button-quiet"
-                    disabled={session.recordings.length === 0 || recording.busy}
-                    onClick={() => updateSession(undoLastTake(session))}
-                  >
-                    Undo last take
-                  </button>
-                </div>
-              </div>
-            )}
-```
-
-- [ ] **Step 4: Styles**
-
-Append to `src/styles.css`:
-
-```css
-.recorder-work {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 24px 40px;
-  margin-top: 24px;
-}
-
-@media (max-width: 640px) {
-  .recorder-work {
-    grid-template-columns: 1fr;
-  }
-}
-
-.recording-grid {
-  border-collapse: collapse;
-}
-
-.recording-grid th,
-.recording-grid td {
-  padding: 4px 8px;
-  text-align: left;
-}
-
-.recording-grid .grid-group {
-  padding-top: 16px;
-  font-weight: 600;
-  color: var(--muted-text);
-}
-
-.cell-button {
-  min-width: 64px;
-  padding: 6px 10px;
-  font: inherit;
-  font-variant-numeric: tabular-nums;
-  color: var(--deep-cobalt);
-  background: #fff;
-  border: 1px solid var(--muted-text);
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.cell-button[aria-pressed='true'] {
-  color: #fff;
-  background: var(--deep-sky);
-  border-color: var(--deep-sky);
-}
-
-.cell-button:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-
-.cell-button:focus-visible {
-  outline: 3px solid var(--deep-sky);
-  outline-offset: 2px;
-}
-
-.take-panel h2 {
-  margin: 0 0 8px;
-  font-size: 1.25rem;
-}
-
-.take-panel p {
-  margin: 0 0 12px;
-}
-
-.take-panel a {
-  color: var(--deep-sky);
-}
-
-.take-countdown {
-  font-size: 3rem;
-  font-weight: 600;
-}
-
-.take-hold {
-  font-size: 1.5rem;
-  font-weight: 600;
-}
-```
-
-- [ ] **Step 5: Verify**
-
-Run: `npm run lint` (no warnings), `npm test` (all pass), `npm run build`.
-Then `npm run dev`, open `http://localhost:5173/record.html` in Chrome, start a session and the camera, choose a cell and click Record:
-- countdown 3-2-1, then "Hold…" for 3.5 s, then "Saved: … frames with a hand" (hand in view) or "Not saved: …" (hand out of view);
-- the cell's count goes up only for saved takes; Undo last take removes the latest;
-- switching tabs during a take discards it with a message;
-- Download session file saves `sema-asl-<code>-<session>.json`; `npm run check-session -- <that file>` prints the table and "OK".
-
-- [ ] **Step 6: Report**
-
-`git status --short`. Explain the take state machine (why a timer plus a listener, why refs). Suggested commit message: `Record takes in the recorder: grid, take panel, undo`.
+- Run `git status --short` and `git diff --cached --name-only`, and confirm nothing under `docs/design/` is listed.
+- Proposed commit message: `feat(preview): add Learn and Practice placeholders (Phase 3, done early: the menu links to them before 3.3–3.4)`
+- Wait.
 
 ---
 
-### Task 8: Docs
+### Task 10: Whole-branch check and review
 
-**Files:**
-- Create: `docs/data-format.md`
-- Modify: `README.md`, `CLAUDE.md`
+**Files:** none in the repo, unless the review finds something.
 
-- [ ] **Step 1: Data format reference**
+- [ ] **Step 1: The whole journey on a production build**
 
-Create `docs/data-format.md` from the spec's section 2 and section 3, as a standalone reference: the JSON example; header fields (including `consent.train`, `consent.publish`, `consent.date`, and that the header's `person`, `session`, `language` are only a label while each sample's are authoritative); `recordings` fields (`status`, `reason`, `kept`, `mismatched`, `droppedNoHand`, `cameraFps`; rejected takes have no samples; interrupted takes are not logged); sample fields with the coordinate conventions (`raw` in the un-mirrored camera frame; `landmarks` flipped for left hands using the detected hand, for now; training filters to `detected == hand`); the normalization steps; the `z`-in-palm-length 2.2 experiment; the rules "bump `format` when the layout changes, bump `normalization` when normalization changes"; and the privacy rule (`data/raw/` is gitignored and private).
+Run `npm run build && npx vite preview --port 5198`, then use the shared harness with a fresh profile and `hand-only.y4m`:
 
-- [ ] **Step 2: README**
+- `/` → Welcome → the three setup steps → Record → consent → one accepted take per hand that MediaPipe detects in the video → Finish and download → `npm run check-session` OK.
+- Reload → Record, with the session offered back.
+- Deep links `/setup/hand`, `/record`, `/learn`, `/practice` and `/dev` each load their page after a reload.
+- `/nope` → `/` → `/record` (returning visitor).
+- No console errors apart from MediaPipe's known noise.
 
-Add a section `## Recording sessions` after `## Recorded data`, covering:
-- the page: `/record` on the live site, `http://localhost:5173/record.html` in development;
-- in person: Lanix opens the page, the participant reads the consent text and ticks the boxes, records each letter and hand 3 times (position hints on screen), then downloads the file;
-- remotely: send the `/record` link; the participant downloads the file and sends it to Lanix;
-- what participants are told (summary of the consent text) and that nothing is uploaded;
-- checking a file before keeping it: `npm run check-session -- path/to/file.json` (what it checks, and that it prints accepted/rejected takes per letter and hand), then moving it into `data/raw/` (private, gitignored);
-- the letter list: `public/languages/asl/letters.json`, training letters as `{ "letter": "B" }`, pilot-only letters with `"pilotOnly": true`.
+- [ ] **Step 2: Final review**
 
-Add `npm test` and `npm run check-session` to the "Other scripts" line, and the new files to the project structure tree (`record.html`, `vercel.json`, `public/languages/asl/letters.json`, `scripts/check-session.js`, `src/recorder/…`, `src/vision/normalizeHand.js`, `src/vision/browserName.js`, `src/camera/frameCounter.js`, `docs/data-format.md`, `docs/recorder-design.md`, `docs/recorder-implementation-plan.md`).
+Follow superpowers:executing-plans' final review:
 
-In the "Deploy (Vercel)" section, add: `vercel.json` turns on `cleanUrls`, so the recorder is at `/record`; a future single-page-app rewrite (Phase 3) must exclude `/record`.
+- **Package:** the whole branch from `cee03b1` (where it left `main`).
+- **Reviewer:** a fresh reviewer on the most capable model, given this plan's Review Focus and the ledger's rulings.
+- **Fixes:** Critical and Important findings get one fix pass, each fix test-first. Minor findings go to the ledger.
 
-- [ ] **Step 3: CLAUDE.md**
+- [ ] **Step 3: Hand over**
 
-Under the folder structure, add `recorder/   the recorder page (record.html): consent, takes, session file` to the `src/` tree. Add a `## Recorder conventions` section:
-- Session files follow `docs/data-format.md`; bump `format` / `normalization` when they change; `scripts/check-session.js` knows the valid versions.
-- The left-hand flip uses the detected hand, for now (open decision in the plan).
-- Take timing and the sampling interval are constants in `src/recorder/takeRules.js`; a take passes when `kept − mismatched ≥ 24`.
-- `data/raw/` is gitignored and private; never commit recorded sessions.
-- `vercel.json` (`cleanUrls`) serves the recorder at `/record`. JSON can't hold comments, so note here: any future single-page-app rewrite (Phase 3) must exclude `/record`.
-- `npm test` runs Vitest; keep pure logic in small modules with tests.
+Give Lanix the Chrome checklist in one place:
 
-- [ ] **Step 4: Report**
+- the setup flow with real hands
+- the other-hand state
+- a blocked camera
+- Record with real takes on both hands
+- the "Leave site?" warning
+- the downloaded file and the checker
+- the menu, Back and Forward, and refresh on every page
+- the camera light going off when leaving a camera page
+- `/dev` and its benchmark
 
-`git status --short`. Suggested commit message: `Document the recorder and the session file format`.
-
----
-
-### Task 9: End-to-end check in headless Chrome (scratch, not committed)
-
-**Files:** none in the repo. Work in the session's scratchpad directory (`$SP` below).
-
-This exercises the whole page with a fake camera: an accepted take, a mismatch rejection (the same hand recorded as the other hand), a no-hand rejection, download plus checker, and restoring a saved session.
-
-- [ ] **Step 1: Make fake-camera videos**
-
-```bash
-mkdir -p $SP/e2e && cd $SP/e2e
-curl -fsS -o victory.jpg https://storage.googleapis.com/mediapipe-assets/victory.jpg
-cat > make_video.py <<'EOF'
-# Usage: python3 -I make_video.py victory.jpg <only|mixed> | ffmpeg ... (raw RGB24 640x480, 30 fps)
-import sys
-from PIL import Image
-W, H = 640, 480
-hand_img = Image.open(sys.argv[1]).convert("RGB")
-hand_img = hand_img.resize((int(hand_img.width * 440 / hand_img.height), 440))
-hand = Image.new("RGB", (W, H), (214, 212, 206))
-hand.paste(hand_img, ((W - hand_img.width) // 2, (H - hand_img.height) // 2))
-blank = Image.new("RGB", (W, H), (214, 212, 206))
-frames = [hand] * 120 if sys.argv[2] == "only" else [hand] * 15 + [blank] * 75
-cache = {}
-for f in frames:
-    sys.stdout.buffer.write(cache.setdefault(id(f), f.tobytes()))
-EOF
-for v in only mixed; do python3 -I make_video.py victory.jpg $v | ffmpeg -loglevel error -y -f rawvideo -pix_fmt rgb24 -s 640x480 -r 30 -i - -pix_fmt yuv420p hand-$v.y4m; done
-```
-
-Expected: `hand-only.y4m` (hand in every frame) and `hand-mixed.y4m` (hand 0.5 s, empty 2.5 s, looping).
-
-- [ ] **Step 2: Driver script**
-
-Create `$SP/e2e/recorder-e2e.mjs`:
-
-```js
-// Usage: node recorder-e2e.mjs <debugPort> <appUrl> <downloadDir> <mode: full|nohand>
-import { readdirSync, readFileSync } from 'node:fs'
-const [port, appUrl, downloadDir, mode] = process.argv.slice(2)
-const ws = new WebSocket((await (await fetch(`http://127.0.0.1:${port}/json/version`)).json()).webSocketDebuggerUrl)
-await new Promise((r) => ws.addEventListener('open', r, { once: true }))
-let id = 0
-const pending = new Map()
-const listeners = new Set()
-ws.addEventListener('message', (e) => {
-  const m = JSON.parse(e.data)
-  if (m.id && pending.has(m.id)) { const p = pending.get(m.id); pending.delete(m.id); m.error ? p.reject(new Error(JSON.stringify(m.error))) : p.resolve(m.result) }
-  else for (const l of listeners) l(m)
-})
-const send = (method, params = {}, sessionId) => new Promise((resolve, reject) => { pending.set(++id, { resolve, reject }); ws.send(JSON.stringify({ id, method, params, sessionId })) })
-const wait = (ms) => new Promise((r) => setTimeout(r, ms))
-await send('Browser.setDownloadBehavior', { behavior: 'allow', downloadPath: downloadDir })
-const { targetId } = await send('Target.createTarget', { url: 'about:blank' })
-const { sessionId } = await send('Target.attachToTarget', { targetId, flatten: true })
-const page = (m, p) => send(m, p, sessionId)
-await page('Page.enable'); await page('Runtime.enable')
-listeners.add((m) => { if (m.sessionId === sessionId && m.method === 'Page.javascriptDialogOpening') page('Page.handleJavaScriptDialog', { accept: true }) })
-const evaluate = async (expression) => (await page('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true })).result.value
-const waitFor = async (expr, ms = 30000) => { const t = Date.now(); while (Date.now() - t < ms) { if (await evaluate(expr).catch(() => false)) return true; await wait(100) } return false }
-const click = (label) => evaluate(`[...document.querySelectorAll('button')].find((b) => b.textContent.trim().startsWith(${JSON.stringify(label)})).click()`)
-const type = (name, value) => evaluate(`(() => { const el = document.querySelector('input[name=${name}]'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(el, ${JSON.stringify(value)}); el.dispatchEvent(new Event('input', { bubbles: true })); })()`)
-const text = () => evaluate('document.querySelector("main").innerText')
-const results = []
-const check = (name, ok, detail) => results.push(`${ok ? 'PASS' : 'FAIL'}  ${name}${ok ? '' : '\n        ' + JSON.stringify(detail).slice(0, 400)}`)
-
-await page('Page.navigate', { url: appUrl })
-await waitFor('!!document.querySelector("input[name=person]")', 10000)
-check('Start session disabled before consent', await evaluate(`[...document.querySelectorAll('button')].find((b) => b.textContent === 'Start session').disabled`))
-await type('person', ' P99 ')
-await evaluate(`document.querySelector('input[name=train]').click()`)
-await click('Start session')
-await waitFor('document.body.innerText.includes("Session p99")')
-await click('Start camera')
-await waitFor('/Hand found|No hand/.test(document.body.innerText)', 60000)
-
-async function recordCell(label) {
-  await evaluate(`document.querySelector('[aria-label=${JSON.stringify(label)}]').click()`)
-  await click('Record')
-  await waitFor('/Saved:|Not saved:/.test(document.querySelector(".take-panel").innerText)', 15000)
-  return evaluate('document.querySelector(".take-panel").innerText')
-}
-
-if (mode === 'full') {
-  const left = await recordCell('No letter, left hand')
-  const right = await recordCell('No letter, right hand')
-  // The same photo is one hand, so recording it as the other hand must fail.
-  const saved = [left, right].filter((t) => t.includes('Saved:'))
-  const mismatch = [left, right].filter((t) => t.includes('Not saved:') && t.includes('other hand detected'))
-  check('One hand accepted, the other rejected as a mismatch', saved.length === 1 && mismatch.length === 1, { left, right })
-  await click('Download session file')
-  await wait(1500)
-  const files = readdirSync(downloadDir).filter((f) => f.startsWith('sema-asl-p99-'))
-  check('Downloaded the session file', files.length === 1, files)
-  const file = JSON.parse(readFileSync(`${downloadDir}/${files[0]}`, 'utf8'))
-  check('File has one accepted and one rejected recording', file.recordings.filter((r) => r.status === 'accepted').length === 1 && file.recordings.filter((r) => r.status === 'rejected').length === 1, file.recordings)
-  check('Samples carry detected hand and 63 + 63 numbers', file.samples.length > 0 && file.samples.every((s) => s.raw.length === 63 && s.landmarks.length === 63 && ['left', 'right'].includes(s.detected)), file.samples[0])
-  await page('Page.reload')
-  await waitFor('document.body.innerText.includes("Continue session p99")', 10000)
-  check('Refresh offers the session back', (await text()).includes('Continue session p99'))
-  await click('Delete')
-  await waitFor('!!document.querySelector("input[name=person]")', 5000)
-  check('Delete clears it', await evaluate('!!document.querySelector("input[name=person]")'))
-}
-
-if (mode === 'nohand') {
-  const result = await recordCell('No letter, left hand')
-  check('No-hand take rejected with counts', result.includes('Not saved:') && result.includes('had no hand'), result)
-}
-
-console.log(results.join('\n'))
-await send('Target.closeTarget', { targetId })
-ws.close()
-process.exit(results.some((r) => r.startsWith('FAIL')) ? 1 : 0)
-```
-
-- [ ] **Step 3: Run it**
-
-```bash
-cd <repo> && npx vite --port 5199 --strictPort > $SP/e2e/vite.log 2>&1 & VITE=$!
-mkdir -p $SP/e2e/dl1 $SP/e2e/dl2
-google-chrome --headless=new --remote-debugging-port=9370 --user-data-dir=$SP/e2e/chrome1 --no-first-run --use-fake-device-for-media-stream --use-file-for-fake-video-capture=$SP/e2e/hand-only.y4m --use-fake-ui-for-media-stream about:blank >/dev/null 2>&1 & C1=$!
-google-chrome --headless=new --remote-debugging-port=9371 --user-data-dir=$SP/e2e/chrome2 --no-first-run --use-fake-device-for-media-stream --use-file-for-fake-video-capture=$SP/e2e/hand-mixed.y4m --use-fake-ui-for-media-stream about:blank >/dev/null 2>&1 & C2=$!
-sleep 3
-node $SP/e2e/recorder-e2e.mjs 9370 http://localhost:5199/record.html $SP/e2e/dl1 full
-npm run check-session -- $SP/e2e/dl1/sema-asl-p99-*.json
-node $SP/e2e/recorder-e2e.mjs 9371 http://localhost:5199/record.html $SP/e2e/dl2 nohand
-npm run build && ls dist/record.html
-kill $C1 $C2 $VITE
-```
-
-Expected: every line `PASS`; the checker prints the table and `OK`; `dist/record.html` exists. Never use `pkill -f` with the scratchpad path (it matches the shell itself); kill by PID.
-
-- [ ] **Step 4: Report**
-
-Tell Lanix what passed and what only they can check in Chrome with a real webcam: real left and right hands, the consent text, the "Leave site?" warning, and the downloaded file. Then the pilot (M2) is Lanix's: a full session with all letters in `letters.json` plus "none", both hands, 3 takes each, passing the checker; after that, 2.1 becomes "In progress" in the plan.
+Then use superpowers:finishing-a-development-branch. Merging and pushing happen only when Lanix says so.
