@@ -100,9 +100,6 @@
   --warning-ink: var(--amber-ink);
   --danger: var(--error-red);
   --shadow-menu: 0 12px 32px rgb(12 29 48 / 0.14);
-  /* Welcome's background: the points, and the glow behind the headline */
-  --backdrop-dot: color-mix(in srgb, var(--deep-sky) 30%, transparent);
-  --backdrop-glow: color-mix(in srgb, var(--deep-sky) 14%, transparent);
 
   /* Type */
   --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
@@ -111,7 +108,7 @@
   --leading-display: 1.05;
   --tracking-display: -0.03em;
   --text-lead: 20px; /* the line under a display heading */
-  --text-wordmark: clamp(36px, 4.5vw, 56px); /* Sema's name on Welcome */
+  --text-welcome: clamp(36px, 4.7vw, 60px); /* Welcome's headline */
   --leading-lead: 1.5;
   --text-button: 17px;
   --text-body: 16px;
@@ -136,8 +133,6 @@
   --space-8: 64px;
   --space-9: 96px;
 
-  --backdrop-grid: 28px; /* spacing of Welcome's points */
-
   /* Layout: the same bar, side padding and widths on every page */
   --bar-height: 56px;
   --page-gutter: clamp(20px, 4vw, 48px);
@@ -149,7 +144,6 @@
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --duration-in: 400ms;
   --stagger: 150ms;
-  --drift: 24s; /* one slow loop of Welcome's glow */
 
   color-scheme: light;
   font-family: var(--font-sans);
@@ -183,8 +177,6 @@
   --warning-ink: var(--amber-pale);
   --danger: var(--red-on-dark);
   --shadow-menu: 0 12px 32px rgb(0 0 0 / 0.4);
-  --backdrop-dot: color-mix(in srgb, var(--bright-sky) 28%, transparent);
-  --backdrop-glow: color-mix(in srgb, var(--bright-sky) 16%, transparent);
 
   color-scheme: dark;
   color: var(--text);
@@ -1690,105 +1682,49 @@ body {
 
 /* ---------- Welcome (WelcomePage.jsx) ---------- */
 
+/* The shared top bar, then the column. A plain page background from the
+   theme: no decoration. */
 .welcome {
-  position: relative;
-  isolation: isolate; /* keeps the background layers below the text */
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
-  overflow: hidden;
 }
 
-/* The background, two layers behind the content (z-index -1):
-   - ::before, a faint grid of points, like the landmarks Sema finds on a
-     hand. A mask fades it out towards the edges (a mask's transparent parts
-     hide what's under them).
-   - ::after, a soft glow of the accent behind the headline, drifting slowly.
-   Both use the theme's colours, and are decoration only: no content. */
-.welcome::before,
-.welcome::after {
-  position: absolute;
-  z-index: -1;
-  content: '';
-  pointer-events: none;
-}
-
-.welcome::before {
-  inset: 0;
-  background-image: radial-gradient(circle, var(--backdrop-dot) 1.2px, transparent 1.6px);
-  background-position: center;
-  background-size: var(--backdrop-grid) var(--backdrop-grid);
-  mask-image: radial-gradient(ellipse 70% 65% at 50% 45%, black 20%, transparent 75%);
-}
-
-.welcome::after {
-  top: 50%;
-  left: 50%;
-  width: min(1100px, 110vw);
-  aspect-ratio: 16 / 10;
-  background: radial-gradient(closest-side, var(--backdrop-glow), transparent);
-  translate: -50% -55%;
-  animation: drift var(--drift) ease-in-out infinite alternate;
-}
-
-@keyframes drift {
-  from {
-    transform: translateX(-4%) scale(1);
-  }
-  to {
-    transform: translateX(4%) scale(1.08);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .welcome::after {
-    animation: none;
-  }
-}
-
-/* One centred column. Sized so the whole page fits 1280×720 and up. */
+/* One centred column. More padding below than above lifts the group a little
+   above the middle, where the eye lands first. Fits 1280×720 and up. */
 .welcome-hero {
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--space-5);
   width: 100%;
   max-width: var(--page-max);
   margin: 0 auto;
-  padding: var(--space-6) var(--page-gutter);
+  padding: var(--space-6) var(--page-gutter) var(--space-9);
   text-align: center;
 }
 
-/* The name, large, at the top of Welcome in place of a logo. */
-.welcome-name {
-  margin: 0 0 var(--space-6);
-  font-size: var(--text-wordmark);
-  line-height: 1;
-  font-weight: 800;
-  letter-spacing: var(--tracking-display);
-}
-
-.eyebrow {
-  margin: 0 0 var(--space-3);
-  font-size: var(--text-small);
-  font-weight: 600;
-  color: var(--text-muted);
-}
-
-/* 14em keeps the headline to two lines at every width. */
-.welcome-hero .display {
+/* Smaller and lighter than the intro pages' headlines: it carries the page
+   by being the only large thing on it, not by weight. 14em keeps it to two
+   lines at every width. */
+.welcome-title {
   max-width: 14em;
+  font-size: var(--text-welcome);
+  line-height: 1.1;
+  font-weight: 700;
+}
+
+/* Spacing by meaning: the line under the headline belongs to it, so it sits
+   close; the button is the next step, so it gets clear space above it. */
+.welcome-lead {
+  margin-top: var(--space-4);
 }
 
 .welcome-actions {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
   justify-content: center;
-  gap: var(--space-5);
-  margin-top: var(--space-2);
+  margin-top: var(--space-7);
 }
 
 /* ---------- The intro pages (IntroLayout.jsx): About Sema, How Sema works,
