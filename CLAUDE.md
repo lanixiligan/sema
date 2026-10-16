@@ -16,9 +16,7 @@ landmarks to teach the ASL alphabet. Built by a student for their portfolio and 
 
 The development plan is `docs/project-plan.md`.
 
-- Read only the section for the current phase; don't build ahead.
-- When a milestone's "Done when" list is fully ticked, update the Status table and
-  tick the boxes in the same commit.
+- Update a phase's status line in docs/project-plan.md when it changes.
 - Don't change decisions in the plan without asking Lanix first.
 
 ## Phases

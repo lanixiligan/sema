@@ -4,7 +4,7 @@ Status: **approved by Lanix on 2026-10-15**, after agreeing it section by sectio
 **Revised 2026-10-15:** the recorder is no longer a separate page. It's the app's main page
 after setup, at `/record` inside the app, so the Phase 3.1 shell, Welcome and setup pages
 are built early on this branch. The changed sections are marked "(revised)".
-Plan reference: [project-plan.md](project-plan.md), Phase 2, milestone 2.1, and Phase 3.1
+Plan reference: [project-plan.md](../project-plan.md), Phase 2, milestone 2.1, and Phase 3.1
 for the shell. Implementation plan: [recorder-implementation-plan.md](recorder-implementation-plan.md).
 
 ## Goal

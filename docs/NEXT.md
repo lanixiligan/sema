@@ -1,0 +1,5 @@
+- Now: rebuild the onboarding pages (not started).
+- Last done: Tasks 8 and 9 (Record page, Learn/Practice placeholders).
+- Next step: build the onboarding pages from docs/onboarding-pages.md (to be added), then review them in Chrome.
+- Waiting on me: add docs/onboarding-pages.md.
+- Do not forget: run Task 10 (the whole-branch check) before the pilot recording; push only phase-2-1-recorder, never main.

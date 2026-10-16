@@ -328,7 +328,7 @@ src/
 docs/
   project-plan.md               the development plan and its status
   data-format.md                the recorded session file format
-  recorder-design.md            the recorder's design (milestone 2.1)
-  recorder-implementation-plan.md  how the recorder was built, task by task
+  archive/recorder-design.md    the recorder's design (milestone 2.1)
+  archive/recorder-implementation-plan.md  how the recorder was built, task by task
 CLAUDE.md                       project notes and conventions for Claude Code
 ```

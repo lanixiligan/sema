@@ -2,7 +2,7 @@
 
 The recorder (`/record`, milestone 2.1) saves one JSON file per session:
 `sema-asl-<person>-<session>.json`. This is the reference for that file.
-Design background: [recorder-design.md](recorder-design.md).
+Design background: [recorder-design.md](archive/recorder-design.md).
 
 **Privacy:** session files go in `data/raw/`, which is gitignored. They stay private
 (backed up by Lanix) and are never committed to the public repository.

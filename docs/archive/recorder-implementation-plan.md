@@ -8,7 +8,7 @@
 
 **Tech Stack:** React 19, Vite 8 (Rolldown), plain JavaScript, `@mediapipe/tasks-vision` 1.1.1, Vitest 5 (dev only), Node 22.
 
-**Spec:** [docs/recorder-design.md](recorder-design.md) for the recorder; [docs/project-plan.md](project-plan.md), Phase 3.1–3.2, for the shell and setup. Page designs are in `docs/design/` (local-only, see below).
+**Spec:** [docs/recorder-design.md](recorder-design.md) for the recorder; [docs/project-plan.md](../project-plan.md), Phase 3.1–3.2, for the shell and setup. Page designs are in `docs/design/` (local-only, see below).
 
 **Revised 2026-10-15.** The first version of this plan built the recorder as a second page (`record.html`). Its tasks 6–9 (page shell and consent, takes and grid, docs, end-to-end check) were built on this branch in commits `0adff55..9e6618c`. Tasks 6–10 below replace them: they move that code into the app instead of starting over.
 
