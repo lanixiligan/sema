@@ -4,11 +4,14 @@ A browser-based ASL fingerspelling coach. It will use your webcam and hand landm
 to teach the ASL alphabet. Everything runs in your browser: no backend, no accounts,
 and video never leaves your machine.
 
-**Status: Phase 1 complete, deployed on Vercel.** The page shows your webcam (mirrored), tracks one hand with
+**Status: Phase 1 complete, deployed on Vercel. Phase 2 in progress:** the recorder
+that collects training data is built, and is becoming the app's main page (Record, in
+a menu with Learn and Practice). Phase 1's hand-tracking page is at `/dev`: it shows
+your webcam (mirrored), tracks one hand with
 [MediaPipe Hand Landmarker](https://developers.google.com/edge/mediapipe/solutions/vision/hand_landmarker)
-and draws its 21 landmarks on top. It shows whether a hand is found and which one,
-the camera and detection frame rates, and the average detection time. Letter
-recognition comes in later phases.
+and draws its 21 landmarks on top, with whether a hand is found and which one, the
+camera and detection frame rates, and the average detection time. Letter recognition
+comes in later phases.
 
 Live site: the link will be added here soon.
 
@@ -27,8 +30,13 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5173 and click **Start camera**. The browser will ask for
-camera permission. The hand model loads the first time the camera starts.
+Open http://localhost:5173. A first visit shows Welcome, then three setup steps (How
+Sema works, which hand you sign with, a camera check), then Record. The camera starts by
+itself on the camera check and on Record's recording step, and the browser asks for
+permission the first time. Returning visitors open straight on Record; clearing the
+site's data starts setup again. The hand model loads the first time the camera starts.
+The Phase 1 hand-tracking page is at http://localhost:5173/dev (click **Start camera**
+there).
 
 Use Chrome/Chromium or Firefox. Hand tracking needs WebGL, which some
 privacy-focused browsers (such as LibreWolf) don't give to pages; the app says so
@@ -67,7 +75,8 @@ Measured on 2026-10-15: Fedora KDE Plasma (Wayland), Ryzen 5 3600, GTX 1660 Supe
 
 Camera at 640 × 480. Measured with the built-in benchmark:
 
-1. Start the camera and open **Developer settings** under the video.
+1. Open http://localhost:5173/dev (or `/dev` on the live site), click **Start camera**
+   and open **Developer settings** under the video.
 2. Pick the delegate and wait until **Runs on** shows it.
 3. Hold one hand in view, keep the tab in front and DevTools closed, and click
    **Run benchmark**. It waits 2 seconds to warm up, then measures every frame
@@ -130,29 +139,36 @@ MediaPipe WebAssembly into `public/`), then `npm run build`, and serves `dist/`
 over HTTPS, which the camera requires. No base path is needed. Every push to
 `main` deploys again.
 
-`vercel.json` turns on `cleanUrls`, so the recorder (`record.html`) is served at
-`/record`. A future single-page-app rewrite (Phase 3) must exclude `/record`.
+Sema is a single HTML file that picks its page from the address (`/record`, `/learn`, `/dev`,
+…). `vercel.json` rewrites every path to `index.html`, so opening or refreshing any of
+them loads the app, which then shows the right page. Vercel serves real files first,
+so the model, MediaPipe's files, the fonts and `letters.json` load as usual.
+`npm run dev` and `npm run preview` do the same locally.
 
 ## Recorded data
 
 Landmark recordings collected for training go in `data/raw/`, which is gitignored: they
 stay private and are backed up by Lanix, never committed to this public repository.
-Participants consent to one use only: training and testing Sema. Recordings are never
-published, and participants can ask Lanix to delete theirs at any time. What is public: the code, evaluation results, confusion
+Participants consent to their recordings being used to train Sema (required to
+record); publishing a dataset is out of scope. Participants can ask Lanix to delete
+theirs at any time. What is public: the code, evaluation results, confusion
 matrices and trained classifier weights.
 
 ## Recording sessions
 
-The recorder collects labelled hand landmarks for training (milestone 2.1). It's a
-separate page: `/record` on the live site, `http://localhost:5173/record.html` in
+The recorder collects labelled hand landmarks for training (milestone 2.1). It's the
+app's Record page: `/record` on the live site, `http://localhost:5173/record` in
 development. The file format is described in [docs/data-format.md](docs/data-format.md).
 
-**In person:** open the page, let the participant read the consent text, enter their
-code (`p03`) and tick the boxes. Start the camera, then for each letter and hand in the
-table choose the cell and click **Record**: a 3-2-1 countdown, "Hold…" for 3.5 seconds,
-then the result. Aim for 3 saved takes per cell; the hint under each take says where to
-hold the hand (centre, closer, off to one side). **Undo last take** removes a mistake.
-At the end, click **Download session file**.
+**In person:** finish setup once on the laptop, then open Record. The participant
+reads "Help train Sema" and "What gets saved", enters their code (`p03`), ticks the
+training box and clicks **Start recording**. The camera then starts by itself. Pick the hand (it starts on the signing
+hand) and a letter tile, and click **Record take**: a 3-2-1 countdown, "Hold…" with a
+frame count for 3.5 seconds, then the result beside the video. Aim for 3 kept takes per
+letter and hand; the letter card says where to hold the hand (centre of the frame, a
+little closer, off to one side). **Undo last take** removes a mistake. At the end,
+click **Finish and download**; the last page names the file and offers **Start a new
+session** for the next person.
 
 **Remotely:** send the participant the `/record` link. They do the same on their own
 computer and send you the downloaded file.
@@ -161,8 +177,7 @@ computer and send you the downloaded file.
 video or photos; they're identified by a code, not their name; everything stays in
 their browser until they download the file, and nothing is uploaded; Lanix keeps the
 file private and uses it to train and test Sema; they can ask Lanix to delete their
-recordings at any time. They consent to one use, training Sema; recordings are never
-published.
+recordings at any time.
 
 **Before keeping a file,** check it:
 
@@ -228,9 +243,10 @@ browsers require before they allow camera access.
 ## Project structure
 
 ```
-record.html                     the recorder page (/record)
-vercel.json                     cleanUrls, so the recorder is at /record
+vercel.json                     rewrites every path to index.html (one HTML file, many pages)
 public/
+  fonts/                        Plus Jakarta Sans, JetBrains Mono and a Greek subset of
+                                Noto Sans Mono (for "σῆμα"), with their licences
   models/hand_landmarker.task   the hand model (in git)
   mediapipe/wasm/               MediaPipe WebAssembly (copied on npm install)
   languages/asl/letters.json    letters to record, with how to form each
@@ -238,35 +254,65 @@ scripts/
   copy-mediapipe.js             copies the WebAssembly files into public/
   check-session.js              checks a recorded session file
 src/
-  camera/
+  app/                          the shell, used by every page
+    router.js                   which page each address shows
+    navigation.js               changes pages without reloading (History API)
+    Link.jsx                    a link to another page
+    CameraProvider.jsx          the camera and hand model, shared by all pages
+    sharedCamera.js             useSharedCamera(), to read them
+    MenuBar.jsx                 the top bar: Record, Learn, Practice
+    PreviewPill.jsx             the "Preview" pills
+    PhoneNotice.jsx             the notice for small screens
+    progressStore.js            the signing hand and "setup done", in localStorage
+  components/                   parts used by more than one page folder
+    CameraStage.jsx             a camera view; the camera is on while one is shown
+    StageProblem.jsx            a camera or hand-tracking problem shown over the video
+    icons.jsx                   line icons
+  pages/                        one folder per part of the app; they don't import each other
+    onboarding/
+      WelcomePage.jsx           1 Welcome
+      HowSemaWorksPage.jsx      setup step 1: what Sema does with what it sees
+      SigningHandPage.jsx       setup step 2: which hand you sign with
+      CameraCheckPage.jsx       setup step 3: camera preview and the two hand checks
+      SetupBar.jsx              "Step N of 3" on the setup pages
+    record/
+      RecordPage.jsx            the Record page: consent, recording and finished steps
+      ConsentForm.jsx           participant code, session ID, consent to train Sema
+      HandToggle.jsx            Hand: Left | Right
+      TakePanel.jsx             the letter card: how to form it, take and position
+      TakeResult.jsx            the last take's result, beside the video
+      TakeOverlay.jsx           countdown, "Hold…", frame count and progress bar
+      RecordingGrid.jsx         one row of letter tiles for the chosen hand
+      FinishedStep.jsx          after Finish and download: thanks and the file name
+    learn/LearnPage.jsx         Learn (a placeholder for now)
+    practice/PracticePage.jsx   Practice (a placeholder for now)
+    dev/
+      DevPage.jsx               the Phase 1 hand-tracking page and benchmark (/dev)
+      BenchmarkPanel.jsx        the benchmark in Developer settings
+  camera/                       webcam logic, no pages
     useCamera.js                start/stop/switch the webcam, camera list, errors
     useVideoStats.js            real resolution and camera frames per second
     cameraMessages.js           plain-language camera error messages
     frameCounter.js             reads the browser's frame counter (camera fps)
-  recorder/
-    main.jsx                    the recorder page's entry point
-    RecorderApp.jsx             consent, camera, grid, take panel, download
-    ConsentForm.jsx             participant code, session ID, consent
-    RecordingGrid.jsx           letter × hand table of saved takes
-    TakePanel.jsx               instructions, Record, countdown, result
+  recorder/                     recording logic, no pages
     useRecording.js             one take: countdown, settle, capture, result
     takeRules.js                take timing, sampling and the pass rule
     letters.js                  loads letters.json
     sessionFile.js              builds the session file
     sessionStore.js             autosave in the browser, download
-  vision/
+  vision/                       hand-tracking logic, no pages
     normalizeHand.js            turns 21 landmarks into 63 shape numbers
+    handChecks.js               the camera check: right hand? whole hand in view?
     browserName.js              "Chrome 155", "Firefox 157"
     loadHandLandmarker.js       loads the model; GPU first, CPU fallback
     useHandLandmarker.js        creates, recreates and closes the landmarker
     useHandDetection.js         per-frame detection loop and readouts
     useBenchmark.js             runs the performance benchmark
     benchmarkStats.js           median, percentiles and the README table row
-    BenchmarkPanel.jsx          the benchmark in Developer settings
     drawHand.js                 draws the skeleton on the canvas
     handedness.js               MediaPipe's Left/Right label -> the hand raised
     visionMessages.js           plain-language hand-tracking messages
-  App.jsx                       the page
+  App.jsx                       the shell: picks the page for the address
   main.jsx                      entry point
   styles.css                    all styles and color variables
 docs/

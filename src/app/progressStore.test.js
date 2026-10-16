@@ -1,0 +1,59 @@
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { NEW_VISITOR, PROGRESS_VERSION, loadProgress, saveProgress } from './progressStore.js'
+
+function fakeStorage(initial = {}, { failWrites = false } = {}) {
+  const data = new Map(Object.entries(initial))
+  return {
+    getItem: (key) => (data.has(key) ? data.get(key) : null),
+    setItem: (key, value) => {
+      if (failWrites) throw new DOMException('Quota exceeded', 'QuotaExceededError')
+      data.set(key, String(value))
+    },
+  }
+}
+const saved = (value) => ({ 'sema.progress': JSON.stringify(value) })
+
+afterEach(() => vi.unstubAllGlobals())
+
+describe('progressStore', () => {
+  it('starts as a new visitor', () => {
+    vi.stubGlobal('localStorage', fakeStorage())
+    expect(loadProgress()).toEqual(NEW_VISITOR)
+  })
+
+  it('saves and loads the signing hand and setup', () => {
+    vi.stubGlobal('localStorage', fakeStorage())
+    const progress = { version: PROGRESS_VERSION, signingHand: 'left', setupDone: true }
+    expect(saveProgress(progress)).toBe(true)
+    expect(loadProgress()).toEqual(progress)
+  })
+
+  it('treats unreadable JSON as a new visitor', () => {
+    vi.stubGlobal('localStorage', fakeStorage({ 'sema.progress': '{not json' }))
+    expect(loadProgress()).toEqual(NEW_VISITOR)
+  })
+
+  it('treats another version as a new visitor', () => {
+    vi.stubGlobal('localStorage', fakeStorage(saved({ version: 99, signingHand: 'left', setupDone: true })))
+    expect(loadProgress()).toEqual(NEW_VISITOR)
+  })
+
+  it('ignores an unknown hand, and setup marked done without a hand', () => {
+    vi.stubGlobal('localStorage', fakeStorage(saved({ version: PROGRESS_VERSION, signingHand: 'both', setupDone: true })))
+    expect(loadProgress()).toEqual(NEW_VISITOR)
+  })
+
+  it('treats blocked storage as a new visitor', () => {
+    vi.stubGlobal('localStorage', {
+      getItem: () => {
+        throw new DOMException('Blocked', 'SecurityError')
+      },
+    })
+    expect(loadProgress()).toEqual(NEW_VISITOR)
+  })
+
+  it('reports a refused save', () => {
+    vi.stubGlobal('localStorage', fakeStorage({}, { failWrites: true }))
+    expect(saveProgress({ version: PROGRESS_VERSION, signingHand: 'right', setupDone: false })).toBe(false)
+  })
+})

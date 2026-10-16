@@ -15,8 +15,16 @@ export const MIN_MATCHED_SHARE = 0.8
 export const MIN_MATCHED = Math.round(MIN_MATCHED_SHARE * EXPECTED_SAMPLES)
 
 export const TAKES_TARGET = 3
-export const POSITION_HINTS = ['Centre of the picture', 'Closer to the camera', 'Off to one side']
+// Where to hold the hand for takes 1, 2 and 3 (wording from the Record design).
+export const POSITION_HINTS = ['centre of the frame', 'a little closer', 'off to one side']
 export const LIFEPRINT_URL = 'https://www.lifeprint.com/asl101/fingerspelling/'
+
+// How far through capture a take is, from 0 to 1, for the progress bar under
+// the video. 0 during the countdown and settle; 1 once capture is over.
+export function captureProgress(elapsed) {
+  const intoCapture = elapsed - COUNTDOWN_MS - SETTLE_MS
+  return Math.min(1, Math.max(0, intoCapture / CAPTURE_MS))
+}
 
 export function takePhase(elapsedMs) {
   if (elapsedMs < COUNTDOWN_MS) return 'countdown'
@@ -71,7 +79,7 @@ export function judgeTake({ kept, mismatched, droppedNoHand }, expected = EXPECT
 
   const parts = []
   if (droppedNoHand > 0) parts.push(`${droppedNoHand} had no hand`)
-  if (mismatched > 0) parts.push(`${mismatched} had the other hand detected`)
+  if (mismatched > 0) parts.push(`${mismatched} had the other hand`)
   const missing = expected - kept - droppedNoHand
   if (missing > 0) parts.push(`${missing} never arrived (the camera or hand tracking was too slow)`)
   const reason = `${matched} of ${expected} frames matched` + (parts.length ? `: ${parts.join(', ')}` : '')

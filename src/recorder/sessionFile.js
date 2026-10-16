@@ -38,7 +38,8 @@ export function newSession({ person, session, consent, date, browser }) {
     session,
     browser,
     cameraFps: null,
-    // Training is the only use people consent to; recordings are never published.
+    // Training is the only thing people are asked to agree to; publishing a
+    // dataset is out of scope.
     consent: { train: consent.train, date },
     recordings: [],
     samples: [],

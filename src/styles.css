@@ -1,14 +1,64 @@
+/* Fonts, served from public/fonts/ with their licences beside them. Plus
+   Jakarta Sans is one variable file that covers every weight from 200 to 800.
+   JetBrains Mono is only used at 500, for codes and counts. font-display: swap
+   shows the text in a fallback font straight away, then swaps the real font in
+   once its file has arrived. */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  src: url('/fonts/PlusJakartaSans-Variable.woff2') format('woff2');
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('/fonts/JetBrainsMono-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* JetBrains Mono has no "ῆ", so the Greek in "σῆμα" would fall back to a
+   different font on every system. This tiny subset of Noto Sans Mono (3 KB)
+   holds just σ ῆ μ α. unicode-range means the browser only downloads it when a
+   page shows one of them, and uses it for those letters only. */
+@font-face {
+  font-family: 'Noto Sans Mono Greek';
+  src: url('/fonts/NotoSansMono-Greek-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+03B1, U+03BC, U+03C3, U+1FC6;
+}
+
+/* The palette, with the exact values from the designs (docs/design/). */
 :root {
-  --deep-cobalt: #142c48; /* text, and the dark frame around the video */
+  --deep-cobalt: #142c48; /* text, and dark surfaces such as the video frame */
   --bright-sky: #36a7d9; /* accents on dark surfaces only: too faint as text on light */
   --deep-sky: #1a75a3; /* buttons and links on light surfaces, with white text */
   --cloud-white: #f5f7f8; /* page background */
-  --amber: #b45309; /* warning text on light backgrounds */
-  --amber-on-dark: #e8a23a; /* warning text on dark surfaces (the video) */
-  --muted-text: #52637a;
+  --white: #fff; /* cards and the menu bar */
+  --ice-tint: #e3f4fa; /* the Preview pill and soft highlights */
+  --line: #e1e7ed; /* borders and dividers on light surfaces */
+  --line-strong: #c3ced9; /* input and letter-tile borders */
+  --disabled: #d3dce5; /* disabled buttons */
+  --chip: #eef2f5; /* the small "preview" pills in the menu */
+  --segment: #e7edf2; /* the track behind a Left/Right toggle */
+  --amber: #b45309; /* warning text and marks on light backgrounds */
+  --amber-on-dark: #e8a23a; /* warnings on dark surfaces (the video) */
+  --amber-tint: #fdf1e3; /* background of a warning note */
+  --amber-ink: #7a3a06; /* text on --amber-tint */
+  --error-red: #b42318; /* destructive actions and errors */
+  --muted-text: #52637a; /* secondary text on light surfaces */
+  --muted-on-dark: #a9bcd0; /* secondary text on dark surfaces */
+  --hand-outline: #0c1d30; /* dark outline under hand drawings */
+  --progress-track: #2a4a70; /* empty part of a progress bar on dark surfaces */
+
+  --font-mono: 'Noto Sans Mono Greek', 'JetBrains Mono', monospace;
 
   color-scheme: light;
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
   line-height: 1.5;
   color: var(--deep-cobalt);
   background: var(--cloud-white);
@@ -37,6 +87,189 @@ body {
   border-bottom: 1px solid rgb(20 44 72 / 0.08);
 }
 
+/* The menu bar on the main screens (MenuBar.jsx). */
+.menu-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  height: 72px;
+  padding: 0 32px;
+  background: var(--white);
+  border-bottom: 1px solid var(--line);
+}
+
+.menu-bar-left {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  gap: 40px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-name {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: inherit;
+  text-decoration: none;
+}
+
+.preview-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--deep-cobalt);
+  background: var(--ice-tint);
+  border-radius: 999px;
+}
+
+/* The links stretch to the bar's full height, so the current screen's
+   underline sits on the bar's bottom edge. */
+.menu {
+  display: flex;
+  align-self: stretch;
+  gap: 28px;
+}
+
+.menu a {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--muted-text);
+  text-decoration: none;
+}
+
+.menu a:hover {
+  color: var(--deep-cobalt);
+}
+
+.menu a[aria-current='page'] {
+  font-weight: 600;
+  color: var(--deep-cobalt);
+  box-shadow: inset 0 -2px 0 var(--deep-sky);
+}
+
+.menu-pill {
+  padding: 2px 7px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted-text);
+  background: var(--chip);
+  border-radius: 999px;
+}
+
+.menu-bar-status {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font-size: 13px;
+  color: var(--muted-text);
+}
+
+.brand-name:focus-visible,
+.menu a:focus-visible {
+  outline: 3px solid var(--deep-sky);
+  outline-offset: 2px;
+}
+
+/* The phone notice (PhoneNotice.jsx), designed for a 390px-wide phone. */
+.phone-notice {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 28px 24px 40px;
+}
+
+.phone-notice-main {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  justify-content: center;
+  gap: 28px;
+}
+
+.phone-notice-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  color: var(--bright-sky);
+  background: var(--deep-cobalt);
+  border-radius: 20px;
+}
+
+.phone-notice h1 {
+  margin: 0;
+  font-size: 28px;
+  line-height: 1.25;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.phone-notice-main p {
+  margin: 14px 0 0;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--muted-text);
+}
+
+.phone-notice-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.phone-notice-copy {
+  min-height: 52px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--white);
+  background: var(--deep-sky);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.phone-notice-continue {
+  min-height: 48px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--deep-sky);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.phone-notice-copy:focus-visible,
+.phone-notice-continue:focus-visible {
+  outline: 3px solid var(--deep-sky);
+  outline-offset: 2px;
+}
+
+.phone-notice-footer {
+  margin: 0;
+  padding-top: 20px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--muted-text);
+  border-top: 1px solid var(--line);
+}
+
 .page {
   max-width: 720px;
   margin: 0 auto;
@@ -56,7 +289,7 @@ body {
 /* The video and the hand overlay must stay exactly on top of each other, so
    they share every rule. The canvas is sized to the video's aspect ratio, so
    object-fit: contain places both identically. scaleX(-1) mirrors both.
-   See the comment above the <video> in App.jsx. */
+   See the comment above the <video> in DevScreen.jsx. */
 .video,
 .overlay {
   position: absolute;
@@ -268,290 +501,1270 @@ body {
   margin-top: 0;
 }
 
-/* Recorder page (record.html) */
-.consent h1 {
-  margin: 0 0 16px;
-  font-size: 1.5rem;
+/* ---------- Record (src/pages/record/) ---------- */
+
+/* Narrow, centred steps: consent and the saved-session offer. */
+.record-narrow {
+  display: flex;
+  justify-content: center;
+  padding: 48px 24px 72px;
 }
 
-.consent-text p {
-  margin: 0 0 12px;
-}
-
-.field {
+.consent,
+.saved-offer {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  margin-top: 16px;
+  gap: 28px;
+  width: 100%;
+  max-width: 520px;
+}
+
+.consent-lead {
+  margin: 12px 0 0;
+  font-size: 15px;
+  line-height: 1.6;
   color: var(--muted-text);
 }
 
-.field input {
-  max-width: 240px;
-  padding: 8px 10px;
-  font: inherit;
-  color: var(--deep-cobalt);
-  background: #fff;
-  border: 1px solid var(--muted-text);
-  border-radius: 8px;
+.consent-lead-next {
+  margin-top: 10px;
 }
 
-.check {
+.consent-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.consent-field {
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.consent-field label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.consent-field input {
+  padding: 11px 12px;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--deep-cobalt);
+  background: var(--white);
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+}
+
+.consent-field input:focus-visible {
+  outline: 3px solid var(--deep-sky);
+  outline-offset: 1px;
+}
+
+.consent-help {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--muted-text);
+}
+
+.consent-help-error {
+  color: var(--amber);
+}
+
+.consent-saved {
+  padding: 20px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.consent-saved-title {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.consent-saved ul {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 10px 0 0;
+  padding-left: 20px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.consent-answers {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.consent-check {
+  display: flex;
   align-items: flex-start;
-  margin-top: 12px;
+  gap: 12px;
+  font-size: 15px;
+  line-height: 1.5;
+  cursor: pointer;
 }
 
-.consent .button {
-  margin-top: 24px;
+.consent-check input {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  margin: 2px 0 0;
+  accent-color: var(--deep-sky);
 }
 
-.button:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-
-.field input:focus-visible,
-.check input:focus-visible {
+.consent-check input:focus-visible {
   outline: 3px solid var(--deep-sky);
   outline-offset: 2px;
 }
 
-.saved-session p,
-.session-bar {
-  margin: 0 0 16px;
+.consent-optional {
+  color: var(--muted-text);
 }
 
-.session-bar {
+.consent-delete {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--muted-text);
+}
+
+.consent-start {
+  align-self: flex-start;
+}
+
+.saved-offer-actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px 16px;
+  gap: 12px;
+}
+
+/* Quieter buttons from the designs: grey text, an outlined one, a red one. */
+.quiet-button,
+.danger-link {
+  padding: 13px 10px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
   color: var(--muted-text);
+  background: transparent;
+  border: none;
+  cursor: pointer;
 }
 
-.session-bar .button-quiet {
-  margin-top: 0;
+.danger-link {
+  font-size: 15px;
+  color: var(--error-red);
 }
 
-.hand-status {
-  color: var(--muted-text);
+.quiet-button:hover:not(:disabled) {
+  color: var(--deep-cobalt);
 }
 
-/* Recorder session view: camera on the left, letter card and grid on the right. */
-.page-wide {
-  max-width: 1200px;
+.quiet-button:disabled,
+.outline-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-.top-bar .session-bar {
-  margin: 0;
-  font-size: 0.9375rem;
-  font-weight: 400;
+.outline-button {
+  padding: 11px 20px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--deep-sky);
+  background: var(--white);
+  border: 1px solid var(--deep-sky);
+  border-radius: 12px;
+  cursor: pointer;
 }
 
-.recorder-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
-  gap: 32px;
-  align-items: start;
+.quiet-button:focus-visible,
+.danger-link:focus-visible,
+.outline-button:focus-visible,
+.hand-toggle button:focus-visible,
+.letter-tile-button:focus-visible,
+.letter-card-link:focus-visible {
+  outline: 3px solid var(--deep-sky);
+  outline-offset: 2px;
 }
 
-@media (max-width: 1000px) {
-  .recorder-layout {
-    grid-template-columns: 1fr;
-  }
+/* The session's code and ID in the menu bar. */
+.session-id {
+  font-family: var(--font-mono);
+  font-weight: 500;
 }
 
-.recorder-main .controls {
-  margin-top: 16px;
+.session-saved,
+.session-not-saved {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.controls-quiet {
+.session-saved svg {
+  color: var(--deep-sky);
+}
+
+.session-not-saved {
+  font-weight: 600;
+  color: var(--amber);
+}
+
+/* The recording step: camera on the left, the take on the right, the letters
+   underneath. flex-wrap lets the side column drop below on narrow windows. */
+.record {
   display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 32px;
+  width: 100%;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 32px 48px 40px;
+}
+
+.record-camera {
+  display: flex;
+  flex: 999 1 560px;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.record-stage {
+  aspect-ratio: auto;
+  height: 480px;
+  border-radius: 20px;
+}
+
+.record-private {
+  display: flex;
+  align-items: center;
   gap: 8px;
-  margin-left: auto;
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted-text);
 }
 
-.controls-quiet .button-quiet {
-  margin-top: 0;
+.record-side {
+  display: flex;
+  flex: 1 1 340px;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 420px;
 }
 
-/* The take's status, on top of the video (not mirrored). */
+.record-note {
+  margin: 0;
+  padding: 14px 16px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--amber-ink);
+  background: var(--amber-tint);
+  border-radius: 12px;
+}
+
+.record-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.record-take {
+  flex: 1 1 auto;
+  padding: 14px 20px;
+}
+
+.record-letters {
+  display: flex;
+  flex: 1 1 100%;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.record-finish {
+  align-self: flex-end;
+}
+
+/* Over the video (TakeOverlay.jsx). */
 .take-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* A soft dark gradient behind the bar keeps its text readable over a bright
+   camera picture. */
+.take-overlay-bar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px 28px;
+  color: var(--cloud-white);
+  background: linear-gradient(rgb(12 29 48 / 0.75), rgb(12 29 48 / 0));
+}
+
+.take-overlay-phase {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.take-overlay-frames {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted-on-dark);
+}
+
+.take-countdown {
   position: absolute;
   inset: 0;
   display: grid;
   place-items: center;
-  pointer-events: none;
-}
-
-.take-countdown {
-  display: grid;
-  place-items: center;
-  width: 120px;
-  height: 120px;
   margin: 0;
-  font-size: 4rem;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
+  font-size: 96px;
+  font-weight: 800;
   color: var(--cloud-white);
-  background: rgb(20 44 72 / 0.75);
-  border-radius: 50%;
+  text-shadow: 0 2px 12px rgb(12 29 48 / 0.6);
 }
 
-.take-hold {
-  margin: 0;
-  padding: 12px 32px;
-  font-size: 2rem;
-  font-weight: 600;
-  color: var(--cloud-white);
-  background: rgb(20 44 72 / 0.75);
-  border-radius: 999px;
-}
-
-.take-banner {
+.take-progress {
   position: absolute;
-  right: 16px;
-  bottom: 16px;
-  left: 16px;
-  margin: 0;
-  padding: 12px 16px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 6px;
+  background: var(--progress-track);
+}
+
+.take-progress div {
+  height: 100%;
+  background: var(--bright-sky);
+}
+
+/* Hand: Left | Right (HandToggle.jsx). */
+.hand-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hand-toggle-label {
+  font-size: 14px;
   font-weight: 600;
-  text-align: center;
-  color: var(--cloud-white);
-  background: rgb(20 44 72 / 0.9);
+  color: var(--muted-text);
+}
+
+.hand-toggle-options {
+  display: grid;
+  grid-template-columns: repeat(2, 88px);
+  gap: 4px;
+  padding: 4px;
+  background: var(--segment);
   border-radius: 10px;
 }
 
-.take-banner-saved {
-  color: var(--bright-sky);
-}
-
-.take-banner-warning {
-  color: var(--amber-on-dark);
-}
-
-/* The card for the chosen letter. */
-.take-card h2 {
-  margin: 0 0 12px;
-  font-size: 1.25rem;
-}
-
-.take-card p {
-  margin: 0 0 10px;
-}
-
-.take-card a {
-  color: var(--deep-sky);
-}
-
-.take-card-empty {
-  color: var(--muted-text);
-}
-
-.take-hint {
+.hand-toggle button {
+  padding: 8px;
+  font: inherit;
+  font-size: 14px;
   font-weight: 600;
-}
-
-.take-note {
   color: var(--muted-text);
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
 }
 
-.reference-figure {
-  margin: 0 0 12px;
+.hand-toggle button[aria-pressed='true'] {
+  color: var(--deep-cobalt);
+  background: var(--white);
 }
 
-.reference {
-  display: grid;
-  place-items: center;
-  height: 150px;
-  margin: 0 0 12px;
+.hand-toggle button:disabled {
+  cursor: not-allowed;
+}
+
+/* The letter card (TakePanel.jsx). */
+.letter-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  padding: 20px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+}
+
+.letter-tile {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
   overflow: hidden;
-  background: #fff;
-  border-radius: 12px;
+  font-size: 40px;
+  font-weight: 800;
+  color: var(--bright-sky);
+  background: var(--deep-cobalt);
+  border-radius: 16px;
 }
 
-.reference-figure .reference {
-  margin-bottom: 4px;
-}
-
-.reference img {
+.letter-tile img {
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
 
-.reference img.mirrored {
+.letter-tile img.mirrored {
   transform: scaleX(-1);
 }
 
-.reference-figure figcaption {
-  font-size: 0.8125rem;
+.letter-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.letter-card-title {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.letter-card-instructions {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.letter-card-note,
+.letter-card-take {
+  font-size: 13px;
   color: var(--muted-text);
 }
 
-.reference-placeholder {
-  font-size: 0.875rem;
-  color: var(--muted-text);
-  border: 2px dashed var(--muted-text);
+.letter-card-link {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--deep-sky);
+  text-decoration: none;
 }
 
-/* The letter × hand grid. */
-.recording-grid-wrap {
-  margin-top: 20px;
+.letter-card-link:hover {
+  text-decoration: underline;
 }
 
-.recording-grid {
-  border-collapse: collapse;
+/* The last take's result (TakeResult.jsx). */
+.take-result {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px;
+  font-size: 14px;
+  line-height: 1.5;
+  border-radius: 12px;
 }
 
-.recording-grid th,
-.recording-grid td {
-  padding: 2px 6px;
-  text-align: left;
+.take-result strong {
+  font-weight: 700;
 }
 
-.recording-grid th[scope='row'] {
-  width: 96px;
-  white-space: nowrap;
+.take-result-warning {
+  color: var(--amber-ink);
+  background: var(--amber-tint);
 }
 
-.cell-button {
-  min-width: 60px;
-  padding: 4px 10px;
-  font: inherit;
-  font-variant-numeric: tabular-nums;
+.take-result-dot {
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  margin-top: 6px;
+  background: var(--amber);
+  border-radius: 999px;
+}
+
+.take-result-kept {
   color: var(--deep-cobalt);
-  background: #fff;
-  border: 1px solid var(--muted-text);
-  border-radius: 6px;
+  background: var(--ice-tint);
+}
+
+.take-result-check {
+  display: inline-flex;
+  margin-top: 3px;
+  color: var(--deep-sky);
+}
+
+/* The letter tiles (RecordingGrid.jsx). */
+.letters {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.letters-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.letters-head h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.letters-pilot-note {
+  font-size: 13px;
+  color: var(--muted-text);
+}
+
+.letter-tiles {
+  display: grid;
+  gap: 8px;
+}
+
+.letter-tile-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 76px;
+  padding: 0;
+  font: inherit;
+  color: var(--deep-cobalt);
+  background: var(--white);
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
   cursor: pointer;
 }
 
-.cell-button[aria-pressed='true'] {
-  color: #fff;
+.letter-tile-button.pilot {
+  background: var(--cloud-white);
+}
+
+.letter-tile-button.done {
+  color: var(--white);
   background: var(--deep-sky);
   border-color: var(--deep-sky);
 }
 
-.cell-button:disabled {
-  opacity: 0.5;
-  cursor: default;
+.letter-tile-button[aria-pressed='true'] {
+  border: 2px solid var(--deep-cobalt);
 }
 
-.cell-button:focus-visible,
-.pilot-letters summary:focus-visible {
+.letter-tile-button:disabled {
+  cursor: not-allowed;
+}
+
+.letter-tile-letter {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.letter-tile-button.none .letter-tile-letter {
+  font-size: 15px;
+}
+
+.letter-tile-count {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted-text);
+}
+
+.letter-tile-button.done .letter-tile-count {
+  color: var(--ice-tint);
+}
+
+.letters-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding-top: 8px;
+  font-size: 13px;
+  color: var(--muted-text);
+}
+
+.letters-legend > span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-swatch {
+  width: 12px;
+  height: 12px;
+  background: var(--white);
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1px var(--line-strong);
+}
+
+.legend-swatch.done {
+  background: var(--deep-sky);
+  box-shadow: none;
+}
+
+.legend-swatch.pilot {
+  background: var(--cloud-white);
+}
+
+/* The finished step (FinishedStep.jsx). */
+.record-finished {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px 96px;
+}
+
+.record-finished section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+  max-width: 480px;
+  text-align: center;
+}
+
+.record-finished-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  color: var(--deep-sky);
+  background: var(--ice-tint);
+  border-radius: 18px;
+}
+
+.record-finished h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.record-finished-counts {
+  margin: 12px 0 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--muted-text);
+}
+
+.record-finished-file {
+  width: 100%;
+  padding: 18px 20px;
+  text-align: left;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.record-finished-file-title {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.record-finished-file-name {
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.record-finished-file-where {
+  margin-top: 8px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--muted-text);
+}
+
+.record-finished-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+/* ---------- Shared by the setup pages (and Welcome) ---------- */
+
+/* The designs' main button. A link (<a>) or a <button> can wear it. */
+.primary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 28px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--white);
+  text-decoration: none;
+  background: var(--deep-sky);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.primary-button:hover {
+  background: color-mix(in srgb, var(--deep-sky), black 15%);
+}
+
+.primary-button:disabled {
+  color: var(--muted-text);
+  background: var(--disabled);
+  cursor: not-allowed;
+}
+
+.back-link {
+  padding: 12px 4px;
+  font: inherit;
+  font-size: 15px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--muted-text);
+  text-decoration: none;
+}
+
+.back-link:hover {
+  color: var(--deep-cobalt);
+}
+
+.primary-button:focus-visible,
+.back-link:focus-visible,
+.disclosure:focus-visible,
+.hand-choice button:focus-visible,
+.other-hand-note button:focus-visible,
+.camera-check-picker select:focus-visible {
   outline: 3px solid var(--deep-sky);
   outline-offset: 2px;
 }
 
-.pilot-letters {
-  margin-top: 12px;
+.setup-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
 }
 
-.pilot-letters summary {
+.setup-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 72px;
+  padding: 0 48px;
+}
+
+.setup-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--muted-text);
+}
+
+.setup-segments {
+  display: grid;
+  grid-template-columns: repeat(3, 32px);
+  gap: 4px;
+}
+
+.setup-segments span {
+  height: 4px;
+  background: var(--disabled);
+  border-radius: 999px;
+}
+
+.setup-segments span.done {
+  background: var(--deep-sky);
+}
+
+.setup-main {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px 96px;
+}
+
+.setup-section {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  width: 100%;
+  max-width: 440px;
+}
+
+.setup-section-wide {
+  max-width: 480px;
+}
+
+.setup-title {
+  margin: 0;
+  font-size: 32px;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.setup-lead {
+  margin: 12px 0 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--muted-text);
+}
+
+.setup-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/* ---------- Welcome (WelcomePage.jsx) ---------- */
+
+.welcome {
+  display: flex;
+  flex-wrap: wrap;
+  min-height: 100dvh;
+}
+
+.welcome-name {
+  display: flex;
+  flex: 1 1 560px;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 56px;
+  color: var(--cloud-white);
+  background: var(--deep-cobalt);
+}
+
+.welcome-greek {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted-on-dark);
+}
+
+.welcome-hand {
+  display: flex;
+  justify-content: center;
+}
+
+.welcome-hand-svg {
+  width: 340px;
+  height: 374px;
+  max-width: 100%;
+}
+
+.welcome-tagline {
+  max-width: 460px;
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+.welcome-main {
+  display: flex;
+  flex: 1 1 560px;
+  align-items: center;
+  justify-content: center;
+  padding: 56px;
+}
+
+.welcome-content {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.welcome-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.welcome-sema {
+  font-size: 40px;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+/* The pill beside the big name is a little larger than in the bars. */
+.welcome-title .preview-pill {
+  padding: 4px 10px;
+  font-size: 12.5px;
+}
+
+.welcome-descriptor {
+  margin-top: 8px;
+  font-size: 15px;
+  color: var(--muted-text);
+}
+
+.welcome-content h1 {
+  margin: 0;
+  font-size: 28px;
+  line-height: 1.3;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.welcome-lead {
+  margin: 12px 0 0;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--muted-text);
+}
+
+.welcome-note {
+  margin: 20px 0 0;
+  padding: 14px 16px;
+  font-size: 14px;
+  line-height: 1.55;
+  background: var(--ice-tint);
+  border-radius: 12px;
+}
+
+.welcome-start {
+  padding: 16px 22px;
+}
+
+.disclosure {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted-text);
+  background: transparent;
+  border: none;
   cursor: pointer;
+}
+
+/* The chevron turns to point down when the note is open. */
+.disclosure[aria-expanded='true'] svg {
+  transform: rotate(90deg);
+}
+
+.disclosure-text {
+  margin: 10px 0 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--muted-text);
+}
+
+/* ---------- How Sema works (HowSemaWorksPage.jsx) ---------- */
+
+.how-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.how-point {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.how-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  color: var(--deep-sky);
+  background: var(--ice-tint);
+  border-radius: 10px;
+}
+
+.how-title {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.how-text {
+  margin-top: 2px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--muted-text);
+}
+
+.how-footnote {
+  margin: 0;
+  padding-top: 18px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted-text);
+  border-top: 1px solid var(--line);
+}
+
+/* ---------- Signing hand (SigningHandPage.jsx) ---------- */
+
+.hand-choice {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.hand-choice button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 28px 12px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--deep-cobalt);
+  background: var(--white);
+  border: 1px solid var(--disabled);
+  border-radius: 16px;
+  cursor: pointer;
+}
+
+/* The chosen hand. The thicker border would make the card jump by a pixel,
+   so the padding shrinks by the same amount. */
+.hand-choice button[aria-pressed='true'] {
+  padding: 27px 11px;
+  background: var(--ice-tint);
+  border: 2px solid var(--deep-sky);
+}
+
+.hand-choice-icon {
+  display: inline-flex;
+}
+
+.hand-choice-icon.mirrored {
+  transform: scaleX(-1);
+}
+
+/* ---------- Camera check (CameraCheckPage.jsx) ---------- */
+
+.camera-check {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 56px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 48px 56px;
+}
+
+.camera-check-text {
+  display: flex;
+  flex: 1 1 320px;
+  flex-direction: column;
+  gap: 28px;
+  max-width: 380px;
+}
+
+.other-hand-note {
+  padding: 14px 16px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--amber-ink);
+  background: var(--amber-tint);
+  border-radius: 12px;
+}
+
+.other-hand-note button {
+  display: block;
+  margin-top: 8px;
+  padding: 0;
+  font: inherit;
+  font-weight: 700;
+  color: var(--amber-ink);
+  text-decoration: underline;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.camera-check-tips {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding-left: 20px;
+  font-size: 14.5px;
+  line-height: 1.5;
+}
+
+.camera-check-picker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--muted-text);
+}
+
+.camera-check-picker label {
+  font-weight: 600;
+}
+
+/* min-width: 0 lets a camera with a long name shrink to fit the column
+   instead of pushing the layout wider. */
+.camera-check-picker select {
+  min-width: 0;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  padding: 7px 10px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--deep-cobalt);
+  background: var(--white);
+  border: 1px solid var(--disabled);
+  border-radius: 8px;
+}
+
+.camera-check-preview {
+  display: flex;
+  flex: 999 1 520px;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+/* A fixed-height dark frame. The video keeps its shape inside it (contain),
+   so a whole-hand check never passes on a hand cut off by cropping. */
+.camera-check-stage {
+  aspect-ratio: auto;
+  height: 560px;
+  border-radius: 20px;
+}
+
+.camera-checks {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  height: 52px;
+  margin: 0;
+  padding: 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  list-style: none;
+  background: rgb(12 29 48 / 0.75);
+}
+
+.camera-check-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--cloud-white);
+}
+
+.camera-check-item.ok span {
+  color: var(--bright-sky);
+}
+
+.camera-check-item.warn span {
+  color: var(--amber-on-dark);
+}
+
+.camera-check-item.wait,
+.camera-check-item.wait span {
+  color: var(--muted-on-dark);
+}
+
+.stage-problem {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 32px;
+  text-align: center;
+}
+
+.stage-problem-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--amber-on-dark);
+  border: 2px solid var(--amber-on-dark);
+  border-radius: 999px;
+}
+
+.stage-problem-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--cloud-white);
+}
+
+.stage-problem-body {
+  max-width: 400px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--muted-on-dark);
+}
+
+/* On the dark frame, the button is Bright Sky with dark text. */
+.stage-problem button {
+  margin-top: 6px;
+  padding: 12px 22px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--deep-cobalt);
+  background: var(--bright-sky);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.stage-problem button:focus-visible {
+  outline: 3px solid var(--bright-sky);
+  outline-offset: 2px;
+}
+
+.camera-check-private {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted-text);
 }

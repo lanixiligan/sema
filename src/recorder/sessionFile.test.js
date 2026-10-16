@@ -100,8 +100,10 @@ describe('newSession', () => {
 })
 
 describe('consent', () => {
-  it('records training consent and its date only: recordings are never published', () => {
-    expect(Object.keys(session().consent)).toEqual(['train', 'date'])
+  it('records training consent and its date only (publishing is out of scope)', () => {
+    expect(session().consent).toEqual({ train: true, date: '2026-11-02' })
+    const s = newSession({ person: 'p03', session: '2026-11-02a', consent: { train: true, publish: true }, date: '2026-11-02', browser: 'Chrome 155' })
+    expect(Object.keys(s.consent)).toEqual(['train', 'date'])
   })
 })
 

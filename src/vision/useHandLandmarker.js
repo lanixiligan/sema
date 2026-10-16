@@ -39,7 +39,7 @@ export function useHandLandmarker(isCameraLive, preferredDelegate) {
       (error) => {
         if (cancelled) return
         console.error('Hand model failed to load.', error)
-        setLoaded({ error: getVisionErrorMessage(error) })
+        setLoaded({ error: getVisionErrorMessage(error), errorName: error?.name ?? 'UnknownError' })
       },
     )
 
@@ -61,6 +61,7 @@ export function useHandLandmarker(isCameraLive, preferredDelegate) {
     landmarkerRef,
     status, // 'idle' | 'loading' | 'ready' | 'error'
     error: loaded?.error ?? null,
+    errorName: loaded?.errorName ?? null, // e.g. 'WebGLUnavailableError'
     delegate: loaded?.delegate ?? null, // the one actually in use
     gpuFailed: loaded?.gpuFailed ?? false,
   }

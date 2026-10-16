@@ -1,167 +1,89 @@
-import { useRef, useState } from 'react'
-import { useCamera } from './camera/useCamera.js'
-import { useVideoStats } from './camera/useVideoStats.js'
-import BenchmarkPanel from './vision/BenchmarkPanel.jsx'
-import { useHandDetection } from './vision/useHandDetection.js'
-import { useHandLandmarker } from './vision/useHandLandmarker.js'
-import { LOADING_HAND_MODEL } from './vision/visionMessages.js'
+import { useEffect, useState } from 'react'
+import CameraProvider from './app/CameraProvider.jsx'
+import PhoneNotice from './app/PhoneNotice.jsx'
+import { navigate, usePathname } from './app/navigation.js'
+import { loadProgress, saveProgress } from './app/progressStore.js'
+import { PATHS, resolveRoute } from './app/router.js'
+import CameraCheckPage from './pages/onboarding/CameraCheckPage.jsx'
+import DevPage from './pages/dev/DevPage.jsx'
+import LearnPage from './pages/learn/LearnPage.jsx'
+import HowSemaWorksPage from './pages/onboarding/HowSemaWorksPage.jsx'
+import SigningHandPage from './pages/onboarding/SigningHandPage.jsx'
+import WelcomePage from './pages/onboarding/WelcomePage.jsx'
+import PracticePage from './pages/practice/PracticePage.jsx'
+import RecordPage from './pages/record/RecordPage.jsx'
 
+// Displays narrower than this get the phone notice (from the design).
+const SMALL_SCREEN = '(max-width: 899px)'
+
+// The app shell: reads the address, picks the page, and wraps every page in
+// the shared camera. Changing pages never reloads the browser tab.
 export default function App() {
-  const { videoRef, status, error, cameras, deviceId, start, stop, switchCamera } =
-    useCamera()
-  const isLive = status === 'live'
-  const stats = useVideoStats(videoRef, isLive)
+  const pathname = usePathname()
+  // The saved settings (signing hand, setup done). They decide where a visitor
+  // may go: setup first for a new one, straight to Record for a returning one.
+  const [progress, setProgress] = useState(loadProgress)
+  const route = resolveRoute(pathname, progress)
+  // Checked once, when the page opens: a phone doesn't change size, and a
+  // computer whose window is made narrow later shouldn't lose its page.
+  const [showPhoneNotice, setShowPhoneNotice] = useState(() => window.matchMedia(SMALL_SCREEN).matches)
 
-  const canvasRef = useRef(null)
-  const [preferredDelegate, setPreferredDelegate] = useState('GPU')
-  const handModel = useHandLandmarker(isLive, preferredDelegate)
-  const isDetecting = isLive && handModel.status === 'ready'
-  const measurementsRef = useRef(null) // filled only while a benchmark runs
-  const hand = useHandDetection({
-    videoRef,
-    canvasRef,
-    landmarkerRef: handModel.landmarkerRef,
-    measurementsRef,
-    isRunning: isDetecting,
-  })
+  // An address the visitor can't open (or that has no page of its own) is
+  // replaced rather than added to the history, so Back doesn't land on it again.
+  useEffect(() => {
+    if (route.redirect) navigate(route.redirect, { replace: true })
+  }, [route.redirect])
+
+  // Settings changes are saved straight away. If the browser refuses, the app
+  // carries on; the settings just won't survive a reload.
+  function updateProgress(changes) {
+    const next = { ...progress, ...changes }
+    setProgress(next)
+    saveProgress(next)
+  }
+
+  // The settings change and the navigation happen in the same click, so React
+  // applies them in one render: the router never sees one without the other.
+  function finishSetup() {
+    updateProgress({ setupDone: true })
+    navigate(PATHS.record)
+  }
+
+  // The notice replaces the app rather than covering it, so nothing behind it
+  // (such as the camera) starts.
+  if (showPhoneNotice) return <PhoneNotice onContinue={() => setShowPhoneNotice(false)} />
 
   return (
-    <>
-      <header className="top-bar">Sema</header>
-
-      <main className="page">
-        <div className="stage">
-          {/* The video and the hand overlay share one CSS rule (.video,
-              .overlay in styles.css) that mirrors them with scaleX(-1), so it
-              feels like looking in a mirror. Only the display is flipped: the
-              frames, and the landmarks MediaPipe finds in them, are not. The
-              overlay is drawn in un-mirrored video coordinates and flipped by
-              the same CSS, which keeps the skeleton on the hand.
-              Both elements are always rendered so their refs are ready. */}
-          <video
-            ref={videoRef}
-            className="video"
-            autoPlay
-            playsInline
-            muted
-          />
-          <canvas ref={canvasRef} className="overlay" />
-          {isLive ? (
-            <span className="mirror-label">Mirrored</span>
-          ) : (
-            <p className="stage-message">
-              {status === 'starting' ? 'Waiting for the camera…' : 'Camera is off'}
-            </p>
-          )}
-        </div>
-
-        <div className="controls">
-          {status === 'idle' ? (
-            <button type="button" className="button" onClick={start}>
-              Start camera
-            </button>
-          ) : (
-            <button type="button" className="button" onClick={stop}>
-              {status === 'starting' ? 'Cancel' : 'Stop camera'}
-            </button>
-          )}
-
-          {isLive && cameras.length > 0 && (
-            <label className="camera-picker">
-              Camera
-              <select
-                name="camera"
-                value={deviceId ?? ''}
-                onChange={(event) => switchCamera(event.target.value)}
-              >
-                {cameras.map((device, index) => (
-                  <option key={device.deviceId} value={device.deviceId}>
-                    {device.label || `Camera ${index + 1}`}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-        </div>
-
-        {error && (
-          <p className="error" role="alert">
-            {error}
-          </p>
-        )}
-        {isLive && (handModel.error || hand.error) && (
-          <p className="error" role="alert">
-            {handModel.error || hand.error}
-          </p>
-        )}
-
-        {isLive && (
-          <>
-            <dl className="readouts">
-              <Readout label="Hand">{describeHand(handModel.status, hand.handLabel)}</Readout>
-              <Readout label="Resolution">
-                {stats.width ? `${stats.width} × ${stats.height}` : '—'}
-              </Readout>
-              <Readout label="Runs on">
-                {handModel.status === 'ready'
-                  ? describeDelegate(handModel.delegate, handModel.gpuFailed)
-                  : '—'}
-              </Readout>
-              <Readout label={stats.fpsIsMeasured ? 'Camera' : 'Camera (setting)'}>
-                {formatFps(stats.fps)}
-              </Readout>
-              <Readout label="Detection">{formatFps(hand.detectionFps)}</Readout>
-              <Readout label="Detection time">
-                {hand.detectionMs === null ? '—' : `${hand.detectionMs.toFixed(1)} ms`}
-              </Readout>
-            </dl>
-
-            <details className="dev-settings">
-              <summary>Developer settings</summary>
-              <label>
-                Hand model runs on{' '}
-                <select
-                  name="delegate"
-                  value={preferredDelegate}
-                  onChange={(event) => setPreferredDelegate(event.target.value)}
-                >
-                  <option value="GPU">GPU (falls back to CPU)</option>
-                  <option value="CPU">CPU</option>
-                </select>
-              </label>
-              <BenchmarkPanel
-                videoRef={videoRef}
-                measurementsRef={measurementsRef}
-                canRun={isDetecting}
-                delegate={handModel.delegate}
-              />
-            </details>
-          </>
-        )}
-      </main>
-    </>
+    <CameraProvider>
+      {route.page && (
+        <Page
+          name={route.page}
+          signingHand={progress.signingHand}
+          onChooseHand={(hand) => updateProgress({ signingHand: hand })}
+          onFinishSetup={finishSetup}
+        />
+      )}
+    </CameraProvider>
   )
 }
 
-function Readout({ label, children }) {
-  return (
-    <div>
-      <dt>{label}</dt>
-      <dd>{children}</dd>
-    </div>
-  )
-}
-
-function describeHand(modelStatus, handLabel) {
-  if (modelStatus === 'loading' || modelStatus === 'idle') return LOADING_HAND_MODEL
-  if (modelStatus === 'error') return 'Off'
-  return handLabel ? `Hand found (${handLabel})` : 'No hand'
-}
-
-function describeDelegate(delegate, gpuFailed) {
-  return gpuFailed ? `${delegate} (GPU unavailable)` : delegate
-}
-
-function formatFps(fps) {
-  return fps ? `${Math.round(fps)} fps` : '—'
+function Page({ name, signingHand, onChooseHand, onFinishSetup }) {
+  switch (name) {
+    case 'welcome':
+      return <WelcomePage />
+    case 'howSemaWorks':
+      return <HowSemaWorksPage />
+    case 'signingHand':
+      return <SigningHandPage signingHand={signingHand} onChoose={onChooseHand} />
+    case 'cameraCheck':
+      return <CameraCheckPage signingHand={signingHand} onSwitchHand={onChooseHand} onDone={onFinishSetup} />
+    case 'record':
+      return <RecordPage signingHand={signingHand} />
+    case 'learn':
+      return <LearnPage />
+    case 'practice':
+      return <PracticePage />
+    case 'dev':
+      return <DevPage />
+  }
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { toTableRow } from './benchmarkStats.js'
-import { BENCHMARK_SECONDS, MIN_HAND_SHARE, useBenchmark } from './useBenchmark.js'
+import { toTableRow } from '../../vision/benchmarkStats.js'
+import { BENCHMARK_SECONDS, MIN_HAND_SHARE, useBenchmark } from '../../vision/useBenchmark.js'
 
 // Developer tool: measures camera and detection speed under fixed conditions
 // and gives a row for the README's performance table.

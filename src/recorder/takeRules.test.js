@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  captureProgress,
   CAPTURE_MS,
   COUNTDOWN_MS,
   EXPECTED_SAMPLES,
@@ -124,13 +125,13 @@ describe('judgeTake', () => {
   it('rejects at 23 matched and says why', () => {
     expect(judgeTake({ kept: 30, mismatched: 7, droppedNoHand: 0 })).toEqual({
       status: 'rejected',
-      reason: '23 of 30 frames matched: 7 had the other hand detected',
+      reason: '23 of 30 frames matched: 7 had the other hand',
     })
   })
 
   it('reports no-hand and mismatched frames together', () => {
     expect(judgeTake({ kept: 22, mismatched: 4, droppedNoHand: 8 }).reason).toBe(
-      '18 of 30 frames matched: 8 had no hand, 4 had the other hand detected',
+      '18 of 30 frames matched: 8 had no hand, 4 had the other hand',
     )
   })
 
@@ -138,5 +139,14 @@ describe('judgeTake', () => {
     expect(judgeTake({ kept: 21, mismatched: 0, droppedNoHand: 0 }).reason).toBe(
       '21 of 30 frames matched: 9 never arrived (the camera or hand tracking was too slow)',
     )
+  })
+})
+
+describe('captureProgress', () => {
+  it('is 0 before capture, 1 after, and in between during it', () => {
+    expect(captureProgress(0)).toBe(0)
+    expect(captureProgress(COUNTDOWN_MS + SETTLE_MS)).toBe(0)
+    expect(captureProgress(COUNTDOWN_MS + SETTLE_MS + CAPTURE_MS / 2)).toBe(0.5)
+    expect(captureProgress(COUNTDOWN_MS + SETTLE_MS + CAPTURE_MS * 2)).toBe(1)
   })
 })

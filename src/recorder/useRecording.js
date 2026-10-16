@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { fpsBetween, nextFrameCount } from '../camera/frameCounter.js'
 import {
   COUNTDOWN_MS,
+  captureProgress,
   SETTLE_MS,
   frameFromDetection,
   judgeTake,
@@ -96,7 +97,15 @@ export function useRecording({ videoRef, listenerRef, isDetecting, onTakeDone })
         })
       }
       if (phase === 'done') return finish()
-      setState({ phase, letter, hand, secondsLeft: Math.ceil((COUNTDOWN_MS - elapsed) / 1000) })
+      setState({
+        phase,
+        letter,
+        hand,
+        secondsLeft: Math.ceil((COUNTDOWN_MS - elapsed) / 1000),
+        // For "18 / 30 frames" and the bar under the video while capturing.
+        kept: take.frames.filter((f) => f.hasHand).length,
+        progress: captureProgress(elapsed),
+      })
     }
 
     takeRef.current = take

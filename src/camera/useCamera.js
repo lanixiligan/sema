@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
-import { CAMERA_MESSAGES, getCameraErrorMessage } from './cameraMessages.js'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { CAMERA_MESSAGES, cameraErrorKind, getCameraErrorMessage } from './cameraMessages.js'
 
 // What we ask the browser for. `ideal` values are preferences: the browser
 // picks the closest thing the camera supports instead of failing, so 640×480
@@ -51,8 +51,21 @@ export function useCamera() {
   // after the number has moved on is out of date, and its stream is stopped.
   const requestIdRef = useRef(0)
 
+  // A callback ref for the <video> on screen. React calls it with the element
+  // when a page shows its video, and with null when that page goes away.
+  // Giving a new element the running stream lets the picture carry on from one
+  // page to the next. useCallback keeps it the same function between
+  // renders, so React doesn't detach and re-attach it every time.
+  const attachVideo = useCallback((video) => {
+    videoRef.current = video
+    if (video && video.srcObject !== streamRef.current) video.srcObject = streamRef.current
+  }, [])
+
   const [status, setStatus] = useState('idle') // 'idle' | 'starting' | 'live'
-  const [error, setError] = useState(null)
+  // What went wrong, if anything: the plain-language message, and its kind
+  // ('blocked', 'busy', 'noCamera', 'insecure', 'stopped' or 'other') for pages
+  // that show their own text per kind.
+  const [failure, setFailure] = useState(null)
   const [cameras, setCameras] = useState([])
   const [deviceId, setDeviceId] = useState(null)
 
@@ -66,13 +79,13 @@ export function useCamera() {
     requestIdRef.current += 1
     const requestId = requestIdRef.current
     releaseCamera() // free the current camera before opening the next one
-    setError(null)
+    setFailure(null)
 
     // Browsers only offer the camera to secure pages (https:// or localhost).
     // Elsewhere navigator.mediaDevices is simply missing.
     if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
       setStatus('idle')
-      setError(CAMERA_MESSAGES.insecureContext)
+      setFailure({ message: CAMERA_MESSAGES.insecureContext, kind: 'insecure' })
       return
     }
 
@@ -83,7 +96,7 @@ export function useCamera() {
     } catch (err) {
       if (requestId !== requestIdRef.current) return // superseded: stay quiet
       setStatus('idle')
-      setError(getCameraErrorMessage(err))
+      setFailure({ message: getCameraErrorMessage(err), kind: cameraErrorKind(err) })
       return
     }
 
@@ -95,7 +108,9 @@ export function useCamera() {
     }
 
     streamRef.current = stream
-    videoRef.current.srcObject = stream
+    // The page's video may not be on screen yet; attachVideo hands it the
+    // stream when it is.
+    if (videoRef.current) videoRef.current.srcObject = stream
 
     const [track] = stream.getVideoTracks()
     // 'ended' fires when the track stops for a reason other than our own
@@ -104,7 +119,7 @@ export function useCamera() {
       if (streamRef.current !== stream) return // an old stream we replaced
       releaseCamera()
       setStatus('idle')
-      setError(CAMERA_MESSAGES.trackEnded)
+      setFailure({ message: CAMERA_MESSAGES.trackEnded, kind: 'stopped' })
     })
 
     setDeviceId(track.getSettings().deviceId ?? null)
@@ -148,8 +163,10 @@ export function useCamera() {
 
   return {
     videoRef,
+    attachVideo,
     status,
-    error,
+    error: failure?.message ?? null,
+    errorKind: failure?.kind ?? null,
     cameras,
     deviceId,
     start: () => startCamera(deviceId), // reuse the last camera, if any
