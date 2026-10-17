@@ -31,6 +31,25 @@ export function loadProgress() {
   }
 }
 
+// Deletes everything Sema has saved in this browser: every localStorage key
+// that starts with "sema." (the settings here, and the recorder's session and
+// used session IDs, sessionStore.js), and nothing of any other site's. The
+// keys are collected first, since removing one while counting would skip the
+// next. Returns false if the browser refused.
+export function clearSavedData() {
+  try {
+    const keys = []
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (key?.startsWith('sema.')) keys.push(key)
+    }
+    for (const key of keys) localStorage.removeItem(key)
+    return true
+  } catch {
+    return false
+  }
+}
+
 // Saves the settings. Returns false if the browser refused (storage full or
 // blocked): the app keeps working, it just won't remember after a reload.
 export function saveProgress(progress) {

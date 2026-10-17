@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { NEW_VISITOR, PROGRESS_VERSION, loadProgress, saveProgress } from './progressStore.js'
+import { NEW_VISITOR, PROGRESS_VERSION, clearSavedData, loadProgress, saveProgress } from './progressStore.js'
 
 function fakeStorage(initial = {}, { failWrites = false } = {}) {
   const data = new Map(Object.entries(initial))
@@ -9,6 +9,12 @@ function fakeStorage(initial = {}, { failWrites = false } = {}) {
       if (failWrites) throw new DOMException('Quota exceeded', 'QuotaExceededError')
       data.set(key, String(value))
     },
+    removeItem: (key) => data.delete(key),
+    key: (i) => [...data.keys()][i] ?? null,
+    get length() {
+      return data.size
+    },
+    keys: () => [...data.keys()],
   }
 }
 const saved = (value) => ({ 'sema.progress': JSON.stringify(value) })
@@ -60,5 +66,27 @@ describe('progressStore', () => {
   it('reports a refused save', () => {
     vi.stubGlobal('localStorage', fakeStorage({}, { failWrites: true }))
     expect(saveProgress({ version: PROGRESS_VERSION, signingHand: 'right', setupDone: false })).toBe(false)
+  })
+
+  it('deletes every sema. key, and only those', () => {
+    const storage = fakeStorage({
+      'sema.progress': '{}',
+      'sema.recorder.session': '{}',
+      'sema.recorder.sessionIds': '[]',
+      'other-site': 'keep',
+    })
+    vi.stubGlobal('localStorage', storage)
+    expect(clearSavedData()).toBe(true)
+    expect(storage.keys()).toEqual(['other-site'])
+    expect(loadProgress()).toEqual(NEW_VISITOR)
+  })
+
+  it('reports when the browser blocks storage', () => {
+    vi.stubGlobal('localStorage', {
+      get length() {
+        throw new DOMException('Blocked', 'SecurityError')
+      },
+    })
+    expect(clearSavedData()).toBe(false)
   })
 })

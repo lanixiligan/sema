@@ -296,16 +296,15 @@ body {
 }
 
 .settings-button {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-1);
-  font: inherit;
-  font-size: var(--text-small);
-  font-weight: 500;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
   color: var(--text-muted);
   background: none;
   border: none;
+  border-radius: var(--radius-control);
   cursor: pointer;
 }
 
@@ -331,25 +330,31 @@ body {
   box-shadow: var(--shadow-menu);
 }
 
-.settings-links {
-  display: flex;
-  flex-direction: column;
-}
-
-.settings-links a {
-  padding: var(--space-2) 0;
+.settings-delete {
+  align-self: flex-start;
+  padding: var(--space-1) 0;
+  font: inherit;
   font-size: var(--text-small);
-  font-weight: 600;
-  color: var(--text);
-  text-decoration: none;
+  font-weight: 700;
+  color: var(--danger);
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 
-.settings-links a:hover {
-  color: var(--accent);
+.settings-delete:hover {
+  text-decoration: underline;
+}
+
+.settings-note {
+  margin: calc(var(--space-2) * -1) 0 0; /* close under the button it explains */
+  font-size: var(--text-caption);
+  line-height: 1.5;
+  color: var(--text-muted);
 }
 
 .settings-button:focus-visible,
-.settings-links a:focus-visible {
+.settings-delete:focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 2px;
   border-radius: 4px;
@@ -835,11 +840,14 @@ body {
 
 /* ---------- Record (src/pages/record/) ---------- */
 
-/* A narrow, centred step: the saved-session offer. */
+/* A narrow step in the middle of the space under the menu bar, a little
+   above centre (more padding below): the saved-session offer. */
 .record-narrow {
   display: flex;
+  align-items: center;
   justify-content: center;
-  padding: 48px 24px 72px;
+  min-height: calc(100dvh - var(--bar-height));
+  padding: 48px 24px 120px;
 }
 
 .saved-offer {
@@ -848,6 +856,40 @@ body {
   gap: 28px;
   width: 100%;
   max-width: 520px;
+}
+
+/* Participant | Session: a small muted label over each value, a thin line
+   between them, no card. */
+.saved-offer-meta {
+  display: flex;
+  gap: 24px;
+  margin: 0;
+}
+
+.saved-offer-meta div + div {
+  padding-left: 24px;
+  border-left: 1px solid var(--border);
+}
+
+.saved-offer-meta dt {
+  font-size: var(--text-caption);
+  color: var(--text-muted);
+}
+
+.saved-offer-meta dd {
+  margin: 4px 0 0;
+  font-size: 16px;
+}
+
+/* Delete, apart from the rest under a thin line. */
+.saved-offer-delete {
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.saved-offer-delete .danger-link {
+  padding-left: 0;
+  font-size: 14px;
 }
 
 /* The consent step: as wide as the recording step (.record), so the left
@@ -1054,7 +1096,13 @@ body {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
+  gap: 12px 16px;
+}
+
+/* The same height as Continue session beside it. */
+.saved-offer-actions .outline-button {
+  min-height: 52px;
+  padding: 0 24px;
 }
 
 /* Quieter buttons from the designs: grey text, an outlined one, a red one. */

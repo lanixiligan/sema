@@ -302,33 +302,44 @@ export default function RecordPage({ signingHand }) {
   )
 }
 
-// A session saved in this browser, offered back when the page opens. A new
-// session needs the old one downloaded or deleted first.
+// A session saved in this browser, offered back when the page opens: whose
+// it is, then the actions from most to least likely: continue, download,
+// start a new one (only once this one is downloaded, so no takes are lost),
+// and, set apart, delete (which asks first, deleteSession).
 function SavedSessionOffer({ saved, canStartNew, onContinue, onDownload, onDelete, onStartNew }) {
   return (
     <main className="record-narrow">
       <section className="saved-offer">
         <div>
-          <h1 className="setup-title">Continue your session?</h1>
-          <p className="consent-lead">
-            This browser has a session that isn't finished: <span className="session-id">{saved.person} · {saved.session}</span>,{' '}
-            {countTakes(saved)}.
-          </p>
+          <h1 className="setup-title">Pick up where you left off</h1>
+          <p className="consent-lead">You have an unfinished session saved on this device.</p>
         </div>
+        <dl className="saved-offer-meta">
+          <div>
+            <dt>Participant</dt>
+            <dd className="session-id">{saved.person}</dd>
+          </div>
+          <div>
+            <dt>Session</dt>
+            <dd className="session-id">{saved.session}</dd>
+          </div>
+        </dl>
         <div className="saved-offer-actions">
           <button type="button" className="primary-button" onClick={onContinue}>
-            Continue
+            Continue session
           </button>
-          <button type="button" className="quiet-button" onClick={onDownload}>
-            Download
+          <button type="button" className="outline-button" onClick={onDownload}>
+            Download session
           </button>
           {canStartNew && (
             <button type="button" className="quiet-button" onClick={onStartNew}>
               Start a new session
             </button>
           )}
+        </div>
+        <div className="saved-offer-delete">
           <button type="button" className="danger-link" onClick={onDelete}>
-            Delete
+            Delete saved session
           </button>
         </div>
       </section>
@@ -339,10 +350,4 @@ function SavedSessionOffer({ saved, canStartNew, onContinue, onDownload, onDelet
 // Where to hold the hand for the next take, from how many are kept.
 function positionHint(kept) {
   return kept < TAKES_TARGET ? `Next take: ${POSITION_HINTS[kept]}` : 'All takes done for this hand.'
-}
-
-// Kept takes only: rejected attempts stay in the file but don't count here.
-function countTakes(session) {
-  const n = session.recordings.filter((r) => r.status === 'accepted').length
-  return n === 1 ? '1 take' : `${n} takes`
 }

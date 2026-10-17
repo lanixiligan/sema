@@ -28,14 +28,12 @@ export function CheckIcon({ size = 14, strokeWidth = 2.4 }) {
   )
 }
 
-// The settings menu's button: three sliders.
-export function SettingsIcon({ size = 16 }) {
+// The settings menu's button: a gear with eight teeth.
+export function SettingsIcon({ size = 20 }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
-      <path d="M2 4h12M2 8h12M2 12h12" />
-      <circle cx="5" cy="4" r="1.6" fill="var(--surface)" />
-      <circle cx="10.5" cy="8" r="1.6" fill="var(--surface)" />
-      <circle cx="6.5" cy="12" r="1.6" fill="var(--surface)" />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true">
+      <path d="M9.84 4.92 L10.44 2.12 L13.56 2.12 L14.16 4.92 L15.47 5.47 L17.88 3.91 L20.09 6.12 L18.53 8.53 L19.08 9.84 L21.88 10.44 L21.88 13.56 L19.08 14.16 L18.53 15.47 L20.09 17.88 L17.88 20.09 L15.47 18.53 L14.16 19.08 L13.56 21.88 L10.44 21.88 L9.84 19.08 L8.53 18.53 L6.12 20.09 L3.91 17.88 L5.47 15.47 L4.92 14.16 L2.12 13.56 L2.12 10.44 L4.92 9.84 L5.47 8.53 L3.91 6.12 L6.12 3.91 L8.53 5.47Z" />
+      <circle cx="12" cy="12" r="3" />
     </svg>
   )
 }

@@ -1,6 +1,6 @@
 import { useId } from 'react'
 import { MonitorIcon, MoonIcon, SunIcon } from '../components/icons.jsx'
-import { useThemeChoice } from './themeChoice.js'
+import { useSettings } from './settings.js'
 
 const OPTIONS = [
   { id: 'dark', label: 'Dark', Icon: MoonIcon },
@@ -14,7 +14,7 @@ const OPTIONS = [
 // text, so each option gets its name from aria-label (for screen readers)
 // and title (the tooltip on hover).
 export default function ThemeToggle() {
-  const { theme, setTheme } = useThemeChoice()
+  const { theme, setTheme } = useSettings()
   // A unique group name, so the three radios belong together.
   const name = useId()
 

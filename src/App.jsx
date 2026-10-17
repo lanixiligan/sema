@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react'
 import CameraProvider from './app/CameraProvider.jsx'
 import PhoneNotice from './app/PhoneNotice.jsx'
 import { navigate, usePathname } from './app/navigation.js'
-import { loadProgress, saveProgress } from './app/progressStore.js'
+import { NEW_VISITOR, clearSavedData, loadProgress, saveProgress } from './app/progressStore.js'
 import { PATHS, resolveRoute } from './app/router.js'
 import { applyTheme, followTheme, systemThemeQuery } from './app/theme.js'
-import { ThemeChoiceContext } from './app/themeChoice.js'
+import { SettingsContext } from './app/settings.js'
 import AboutPage from './pages/onboarding/AboutPage.jsx'
 import CameraCheckPage from './pages/onboarding/CameraCheckPage.jsx'
 import DevPage from './pages/dev/DevPage.jsx'
@@ -58,14 +58,27 @@ export default function App() {
     navigate(PATHS.record)
   }
 
+  // The settings menu's Delete Sema's data (after the person confirmed):
+  // everything saved in this browser goes, and Sema starts over as for a new
+  // visitor, on Welcome. It doesn't reload the tab: going to Welcome closes
+  // Record (its unsaved session in memory with it) and the camera, and the
+  // settings in memory go back to a new visitor's in the same render.
+  // Nothing is saved again until the person changes a setting.
+  function deleteData() {
+    const cleared = clearSavedData()
+    setProgress(NEW_VISITOR)
+    navigate(PATHS.welcome)
+    return cleared
+  }
+
   // The notice replaces the app rather than covering it, so nothing behind it
   // (such as the camera) starts.
   if (showPhoneNotice) return <PhoneNotice onContinue={() => setShowPhoneNotice(false)} />
 
-  const themeChoice = { theme: progress.theme, setTheme: (theme) => updateProgress({ theme }) }
+  const settings = { theme: progress.theme, setTheme: (theme) => updateProgress({ theme }), deleteData }
 
   return (
-    <ThemeChoiceContext value={themeChoice}>
+    <SettingsContext value={settings}>
       <CameraProvider>
         {route.page && (
           <Page
@@ -76,7 +89,7 @@ export default function App() {
           />
         )}
       </CameraProvider>
-    </ThemeChoiceContext>
+    </SettingsContext>
   )
 }
 

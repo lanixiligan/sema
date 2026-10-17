@@ -1,14 +1,19 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { SettingsIcon } from '../components/icons.jsx'
-import Link from './Link.jsx'
-import { PATHS } from './router.js'
+import { useSettings } from './settings.js'
 
-// The settings menu at the right of the menu bar: the two intro pages worth
-// re-reading. (The theme has its own toggle in the top bar, ThemeToggle.jsx.)
-// A button opens a small panel under it. aria-expanded tells screen readers
-// whether it's open. A click outside the menu or Escape closes it; Escape
-// also puts focus back on the button.
+// The settings menu at the right of the menu bar: a gear (no text, so it's
+// named by aria-label and title) that opens a small panel under it, which
+// for now holds one thing: deleting everything Sema saved in this browser,
+// after a confirmation. (The theme has its own toggle, ThemeToggle.jsx.)
+// aria-expanded tells screen readers whether the panel is open. A click
+// outside the menu or Escape closes it; Escape also puts focus back on the
+// button.
+const DELETE_QUESTION =
+  "Delete everything Sema saved in this browser?\n\nThis removes your settings and any recording session, including takes you haven't downloaded. Sema will start again from the welcome page."
+
 export default function SettingsMenu() {
+  const { deleteData } = useSettings()
   const [open, setOpen] = useState(false)
   const menuRef = useRef(null)
   const buttonRef = useRef(null)
@@ -33,26 +38,33 @@ export default function SettingsMenu() {
     }
   }, [open])
 
+  function confirmDelete() {
+    if (!window.confirm(DELETE_QUESTION)) return
+    setOpen(false)
+    deleteData()
+  }
+
   return (
     <div className="settings" ref={menuRef}>
       <button
         ref={buttonRef}
         type="button"
         className="settings-button"
+        aria-label="Settings"
+        title="Settings"
         aria-expanded={open}
         aria-controls={`${id}-panel`}
         onClick={() => setOpen(!open)}
       >
         <SettingsIcon />
-        Settings
       </button>
 
       {open && (
         <div id={`${id}-panel`} className="settings-panel">
-          <div className="settings-links">
-            <Link to={PATHS.about}>About Sema</Link>
-            <Link to={PATHS.privacy}>Privacy</Link>
-          </div>
+          <button type="button" className="settings-delete" onClick={confirmDelete}>
+            Delete Sema's data
+          </button>
+          <p className="settings-note">Removes your settings and any recording session from this browser.</p>
         </div>
       )}
     </div>

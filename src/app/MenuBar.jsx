@@ -10,7 +10,7 @@ const MENU = [
 ]
 
 // The top bar on the main pages, with the menu, and on the right whatever the
-// page passes in (Record shows its session there), then the settings menu.
+// page passes in, the theme toggle, and the settings menu last.
 // The current page's link gets aria-current="page": screen readers announce
 // it as the current page, and the CSS underlines it.
 export default function MenuBar({ active, children }) {
@@ -29,9 +29,9 @@ export default function MenuBar({ active, children }) {
           ))}
         </nav>
       }
+      end={<SettingsMenu />}
     >
       {children}
-      <SettingsMenu />
     </TopBar>
   )
 }

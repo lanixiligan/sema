@@ -106,8 +106,11 @@ src/
   `localStorage` directly; `App.jsx` holds the settings and passes them down.
 - The theme (Light / Dark / System, default System) is saved in the same store and chosen with
   the icon toggle at the right of every page's top bar (`src/app/ThemeToggle.jsx`, in
-  `TopBar`). The settings menu (`src/app/SettingsMenu.jsx`) now holds only the About Sema
-  and Privacy links. `src/app/theme.js` sets `data-theme` on
+  `TopBar`). The settings menu (`src/app/SettingsMenu.jsx`, a gear with no text, last in the
+  bar on the main pages) holds only Delete Sema's data: after a confirm it removes every `sema.*`
+  localStorage key (`clearSavedData` in `progressStore.js`) and App starts over as a new
+  visitor on Welcome, without a reload. The theme and the delete reach the top bar through
+  `SettingsContext` (`src/app/settings.js`). `src/app/theme.js` sets `data-theme` on
   `<html>`; a small script in `index.html` sets it before the first paint. In `styles.css`,
   rules use colour roles (`--bg`, `--text`, `--accent`…), with a light set on `:root` and a
   dark set on `[data-theme='dark']` and `.on-dark`. Palette colours are used directly only
