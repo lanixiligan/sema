@@ -851,36 +851,42 @@ body {
 }
 
 /* The consent step: as wide as the recording step (.record), so the left
-   edge stays put when recording starts. Two columns: what this is and what
-   gets saved on the left, the form on the right. */
+   edge stays put when recording starts, and centred in the height under the
+   menu bar. Two columns, no cards: the explanation and three facts on the
+   left, the form on the right. A little larger than the rest of Record, since
+   it's read closely once. */
 .record-consent {
+  display: flex;
+  align-items: center;
   width: 100%;
-  max-width: 1320px;
+  max-width: 1440px;
+  min-height: calc(100dvh - var(--bar-height));
   margin: 0 auto;
-  padding: var(--space-8) 48px 72px;
+  padding: var(--space-8) 48px;
 }
 
 .consent {
   display: grid;
+  flex: 1 1 auto;
   grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
-  gap: var(--space-8);
-  align-items: start;
+  gap: 96px;
+  align-items: center;
 }
 
 .consent-about,
 .consent-side {
   display: flex;
   flex-direction: column;
-  gap: 28px;
 }
 
-/* Keeps the paragraphs to a comfortable line length. */
 .consent-about {
+  gap: 40px;
   max-width: 560px;
 }
 
 .consent-side {
-  max-width: 480px;
+  gap: 28px;
+  max-width: 500px;
 }
 
 /* Narrow windows: one column, the form under the text. */
@@ -891,42 +897,88 @@ body {
 
   .consent {
     grid-template-columns: 1fr;
-    gap: 28px;
+    gap: 40px;
   }
 }
 
+.consent-title {
+  margin: 0;
+  font-size: 44px;
+  line-height: 1.15;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
 .consent-lead {
-  margin: 12px 0 0;
-  font-size: 15px;
-  line-height: 1.6;
+  margin: 16px 0 0;
+  font-size: 19px;
+  line-height: 1.55;
   color: var(--text-muted);
 }
 
-.consent-lead-next {
-  margin-top: 10px;
+/* What gets saved: three short facts, a thin line above each, an icon on
+   the left. The fact is in the accent colour and bold (so it stands out in
+   light mode too); what it means is muted. */
+.consent-facts {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.consent-facts li {
+  display: grid;
+  grid-template-columns: 26px 1fr;
+  column-gap: 18px;
+  align-items: center;
+  padding: 18px 0;
+  border-top: 1px solid var(--border);
+}
+
+/* The icon spans both lines, centred beside them. */
+.consent-facts svg {
+  grid-row: 1 / span 2;
+  color: var(--accent);
+}
+
+.consent-facts li:last-child {
+  border-bottom: 1px solid var(--border);
+}
+
+.consent-facts strong {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.consent-facts span {
+  margin-top: 4px;
+  font-size: 16px;
+  color: var(--text-muted);
 }
 
 .consent-fields {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  gap: 20px;
 }
 
 .consent-field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .consent-field label {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
 }
 
 .consent-field input {
-  padding: 11px 12px;
+  padding: 13px 14px;
   font-family: var(--font-mono);
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 500;
   color: var(--text);
   background: var(--surface);
@@ -940,7 +992,7 @@ body {
 }
 
 .consent-help {
-  font-size: 12.5px;
+  font-size: 13.5px;
   line-height: 1.45;
   color: var(--text-muted);
 }
@@ -949,47 +1001,30 @@ body {
   color: var(--warning);
 }
 
-.consent-saved {
-  padding: 20px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-}
-
-.consent-saved-title {
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.consent-saved ul {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin: 10px 0 0;
-  padding-left: 20px;
-  font-size: 14px;
-  line-height: 1.5;
-}
-
+/* The consent, after one thin line: the statement in full-strength text,
+   what else the file holds smaller and muted under it. */
 .consent-answers {
   display: flex;
   flex-direction: column;
   gap: 14px;
+  padding-top: 28px;
+  border-top: 1px solid var(--border);
 }
 
 .consent-check {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  font-size: 15px;
+  gap: 14px;
+  font-size: 17px;
+  font-weight: 600;
   line-height: 1.5;
   cursor: pointer;
 }
 
 .consent-check input {
   flex: 0 0 auto;
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   margin: 2px 0 0;
   accent-color: var(--accent);
 }
@@ -1000,12 +1035,14 @@ body {
 }
 
 .consent-optional {
+  font-weight: 400;
   color: var(--text-muted);
 }
 
 .consent-delete {
-  margin: 0;
-  font-size: 13.5px;
+  margin: 0 0 0 36px; /* lines up with the statement, past the checkbox */
+  font-size: 14px;
+  line-height: 1.5;
   color: var(--text-muted);
 }
 
@@ -1064,95 +1101,90 @@ body {
 .danger-link:focus-visible,
 .outline-button:focus-visible,
 .letter-row:focus-visible,
-.take-slot button:focus-visible,
+.take-mark.kept:focus-visible,
 .letter-card-link:focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 2px;
 }
 
-/* The session above the camera: code and ID, saved or not, then Finish. */
-.record-session {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
+/* The recording step: three columns that start and end on the same lines:
+   the letters, the camera (the widest), and the chosen letter, the record
+   button and Finish at the bottom, level with the camera's. */
+.record {
+  display: grid;
+  grid-template-areas: 'letters camera side';
+  grid-template-columns: 248px minmax(0, 1fr) 320px;
+  gap: 16px 24px;
+  align-items: start;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 20px 48px 28px;
 }
 
-.record-session-status {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  font-size: var(--text-small);
-  color: var(--text-muted);
-}
-
+/* The code and session ID, as "Continue your session?" shows them. */
 .session-id {
   font-family: var(--font-mono);
   font-weight: 500;
   color: var(--text);
 }
 
-.session-saved,
-.session-not-saved {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+/* Finish and download, at the bottom of the right column, with a short line
+   under it saying what it needs or does. */
+.record-finish {
+  display: flex;
+  flex-direction: column;
+  margin-top: auto;
+  align-items: stretch;
+  gap: 4px;
+  text-align: center;
 }
 
-.session-saved svg {
-  color: var(--accent);
-}
-
-.session-not-saved {
-  font-weight: 600;
-  color: var(--warning);
-}
-
-/* The recording step: the session row over the camera and side columns,
-   then three columns that start on the same line: the letters, the camera
-   (the widest), and the chosen letter with its takes and the record button. */
-.record {
-  display: grid;
-  grid-template-areas:
-    '. session session'
-    'letters camera side';
-  grid-template-columns: 148px minmax(0, 1fr) 340px;
-  gap: var(--space-4) 32px;
-  align-items: start;
-  width: 100%;
-  max-width: 1600px;
-  margin: 0 auto;
-  padding: 24px 48px 40px;
-}
-
-.record-session {
-  grid-area: session;
+.record-finish-help {
+  font-size: 12.5px;
+  color: var(--text-muted);
 }
 
 .record-letters {
+  display: flex;
   grid-area: letters;
+  flex-direction: column;
+  align-self: stretch;
+}
+
+/* The letters panel reaches down as far as the camera, so the three
+   columns end on one line. */
+.record-letters .letter-list {
+  flex: 1 1 auto;
 }
 
 .record-camera {
+  display: flex;
   grid-area: camera;
+  flex-direction: column;
+  align-self: stretch;
   min-width: 0;
 }
 
-.record-side {
-  grid-area: side;
-}
-
+/* The camera panel fills the height the window leaves (top bar and
+   padding: 120px), so it stays the same size whichever letter is chosen, and the letters panel stretches to match. If the right
+   column is taller, the panel grows to it, so the three end on one line. The
+   video keeps its 4:3 shape inside (contain): the status bar and the controls
+   sit in the bands above and below it, off the hand, and no part of the hand
+   is ever cut off. */
 .record-stage {
-  /* The camera's own 4:3 shape, as wide as the column, but never taller than
-     the window leaves room for (top bar, session row, padding). */
-  max-height: calc(100dvh - 180px);
-  --stage-radius: 20px;
+  flex: 1 1 auto;
+  aspect-ratio: auto;
+  min-height: clamp(420px, calc(100dvh - 120px), 760px);
+  --stage-radius: 18px;
 }
 
 .record-side {
   display: flex;
+  grid-area: side;
   flex-direction: column;
-  gap: var(--space-4);
+  align-self: stretch;
+  gap: 10px;
 }
 
 .record-note {
@@ -1166,6 +1198,7 @@ body {
 }
 
 .record-take {
+  width: 100%;
   padding: 14px 20px;
   white-space: nowrap;
 }
@@ -1270,6 +1303,67 @@ body {
   color: var(--cloud-white);
 }
 
+/* Why it's off (another tab, no hand), or what to do (not turned on yet). */
+.camera-off-text {
+  max-width: 28em;
+  font-size: var(--text-small);
+  text-wrap: balance;
+}
+
+/* Turning it back on is always the person's choice: the same button as
+   "Try again" on a camera problem. */
+.camera-off button {
+  margin-top: var(--space-3);
+  padding: 12px 22px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--deep-cobalt);
+  background: var(--bright-sky);
+  border: none;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+
+/* While the hand model loads: quiet, and not clickable yet. */
+.camera-off button:disabled {
+  color: var(--muted-on-dark);
+  background: var(--progress-track);
+  cursor: progress;
+}
+
+.camera-off button:focus-visible {
+  outline: 3px solid var(--bright-sky);
+  outline-offset: 2px;
+}
+
+/* The idle notice (IdleNotice.jsx): in the middle of the camera view, which
+   is empty when no hand is in view, on the same dark film as the bars. */
+.idle-notice {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  padding: var(--space-4) var(--space-5);
+  font-size: var(--text-small);
+  text-align: center;
+  color: var(--muted-on-dark);
+  background: var(--scrim);
+  border-radius: var(--radius-card);
+  pointer-events: none;
+}
+
+.idle-notice p {
+  margin: 0;
+}
+
+.idle-notice-title {
+  margin-bottom: var(--space-1);
+  font-size: var(--text-body);
+  font-weight: 700;
+  color: var(--cloud-white);
+}
+
 .camera-off-body {
   font-size: var(--text-small);
 }
@@ -1328,6 +1422,12 @@ body {
   background: var(--cloud-white);
 }
 
+/* Off and waiting for the hand model: dimmed, not clickable yet. */
+.camera-controls-pill .camera-controls-toggle.off:disabled {
+  opacity: 0.45;
+  cursor: progress;
+}
+
 /* Left | Right, after a thin line: the hand that's on gets the lighter fill. */
 .camera-controls-divider {
   width: 1px;
@@ -1338,7 +1438,15 @@ body {
 
 .camera-controls-hands {
   display: flex;
+  align-items: center;
   gap: var(--space-1);
+}
+
+.camera-controls-hands-label {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 var(--space-2) 0 var(--space-3);
+  color: var(--muted-on-dark);
 }
 
 .camera-controls-pill .camera-controls-hands button {
@@ -1479,8 +1587,47 @@ body {
 .letter-card-record {
   flex-direction: column;
   align-items: stretch;
-  gap: var(--space-4);
-  padding: var(--space-4);
+  gap: 10px;
+  padding: 14px 16px;
+}
+
+/* Its name, and its kept takes on the right. */
+.letter-card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.letter-card-record .letter-card-title {
+  margin: 0;
+  font-size: 19px;
+}
+
+.letter-card-count {
+  font-size: var(--text-caption);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* How to form it, in a soft box under the picture. */
+.letter-card-how {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 14px;
+  background: var(--surface-soft);
+  border-radius: 10px;
+}
+
+.letter-card-how p {
+  margin: 0;
+}
+
+/* Room for three lines (the longest instructions), so the column keeps its
+   height from letter to letter. */
+.letter-card-how .letter-card-instructions {
+  min-height: calc(3 * 1.5em);
 }
 
 .reference-image {
@@ -1540,8 +1687,7 @@ body {
   line-height: 1.5;
 }
 
-.letter-card-note,
-.letter-card-take {
+.letter-card-note {
   font-size: 13px;
   color: var(--text-muted);
 }
@@ -1557,15 +1703,50 @@ body {
   text-decoration: underline;
 }
 
+/* Under the record button: the last take's result (a line kept free for
+   it) and where to hold the hand next. */
+.record-feedback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-align: center;
+}
+
+.record-feedback-result {
+  min-height: 20px;
+}
+
+.record-feedback .take-result {
+  padding: 0;
+  background: none;
+}
+
+.record-feedback .take-result-warning {
+  color: var(--warning);
+}
+
+.record-feedback .take-result-dot {
+  width: 8px;
+  height: 8px;
+  margin-top: 7px;
+}
+
+.record-feedback-hint {
+  margin: 0;
+  font-size: var(--text-caption);
+  color: var(--text-muted);
+}
+
 /* The last take's result (TakeResult.jsx). */
 .take-result {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  padding: 14px 16px;
-  font-size: 14px;
+  padding: 9px 14px;
+  font-size: 13.5px;
   line-height: 1.5;
-  border-radius: 12px;
+  border-radius: 10px;
 }
 
 .take-result strong {
@@ -1597,33 +1778,50 @@ body {
   color: var(--accent);
 }
 
-/* The letters column (LetterList.jsx): one row per letter, its kept takes
-   as dots. Pilot letters sit in their own group, fainter, dashed. */
+/* The letters column (LetterList.jsx): a panel with two groups, each with
+   a heading and its count; one row per letter, its takes as three marks.
+   Pilot letters are drawn fainter. */
+.letter-list {
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+}
+
 .letter-list ul {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: 3px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.letter-list section {
-  margin-top: var(--space-5);
+.letter-group + .letter-group {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
 }
 
 .letter-list-heading {
   display: flex;
-  align-items: baseline;
+  align-items: center;
+  justify-content: space-between;
   gap: var(--space-2);
-  margin: 0 0 var(--space-2);
-  font-size: var(--text-caption);
+  margin: 0 0 8px;
+  padding: 0 4px 0 6px;
+  font-size: var(--text-small);
   font-weight: 700;
-  color: var(--text-muted);
 }
 
-.letter-list-heading span {
-  font-weight: 500;
+.letter-list-count {
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--surface-soft);
+  border-radius: var(--radius-pill);
+  font-variant-numeric: tabular-nums;
 }
 
 .letter-row {
@@ -1631,12 +1829,12 @@ body {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  height: 38px;
-  padding: 0 var(--space-3);
+  height: 34px;
+  padding: 0 12px;
   font: inherit;
   color: var(--text);
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: var(--surface-soft);
+  border: 1.5px solid transparent;
   border-radius: var(--radius-control);
   cursor: pointer;
 }
@@ -1647,8 +1845,7 @@ body {
 
 .letter-row[aria-pressed='true'] {
   background: var(--highlight);
-  border: 2px solid var(--accent);
-  padding: 0 calc(var(--space-3) - 1px);
+  border-color: var(--accent);
 }
 
 .letter-row:disabled {
@@ -1656,98 +1853,89 @@ body {
 }
 
 .letter-row-letter {
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 700;
-}
-
-.letter-row.pilot {
-  background: transparent;
-  border-style: dashed;
-  border-color: var(--border-strong);
 }
 
 .letter-row.pilot .letter-row-letter {
   color: var(--text-muted);
 }
 
-.letter-row.pilot[aria-pressed='true'] {
-  border-style: solid;
+.letter-row.pilot[aria-pressed='true'] .letter-row-letter {
+  color: var(--text);
 }
 
-/* Three dots, filled for each kept take. */
-.take-dots {
+/* A letter's takes (TakeMarks.jsx), on top of the row's right end: kept
+   ones filled with a tick, the rest plain rings. The rings let clicks through
+   to the row underneath; a kept one is a button that shows a × on hover and
+   deletes that take. */
+.letter-item {
+  position: relative;
+}
+
+.letter-item:hover .letter-row:not(:disabled) {
+  border-color: var(--border-strong);
+}
+
+.take-marks {
+  position: absolute;
+  top: 50%;
+  right: 12px;
   display: flex;
-  gap: 4px;
+  gap: 6px;
+  translate: 0 -50%;
+  pointer-events: none;
 }
 
-.take-dots span {
-  width: 8px;
-  height: 8px;
+.take-mark {
+  display: grid;
+  place-items: center;
+  width: 15px;
+  height: 15px;
+  padding: 0;
   border: 1.5px solid var(--border-strong);
   border-radius: 50%;
 }
 
-.take-dots .filled {
+.take-mark.kept {
+  color: var(--on-accent);
   background: var(--accent);
   border-color: var(--accent);
-}
-
-/* The chosen letter's takes (TakeList.jsx): kept ones with a delete button,
-   then empty slots. */
-.take-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.take-slot {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 36px;
-  padding: 0 4px 0 12px;
-  font-size: var(--text-small);
-  font-weight: 700;
-  color: var(--text);
-  background: var(--highlight);
-  border-radius: var(--radius-pill);
-}
-
-.take-slot-mark {
-  display: inline-flex;
-  color: var(--accent);
-}
-
-.take-slot.empty {
-  justify-content: center;
-  width: 36px;
-  padding: 0;
-  font-weight: 500;
-  color: var(--text-muted);
-  background: transparent;
-  border: 1.5px dashed var(--border-strong);
-}
-
-.take-slot button {
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  color: var(--text-muted);
-  background: transparent;
-  border: none;
-  border-radius: 50%;
   cursor: pointer;
+  pointer-events: auto;
 }
 
-.take-slot button:hover {
-  color: var(--danger);
-  background: var(--surface);
+.take-mark.kept:disabled {
+  cursor: default;
 }
+
+/* The tick and the × share the circle; hover or focus swaps them. */
+.take-mark-tick,
+.take-mark-delete {
+  display: grid;
+  grid-area: 1 / 1;
+  place-items: center;
+}
+
+.take-mark-delete {
+  visibility: hidden;
+}
+
+.take-mark.kept:not(:disabled):is(:hover, :focus-visible) {
+  color: var(--white);
+  background: var(--danger);
+  border-color: var(--danger);
+}
+
+.take-mark.kept:not(:disabled):is(:hover, :focus-visible) .take-mark-tick {
+  visibility: hidden;
+}
+
+.take-mark.kept:not(:disabled):is(:hover, :focus-visible) .take-mark-delete {
+  visibility: visible;
+}
+
+
 
 /* The finished step (FinishedStep.jsx). */
 .record-finished {
@@ -1877,8 +2065,7 @@ body {
 }
 
 .primary-button:focus-visible,
-.back-link:focus-visible,
-.camera-check-picker select:focus-visible {
+.back-link:focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 2px;
 }
@@ -1911,7 +2098,7 @@ body {
 
 .setup-lead {
   margin: 12px 0 0;
-  font-size: 15px;
+  font-size: 17px;
   line-height: 1.6;
   color: var(--text-muted);
 }
@@ -2076,34 +2263,12 @@ body {
   max-width: 14em;
 }
 
-.intro-lines {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  max-width: var(--reading-max);
-  margin-top: var(--space-5);
-  font-size: var(--text-lead);
-  line-height: var(--leading-lead);
-  color: var(--text-muted);
-  text-wrap: pretty;
-}
-
-.intro-lines p {
-  margin: 0;
-}
-
+/* A highlighted phrase in the intro text. Bold as well as coloured: in the
+   light theme, Deep Sky alone is too close to the text colour to tell apart. */
 .intro-key {
+  font-weight: 600;
   color: var(--accent);
 }
-
-.intro-small {
-  max-width: var(--reading-max);
-  margin: var(--space-4) 0 0;
-  font-size: var(--text-caption);
-  line-height: 1.5;
-  color: var(--text-muted);
-}
-
 
 /* How Sema works: the headline on one line at the left, then the steps side
    by side, each under a thin line: its number, its title, its text. */
@@ -2117,30 +2282,59 @@ body {
   font-size: clamp(36px, 4.4vw, 56px);
 }
 
+/* Three even columns. They span the page's width (the logo's left edge to
+   Next's right edge), so every edge lines up with the rest of the page. */
 .intro-steps {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-8);
-  margin: var(--space-7) 0 0;
+  column-gap: var(--space-7);
+  margin: 40px 0 0;
   padding: 0;
   list-style: none;
 }
 
+/* Each step shares the list's two rows (subgrid): the title rows of all
+   three steps are one height, so the descriptions always start level, even
+   if a title wraps. */
 .intro-steps li {
-  padding-top: var(--space-4);
+  display: grid;
+  grid-row: span 2;
+  grid-template-rows: subgrid;
+  padding-top: 20px;
   border-top: 1px solid var(--border-strong);
 }
 
+/* A step's first row: its number and title at the left, its icon
+   (StepIcons.jsx) at the right, in the accent colour. */
+.intro-step-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: 20px;
+}
+
 .intro-steps h2 {
-  margin: 0 0 var(--space-6);
-  font-size: 24px;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0;
+  /* 20px keeps the longest title, its number and the icon on one line at 1280px. */
+  font-size: 20px;
   font-weight: 700;
   letter-spacing: -0.01em;
 }
 
-.intro-step-number {
+.intro-step-icon {
+  flex: 0 0 auto;
+  color: var(--accent);
+}
+
+.intro-step-icon svg {
   display: block;
-  margin-bottom: var(--space-2);
+}
+
+.intro-step-number {
   font-family: var(--font-mono);
   font-size: var(--text-small);
   font-weight: 500;
@@ -2161,6 +2355,11 @@ body {
     grid-template-columns: 1fr;
     gap: var(--space-5);
   }
+
+  .intro-steps li {
+    display: block;
+    grid-row: auto;
+  }
 }
 
 /* Two columns, the text on the left and its picture or choice on the right
@@ -2168,7 +2367,7 @@ body {
    Back below it. */
 .split {
   display: grid;
-  grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+  grid-template-columns: minmax(0, 7fr) minmax(0, 6fr);
   gap: var(--space-8);
   align-items: center;
   width: 100%;
@@ -2181,18 +2380,50 @@ body {
   text-align: left;
 }
 
-/* About's picture (AboutPreview.jsx): the camera frame, the letter card under it. */
-.about-preview {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  text-align: left;
+/* About's text: three sections across the whole column, a thin line between
+   them. Paragraphs within a section sit closer than the sections do. */
+.about-lines {
+  width: 100%;
+  margin-top: var(--space-6);
+  font-size: var(--text-lead);
+  line-height: var(--leading-lead);
+  color: var(--text-muted);
+  text-wrap: pretty;
 }
 
-/* The camera frame's own dark colour (.stage), as on Record, in both themes. */
+.about-section + .about-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.about-section p {
+  margin: 0;
+}
+
+.about-section p + p {
+  margin-top: var(--space-2);
+}
+
+/* About's picture (AboutPreview.jsx): one panel. The camera frame on top
+   (.stage: dark in both themes, as on Record), a little taller than 4:3; the
+   letter under a thin line, on the theme's card colour (the same dark as the
+   frame in the dark theme, so the panel reads as one piece). */
+.about-preview {
+  overflow: hidden;
+  text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+}
+
 .about-preview-frame {
-  border: 1px solid var(--progress-track);
-  --stage-radius: 20px;
+  width: 100%;
+  aspect-ratio: 10 / 9;
+  /* On a short window (720px tall) the frame gives up some height, so the
+     page still fits without scrolling; the hand stays centred inside it. */
+  max-height: calc(100dvh - 340px);
+  --stage-radius: 0px;
 }
 
 .about-preview-hand {
@@ -2202,32 +2433,150 @@ body {
   height: 100%;
 }
 
-/* drawHand.js's colours, and its widths a third thicker (in 640-pixel units). */
-.about-preview-outline,
-.about-preview-bones {
+/* The still hand (HandSketch.jsx): drawHand.js's colours, and its widths a
+   third thicker (in 640-pixel units), as it's shown smaller than Record's. */
+.hand-sketch-outline,
+.hand-sketch-bones {
   fill: none;
   stroke-linecap: round;
 }
 
-.about-preview-outline {
+.hand-sketch-outline {
   stroke: var(--hand-outline);
   stroke-width: 8;
 }
 
-.about-preview-bones {
+.hand-sketch-bones {
   stroke: var(--bright-sky);
   stroke-width: 4;
 }
 
-.about-preview-joint {
+.hand-sketch-joint {
   fill: var(--cloud-white);
   stroke: var(--hand-outline);
   stroke-width: 2;
 }
 
-/* A step lighter than the page around it. */
-.about-preview-card {
-  background: var(--surface-soft);
+/* The letter row: Record's letter tile and text, without a card of its own. */
+.about-preview-letter {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  padding: var(--space-5);
+  border-top: 1px solid var(--border);
+}
+
+.about-preview-letter .letter-tile {
+  border: 1px solid var(--border);
+}
+
+/* ---------- How Sema handles your data (PrivacyPage.jsx) ---------- */
+
+/* Centred at the top: the shield badge, the headline and what Sema does with
+   the camera. Three points under a thin line; the hosting note under another. */
+.privacy {
+  width: 100%;
+  text-align: left;
+}
+
+.privacy-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* The shield in a soft round badge: the theme's highlight colour, a thin
+   border, the icon in the accent. */
+.privacy-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: var(--space-4);
+  color: var(--accent);
+  background: var(--highlight);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+}
+
+.privacy-badge svg {
+  display: block;
+}
+
+.privacy-title {
+  font-size: clamp(36px, 4vw, 56px);
+}
+
+/* Kept to a comfortable line length; balanced, so the centred lines are even. */
+.privacy-intro {
+  max-width: 34em;
+  margin: var(--space-4) 0 0;
+  font-size: 19px;
+  line-height: var(--leading-lead);
+  color: var(--text-muted);
+  text-wrap: balance;
+}
+
+/* Three even columns under a thin line, a thinner one between each. */
+.privacy-points {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: var(--space-5) 0 0;
+  padding: var(--space-5) 0 0;
+  list-style: none;
+  border-top: 1px solid var(--border);
+}
+
+.privacy-points li {
+  padding: 0 var(--space-6);
+}
+
+.privacy-points li:first-child {
+  padding-left: 0;
+}
+
+.privacy-points li:last-child {
+  padding-right: 0;
+}
+
+.privacy-points li + li {
+  border-left: 1px solid var(--border);
+}
+
+.privacy-point-icon {
+  display: block;
+  margin-bottom: var(--space-3);
+  color: var(--accent);
+}
+
+.privacy-point-icon svg {
+  display: block;
+}
+
+.privacy-points h2 {
+  margin: 0 0 var(--space-2);
+  font-size: 17px;
+  line-height: 1.3;
+  font-weight: 700;
+}
+
+.privacy-points p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--text-muted);
+  text-wrap: pretty;
+}
+
+/* The small print, quieter than everything above it. */
+.privacy-hosting {
+  margin: var(--space-5) 0 0;
+  padding-top: var(--space-4);
+  font-size: var(--text-caption);
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
 }
 
 /* Narrow windows: the picture under the text. */
@@ -2240,55 +2589,43 @@ body {
   .about-preview {
     max-width: 480px;
   }
+
+  .privacy-points {
+    grid-template-columns: 1fr;
+  }
+
+  .privacy-points li {
+    padding: 0;
+    border-left: none;
+  }
 }
 
 /* ---------- Camera check (CameraCheckPage.jsx) ---------- */
 
+/* Both columns are the same height (align-items), and the pair sits in the
+   middle of the page as one group (align-content). */
 .camera-check {
   display: flex;
   flex: 1 1 auto;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 56px;
+  align-content: center;
+  align-items: stretch;
+  gap: var(--space-8);
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
   padding: 32px 48px 0;
 }
 
+/* As tall as the camera column; the bottom padding is the privacy line's
+   height plus its gap, so the steps end level with the panel's bottom edge. */
 .camera-check-text {
   display: flex;
-  flex: 1 1 320px;
+  flex: 1 1 340px;
   flex-direction: column;
-  gap: 28px;
-  max-width: 380px;
-}
-
-.camera-check-picker {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 14px;
-  color: var(--text-muted);
-}
-
-.camera-check-picker label {
-  font-weight: 600;
-}
-
-/* min-width: 0 lets a camera with a long name shrink to fit the column
-   instead of pushing the layout wider. */
-.camera-check-picker select {
-  min-width: 0;
-  max-width: 100%;
-  text-overflow: ellipsis;
-  padding: 7px 10px;
-  font: inherit;
-  font-size: 14px;
-  color: var(--text);
-  background: var(--surface);
-  border: 1px solid var(--fill-off);
-  border-radius: 8px;
+  gap: var(--space-7);
+  max-width: 420px;
+  padding: var(--space-2) 0 32px;
 }
 
 .camera-check-preview {
@@ -2297,80 +2634,183 @@ body {
   flex-direction: column;
   gap: 12px;
   min-width: 0;
+  max-width: 620px;
 }
 
-/* A fixed-height dark frame. The video keeps its shape inside it (contain),
-   so a whole-hand check never passes on a hand cut off by cropping. 512px
-   leaves room for Previous and Next below it at 1280×720. */
+/* The video inside the camera panel. The video keeps its shape inside it
+   (contain), so a whole-hand check never passes on a hand cut off by
+   cropping. Its height leaves room for the panel's bar and for Previous and
+   Next at 1280×720. */
 .camera-check-stage {
-  aspect-ratio: auto;
-  height: 512px;
-  --stage-radius: 20px;
+  /* The camera's 4:3 shape at the panel's width, but never taller than the
+     window allows (430px at 720px tall), so there are no empty bands above
+     and below the video on a narrower panel. width: 100% keeps the full width
+     when the height cap applies (aspect-ratio would shrink it). */
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  max-height: clamp(300px, calc(100dvh - 290px), 600px);
+  --stage-radius: 0px;
 }
 
-/* The short instruction at the top of the video, over a soft dark gradient
-   that keeps it readable over a bright camera picture (like Record's take
-   bar). With both hands found, it leads with a sky-blue check. */
-.camera-check-hint {
+/* The three numbered steps (CameraCheckPage.jsx), joined by a thin line
+   down from each mark to the next. The step to do now has an accent ring;
+   done steps a filled ✓; later ones are quiet. */
+/* The list takes the column's free height: steps 1 and 2 stretch (their
+   line stretches with them), so step 3 sits at the bottom. */
+.setup-steps {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.setup-step-item {
+  position: relative;
+  display: flex;
+  gap: var(--space-5);
+  padding-bottom: 40px;
+}
+
+.setup-step-item:not(:last-child) {
+  flex: 1 1 auto;
+}
+
+.setup-step-item:last-child {
+  padding-bottom: 0;
+}
+
+/* The line to the next step, from under this step's mark. */
+.setup-step-item:not(:last-child)::before {
+  content: '';
   position: absolute;
-  top: 0;
-  right: 0;
-  left: 0;
+  top: 38px;
+  bottom: 6px;
+  left: 15px;
+  border-left: 2px solid var(--border);
+}
+
+.setup-step-mark {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  font-family: var(--font-mono);
+  font-size: var(--text-body);
+  font-weight: 500;
+  color: var(--text-muted);
+  border: 2px solid var(--border-strong);
+  border-radius: 50%;
+}
+
+.setup-step-item.active .setup-step-mark {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.setup-step-item.done .setup-step-mark {
+  font-family: inherit;
+  font-weight: 700;
+  color: var(--on-accent);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.setup-step-body h2 {
+  margin: 3px 0 var(--space-2);
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.setup-step-item.todo .setup-step-body h2 {
+  color: var(--text-muted);
+}
+
+.setup-step-body p {
+  margin: 0;
+  font-size: var(--text-body);
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+
+/* The camera panel: a header ("Camera preview" and the status, the 3-second
+   line along its bottom edge), then the video, in one frame, dark in every
+   theme. */
+.camera-panel {
+  overflow: hidden;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+}
+
+.camera-panel-head {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  margin: 0;
-  padding: 18px 20px 32px;
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--cloud-white);
-  background: linear-gradient(var(--scrim), var(--scrim-clear));
-  pointer-events: none;
+  padding: var(--space-3) var(--space-5) 15px;
 }
 
-.camera-check-hint.done span {
-  color: var(--bright-sky);
+.camera-panel-status {
+  font-size: var(--text-small);
+  font-weight: 600;
+  color: var(--text-muted);
 }
 
-.camera-checks {
+.camera-panel-status.ok {
+  color: var(--accent);
+}
+
+.camera-panel-status.warn {
+  color: var(--warning);
+}
+
+/* The 3-second line, which is also the header's bottom edge: it fills once,
+   over BOTH_HANDS_HOLD_MS (set inline), each time a hold starts; a new hold
+   starts a new line. Full once the check passes. */
+.camera-progress {
   position: absolute;
   right: 0;
   bottom: 0;
   left: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 28px;
-  height: 52px;
-  margin: 0;
-  padding: 0;
-  font-size: 13.5px;
-  font-weight: 600;
-  list-style: none;
-  background: var(--scrim);
+  height: 3px;
+  overflow: hidden;
+  background: var(--progress-track);
 }
 
-.camera-check-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--cloud-white);
+.camera-progress span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
 }
 
-.camera-check-item.ok span {
-  color: var(--bright-sky);
+.camera-progress .filling {
+  animation: camera-progress-fill linear both;
 }
 
-.camera-check-item.warn span {
-  color: var(--amber-on-dark);
+@keyframes camera-progress-fill {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
 }
 
-.camera-check-item.wait,
-.camera-check-item.wait span {
-  color: var(--muted-on-dark);
+/* With reduced motion the bar doesn't move; the message counts down instead. */
+@media (prefers-reduced-motion: reduce) {
+  .camera-progress .filling {
+    animation: none;
+    width: 0;
+  }
 }
 
+/* The extra space at the bottom keeps the panel clear of the camera
+   controls along the bottom of the view. */
 .stage-problem {
   position: absolute;
   inset: 0;
@@ -2379,7 +2819,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 14px;
-  padding: 32px;
+  padding: 32px 32px 88px;
   text-align: center;
 }
 
@@ -2426,15 +2866,6 @@ body {
 .stage-problem button:focus-visible {
   outline: 3px solid var(--bright-sky);
   outline-offset: 2px;
-}
-
-.camera-check-private {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0;
-  font-size: 13px;
-  color: var(--text-muted);
 }
 
 /* ---------- Learn and Practice placeholders (PlaceholderPage.jsx) ---------- */

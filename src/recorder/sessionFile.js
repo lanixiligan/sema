@@ -1,4 +1,5 @@
 import { NORMALIZATION_VERSION } from '../vision/normalizeHand.js'
+import { TAKES_TARGET } from './takeRules.js'
 
 // Builds the session file described in docs/data-format.md. Everything here
 // returns new objects; nothing is changed in place.
@@ -64,6 +65,17 @@ function nextTakeNumber(session, letter, hand) {
 
 export function acceptedCount(session, letter, hand) {
   return takesFor(session, letter, hand).filter((r) => r.status === 'accepted').length
+}
+
+// Progress toward the collection plan: kept takes for these letters and
+// hands, each letter and hand counting at most TAKES_TARGET (extra takes
+// don't make up for missing ones), out of how many are needed in all.
+export function takeProgress(session, letters, hands = ['left', 'right']) {
+  let kept = 0
+  for (const letter of letters) {
+    for (const hand of hands) kept += Math.min(acceptedCount(session, letter, hand), TAKES_TARGET)
+  }
+  return { kept, needed: letters.length * hands.length * TAKES_TARGET }
 }
 
 function median(values) {

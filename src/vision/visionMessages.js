@@ -25,12 +25,12 @@ export function getDetectionErrorMessage(error) {
   return `Hand tracking stopped unexpectedly. Reload the page to try again. (${name})`
 }
 
-// What the camera check (setup step 3) shows when hand tracking can't run.
+// What a camera view (CameraView) shows when hand tracking can't run.
 // The WebGL text is from the design; other failures show the title below with
 // the plain message from getVisionErrorMessage.
-export const CAMERA_CHECK_NO_WEBGL = {
+export const CAMERA_VIEW_NO_WEBGL = {
   title: "Hand tracking can't run in this browser",
   body: "It needs WebGL, which this browser isn't giving to pages. Open Sema in Chrome or Firefox.",
 }
 
-export const CAMERA_CHECK_TRACKING_FAILED_TITLE = "Hand tracking couldn't start"
+export const CAMERA_VIEW_TRACKING_FAILED_TITLE = "Hand tracking couldn't start"

@@ -20,7 +20,6 @@ export default function PracticePage() {
         </div>
       }
     >
-      Practice mixes letters you've learned, so it comes after Learn.
     </PlaceholderPage>
   )
 }

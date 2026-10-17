@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from 'react'
 import { loadHandLandmarker } from './loadHandLandmarker.js'
 import { getVisionErrorMessage } from './visionMessages.js'
 
-// Owns the MediaPipe HandLandmarker: creates it the first time the camera
-// starts, recreates it when the preferred delegate changes, and closes it on
-// unmount.
-export function useHandLandmarker(isCameraLive, preferredDelegate) {
+// Owns the MediaPipe HandLandmarker: creates it the first time it's wanted
+// (`shouldLoad`: a camera view is on screen, or the camera is live), recreates
+// it when the preferred delegate changes, and closes it on unmount.
+export function useHandLandmarker(shouldLoad, preferredDelegate) {
   // The detection loop reads this on every frame. Cleanup sets it to null
   // *before* calling close(), so the loop never uses a closed landmarker.
   const landmarkerRef = useRef(null)
@@ -13,15 +13,15 @@ export function useHandLandmarker(isCameraLive, preferredDelegate) {
   // null while nothing has finished loading.
   const [loaded, setLoaded] = useState(null)
 
-  // Nothing is downloaded on page load: wait for the camera's first start,
-  // then keep the model loaded even if the camera is stopped.
+  // Nothing is downloaded on page load: wait until it's first wanted, then
+  // keep the model loaded even if the camera is stopped or the view goes away.
   // Setting state while rendering is fine for remembering a change in props
   // like this; React re-renders straight away, before showing anything.
-  const [hasCameraStarted, setHasCameraStarted] = useState(false)
-  if (isCameraLive && !hasCameraStarted) setHasCameraStarted(true)
+  const [wanted, setWanted] = useState(false)
+  if (shouldLoad && !wanted) setWanted(true)
 
   useEffect(() => {
-    if (!hasCameraStarted) return
+    if (!wanted) return
     let cancelled = false
     let landmarker = null
 
@@ -49,10 +49,10 @@ export function useHandLandmarker(isCameraLive, preferredDelegate) {
       landmarker?.close() // frees its WebAssembly memory and GPU resources
       setLoaded(null)
     }
-  }, [hasCameraStarted, preferredDelegate])
+  }, [wanted, preferredDelegate])
 
   let status = 'idle'
-  if (hasCameraStarted) {
+  if (wanted) {
     if (!loaded) status = 'loading'
     else status = loaded.error ? 'error' : 'ready'
   }

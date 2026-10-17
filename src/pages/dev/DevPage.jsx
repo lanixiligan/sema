@@ -66,7 +66,7 @@ export default function DevPage() {
               Start camera
             </button>
           ) : (
-            <button type="button" className="button" onClick={stop}>
+            <button type="button" className="button" onClick={() => stop()}>
               {status === 'starting' ? 'Cancel' : 'Stop camera'}
             </button>
           )}

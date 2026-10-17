@@ -11,6 +11,7 @@ import {
   normalizePersonCode,
   sessionFileName,
   deleteTake,
+  takeProgress,
 } from './sessionFile.js'
 
 function frame(detected = 'left', t = 0) {
@@ -198,6 +199,22 @@ describe('deleteTake', () => {
 describe('sessionFileName', () => {
   it('names the file after the person and session', () => {
     expect(sessionFileName(session())).toBe('sema-asl-p03-2026-11-02a.json')
+  })
+})
+
+describe('takeProgress', () => {
+  it('counts kept takes for every letter and both hands, out of 3 each', () => {
+    let s = session()
+    s = addTake(s, take({ letter: 'W', hand: 'left' }))
+    s = addTake(s, take({ letter: 'W', hand: 'right' }))
+    s = addTake(s, take({ letter: 'B', hand: 'left', status: 'rejected', reason: 'too-few-frames' }))
+    expect(takeProgress(s, ['B', 'W', 'none'])).toEqual({ kept: 2, needed: 18 })
+  })
+
+  it('counts at most 3 takes per letter and hand', () => {
+    let s = session()
+    for (let i = 0; i < 4; i++) s = addTake(s, take())
+    expect(takeProgress(s, ['W'], ['left'])).toEqual({ kept: 3, needed: 3 })
   })
 })
 

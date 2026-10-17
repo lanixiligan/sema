@@ -66,6 +66,10 @@ export function useCamera() {
   // ('blocked', 'busy', 'noCamera', 'insecure', 'stopped' or 'other') for pages
   // that show their own text per kind.
   const [failure, setFailure] = useState(null)
+  // Why the camera was last stopped, when that matters to the page: 'hidden'
+  // (the person switched to another tab), 'idle' (no hand in view for a
+  // minute) or null. Cleared on every start.
+  const [stopReason, setStopReason] = useState(null)
   const [cameras, setCameras] = useState([])
   const [deviceId, setDeviceId] = useState(null)
 
@@ -80,6 +84,7 @@ export function useCamera() {
     const requestId = requestIdRef.current
     releaseCamera() // free the current camera before opening the next one
     setFailure(null)
+    setStopReason(null)
 
     // Browsers only offer the camera to secure pages (https:// or localhost).
     // Elsewhere navigator.mediaDevices is simply missing.
@@ -127,10 +132,12 @@ export function useCamera() {
     setCameras(await listCameras()) // we have permission now, so names show
   }
 
-  function stop() {
+  // `reason` says why, for pages that explain it (see stopReason).
+  function stop(reason = null) {
     requestIdRef.current += 1 // cancels a start still waiting on the prompt
     releaseCamera()
     setStatus('idle')
+    setStopReason(reason)
   }
 
   // Keep the camera list current when cameras are plugged in or removed.
@@ -167,6 +174,7 @@ export function useCamera() {
     status,
     error: failure?.message ?? null,
     errorKind: failure?.kind ?? null,
+    stopReason,
     cameras,
     deviceId,
     start: () => startCamera(deviceId), // reuse the last camera, if any

@@ -66,7 +66,7 @@ Check a file before keeping it: `npm run check-session -- <file>`.
 | `person`, `session` | The participant code (`p03`) and session ID (`2026-11-02a`). Session IDs can repeat across people. |
 | `browser` | Browser and major version, e.g. `"Chrome 155"`. |
 | `cameraFps` | Median of the recordings' `cameraFps`. |
-| `consent.train` | Always `true`: "My recordings may be used to train Sema" must be ticked to record. |
+| `consent.train` | Always `true`: "I agree that the hand-movement data I record may be used to improve Sema" must be ticked to record (before 2026-10-18 it read "My recordings may be used to train Sema"). |
 | `consent.date` | The day consent was given. |
 
 The header's `person`, `session` and `language` only label the file. **Each sample's

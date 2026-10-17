@@ -1,23 +1,19 @@
 import { useEffect, useRef, useState } from 'react'
 import MenuBar from '../../app/MenuBar.jsx'
 import { useSharedCamera } from '../../app/sharedCamera.js'
-import CameraStage from '../../components/CameraStage.jsx'
-import { CheckIcon, VideoOffIcon } from '../../components/icons.jsx'
-import StageProblem from '../../components/StageProblem.jsx'
+import CameraView from '../../components/CameraView.jsx'
 import { useLetters } from '../../recorder/letters.js'
 import { acceptedCount, addTake, deleteTake, needsDownload, newSession } from '../../recorder/sessionFile.js'
 import { clearSession, downloadSession, loadSession, rememberSessionId, saveSession } from '../../recorder/sessionStore.js'
-import { TAKES_TARGET } from '../../recorder/takeRules.js'
+import { POSITION_HINTS, TAKES_TARGET } from '../../recorder/takeRules.js'
 import { useRecording } from '../../recorder/useRecording.js'
 import { browserName } from '../../vision/browserName.js'
 import { useHandDetection } from '../../vision/useHandDetection.js'
-import CameraControls from './CameraControls.jsx'
 import ConsentForm from './ConsentForm.jsx'
 import FinishedStep from './FinishedStep.jsx'
 import LetterList from './LetterList.jsx'
 import TakeOverlay from './TakeOverlay.jsx'
 import TakePanel from './TakePanel.jsx'
-import TakeList from './TakeList.jsx'
 import TakeResult from './TakeResult.jsx'
 import { takeReadiness } from './takeReadiness.js'
 
@@ -30,7 +26,7 @@ const today = () => new Date().toLocaleDateString('en-CA')
 // - recording: the camera, the chosen letter and hand, the letter tiles;
 // - finished: after "Finish and download".
 // The camera is on only during recording: that's the only step with a camera
-// view (CameraStage), and CameraProvider starts and stops it to match.
+// view (CameraView), and CameraProvider starts and stops it to match.
 export default function RecordPage({ signingHand }) {
   const [saved, setSaved] = useState(loadSession) // offered back when the page opens
   const [session, setSession] = useState(null)
@@ -176,7 +172,7 @@ export default function RecordPage({ signingHand }) {
     return () => window.removeEventListener('beforeunload', warn)
   }, [unsaved])
 
-  // Deletes one kept take, chosen in the take list.
+  // Deletes one kept take, chosen on its letter row (TakeMarks).
   function deleteOne(recordingId) {
     updateSession(deleteTake(session, recordingId))
     recording.dismiss() // the result line may describe the take just removed
@@ -210,21 +206,10 @@ export default function RecordPage({ signingHand }) {
       )}
 
       {step === 'recording' && (
-        // A row with the session and Finish, then three columns that start on
-        // the same line: the letters, the camera, and the chosen letter with
-        // its takes and the record button (grid areas in styles.css).
+        // Three columns that start and end on the same lines: the letters,
+        // the camera, and the chosen letter, the record button and Finish at
+        // the bottom (grid areas in styles.css).
         <main className="record">
-          <div className="record-session">
-            <SessionStatus session={session} storageOk={storageOk} />
-            <button
-              type="button"
-              className="outline-button record-finish"
-              disabled={session.recordings.length === 0 || recording.busy}
-              onClick={finish}
-            >
-              Finish and download
-            </button>
-          </div>
 
           <div className="record-letters">
             {letters.status === 'ready' && (
@@ -235,30 +220,24 @@ export default function RecordPage({ signingHand }) {
                 hand={takeHand}
                 selected={cell}
                 onSelect={setLetter}
+                onDelete={deleteOne}
                 disabled={recording.busy}
               />
             )}
           </div>
 
           <section className="record-camera" aria-label="Camera">
-            <CameraStage canvasRef={canvasRef} className="stage record-stage">
-              {camera.error ? (
-                <StageProblem title="The camera didn't start" body={camera.error} onRetry={camera.start} />
-              ) : handModel.status === 'error' || hand.error ? (
-                <StageProblem title="Hand tracking couldn't start" body={handModel.error || hand.error} />
-              ) : camera.status === 'idle' ? (
-                <div className="camera-off" role="status">
-                  <VideoOffIcon size={28} />
-                  <p className="camera-off-title">Camera is off</p>
-                </div>
-              ) : (
-                <TakeOverlay recording={recording} idleText={readiness.text} />
-              )}
-              {/* Hidden during a take: switching the camera or the hand would spoil it. */}
-              {!recording.busy && (
-                <CameraControls hand={takeHand} onHandChange={setTakeHand} handLabel="Hand for this take" />
-              )}
-            </CameraStage>
+            {/* The controls are hidden during a take: switching the camera or
+                the hand would spoil it. */}
+            <CameraView
+              canvasRef={canvasRef}
+              hand={hand}
+              className="record-stage"
+              offNote="Turn on your camera to start recording."
+              controls={!recording.busy && { hand: takeHand, onHandChange: setTakeHand, handLabel: 'Hand for this take' }}
+            >
+              <TakeOverlay recording={recording} idleText={readiness.text} />
+            </CameraView>
           </section>
 
           <aside className="record-side" aria-label="Current take">
@@ -273,16 +252,13 @@ export default function RecordPage({ signingHand }) {
               </p>
             )}
             {cell && (
-              <>
-                <TakePanel
-                  cell={cell}
-                  isPilot={letters.pilot.includes(cell.letter)}
-                  instructions={letters.instructions[cell.letter]}
-                  image={letters.images[cell.letter]}
-                  accepted={acceptedCount(session, cell.letter, cell.hand)}
-                />
-                <TakeList takes={keptTakes(session, cell)} onDelete={deleteOne} disabled={recording.busy} />
-              </>
+              <TakePanel
+                cell={cell}
+                isPilot={letters.pilot.includes(cell.letter)}
+                instructions={letters.instructions[cell.letter]}
+                image={letters.images[cell.letter]}
+                accepted={acceptedCount(session, cell.letter, cell.hand)}
+              />
             )}
             <button
               type="button"
@@ -294,31 +270,35 @@ export default function RecordPage({ signingHand }) {
               {/* Space is the main way to start a take; a click works too. */}
               Press <kbd>Space</kbd> to record
             </button>
-            <TakeResult recording={recording} cell={cell} />
+            {/* The last take's result and where to hold the hand next. Its two
+                lines are always there, so nothing moves when a result appears. */}
+            {cell && (
+              <div className="record-feedback">
+                <div className="record-feedback-result">
+                  <TakeResult recording={recording} cell={cell} />
+                </div>
+                <p className="record-feedback-hint">{positionHint(acceptedCount(session, cell.letter, cell.hand))}</p>
+              </div>
+            )}
+            {/* Last, at the bottom of the column: done with the session. */}
+            <div className="record-finish">
+              <button
+                type="button"
+                className="outline-button"
+                disabled={session.recordings.length === 0 || recording.busy}
+                aria-describedby="record-finish-help"
+                onClick={finish}
+              >
+                Finish and download
+              </button>
+              <span id="record-finish-help" className="record-finish-help">
+                {session.recordings.length === 0 ? 'Record a take first' : 'Downloads your session file'}
+              </span>
+            </div>
           </aside>
         </main>
       )}
     </>
-  )
-}
-
-// Above the camera while a session is open: its code and ID, and whether
-// it's saved in this browser.
-function SessionStatus({ session, storageOk }) {
-  return (
-    <div className="record-session-status">
-      <span className="session-id">
-        {session.person} · {session.session}
-      </span>
-      {storageOk ? (
-        <span className="session-saved">
-          <CheckIcon />
-          Saved · {countTakes(session)}
-        </span>
-      ) : (
-        <span className="session-not-saved">Not saved · {countTakes(session)}</span>
-      )}
-    </div>
   )
 }
 
@@ -356,13 +336,13 @@ function SavedSessionOffer({ saved, canStartNew, onContinue, onDownload, onDelet
   )
 }
 
+// Where to hold the hand for the next take, from how many are kept.
+function positionHint(kept) {
+  return kept < TAKES_TARGET ? `Next take: ${POSITION_HINTS[kept]}` : 'All takes done for this hand.'
+}
+
 // Kept takes only: rejected attempts stay in the file but don't count here.
 function countTakes(session) {
   const n = session.recordings.filter((r) => r.status === 'accepted').length
   return n === 1 ? '1 take' : `${n} takes`
-}
-
-// The kept takes for one letter and hand, oldest first.
-function keptTakes(session, { letter, hand }) {
-  return session.recordings.filter((r) => r.letter === letter && r.hand === hand && r.status === 'accepted')
 }

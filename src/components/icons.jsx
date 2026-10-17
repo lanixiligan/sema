@@ -20,15 +20,6 @@ export function HandIcon({ size = 18, strokeWidth = 1.6 }) {
   )
 }
 
-export function LockIcon({ size = 18 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-      <rect x="3" y="7" width="10" height="7" rx="1.5" />
-      <path d="M5.5 7V5a2.5 2.5 0 015 0v2" />
-    </svg>
-  )
-}
-
 export function CheckIcon({ size = 14, strokeWidth = 2.4 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">

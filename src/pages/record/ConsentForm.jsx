@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { CameraOffIcon, FileSendIcon, HandPointsIcon } from '../../components/LineIcons.jsx'
 import { isValidPersonCode, nextSessionId, normalizePersonCode } from '../../recorder/sessionFile.js'
 import { loadUsedSessionIds } from '../../recorder/sessionStore.js'
 
@@ -19,34 +20,39 @@ export default function ConsentForm({ today, onStart }) {
     if (canStart) onStart({ person: code, sessionId: sessionId.trim(), consent: { train } })
   }
 
-  // Two columns on desktop: what this is and what gets saved on the left, the
-  // form on the right. Both sit inside the one <form>, so Start recording
-  // still submits the fields.
+  // Two columns on desktop, centred in the page: a short explanation and three
+  // facts about what gets saved on the left; the fields, then the consent
+  // and Start recording, on the right. No cards: space and two thin lines
+  // separate the parts. Both columns sit inside the one <form>, so Start
+  // recording still submits the fields.
   return (
     <main className="record-consent">
       <form className="consent" onSubmit={submit}>
         <div className="consent-about">
           <div>
-            <h1 className="setup-title">Help train Sema</h1>
+            <h1 className="consent-title">Help improve Sema</h1>
             <p className="consent-lead">
-              You're set up. While Sema is being built, the most useful thing you can do is help train it: to
-              learn the alphabet, it needs examples from real hands, maybe yours. Learn and Practice are open as a
-              preview in the menu above.
-            </p>
-            <p className="consent-lead consent-lead-next">
-              You'll sign a few letters, three short takes each, with both hands. It takes about 10 minutes. The
-              file stays on this computer until you send it to Lanix.
+              Help me test how well Sema recognizes ASL letters. It takes about 10 minutes.
             </p>
           </div>
 
-          <div className="consent-saved">
-            <div className="consent-saved-title">What gets saved</div>
-            <ul>
-              <li>21 points on your hand, about ten times a second. No video, no photos.</li>
-              <li>Your code, the letter, which hand, and your browser's name.</li>
-              <li>Nothing is uploaded. You download a file and send it to Lanix.</li>
-            </ul>
-          </div>
+          <ul className="consent-facts" aria-label="What gets saved">
+            <li>
+              <HandPointsIcon size={26} />
+              <strong>21 hand points</strong>
+              <span>Your hand's position and movement.</span>
+            </li>
+            <li>
+              <CameraOffIcon size={26} />
+              <strong>No video or photos</strong>
+              <span>Only hand-point data is saved.</span>
+            </li>
+            <li>
+              <FileSendIcon size={26} />
+              <strong>You send the file</strong>
+              <span>Nothing is uploaded automatically.</span>
+            </li>
+          </ul>
         </div>
 
         <div className="consent-side">
@@ -68,7 +74,7 @@ export default function ConsentForm({ today, onStart }) {
                 </span>
               ) : (
                 <span id="rec-code-help" className="consent-help">
-                  From Lanix. Never your name.
+                  Use the code Lanix gave you. Don't enter your name.
                 </span>
               )}
             </div>
@@ -83,7 +89,7 @@ export default function ConsentForm({ today, onStart }) {
                 onChange={(event) => setSessionId(event.target.value)}
               />
               <span id="rec-session-help" className="consent-help">
-                Filled in for you.
+                Added automatically.
               </span>
             </div>
           </div>
@@ -92,10 +98,15 @@ export default function ConsentForm({ today, onStart }) {
             <label className="consent-check">
               <input type="checkbox" name="train" checked={train} onChange={(event) => setTrain(event.target.checked)} />
               <span>
-                My recordings may be used to train Sema <span className="consent-optional">(required)</span>
+                I agree that the hand-movement data I record may be used to improve Sema.{' '}
+                <span className="consent-optional">(Required)</span>
               </span>
             </label>
-            <p className="consent-delete">You can ask Lanix to delete your recordings at any time.</p>
+            {/* The rest of what's in the file, so the agreement is informed. */}
+            <p className="consent-delete">
+              The file also holds your code, the letters and hands, the date, and basic browser and camera
+              details. You can ask Lanix to delete your recordings at any time.
+            </p>
           </div>
 
           <button type="submit" className="primary-button consent-start" disabled={!canStart}>

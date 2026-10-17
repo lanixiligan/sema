@@ -63,7 +63,7 @@ app's Record page: `/record` on the live site, `http://localhost:5173/record` in
 development. The file format is described in [docs/data-format.md](data-format.md).
 
 **In person:** finish setup once on the laptop, then open Record. The participant
-reads "Help train Sema" and "What gets saved", enters their code (`p03`), ticks the
+reads "Help improve Sema" and "What gets saved", enters their code (`p03`), ticks the
 training box and clicks **Start recording**. The camera then starts by itself. Pick a
 letter in the column on the left and the hand (Left | Right, on the video; it starts on
 the signing hand), then press **Space** with the other hand: a 3-2-1 countdown, a wait

@@ -1,23 +1,28 @@
 import { PATHS } from '../../app/router.js'
 import IntroLayout from './IntroLayout.jsx'
+import { BookIcon, HandPointsIcon, ScanIcon } from '../../components/LineIcons.jsx'
 import { useStaggeredReveal } from './useStaggeredReveal.js'
 
 const STEPS = [
   {
-    title: 'See a letter',
-    text: 'Each letter comes with a reference photo and a short description of the handshape.',
+    title: 'Explore a letter',
+    Icon: BookIcon,
+    text: 'Each letter includes a reference image and a brief guide to its corresponding handshape.',
   },
   {
-    title: 'Sign it to your camera',
+    title: 'Form the letter',
+    Icon: ScanIcon,
     text: (
       <>
-        Sema finds <span className="intro-key">21 points</span> on your hand and follows them as you move.
+        Show your chosen hand to the camera. Sema tracks <span className="intro-key">21 landmarks</span> as you form
+        the handshape.
       </>
     ),
   },
   {
-    title: 'Check the shape',
-    text: "Sema compares your hand's shape with the letter. In this preview it can find your hand but can't check letters yet.",
+    title: 'Understand the handshape',
+    Icon: HandPointsIcon,
+    text: "Sema is being developed to recognize letters. For now, it can detect and track your hand.",
   },
 ]
 
@@ -40,12 +45,18 @@ export default function HowSemaWorksPage() {
         <ol className="intro-steps">
           {STEPS.map((step, i) => (
             <li key={step.title} className={reveal.itemClass(i + 1)}>
-              <h2>
-                <span className="intro-step-number" aria-hidden="true">
-                  {String(i + 1).padStart(2, '0')}
+              {/* One row: the number and title on the left, the icon on the right. */}
+              <div className="intro-step-head">
+                <h2>
+                  <span className="intro-step-number" aria-hidden="true">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  {step.title}
+                </h2>
+                <span className="intro-step-icon">
+                  <step.Icon />
                 </span>
-                {step.title}
-              </h2>
+              </div>
               <p>{step.text}</p>
             </li>
           ))}

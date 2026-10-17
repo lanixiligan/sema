@@ -65,7 +65,9 @@ The development plan is `docs/project-plan.md`.
 src/
   app/          the shell: router, navigation, top bar and menu, phone notice,
                 camera provider, settings store
-  components/   parts used by more than one page folder (CameraStage, icons)
+  components/   parts used by more than one page folder (CameraView and its parts:
+                CameraStage, CameraControls, CameraOff, IdleNotice, StageProblem; icons.jsx
+                and the larger LineIcons.jsx)
   pages/
     onboarding/ Welcome; the intro pages About Sema, How Sema works and How Sema
                 handles your data (+ IntroLayout); Camera check; StepNav
@@ -120,8 +122,14 @@ src/
   same time for 3 s (`BOTH_HANDS_HOLD_MS`); a gap over 300 ms restarts the count. With two
   hands, left and right come from position (the person's right hand is on the un-mirrored
   frame's left), because MediaPipe's label can flip while a hand turns; one hand alone
-  goes by its label, so one hand can never pass. A line on the video counts down and says
-  when it's done; Next stays closed until then. Finishing setup keeps a saved signing hand
+  goes by its label, so one hand can never pass. A gap over 300 ms, even with the camera
+  off, always starts the 3 s again. The page shows three numbered steps (enable the camera,
+  show both hands, hold still), a checklist ticked off from the real camera and detection
+  state, and a camera panel: a header (a short status, centred, with a line along its
+  bottom edge that fills over the 3 s), then the 4:3 video with only the camera controls
+  on it. The steps column (420px) and the panel (620px) are the same height: the steps
+  stretch so the last ends level with the panel's bottom. Next stays closed until
+  the check passes. Finishing setup keeps a saved signing hand
   or sets Right; the camera controls' hand toggle switches it. The rules (`seeHands`,
   `steadySeen`, `updateHold`, `holdSecondsLeft`) are in `src/vision/handChecks.js`. Its error titles and texts come from the design and
   live in `cameraMessages.js` and `visionMessages.js`; `useCamera` returns an
@@ -129,13 +137,25 @@ src/
 
 ## Camera conventions
 
-- Start the camera automatically when arriving on the camera check and on Record's recording step.
-  Navigating there and the browser's permission prompt are the consent. It stays off
-  on Welcome, the intro pages and Record's consent/finished steps, and turns off whenever no
-  camera view is on screen.
+- The camera check never starts the camera by itself: it opens with "Camera is off" and a
+  Turn camera on button, and the browser only asks for the camera after that click
+  (`CameraStage autoStart={false}`). Record's recording step starts it on arrival, since the
+  person just pressed Start recording. It stays off on Welcome, the intro pages and
+  Record's consent/finished steps, and turns off whenever no camera view is on screen.
 - `CameraProvider` (`src/app/`) does this: it owns the camera and the hand model for
-  every page, starts the camera when a `CameraStage` appears, and stops it when the
-  last one goes away. After an error or Stop it waits for a click. Pages never call
+  every page, starts the camera when a `CameraStage` with `autoStart` (the default)
+  appears, and stops it when the last one goes away. After an error or Stop it waits for a click. Switching to another
+  tab (the page hidden) stops it too, with `stopReason: 'hidden'`, and it never comes back
+  by itself. No hand in view for a minute stops it as well (`stopReason: 'idle'`), after a
+  notice that counts down from 10 s (`src/camera/idleRules.js`, `src/app/useIdleCameraOff.js`,
+  `IdleNotice`); any hand resets the count.
+- Every camera page (camera check, Record) uses one component, `CameraView`
+  (`src/components/`): the frame, the problem panel (texts `CAMERA_VIEW_*` in
+  `cameraMessages.js` and `visionMessages.js`), `CameraOff` with a Turn camera on button,
+  the idle timeout, and `CameraControls` (on/off, the camera list; the page passes options
+  or `false`). The page keeps its own hand detection and passes its overlays as children,
+  shown while the camera is live.
+  Pages never call
   `useCamera` or `useHandLandmarker` themselves, except `/dev`, which keeps its own
   camera and its Start camera button.
 - Constraints: video only, ideal 640×480, `facingMode: 'user'`. Ideal values are
@@ -160,7 +180,9 @@ src/
   gitignored. It must match the installed package version. The model
   `public/models/hand_landmarker.task` is committed (float16 v1, 7,819,105 bytes,
   sha256 `fbc2a300…7cde1`).
-- Load the model when the camera first starts, never on page load. Keep it loaded
+- Load the model when a camera view first appears (or the camera first starts), never on
+  page load, so Welcome and the intro pages download nothing. Until it's ready, Turn camera
+  on says "Loading hand model…" and waits, and so does the controls' camera button. Keep it loaded
   across Stop/Start and across pages (it lives in `CameraProvider`). Close it on
   unmount.
 - MediaPipe web needs WebGL2 even on the CPU delegate. `loadHandLandmarker` checks

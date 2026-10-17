@@ -35,9 +35,10 @@ export function cameraErrorKind(error) {
   return KINDS_BY_ERROR_NAME[error?.name] ?? 'other'
 }
 
-// What the camera check (setup step 3) shows for each kind, from the design.
-// Kinds not listed show CAMERA_CHECK_OTHER with the plain message above.
-export const CAMERA_CHECK_ERRORS = {
+// What a camera view (CameraView: the camera check, Record) shows for each
+// kind, from the design. Kinds not listed show CAMERA_VIEW_OTHER_TITLE with
+// the plain message above.
+export const CAMERA_VIEW_ERRORS = {
   blocked: {
     title: 'Camera access is blocked',
     body: 'Allow it from the camera icon in the address bar, then try again.',
@@ -56,7 +57,7 @@ export const CAMERA_CHECK_ERRORS = {
   },
 }
 
-export const CAMERA_CHECK_OTHER_TITLE = "The camera didn't start"
+export const CAMERA_VIEW_OTHER_TITLE = "The camera didn't start"
 
 export function getCameraErrorMessage(error) {
   const name = error?.name || 'UnknownError'

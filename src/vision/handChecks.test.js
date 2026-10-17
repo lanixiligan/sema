@@ -93,6 +93,11 @@ describe('updateHold', () => {
   it('ends after a longer gap', () => {
     expect(updateHold({ start: 1000, lastAt: 2000 }, oneHand, 2000 + HAND_HOLD_MS)).toEqual(NO_HOLD)
   })
+
+  it('starts again when both hands come back after a longer gap', () => {
+    // Both up from 1000 to 2000, then no frames (camera off) until 9000.
+    expect(updateHold({ start: 1000, lastAt: 2000 }, both, 9000)).toEqual({ start: 9000, lastAt: 9000 })
+  })
 })
 
 describe('holdSecondsLeft', () => {

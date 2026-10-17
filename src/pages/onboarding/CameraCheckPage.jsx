@@ -1,27 +1,25 @@
 import { useEffect, useRef, useState } from 'react'
-import CameraStage from '../../components/CameraStage.jsx'
-import { LockIcon } from '../../components/icons.jsx'
-import StageProblem from '../../components/StageProblem.jsx'
 import { PATHS } from '../../app/router.js'
-import TopBar from '../../app/TopBar.jsx'
-import StepNav from './StepNav.jsx'
 import { useSharedCamera } from '../../app/sharedCamera.js'
-import { CAMERA_CHECK_ERRORS, CAMERA_CHECK_OTHER_TITLE } from '../../camera/cameraMessages.js'
-import { NO_HOLD, holdSecondsLeft, seeHands, steadySeen, updateHold } from '../../vision/handChecks.js'
+import TopBar from '../../app/TopBar.jsx'
+import CameraView from '../../components/CameraView.jsx'
+import { BOTH_HANDS_HOLD_MS, NO_HOLD, holdSecondsLeft, seeHands, steadySeen, updateHold } from '../../vision/handChecks.js'
 import { useHandDetection } from '../../vision/useHandDetection.js'
-import { CAMERA_CHECK_NO_WEBGL, CAMERA_CHECK_TRACKING_FAILED_TITLE } from '../../vision/visionMessages.js'
+import StepNav from './StepNav.jsx'
 
 const NOT_SEEN = { left: 'none', right: 'none' }
 const HANDS = ['left', 'right']
 
-// Setup's one page, the camera check. The camera starts by itself
-// (CameraStage), and Sema looks for both hands, drawing the 21 points on each
-// hand it finds. The checklist under the video shows each hand as it is now.
-// The check passes once both hands have been up, whole (wrist included), at
-// the same time for 3 seconds (handChecks.js): needing both at once means one
-// hand that MediaPipe labels wrongly while it turns can't pass for the other.
-// A short line on the video says what to do, counts the 3 seconds down, and
-// says when it's done. Next opens then, stays open, and finishes setup.
+// Setup's one page, the camera check: Sema must see both hands, whole (wrist
+// included), at the same time for 3 seconds (handChecks.js). Needing both at
+// once means one hand that MediaPipe labels wrongly while it turns can't pass
+// for the other. Two columns:
+// - a checklist of three numbered steps (enable the camera, show both hands,
+//   hold still), each ticked off once it's really done;
+// - the camera panel: a header with a short status, and along its bottom
+//   edge a line that fills over the 3 seconds; then the live video (only the
+//   camera controls on it).
+// Next opens once the check passes, stays open, and finishes setup.
 export default function CameraCheckPage({ onDone }) {
   const camera = useSharedCamera()
   const { handModel } = camera
@@ -39,12 +37,13 @@ export default function CameraCheckPage({ onDone }) {
   })
 
   // What Sema sees of each hand now (handChecks.js: 'none', 'part', 'whole'),
-  // the seconds left in the 3-second hold (null with no hold), and whether
-  // the check has passed. The detection loop calls the listener on every
-  // frame; state only changes when a value does, so the page doesn't
-  // re-render 30 times a second. steadySeen keeps a hand missed for a frame
-  // from flickering.
+  // when the current 3-second hold started (null with no hold; a new start
+  // restarts the bar), the seconds left in it, and whether the check has
+  // passed. The detection loop calls the listener on every frame; state only
+  // changes when a value does, so the page doesn't re-render 30 times a
+  // second. steadySeen keeps a hand missed for a frame from flickering.
   const [seen, setSeen] = useState(NOT_SEEN)
+  const [holdStart, setHoldStart] = useState(null)
   const [secondsLeft, setSecondsLeft] = useState(null)
   const [passed, setPassed] = useState(false)
   useEffect(() => {
@@ -61,6 +60,7 @@ export default function CameraCheckPage({ onDone }) {
         setSeen(steady)
       }
       hold = updateHold(hold, frame, now)
+      setHoldStart(hold.start)
       const left = holdSecondsLeft(hold, now)
       setSecondsLeft(left)
       if (left === 0) setPassed(true)
@@ -69,9 +69,18 @@ export default function CameraCheckPage({ onDone }) {
       listenerRef.current = null
     }
   }, [])
+  // Only what's true now counts: with the camera or tracking stopped, no hand
+  // is in view and no hold is running.
   const shown = isDetecting ? seen : NOT_SEEN
+  const holding = isDetecting && !passed && holdStart !== null
+  const bothInView = shown.left === 'whole' && shown.right === 'whole'
 
-  const failure = describeFailure(camera, handModel, hand.error)
+  const steps = [
+    passed || isLive ? 'done' : 'active',
+    passed || bothInView ? 'done' : isLive ? 'active' : 'todo',
+    passed ? 'done' : holding ? 'active' : 'todo',
+  ]
+  const { status, tone } = readiness({ camera, handModel, hand, passed, holding, secondsLeft, shown })
 
   return (
     <div className="setup-page">
@@ -80,113 +89,99 @@ export default function CameraCheckPage({ onDone }) {
         <section className="camera-check-text">
           <div>
             <h1 className="setup-title">Check your camera</h1>
-            <p className="setup-lead">
-              Sema needs to see both of your hands at once. Hold them up together, wrists in view, and keep them
-              there for 3 seconds.
-            </p>
+            <p className="setup-lead">Let's make sure your camera is ready before you start recording.</p>
           </div>
-
-          <div className="camera-check-picker">
-            <label htmlFor="setup-camera">Camera</label>
-            <select
-              id="setup-camera"
-              value={camera.deviceId ?? ''}
-              disabled={camera.cameras.length === 0}
-              onChange={(event) => camera.switchCamera(event.target.value)}
-            >
-              {camera.cameras.length === 0 ? (
-                <option value="">Default webcam</option>
-              ) : (
-                camera.cameras.map((device, index) => (
-                  <option key={device.deviceId} value={device.deviceId}>
-                    {device.label || `Camera ${index + 1}`}
-                  </option>
-                ))
-              )}
-            </select>
-          </div>
+          <ol className="setup-steps">
+            <Step n={1} state={steps[0]} title="Enable your camera">
+              Allow camera access when your browser asks, so Sema can see your hands.
+            </Step>
+            <Step n={2} state={steps[1]} title="Show both hands">
+              Hold both hands up with your wrists in view.
+            </Step>
+            <Step n={3} state={steps[2]} title="Hold still">
+              Keep both hands visible for three seconds.
+            </Step>
+          </ol>
         </section>
 
-        <section className="camera-check-preview" aria-label="Camera preview">
-          <CameraStage canvasRef={canvasRef} className="stage camera-check-stage">
-            {failure ? (
-              <StageProblem
-                title={failure.title}
-                body={failure.body}
-                onRetry={failure.canRetry ? camera.start : undefined}
-              />
-            ) : (
-              <>
-                {/* The short instruction on the video. It's a live region, so
-                    screen readers also hear "Both hands found". */}
-                <p className={`camera-check-hint${passed ? ' done' : ''}`} role="status">
-                  {passed && <span aria-hidden="true">✓</span>}
-                  {hint(passed, secondsLeft)}
-                </p>
-                <ul className="camera-checks" aria-label="Camera checks">
-                  {HANDS.map((side) => (
-                    <Check key={side} {...handCheck(side, shown[side], passed)} />
-                  ))}
-                </ul>
-              </>
-            )}
-          </CameraStage>
-          <p className="camera-check-private">
-            <LockIcon size={14} />
-            Your video stays on this device.
-          </p>
+        <section className="camera-check-preview">
+          {/* Dark in every theme, like every camera frame (.on-dark). */}
+          <div className="camera-panel on-dark" role="group" aria-label="Camera preview">
+            <div className="camera-panel-head">
+              {/* A live region: screen readers hear each new status. */}
+              <span className={`camera-panel-status ${tone}`} role="status">
+                {status}
+              </span>
+              <div className="camera-progress" aria-hidden="true">
+                {(holding || passed) && (
+                  <span
+                    key={passed ? 'passed' : holdStart}
+                    className={passed ? 'full' : 'filling'}
+                    style={{ animationDuration: `${BOTH_HANDS_HOLD_MS}ms` }}
+                  />
+                )}
+              </div>
+            </div>
+            {/* The camera waits for the person: arriving here isn't a choice
+                to turn it on, so the browser only asks after Turn camera on. */}
+            <CameraView
+              canvasRef={canvasRef}
+              hand={hand}
+              className="camera-check-stage"
+              autoStart={false}
+              offNote="Turn it on when you're ready. Sema only looks for your hands."
+            />
+          </div>
         </section>
       </main>
-      <StepNav previous={{ to: PATHS.privacy }} next={{ onClick: onDone, disabled: Boolean(failure) || !passed }} />
+      <StepNav previous={{ to: PATHS.privacy }} next={{ onClick: onDone, disabled: !passed }} />
     </div>
   )
 }
 
-// One check in the strip under the video: ✓ passed (blue), ! needs something
-// (amber), ○ waiting (grey). The mark is decoration; the text says it all.
-const MARKS = { ok: '✓', warn: '!', wait: '○' }
+// One numbered step: ✓ once done; the step to do now stands out; later ones
+// are quiet. The mark is decoration; screen readers get the state as text.
+const STEP_STATE_TEXT = { done: 'done', active: 'now', todo: 'next' }
 
-function Check({ state, text }) {
+function Step({ n, state, title, children }) {
   return (
-    <li className={`camera-check-item ${state}`}>
-      <span aria-hidden="true">{MARKS[state]}</span>
-      {text}
+    <li className={`setup-step-item ${state}`}>
+      <span className="setup-step-mark" aria-hidden="true">
+        {state === 'done' ? '✓' : n}
+      </span>
+      <div className="setup-step-body">
+        <h2>
+          {title}
+          <span className="visually-hidden"> ({STEP_STATE_TEXT[state]})</span>
+        </h2>
+        <p>{children}</p>
+      </div>
     </li>
   )
 }
 
-// One hand's check: once the check has passed, ✓ found; before that, how the
-// hand is now: ✓ in view, ! only part of it, ○ not in view.
-function handCheck(side, seen, passed) {
-  const Hand = capitalize(side)
-  if (passed) return { state: 'ok', text: `${Hand} hand found` }
-  if (seen === 'whole') return { state: 'ok', text: `${Hand} hand in view` }
-  if (seen === 'part') return { state: 'warn', text: `${Hand} hand: show the wrist too` }
-  return { state: 'wait', text: `${Hand} hand` }
+// The panel's status, short, from the camera, hand tracking and what Sema
+// sees, and its tone: 'ok' (accent) while it's going well, 'warn' (amber) on
+// a problem, '' otherwise. The problem panel on the video explains a failure
+// in full.
+function readiness({ camera, handModel, hand, passed, holding, secondsLeft, shown }) {
+  if (camera.error) return { status: 'Camera problem', tone: 'warn' }
+  if (handModel.status === 'error' || hand.error) return { status: 'Tracking problem', tone: 'warn' }
+  if (passed) return { status: 'Camera ready', tone: 'ok' }
+  if (camera.status === 'idle') return { status: 'Camera off', tone: '' }
+  if (camera.status === 'starting') return { status: 'Starting…', tone: '' }
+  if (handModel.status !== 'ready') return { status: 'Getting ready…', tone: '' }
+  if (holding) return { status: `Hold still… ${secondsLeft}`, tone: 'ok' }
+  return { status: handsStatus(shown), tone: '' }
 }
 
-// The line on the video: what to do, the countdown, or that it's done.
-function hint(passed, secondsLeft) {
-  if (passed) return 'Both hands found. You can continue.'
-  if (secondsLeft) return `Keep both hands up… ${secondsLeft}`
-  return 'Hold up both hands, wrists in view'
-}
-
-// What went wrong, as the title and text the error panel shows, or null.
-// Camera problems can be retried; hand-tracking problems can't from here.
-function describeFailure(camera, handModel, detectionError) {
-  if (camera.error) {
-    const known = CAMERA_CHECK_ERRORS[camera.errorKind]
-    return { ...(known ?? { title: CAMERA_CHECK_OTHER_TITLE, body: camera.error }), canRetry: true }
-  }
-  if (handModel.status === 'error') {
-    if (handModel.errorName === 'WebGLUnavailableError') return { ...CAMERA_CHECK_NO_WEBGL, canRetry: false }
-    return { title: CAMERA_CHECK_TRACKING_FAILED_TITLE, body: handModel.error, canRetry: false }
-  }
-  if (detectionError) return { title: CAMERA_CHECK_TRACKING_FAILED_TITLE, body: detectionError, canRetry: false }
-  return null
-}
-
-function capitalize(word) {
-  return word.charAt(0).toUpperCase() + word.slice(1)
+// What to do about the hands, from what Sema sees of each, in as few words
+// as possible: first get both hands in view, then their wrists.
+function handsStatus(shown) {
+  const inView = HANDS.filter((side) => shown[side] !== 'none').length
+  if (inView === 0) return 'Waiting for both hands'
+  if (inView === 1) return 'Show other hand'
+  // Both whole but no hold running only lasts a moment (a hand just left).
+  if (HANDS.every((side) => shown[side] === 'whole')) return 'Hold still'
+  return 'Show wrists'
 }

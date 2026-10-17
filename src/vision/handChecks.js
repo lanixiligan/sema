@@ -53,13 +53,15 @@ export function steadySeen(shown, seen, lastSeenAt, now) {
 
 // The current hold of both hands: `start` is when both were first up and
 // whole together (null while they aren't), `lastAt` the last frame they were.
-// A gap shorter than HAND_HOLD_MS doesn't end the hold.
+// A gap shorter than HAND_HOLD_MS doesn't end the hold; a longer one does,
+// even if no frame came in between (the camera was off), so the 3 seconds
+// always start again.
 export const NO_HOLD = { start: null, lastAt: 0 }
 
 export function updateHold(hold, seen, now) {
-  if (seen.left === 'whole' && seen.right === 'whole') return { start: hold.start ?? now, lastAt: now }
-  if (hold.start !== null && now - hold.lastAt < HAND_HOLD_MS) return hold
-  return NO_HOLD
+  const holding = hold.start !== null && now - hold.lastAt < HAND_HOLD_MS
+  if (seen.left === 'whole' && seen.right === 'whole') return { start: holding ? hold.start : now, lastAt: now }
+  return holding ? hold : NO_HOLD
 }
 
 // Whole seconds left in the hold (3, 2, 1), 0 once it's long enough, or null
