@@ -7,7 +7,7 @@ export const PATHS = {
   about: '/about',
   howSemaWorks: '/how-it-works',
   privacy: '/privacy',
-  signingHand: '/setup/hand',
+  // Setup's one page: it finds the signing hand.
   cameraCheck: '/setup/camera',
   record: '/record',
   learn: '/learn',
@@ -22,12 +22,11 @@ const NEEDS_SETUP = ['record', 'learn', 'practice']
 // send the person somewhere else. `progress` is the saved settings
 // (progressStore): a new visitor goes through setup first, and a returning one
 // skips Welcome. A trailing slash is ignored.
-export function resolveRoute(pathname, { signingHand, setupDone }) {
+export function resolveRoute(pathname, { setupDone }) {
   const path = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname
   const page = Object.keys(PATHS).find((name) => PATHS[name] === path)
   if (!page) return { redirect: PATHS.welcome }
   if (page === 'welcome' && setupDone) return { redirect: PATHS.record }
   if (NEEDS_SETUP.includes(page) && !setupDone) return { redirect: PATHS.welcome }
-  if (page === 'cameraCheck' && !signingHand) return { redirect: PATHS.signingHand }
   return { page }
 }

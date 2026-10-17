@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { clearHand, drawHand } from './drawHand.js'
+import { clearHand, drawHand, drawHands } from './drawHand.js'
 import { isWholeHand } from './handChecks.js'
 import { toPhysicalHand } from './handedness.js'
-import { pickHand } from './pickHand.js'
+import { listHands, pickHand } from './pickHand.js'
 import { getDetectionErrorMessage } from './visionMessages.js'
 
 // How long the hand must be missing before we say "No hand". Without this the
@@ -20,6 +20,10 @@ const NO_STATS = { detectionFps: null, detectionMs: null }
 // wantedHand ('left' or 'right', optional): with two hands in view, that one
 // is used (pickHand.js); it's the only hand drawn, and the other is reported
 // but not drawn. Without it, the first hand found is used and drawn.
+// drawAllHands (optional): draw every hand found, not just the picked one
+// (the camera check, which looks at both hands).
+// The listener gets the picked hand (landmarks, handedness) and, as `hands`,
+// every hand found (pickHand.js's listHands).
 export function useHandDetection({
   videoRef,
   canvasRef,
@@ -28,6 +32,7 @@ export function useHandDetection({
   listenerRef,
   isRunning,
   wantedHand,
+  drawAllHands = false,
 }) {
   const [handLabel, setHandLabel] = useState(null) // null means no hand
   // Every point of the hand, wrist included, inside the frame (handChecks.js).
@@ -98,13 +103,16 @@ export function useHandDetection({
       detections += 1
       detectionMsTotal += detectionMs
 
-      // Up to two hands are found; from here on, only the picked one counts.
+      // Up to two hands are found; from here on, only the picked one counts
+      // (except for drawing, with drawAllHands).
+      const hands = listHands(result)
       const picked = pickHand(result, wantedHandRef.current)
       const landmarks = picked?.landmarks
       measurementsRef?.current?.push({ ms: detectionMs, hand: Boolean(landmarks) })
       listenerRef?.current?.({
         landmarks: landmarks ?? null,
         handedness: picked?.handedness ?? null,
+        hands,
         width: video.videoWidth,
         height: video.videoHeight,
         time: now,
@@ -115,8 +123,13 @@ export function useHandDetection({
         const label = toPhysicalHand(picked.handedness.categoryName)
         // The other hand is cleared straight away: no points on the wrong hand.
         const wanted = wantedHandRef.current
-        if (!wanted || label.toLowerCase() === wanted) drawHand(canvas, landmarks, video.videoWidth, video.videoHeight)
-        else clearHand(canvas)
+        if (drawAllHands) {
+          drawHands(canvas, hands.map((hand) => hand.landmarks), video.videoWidth, video.videoHeight)
+        } else if (!wanted || label.toLowerCase() === wanted) {
+          drawHand(canvas, landmarks, video.videoWidth, video.videoHeight)
+        } else {
+          clearHand(canvas)
+        }
         // State changes only when the result does, so the page doesn't
         // re-render on every frame.
         if (label !== shownLabel) {
@@ -161,7 +174,7 @@ export function useHandDetection({
       setStats(NO_STATS)
       setError(null)
     }
-  }, [videoRef, canvasRef, landmarkerRef, measurementsRef, listenerRef, isRunning])
+  }, [videoRef, canvasRef, landmarkerRef, measurementsRef, listenerRef, isRunning, drawAllHands])
 
   return { handLabel, wholeHand, ...stats, error }
 }

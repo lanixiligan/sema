@@ -12,7 +12,6 @@ import DevPage from './pages/dev/DevPage.jsx'
 import LearnPage from './pages/learn/LearnPage.jsx'
 import HowSemaWorksPage from './pages/onboarding/HowSemaWorksPage.jsx'
 import PrivacyPage from './pages/onboarding/PrivacyPage.jsx'
-import SigningHandPage from './pages/onboarding/SigningHandPage.jsx'
 import WelcomePage from './pages/onboarding/WelcomePage.jsx'
 import PracticePage from './pages/practice/PracticePage.jsx'
 import RecordPage from './pages/record/RecordPage.jsx'
@@ -50,10 +49,12 @@ export default function App() {
     saveProgress(next)
   }
 
-  // The settings change and the navigation happen in the same click, so React
+  // The camera check's Next. Setup doesn't ask for the signing hand, so it
+  // keeps a saved one, or Right (Record's hand toggle switches it). The
+  // settings change and the navigation happen in the same click, so React
   // applies them in one render: the router never sees one without the other.
   function finishSetup() {
-    updateProgress({ setupDone: true })
+    updateProgress({ signingHand: progress.signingHand ?? 'right', setupDone: true })
     navigate(PATHS.record)
   }
 
@@ -71,7 +72,6 @@ export default function App() {
             name={route.page}
             signingHand={progress.signingHand}
             setupDone={progress.setupDone}
-            onChooseHand={(hand) => updateProgress({ signingHand: hand })}
             onFinishSetup={finishSetup}
           />
         )}
@@ -80,20 +80,18 @@ export default function App() {
   )
 }
 
-function Page({ name, signingHand, setupDone, onChooseHand, onFinishSetup }) {
+function Page({ name, signingHand, setupDone, onFinishSetup }) {
   switch (name) {
     case 'welcome':
       return <WelcomePage />
     case 'about':
       return <AboutPage setupDone={setupDone} />
     case 'howSemaWorks':
-      return <HowSemaWorksPage setupDone={setupDone} />
+      return <HowSemaWorksPage />
     case 'privacy':
       return <PrivacyPage setupDone={setupDone} />
-    case 'signingHand':
-      return <SigningHandPage signingHand={signingHand} onChoose={onChooseHand} />
     case 'cameraCheck':
-      return <CameraCheckPage signingHand={signingHand} onSwitchHand={onChooseHand} onDone={onFinishSetup} />
+      return <CameraCheckPage onDone={onFinishSetup} />
     case 'record':
       return <RecordPage signingHand={signingHand} />
     case 'learn':

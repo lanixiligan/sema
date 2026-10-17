@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import Link from '../../app/Link.jsx'
 import { PATHS } from '../../app/router.js'
 import TopBar from '../../app/TopBar.jsx'
+import Logo from '../../components/Logo.jsx'
 
 // Whether Welcome has already played its entrance. A module variable lives
 // as long as the browser tab, so the entrance plays on the first load only:
@@ -25,6 +26,7 @@ export default function WelcomePage() {
     <div className="welcome">
       <TopBar />
       <main className="welcome-hero">
+        <Logo className="welcome-logo" />
         <h1 className={`display welcome-title${rise(1)}`}>Learn the ASL alphabet with your webcam.</h1>
         <p className={`lead welcome-lead${rise(2)}`}>No account. Your video never leaves this device.</p>
         <div className={`welcome-actions${rise(3)}`}>

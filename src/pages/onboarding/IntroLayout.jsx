@@ -1,39 +1,16 @@
-import Link from '../../app/Link.jsx'
 import TopBar from '../../app/TopBar.jsx'
-import { ChevronIcon } from '../../components/icons.jsx'
+import StepNav from './StepNav.jsx'
 
-// The frame the three intro pages share: a dark page, the top bar, the page's
-// own items in the middle (revealed one by one), and Back and Skip intro at
-// the bottom, visible from the start. Back is a link to `backTo`, a button
-// that runs `onBack`, or absent. The middle comes first in the page, so the
-// focus order is Continue, Back, Skip intro.
-export default function IntroLayout({ reveal, backTo, onBack, skipTo, children }) {
+// The frame the three intro pages share: the top bar, the page's own items
+// in the middle (revealed one by one), and Previous and Next along the
+// bottom, there from the start. `previous` and `next` are StepNav's: a link
+// ({ to }) or a button ({ onClick }), or absent.
+export default function IntroLayout({ reveal, previous, next, children }) {
   return (
-    <div className="intro on-dark">
+    <div className="intro">
       <TopBar />
-      <main className={`intro-main ${reveal.containerClass}`}>
-        <div className="intro-stage">{children}</div>
-        <div className="intro-footer">
-          {backTo && (
-            <Link to={backTo} className="text-link text-link-quiet">
-              <ChevronIcon direction="left" />
-              Back
-            </Link>
-          )}
-          {onBack && (
-            <button type="button" className="text-link text-link-quiet" onClick={onBack}>
-              <ChevronIcon direction="left" />
-              Back
-            </button>
-          )}
-          {skipTo && (
-            <Link to={skipTo} className="text-link text-link-quiet intro-skip">
-              Skip intro
-              <ChevronIcon />
-            </Link>
-          )}
-        </div>
-      </main>
+      <main className={`intro-main ${reveal.containerClass}`}>{children}</main>
+      <StepNav previous={previous} next={next} />
     </div>
   )
 }

@@ -41,6 +41,11 @@ The development plan is `docs/project-plan.md`.
   `vitest` (dev only).
 - Serve every asset from the app itself, never from a CDN. Fonts are `.woff2` files in
   `public/fonts/` with their OFL licences, declared with `@font-face` in `styles.css`.
+- Logos are SVGs in `public/logos/`: `sema-mark-*` (the mark alone) and `sema-logo-*`
+  (mark and "sema."). `-light` is for light backgrounds, `-dark` for dark ones. The tab
+  icon is `sema-mark-light.svg`, linked from `index.html`. Pages show the logo with
+  `src/components/Logo.jsx` (top bars, Welcome): both files are in the page and CSS shows
+  the dark one under `[data-theme='dark']` or `.on-dark`.
 - No backend, database or accounts. Everything runs in the browser.
 - Node 20.19+ or 22.12+ (Vite requirement).
 - `vite.config.js` allows `.app.github.dev` hosts so the dev server works in GitHub Codespaces.
@@ -63,7 +68,7 @@ src/
   components/   parts used by more than one page folder (CameraStage, icons)
   pages/
     onboarding/ Welcome; the intro pages About Sema, How Sema works and How Sema
-                handles your data (+ IntroLayout); Signing hand, Camera check (+ SetupBar)
+                handles your data (+ IntroLayout); Camera check; StepNav
     record/     the Record page and its parts
     learn/      the Learn placeholder
     practice/   the Practice placeholder
@@ -90,31 +95,43 @@ src/
 - `vercel.json` rewrites every path to `index.html`; Vercel serves real files first.
 - `/dev` is the Phase 1 tracking page with the benchmark. It's not in the menu.
 - Setup redirects live in `resolveRoute`: a new visitor opening Record, Learn or
-  Practice goes to Welcome; a returning visitor opening `/` goes to Record; the camera
-  check needs a signing hand first.
+  Practice goes to Welcome; a returning visitor opening `/` goes to Record.
 
 ## Settings
 
 - The signing hand and "setup done" are kept by `src/app/progressStore.js`
   (`localStorage` key `sema.progress`, with a version number). Pages never touch
   `localStorage` directly; `App.jsx` holds the settings and passes them down.
-- The theme (Light / Dark / System, default System) is saved in the same store and chosen in
-  the settings menu (`src/app/SettingsMenu.jsx`). `src/app/theme.js` sets `data-theme` on
+- The theme (Light / Dark / System, default System) is saved in the same store and chosen with
+  the icon toggle at the right of every page's top bar (`src/app/ThemeToggle.jsx`, in
+  `TopBar`). The settings menu (`src/app/SettingsMenu.jsx`) now holds only the About Sema
+  and Privacy links. `src/app/theme.js` sets `data-theme` on
   `<html>`; a small script in `index.html` sets it before the first paint. In `styles.css`,
   rules use colour roles (`--bg`, `--text`, `--accent`…), with a light set on `:root` and a
   dark set on `[data-theme='dark']` and `.on-dark`. Palette colours are used directly only
-  where a colour never changes (the camera frame, hand drawings). The About Sema, How Sema
-  works and data pages are `.on-dark`, so they're dark in every theme.
-- The camera check's rules (signing hand found, whole hand with the wrist in view) are
-  in `src/vision/handChecks.js`. Its error titles and texts come from the design and
+  where a colour never changes (the camera frame, hand drawings). Every page follows the
+  theme; `.on-dark` is only for parts that sit on the dark camera frame (the camera menu).
+- The onboarding pages (the three intro pages and the camera check) move on with quiet
+  Previous / Next text from `StepNav.jsx`, in a row along the bottom that is the same on
+  every one of them, so Next never moves and is there from the start. There is no Skip
+  intro. Welcome keeps its Get started button.
+- Setup is one page, the camera check, and it doesn't ask for the signing hand. It draws
+  every hand it finds and passes once both hands are up and whole (wrist in view) at the
+  same time for 3 s (`BOTH_HANDS_HOLD_MS`); a gap over 300 ms restarts the count. With two
+  hands, left and right come from position (the person's right hand is on the un-mirrored
+  frame's left), because MediaPipe's label can flip while a hand turns; one hand alone
+  goes by its label, so one hand can never pass. A line on the video counts down and says
+  when it's done; Next stays closed until then. Finishing setup keeps a saved signing hand
+  or sets Right; the camera controls' hand toggle switches it. The rules (`seeHands`,
+  `steadySeen`, `updateHold`, `holdSecondsLeft`) are in `src/vision/handChecks.js`. Its error titles and texts come from the design and
   live in `cameraMessages.js` and `visionMessages.js`; `useCamera` returns an
   `errorKind` and `useHandLandmarker` an `errorName` so pages can pick them.
 
 ## Camera conventions
 
-- Start the camera automatically when arriving on 2c and on Record's recording step.
+- Start the camera automatically when arriving on the camera check and on Record's recording step.
   Navigating there and the browser's permission prompt are the consent. It stays off
-  on Welcome, 2a, 2b and Record's consent/finished steps, and turns off whenever no
+  on Welcome, the intro pages and Record's consent/finished steps, and turns off whenever no
   camera view is on screen.
 - `CameraProvider` (`src/app/`) does this: it owns the camera and the hand model for
   every page, starts the camera when a `CameraStage` appears, and stops it when the
@@ -153,7 +170,8 @@ src/
   keeps tracking the first hand it finds and never sees the other, so the chosen hand went
   unseen whenever the other came first. `pickHand` (`src/vision/pickHand.js`) keeps one
   hand: the page's `wantedHand` if found, else the first. Only that hand is drawn and
-  passed on. Benchmark numbers from before this change were measured with one hand, so
+  passed on (the camera check passes `drawAllHands` to draw both; its listener also
+  gets every hand as `hands`). Benchmark numbers from before this change were measured with one hand, so
   they aren't comparable; re-run the benchmark before relying on them.
 - Call `detectForVideo` once per new video
   frame (`requestVideoFrameCallback`). Timestamps must strictly increase:

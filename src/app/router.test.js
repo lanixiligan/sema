@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest'
 import { PATHS, resolveRoute } from './router.js'
 
 const newVisitor = { signingHand: null, setupDone: false }
-const choseHand = { signingHand: 'left', setupDone: false }
 const returning = { signingHand: 'right', setupDone: true }
 
 describe('resolveRoute', () => {
@@ -22,8 +21,8 @@ describe('resolveRoute', () => {
     }
   })
 
-  it('lets a new visitor open Welcome, the intro pages, the signing hand and /dev', () => {
-    for (const page of ['welcome', 'about', 'howSemaWorks', 'privacy', 'signingHand', 'dev']) {
+  it('lets a new visitor open Welcome, the intro pages, the camera check and /dev', () => {
+    for (const page of ['welcome', 'about', 'howSemaWorks', 'privacy', 'cameraCheck', 'dev']) {
       expect(resolveRoute(PATHS[page], newVisitor)).toEqual({ page })
     }
   })
@@ -34,9 +33,8 @@ describe('resolveRoute', () => {
     expect(resolveRoute('/privacy', returning)).toEqual({ page: 'privacy' })
   })
 
-  it('asks for the signing hand before the camera check', () => {
-    expect(resolveRoute('/setup/camera', newVisitor)).toEqual({ redirect: '/setup/hand' })
-    expect(resolveRoute('/setup/camera', choseHand)).toEqual({ page: 'cameraCheck' })
+  it('no longer has a signing hand page', () => {
+    expect(resolveRoute('/setup/hand', newVisitor)).toEqual({ redirect: '/' })
   })
 
   it('ignores a trailing slash', () => {

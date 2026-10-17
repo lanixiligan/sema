@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { pickHand } from './pickHand.js'
+import { listHands, pickHand } from './pickHand.js'
 
 // A detectForVideo result with one entry per hand found, in MediaPipe's shape:
 // landmarks[i] is a hand's points, handedness[i] its list of categories.
@@ -26,5 +26,17 @@ describe('pickHand', () => {
 
   it('takes the first hand when no hand is wanted', () => {
     expect(pickHand(result(['Left', 0.2], ['Right', 0.7])).handedness.categoryName).toBe('Left')
+  })
+})
+
+describe('listHands', () => {
+  it('lists every hand found, in order', () => {
+    const hands = listHands(result(['Left', 0.2], ['Right', 0.7]))
+    expect(hands.map((hand) => hand.handedness.categoryName)).toEqual(['Left', 'Right'])
+    expect(hands[1].landmarks[0].x).toBe(0.7)
+  })
+
+  it('is empty when there is no hand', () => {
+    expect(listHands(result())).toEqual([])
   })
 })

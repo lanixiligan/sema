@@ -1,4 +1,3 @@
-import Link from '../../app/Link.jsx'
 import { goBack } from '../../app/navigation.js'
 import { PATHS } from '../../app/router.js'
 import IntroLayout from './IntroLayout.jsx'
@@ -20,20 +19,19 @@ const LINES = [
 ]
 
 // Intro page 3 of 3, How Sema handles your data. It works two ways:
-// - during setup it's the last intro page: Continue goes to the signing hand,
-//   Back to How Sema works;
-// - once setup is done it's a page to read from anywhere: only Back, which
-//   returns to wherever the person came from.
-// The small print comes in with Continue, after the last line.
+// - during setup it's the last intro page: Next goes to the camera check,
+//   Previous to How Sema works;
+// - once setup is done it's a page to read from anywhere: only Previous,
+//   which returns to wherever the person came from.
+// The small print comes in last, after the last line.
 export default function PrivacyPage({ setupDone }) {
   const reveal = useStaggeredReveal(LINES.length + 2)
-  const last = reveal.itemClass(LINES.length + 1)
 
   return (
     <IntroLayout
       reveal={reveal}
-      backTo={setupDone ? undefined : PATHS.howSemaWorks}
-      onBack={setupDone ? () => goBack(PATHS.record) : undefined}
+      previous={setupDone ? { onClick: () => goBack(PATHS.record) } : { to: PATHS.howSemaWorks }}
+      next={setupDone ? undefined : { to: PATHS.cameraCheck }}
     >
       <h1 className={`display intro-title ${reveal.itemClass(0)}`}>Your video stays yours.</h1>
       <div className="intro-lines">
@@ -43,14 +41,9 @@ export default function PrivacyPage({ setupDone }) {
           </p>
         ))}
       </div>
-      <p className={`intro-small ${last}`}>
+      <p className={`intro-small ${reveal.itemClass(LINES.length + 1)}`}>
         Like any website, the hosting service may keep standard technical logs, such as IP addresses.
       </p>
-      {!setupDone && (
-        <Link to={PATHS.signingHand} className={`primary-button intro-continue ${last}`}>
-          Continue
-        </Link>
-      )}
     </IntroLayout>
   )
 }

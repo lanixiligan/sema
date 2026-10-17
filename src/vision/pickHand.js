@@ -7,8 +7,14 @@ import { toPhysicalHand } from './handedness.js'
 // "Left hand seen"), or null when there's no hand.
 // Returns { landmarks, handedness }, handedness being the hand's top category.
 export function pickHand(result, wantedHand) {
-  const hands = result.landmarks.map((landmarks, i) => ({ landmarks, handedness: result.handedness[i][0] }))
+  const hands = listHands(result)
   if (hands.length === 0) return null
   const wanted = wantedHand && hands.find((hand) => toPhysicalHand(hand.handedness.categoryName).toLowerCase() === wantedHand)
   return wanted ?? hands[0]
+}
+
+// Every hand in a detectForVideo result, as { landmarks, handedness } like
+// pickHand's (handedness being the hand's top category). Empty with no hand.
+export function listHands(result) {
+  return result.landmarks.map((landmarks, i) => ({ landmarks, handedness: result.handedness[i][0] }))
 }

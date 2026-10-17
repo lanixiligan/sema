@@ -41,8 +41,8 @@
      the hand drawings, the dark art panels.
    - roles (--bg, --text, --accent, ...): what a colour is for. Everything else
      uses these. :root holds the light set; the dark set below replaces them
-     for the dark theme and inside any .on-dark element (the intro pages,
-     which are dark in every theme). Custom properties are inherited, so
+     for the dark theme and inside any .on-dark element (the camera menu,
+     which sits on the dark camera frame). Custom properties are inherited, so
      everything inside picks up the dark values. */
 :root {
   /* Palette */
@@ -193,7 +193,7 @@ body {
   background: var(--bg);
 }
 
-/* The top bar on every page (TopBar.jsx): thin, the wordmark and a quiet
+/* The top bar on every page (TopBar.jsx): thin, the logo and a quiet
    "Preview" on the left, then the page's own items. */
 .app-bar {
   display: flex;
@@ -214,12 +214,31 @@ body {
   gap: var(--space-2);
 }
 
+/* The logo, a link to Welcome. */
 .wordmark {
-  font-size: 19px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: inherit;
-  text-decoration: none;
+  display: flex;
+  align-items: center;
+}
+
+.wordmark-logo {
+  height: 30px;
+  width: auto;
+}
+
+/* The logo (Logo.jsx) comes in two files; only the one made for the
+   background shows. Dark means the dark theme, or an always-dark page. */
+.logo-dark {
+  display: none;
+}
+
+[data-theme='dark'] .logo-light,
+.on-dark .logo-light {
+  display: none;
+}
+
+[data-theme='dark'] .logo-dark,
+.on-dark .logo-dark {
+  display: block;
 }
 
 .preview-note {
@@ -312,30 +331,9 @@ body {
   box-shadow: var(--shadow-menu);
 }
 
-.settings-theme {
-  margin: 0;
-  padding: 0;
-  border: none;
-}
-
-.settings-theme legend {
-  margin-bottom: var(--space-2);
-  padding: 0;
-  font-size: var(--text-small);
-  font-weight: 700;
-}
-
-.settings-note {
-  margin: 0;
-  font-size: var(--text-caption);
-  color: var(--text-muted);
-}
-
 .settings-links {
   display: flex;
   flex-direction: column;
-  padding-top: var(--space-2);
-  border-top: 1px solid var(--border);
 }
 
 .settings-links a {
@@ -357,24 +355,28 @@ body {
   border-radius: 4px;
 }
 
-/* A segmented control made of real radio buttons. The input covers its
-   option, transparent: it still takes clicks, focus and arrow keys, and the
-   drawn option next to it shows its state. */
-.segmented {
-  display: grid;
-  grid-auto-columns: 1fr;
-  grid-auto-flow: column;
-  gap: var(--space-1);
-  padding: var(--space-1);
+/* The theme toggle (ThemeToggle.jsx): three icons on a track, the chosen
+   one raised. Each radio input covers its icon, transparent: it still takes
+   clicks, focus and arrow keys, and the icon next to it shows its state. */
+.theme-toggle {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.theme-toggle-track {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
   background: var(--segment-track);
   border-radius: var(--radius-control);
 }
 
-.segmented label {
+.theme-toggle label {
   position: relative;
 }
 
-.segmented input {
+.theme-toggle input {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -384,22 +386,26 @@ body {
   cursor: pointer;
 }
 
-.segmented span {
-  display: block;
-  padding: 6px var(--space-2);
-  font-size: var(--text-small);
-  font-weight: 600;
-  text-align: center;
+.theme-toggle-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 24px;
   color: var(--text-muted);
   border-radius: var(--radius-segment);
 }
 
-.segmented input:checked + span {
+.theme-toggle label:hover .theme-toggle-option {
+  color: var(--text);
+}
+
+.theme-toggle input:checked + .theme-toggle-option {
   color: var(--text);
   background: var(--segment-on);
 }
 
-.segmented input:focus-visible + span {
+.theme-toggle input:focus-visible + .theme-toggle-option {
   outline: 3px solid var(--accent);
   outline-offset: 1px;
 }
@@ -498,7 +504,7 @@ body {
 /* The phone notice (PhoneNotice.jsx), designed for a 390px-wide phone. */
 .phone-notice-bar {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: var(--space-2);
 }
 
@@ -1872,8 +1878,6 @@ body {
 
 .primary-button:focus-visible,
 .back-link:focus-visible,
-.hand-choice button:focus-visible,
-.other-hand-note button:focus-visible,
 .camera-check-picker select:focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 2px;
@@ -1883,39 +1887,6 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
-}
-
-.setup-step {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-muted);
-}
-
-.setup-segments {
-  display: grid;
-  grid-template-columns: repeat(3, 32px);
-  gap: 4px;
-}
-
-.setup-segments span {
-  height: 4px;
-  background: var(--fill-off);
-  border-radius: 999px;
-}
-
-.setup-segments span.done {
-  background: var(--accent);
-}
-
-.setup-main {
-  display: flex;
-  flex: 1 1 auto;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 24px 96px;
 }
 
 .setup-section {
@@ -1945,11 +1916,52 @@ body {
   color: var(--text-muted);
 }
 
-.setup-actions {
+/* Previous and Next (StepNav.jsx), on every onboarding page: quiet text at
+   the two ends of the page's bottom row. The row has the same width, gutter
+   and height on every one of these pages, so Next never moves. Next keeps to
+   the right when there's no Previous. */
+.step-nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: var(--space-4) var(--page-gutter) var(--space-6);
+}
+
+.step-nav-link {
+  padding: var(--space-2) 2px;
+  font: inherit;
+  font-size: var(--text-body);
+  font-weight: 600;
+  color: var(--text-muted);
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.step-nav-link:hover {
+  color: var(--text);
+}
+
+.step-nav-next {
+  margin-left: auto;
+}
+
+.step-nav-link:disabled,
+.step-nav-link:disabled:hover {
+  color: var(--text-muted);
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.step-nav-link:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 /* Text for screen readers only: kept in the page, not shown. */
@@ -2006,6 +2018,14 @@ body {
   text-align: center;
 }
 
+/* The logo above the headline. The SVG has its own space around the
+   drawing, so the gap below looks larger than the margin. */
+.welcome-logo {
+  height: 64px;
+  width: auto;
+  margin-bottom: var(--space-6);
+}
+
 /* Smaller and lighter than the intro pages' headlines: it carries the page
    by being the only large thing on it, not by weight. 14em keeps it to two
    lines at every width. */
@@ -2035,26 +2055,19 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
-  color: var(--white);
-  background: var(--deep-cobalt);
 }
 
-/* The page's items in the middle, Back and Skip intro along the bottom. */
+/* The page's items in the middle; Previous and Next along the bottom. */
 .intro-main {
-  display: grid;
-  flex: 1 1 auto;
-  grid-template-rows: 1fr auto;
-  width: 100%;
-  max-width: var(--page-max);
-  margin: 0 auto;
-  padding: var(--space-6) var(--page-gutter) var(--space-4);
-}
-
-.intro-stage {
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: var(--space-6) var(--page-gutter) 0;
   text-align: center;
 }
 
@@ -2091,55 +2104,53 @@ body {
   color: var(--text-muted);
 }
 
-.intro-continue {
-  margin-top: var(--space-6);
+
+/* How Sema works: the headline on one line at the left, then the steps side
+   by side, each under a thin line: its number, its title, its text. */
+.how-it-works {
+  width: 100%;
+  text-align: left;
 }
 
-.intro-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-top: var(--space-4);
+/* Smaller than the other intro headlines, so it fits on one line. */
+.how-title {
+  font-size: clamp(36px, 4.4vw, 56px);
 }
 
-/* Skip intro sits at the right end, whatever is beside it. */
-.intro-skip {
-  margin-left: auto;
-}
-
-/* How Sema works: the steps side by side. */
 .intro-steps {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-6);
-  width: 100%;
-  margin: var(--space-6) 0 0;
+  gap: var(--space-8);
+  margin: var(--space-7) 0 0;
   padding: 0;
   list-style: none;
 }
 
+.intro-steps li {
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-strong);
+}
+
 .intro-steps h2 {
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: var(--space-2);
-  margin: 0 0 var(--space-2);
-  font-size: 22px;
+  margin: 0 0 var(--space-6);
+  font-size: 24px;
   font-weight: 700;
   letter-spacing: -0.01em;
 }
 
 .intro-step-number {
+  display: block;
+  margin-bottom: var(--space-2);
+  font-family: var(--font-mono);
   font-size: var(--text-small);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
+  font-weight: 500;
   color: var(--accent);
 }
 
 .intro-steps p {
   margin: 0;
-  font-size: 19px;
-  line-height: var(--leading-lead);
+  font-size: 17px;
+  line-height: 1.5;
   color: var(--text-muted);
   text-wrap: pretty;
 }
@@ -2178,9 +2189,8 @@ body {
   text-align: left;
 }
 
-/* A shade darker than the page, so the frame reads as a camera view. */
+/* The camera frame's own dark colour (.stage), as on Record, in both themes. */
 .about-preview-frame {
-  background: var(--night);
   border: 1px solid var(--progress-track);
   --stage-radius: 20px;
 }
@@ -2232,90 +2242,6 @@ body {
   }
 }
 
-/* ---------- Signing hand (SigningHandPage.jsx) ---------- */
-
-.hand-choice {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.hand-choice button {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 28px 12px;
-  font: inherit;
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--text);
-  background: var(--surface);
-  border: 1px solid var(--fill-off);
-  border-radius: 16px;
-  cursor: pointer;
-}
-
-/* The chosen hand. The thicker border would make the card jump by a pixel,
-   so the padding shrinks by the same amount. */
-.hand-choice button[aria-pressed='true'] {
-  padding: 27px 11px;
-  background: var(--highlight);
-  border: 2px solid var(--accent);
-}
-
-.hand-choice-icon {
-  display: inline-flex;
-}
-
-.hand-choice-icon.mirrored {
-  transform: scaleX(-1);
-}
-
-/* Two columns, as wide as About Sema's: the text and Back/Continue on the
-   left, the choice on the right. Grid areas name the
-   cells, so the page's order (text, choice, buttons, for Tab) can differ from
-   where things sit. */
-.signing-hand {
-  grid-template-areas:
-    'text side'
-    'actions side';
-  row-gap: var(--space-6);
-  max-width: calc(var(--page-max) - 2 * var(--page-gutter));
-}
-
-.signing-hand-text {
-  grid-area: text;
-  align-self: end;
-  max-width: 440px;
-}
-
-.signing-hand-actions {
-  grid-area: actions;
-  align-self: start;
-  max-width: 440px;
-}
-
-.signing-hand-choice {
-  grid-area: side;
-}
-
-/* Bigger cards here, where they fill a column. */
-.signing-hand .hand-choice button {
-  padding: var(--space-7) var(--space-3);
-}
-
-.signing-hand .hand-choice button[aria-pressed='true'] {
-  padding: calc(var(--space-7) - 1px) calc(var(--space-3) - 1px);
-}
-
-/* Narrow windows: one column, in the page's order. */
-@media (max-width: 899px) {
-  .signing-hand {
-    grid-template-areas: 'text' 'side' 'actions';
-  }
-}
-
 /* ---------- Camera check (CameraCheckPage.jsx) ---------- */
 
 .camera-check {
@@ -2327,7 +2253,7 @@ body {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 32px 48px 56px;
+  padding: 32px 48px 0;
 }
 
 .camera-check-text {
@@ -2336,38 +2262,6 @@ body {
   flex-direction: column;
   gap: 28px;
   max-width: 380px;
-}
-
-.other-hand-note {
-  padding: 14px 16px;
-  font-size: 14px;
-  line-height: 1.55;
-  color: var(--warning-ink);
-  background: var(--warning-bg);
-  border-radius: 12px;
-}
-
-.other-hand-note button {
-  display: block;
-  margin-top: 8px;
-  padding: 0;
-  font: inherit;
-  font-weight: 700;
-  color: var(--warning-ink);
-  text-decoration: underline;
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-.camera-check-tips {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin: 0;
-  padding-left: 20px;
-  font-size: 14.5px;
-  line-height: 1.5;
 }
 
 .camera-check-picker {
@@ -2406,11 +2300,37 @@ body {
 }
 
 /* A fixed-height dark frame. The video keeps its shape inside it (contain),
-   so a whole-hand check never passes on a hand cut off by cropping. */
+   so a whole-hand check never passes on a hand cut off by cropping. 512px
+   leaves room for Previous and Next below it at 1280×720. */
 .camera-check-stage {
   aspect-ratio: auto;
-  height: 560px;
+  height: 512px;
   --stage-radius: 20px;
+}
+
+/* The short instruction at the top of the video, over a soft dark gradient
+   that keeps it readable over a bright camera picture (like Record's take
+   bar). With both hands found, it leads with a sky-blue check. */
+.camera-check-hint {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 0;
+  padding: 18px 20px 32px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--cloud-white);
+  background: linear-gradient(var(--scrim), var(--scrim-clear));
+  pointer-events: none;
+}
+
+.camera-check-hint.done span {
+  color: var(--bright-sky);
 }
 
 .camera-checks {

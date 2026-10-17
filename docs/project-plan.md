@@ -11,7 +11,7 @@ Filipino Sign Language comes only after the American version is finalized.
 - Phase 0, render the webcam: done.
 - Phase 1, hand tracking: done (deployed on Vercel).
 - Phase 2, recognition (8 letters plus "no letter"): now. The recorder (2.1) is built on `phase-2-1-recorder`. Next come the pilot recording, training (2.2), the live classifier (2.3) and finger hints (2.4).
-- Phase 3, the designed pages: now. The shell and setup (3.1) are built early on `phase-2-1-recorder`, and the onboarding pages are being rebuilt. Learn and Practice (3.3–3.4) come next, on `phase-3-preview`.
+- Phase 3, the designed pages: now. The shell and setup (3.1) are built early on `phase-2-1-recorder`, and the onboarding pages were rebuilt (2026-10-18); a final frontend polish comes before merging into `main`. Learn and Practice (3.3–3.4) come next, on `phase-3-preview`.
 - Phase 4, the remaining letters, then finalizing the American version: next.
 
 ## Current page sequence
@@ -21,9 +21,8 @@ The copy for these pages: docs/onboarding-pages.md (to be added).
 - Welcome: `/`
 - About Sema: `/about`
 - How Sema works: `/how-it-works`
-- Signing hand: `/setup/hand` (step 1 of 3)
-- How Sema handles your data: `/privacy` (step 2 of 3)
-- Camera check: `/setup/camera` (step 3 of 3)
+- How Sema handles your data: `/privacy`
+- Camera check: `/setup/camera` (setup's one page: Sema must see both hands)
 - Record: `/record` (returning visitors start here)
 - Learn: `/learn` (a placeholder until 3.3)
 - Practice: `/practice` (a placeholder until 3.4)
@@ -36,7 +35,7 @@ The copy for these pages: docs/onboarding-pages.md (to be added).
 - Browser only: no backend, database or accounts until Phase 5. Recorded hand points stay private in `data/raw/`.
 - Desktop first. Phone layouts aren't a goal yet.
 - React, Vite, plain JavaScript and plain CSS. No new dependencies without asking Lanix. Python runs only offline, to train the classifier.
-- Setup asks which hand the user signs with. Left hands are flipped to look like right hands before classifying.
+- Setup doesn't ask which hand the user signs with (2026-10-18; before, a Signing hand page asked). The camera check makes sure Sema sees both hands whole, together, for 3 seconds; the signing hand starts as Right and is switched with the hand toggle in the camera controls. Left hands are flipped to look like right hands before classifying.
 - Switching Left/Right lives in the camera controls of each camera view (2026-10-16). On Record it picks the hand for the next take; on Learn and Practice it will change the setting.
 - Hosting is Vercel. There is a privacy page but no cookie banner, because there are no analytics or tracking.
 

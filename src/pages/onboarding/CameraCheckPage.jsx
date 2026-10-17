@@ -1,23 +1,28 @@
 import { useEffect, useRef, useState } from 'react'
 import CameraStage from '../../components/CameraStage.jsx'
-import Link from '../../app/Link.jsx'
 import { LockIcon } from '../../components/icons.jsx'
 import StageProblem from '../../components/StageProblem.jsx'
 import { PATHS } from '../../app/router.js'
-import SetupBar from './SetupBar.jsx'
+import TopBar from '../../app/TopBar.jsx'
+import StepNav from './StepNav.jsx'
 import { useSharedCamera } from '../../app/sharedCamera.js'
 import { CAMERA_CHECK_ERRORS, CAMERA_CHECK_OTHER_TITLE } from '../../camera/cameraMessages.js'
-import { checkHand } from '../../vision/handChecks.js'
+import { NO_HOLD, holdSecondsLeft, seeHands, steadySeen, updateHold } from '../../vision/handChecks.js'
 import { useHandDetection } from '../../vision/useHandDetection.js'
 import { CAMERA_CHECK_NO_WEBGL, CAMERA_CHECK_TRACKING_FAILED_TITLE } from '../../vision/visionMessages.js'
 
-const NO_HAND = { hand: 'none', wholeHand: false }
+const NOT_SEEN = { left: 'none', right: 'none' }
+const HANDS = ['left', 'right']
 
-// Setup step 2 of 2: the camera starts by itself (CameraStage), and two checks
-// say whether Sema sees the signing hand and all of it, wrist included.
-// Continue is open unless the camera or hand tracking failed: the checks are
-// guidance, as in the design ("When both checks turn blue, you're ready").
-export default function CameraCheckPage({ signingHand, onSwitchHand, onDone }) {
+// Setup's one page, the camera check. The camera starts by itself
+// (CameraStage), and Sema looks for both hands, drawing the 21 points on each
+// hand it finds. The checklist under the video shows each hand as it is now.
+// The check passes once both hands have been up, whole (wrist included), at
+// the same time for 3 seconds (handChecks.js): needing both at once means one
+// hand that MediaPipe labels wrongly while it turns can't pass for the other.
+// A short line on the video says what to do, counts the 3 seconds down, and
+// says when it's done. Next opens then, stays open, and finishes setup.
+export default function CameraCheckPage({ onDone }) {
   const camera = useSharedCamera()
   const { handModel } = camera
   const isLive = camera.status === 'live'
@@ -30,57 +35,56 @@ export default function CameraCheckPage({ signingHand, onSwitchHand, onDone }) {
     landmarkerRef: handModel.landmarkerRef,
     listenerRef,
     isRunning: isDetecting,
-    // With both hands up, the checks follow the signing hand, and only it gets points.
-    wantedHand: signingHand,
+    drawAllHands: true,
   })
 
-  // The detection loop calls the listener on every frame. State only changes
-  // when the result does, so the page doesn't re-render 30 times a second. A
-  // frame without a hand is ignored here: useHandDetection reports the hand
-  // lost after 300 ms (hand.handLabel becomes null), which keeps the checks
+  // What Sema sees of each hand now (handChecks.js: 'none', 'part', 'whole'),
+  // the seconds left in the 3-second hold (null with no hold), and whether
+  // the check has passed. The detection loop calls the listener on every
+  // frame; state only changes when a value does, so the page doesn't
+  // re-render 30 times a second. steadySeen keeps a hand missed for a frame
   // from flickering.
-  const [checks, setChecks] = useState(NO_HAND)
+  const [seen, setSeen] = useState(NOT_SEEN)
+  const [secondsLeft, setSecondsLeft] = useState(null)
+  const [passed, setPassed] = useState(false)
   useEffect(() => {
+    const lastSeenAt = { left: 0, right: 0 }
+    let shownSeen = NOT_SEEN
+    let hold = NO_HOLD
     listenerRef.current = (detection) => {
-      const next = checkHand(detection, signingHand)
-      if (next.hand === 'none') return
-      setChecks((prev) => (prev.hand === next.hand && prev.wholeHand === next.wholeHand ? prev : next))
+      const now = detection.time
+      const frame = seeHands(detection.hands)
+      for (const side of HANDS) if (frame[side] !== 'none') lastSeenAt[side] = now
+      const steady = steadySeen(shownSeen, frame, lastSeenAt, now)
+      if (steady.left !== shownSeen.left || steady.right !== shownSeen.right) {
+        shownSeen = steady
+        setSeen(steady)
+      }
+      hold = updateHold(hold, frame, now)
+      const left = holdSecondsLeft(hold, now)
+      setSecondsLeft(left)
+      if (left === 0) setPassed(true)
     }
     return () => {
       listenerRef.current = null
     }
-  }, [signingHand])
-  const shown = isDetecting && hand.handLabel ? checks : NO_HAND
+  }, [])
+  const shown = isDetecting ? seen : NOT_SEEN
 
   const failure = describeFailure(camera, handModel, hand.error)
-  const other = signingHand === 'left' ? 'right' : 'left'
 
   return (
     <div className="setup-page">
-      <SetupBar step={2} />
+      <TopBar />
       <main className="camera-check">
         <section className="camera-check-text">
           <div>
             <h1 className="setup-title">Check your camera</h1>
             <p className="setup-lead">
-              Hold up your {signingHand} hand anywhere in view. When both checks turn blue, you're ready.
+              Sema needs to see both of your hands at once. Hold them up together, wrists in view, and keep them
+              there for 3 seconds.
             </p>
           </div>
-
-          {!failure && shown.hand === 'other' && (
-            <div className="other-hand-note" role="status">
-              <strong>That looks like your {other} hand.</strong> You chose to sign with your {signingHand}. Sema
-              only follows the hand you chose, so switch hands or change your choice.
-              <button type="button" onClick={() => onSwitchHand(other)}>
-                Sign with my {other} hand instead
-              </button>
-            </div>
-          )}
-
-          <ul className="camera-check-tips">
-            <li>Keep your whole hand and wrist in view.</li>
-            <li>Light on your hand helps Sema find it.</li>
-          </ul>
 
           <div className="camera-check-picker">
             <label htmlFor="setup-camera">Camera</label>
@@ -101,15 +105,6 @@ export default function CameraCheckPage({ signingHand, onSwitchHand, onDone }) {
               )}
             </select>
           </div>
-
-          <div className="setup-actions">
-            <Link to={PATHS.signingHand} className="back-link">
-              Back
-            </Link>
-            <button type="button" className="primary-button" disabled={Boolean(failure)} onClick={onDone}>
-              Continue
-            </button>
-          </div>
         </section>
 
         <section className="camera-check-preview" aria-label="Camera preview">
@@ -121,10 +116,19 @@ export default function CameraCheckPage({ signingHand, onSwitchHand, onDone }) {
                 onRetry={failure.canRetry ? camera.start : undefined}
               />
             ) : (
-              <ul className="camera-checks" aria-label="Camera checks" aria-live="polite">
-                <Check {...handCheck(shown, signingHand, other)} />
-                <Check {...wholeHandCheck(shown)} />
-              </ul>
+              <>
+                {/* The short instruction on the video. It's a live region, so
+                    screen readers also hear "Both hands found". */}
+                <p className={`camera-check-hint${passed ? ' done' : ''}`} role="status">
+                  {passed && <span aria-hidden="true">✓</span>}
+                  {hint(passed, secondsLeft)}
+                </p>
+                <ul className="camera-checks" aria-label="Camera checks">
+                  {HANDS.map((side) => (
+                    <Check key={side} {...handCheck(side, shown[side], passed)} />
+                  ))}
+                </ul>
+              </>
             )}
           </CameraStage>
           <p className="camera-check-private">
@@ -133,6 +137,7 @@ export default function CameraCheckPage({ signingHand, onSwitchHand, onDone }) {
           </p>
         </section>
       </main>
+      <StepNav previous={{ to: PATHS.privacy }} next={{ onClick: onDone, disabled: Boolean(failure) || !passed }} />
     </div>
   )
 }
@@ -150,17 +155,21 @@ function Check({ state, text }) {
   )
 }
 
-function handCheck(checks, signingHand, other) {
-  const Hand = capitalize(signingHand)
-  if (checks.hand === 'match') return { state: 'ok', text: `${Hand} hand found` }
-  if (checks.hand === 'other') return { state: 'warn', text: `${capitalize(other)} hand seen: waiting for your ${signingHand}` }
-  return { state: 'wait', text: `Waiting for your ${signingHand} hand` }
+// One hand's check: once the check has passed, ✓ found; before that, how the
+// hand is now: ✓ in view, ! only part of it, ○ not in view.
+function handCheck(side, seen, passed) {
+  const Hand = capitalize(side)
+  if (passed) return { state: 'ok', text: `${Hand} hand found` }
+  if (seen === 'whole') return { state: 'ok', text: `${Hand} hand in view` }
+  if (seen === 'part') return { state: 'warn', text: `${Hand} hand: show the wrist too` }
+  return { state: 'wait', text: `${Hand} hand` }
 }
 
-function wholeHandCheck(checks) {
-  if (checks.hand !== 'match') return { state: 'wait', text: 'Show your whole hand, including the wrist' }
-  if (checks.wholeHand) return { state: 'ok', text: 'Whole hand in view' }
-  return { state: 'warn', text: 'Show your whole hand, including the wrist' }
+// The line on the video: what to do, the countdown, or that it's done.
+function hint(passed, secondsLeft) {
+  if (passed) return 'Both hands found. You can continue.'
+  if (secondsLeft) return `Keep both hands up… ${secondsLeft}`
+  return 'Hold up both hands, wrists in view'
 }
 
 // What went wrong, as the title and text the error panel shows, or null.

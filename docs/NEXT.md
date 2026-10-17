@@ -1,5 +1,4 @@
-- Now: rebuild the onboarding pages (not started).
-- Last done: Tasks 8 and 9 (Record page, Learn/Practice placeholders).
-- Next step: build the onboarding pages from docs/onboarding-pages.md (to be added), then review them in Chrome.
-- Waiting on me: add docs/onboarding-pages.md.
-- Do not forget: run Task 10 (the whole-branch check) before the pilot recording; push only phase-2-1-recorder, never main.
+- Now: final frontend polish, then merge phase-2-1-recorder into main.
+- Last done (2026-10-18): logos and tab icon; theme toggle in every top bar; every page follows the theme; How Sema works redesigned; Previous / Next fixed at the bottom of the onboarding pages, no Skip intro; Signing hand page removed; the camera check needs both hands up together for 3 seconds.
+- Waiting on me: should Record's hand toggle also save the signing hand? (Setup now saves Right.) And add docs/onboarding-pages.md, or drop the plan's reference to it.
+- Do not forget: run Task 10 (the whole-branch check) before merging and before the pilot recording. Its checklist needs updating: /setup/hand is gone, and the camera check needs a test video with both hands (hand-only.y4m has one). Push only phase-2-1-recorder, never main.

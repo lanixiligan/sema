@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import Logo from '../components/Logo.jsx'
 
 // Shown instead of the app on small screens (App decides when): Sema's pages
 // are designed for a computer with a webcam. "Continue on this phone" shows
@@ -19,7 +20,7 @@ export default function PhoneNotice({ onContinue }) {
   return (
     <div className="phone-notice">
       <header className="phone-notice-bar">
-        <span className="wordmark">Sema</span>
+        <Logo className="wordmark-logo" />
         <span className="preview-note">Preview</span>
       </header>
 

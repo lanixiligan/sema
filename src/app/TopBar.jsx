@@ -1,21 +1,27 @@
+import Logo from '../components/Logo.jsx'
 import Link from './Link.jsx'
 import { PATHS } from './router.js'
+import ThemeToggle from './ThemeToggle.jsx'
 
-// The thin bar at the top of every page: the wordmark and a quiet "Preview"
+// The thin bar at the top of every page: the logo and a quiet "Preview"
 // (Sema's only preview signal) on the left, then what the page adds: the menu
-// on the main pages (`nav`), and items on the right (`children`). Its colours
-// come from the theme, or from the dark set inside an always-dark page.
+// on the main pages (`nav`), and items on the right (`children`), with the
+// theme toggle always last. Its colours come from the theme, or from the dark
+// set inside an always-dark page.
 export default function TopBar({ nav, children }) {
   return (
     <header className="app-bar">
       <div className="app-bar-left">
         <Link to={PATHS.welcome} className="wordmark">
-          Sema
+          <Logo className="wordmark-logo" />
         </Link>
         <span className="preview-note">Preview</span>
         {nav}
       </div>
-      {children && <div className="app-bar-right">{children}</div>}
+      <div className="app-bar-right">
+        {children}
+        <ThemeToggle />
+      </div>
     </header>
   )
 }
