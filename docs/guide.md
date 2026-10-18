@@ -97,9 +97,10 @@ into `data/raw/` (private, gitignored).
 like `{ "letter": "B", "instructions": ["Flat hand", "…"] }` (short steps, shown as bullets
 under the letter card, describing the right hand);
 pilot-only letters have `"pilotOnly": true`. They're recorded in the pilot but left out
-of the first training set. A letter can also have `"image": "reference/B.svg"`, a reference
-picture inside `public/languages/asl/`; until then the recorder shows a placeholder.
-Left-hand cells show the picture mirrored.
+of the first training set. Each letter has `"image": "images/asl/b.svg"`, its reference
+drawing (a path inside `public/`; the drawings' source is in `docs/ATTRIBUTION.md`). The
+letter card shows it on white. The drawings show a left hand, so the card mirrors them for
+right-hand takes; without one it shows a placeholder.
 
 ## Check your webcam on Fedora
 

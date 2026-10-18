@@ -36,6 +36,7 @@ Recorded hand points stay private in `data/raw/` (gitignored) and are never comm
 - [Benchmarks](docs/benchmarks.md)
 - [Session file format](docs/data-format.md)
 - [Guide](docs/guide.md): deploy, recording sessions, MediaPipe files, webcam, Codespaces
+- [Image attribution](docs/ATTRIBUTION.md): where the ASL hand drawings come from, and their licence
 - Onboarding page spec: docs/onboarding-pages.md (to be added)
 
 ## Tech
@@ -48,8 +49,13 @@ React, Vite, plain JavaScript and CSS, with MediaPipe Hand Landmarker running in
   (`@mediapipe/tasks-vision`, Apache-2.0) finds the hand points.
 - Fonts: Plus Jakarta Sans, JetBrains Mono and a subset of Noto Sans Mono, under the SIL Open
   Font License 1.1. The licences are in `public/fonts/`.
+- ASL hand drawings: at this stage, Sema uses the SVG hand drawings (A to Z) from the
+  Wikimedia Commons category [ASL letters](https://commons.wikimedia.org/wiki/Category:ASL_letters),
+  by [WPClipart](http://www.wpclipart.com/), in the public domain. They're in
+  `public/images/asl/`; [docs/ATTRIBUTION.md](docs/ATTRIBUTION.md) lists each file's source
+  and licence.
 
 ## License
 
-Sema's own code is under the [MIT License](LICENSE). The fonts and MediaPipe keep their own
-licences, listed under Credits.
+Sema's own code is under the [MIT License](LICENSE). The fonts, MediaPipe and the ASL hand
+drawings keep their own licences, listed under Credits.

@@ -5,7 +5,8 @@ import { useEffect, useState } from 'react'
 // pilotOnly are recorded in the pilot but left out of 2.2's first training set.
 // A letter can carry "instructions" (how to form it, described for the right
 // hand: a list of short steps, shown as bullets; one string counts as one
-// step) and an "image": a reference picture's path inside public/languages/asl/.
+// step) and an "image": a reference picture's path inside public/ (the
+// letters' drawings are images/asl/b.svg and so on).
 export function splitLetters(entries) {
   const training = []
   const pilot = []

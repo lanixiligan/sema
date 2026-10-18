@@ -1,18 +1,18 @@
 {
   "language": "asl",
   "letters": [
-    {"letter": "B", "instructions": ["Flat hand", "Four fingers straight up and together", "Thumb folded across the palm"]},
-    {"letter": "C", "instructions": ["Fingers and thumb curved into a C, as if holding a cup", "Palm faces to the side"]},
-    {"letter": "D", "instructions": ["Index finger points up", "The other fingertips touch the thumb tip to form a circle"]},
-    {"letter": "F", "instructions": ["Index fingertip and thumb tip touch to form a circle", "The other three fingers point up, spread"]},
-    {"letter": "I", "instructions": ["Pinky points up", "The other fingers curled", "Thumb across them"]},
-    {"letter": "L", "instructions": ["Index points up", "Thumb points out to the side, forming an L", "The other fingers curled"]},
-    {"letter": "W", "instructions": ["Index, middle and ring fingers up and spread", "Thumb holds the pinky down"]},
-    {"letter": "Y", "instructions": ["Thumb and pinky out", "The other three fingers curled"]},
-    {"letter": "A", "pilotOnly": true},
-    {"letter": "S", "pilotOnly": true},
-    {"letter": "M", "pilotOnly": true},
-    {"letter": "N", "pilotOnly": true},
-    {"letter": "T", "pilotOnly": true}
+    {"letter": "B", "instructions": ["Flat hand", "Four fingers straight up and together", "Thumb folded across the palm"], "image": "images/asl/b.svg"},
+    {"letter": "C", "instructions": ["Fingers and thumb curved into a C, as if holding a cup", "Palm faces to the side"], "image": "images/asl/c.svg"},
+    {"letter": "D", "instructions": ["Index finger points up", "The other fingertips touch the thumb tip to form a circle"], "image": "images/asl/d.svg"},
+    {"letter": "F", "instructions": ["Index fingertip and thumb tip touch to form a circle", "The other three fingers point up, spread"], "image": "images/asl/f.svg"},
+    {"letter": "I", "instructions": ["Pinky points up", "The other fingers curled", "Thumb across them"], "image": "images/asl/i.svg"},
+    {"letter": "L", "instructions": ["Index points up", "Thumb points out to the side, forming an L", "The other fingers curled"], "image": "images/asl/l.svg"},
+    {"letter": "W", "instructions": ["Index, middle and ring fingers up and spread", "Thumb holds the pinky down"], "image": "images/asl/w.svg"},
+    {"letter": "Y", "instructions": ["Thumb and pinky out", "The other three fingers curled"], "image": "images/asl/y.svg"},
+    {"letter": "A", "pilotOnly": true, "image": "images/asl/a.svg"},
+    {"letter": "S", "pilotOnly": true, "image": "images/asl/s.svg"},
+    {"letter": "M", "pilotOnly": true, "image": "images/asl/m.svg"},
+    {"letter": "N", "pilotOnly": true, "image": "images/asl/n.svg"},
+    {"letter": "T", "pilotOnly": true, "image": "images/asl/t.svg"}
   ]
 }

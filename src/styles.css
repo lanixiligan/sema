@@ -1760,6 +1760,14 @@ body {
   transform: scaleX(-1);
 }
 
+/* A drawing (black lines): on white in both themes, with room around it,
+   and a thin edge so it still reads as a frame on the white light-mode card. */
+.reference-image-drawing {
+  padding: 16px;
+  background: var(--white);
+  border: 1px solid var(--border);
+}
+
 /* No photo yet: a dashed frame with the letter, large. (Not named
    .placeholder: that class is the placeholder pages' layout.) */
 .reference-image-empty {
