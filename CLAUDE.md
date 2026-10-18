@@ -67,7 +67,7 @@ src/
                 camera provider, settings store
   components/   parts used by more than one page folder (CameraView and its parts:
                 CameraStage, CameraControls, CameraOff, IdleNotice, StageProblem; icons.jsx
-                and the larger LineIcons.jsx)
+                and the larger LineIcons.jsx; mixLetters for Learn's and Practice's art)
   pages/
     onboarding/ Welcome; the intro pages About Sema, How Sema works and How Sema
                 handles your data (+ IntroLayout); Camera check; StepNav
