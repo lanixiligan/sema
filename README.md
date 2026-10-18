@@ -1,8 +1,39 @@
-# Sema
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="public/logos/sema-logo-dark.svg">
+    <img src="public/logos/sema-logo-light.svg" alt="sema." width="320">
+  </picture>
+</p>
 
-A browser-based ASL fingerspelling coach. It uses your webcam and MediaPipe hand landmarks to teach the ASL alphabet.
+<p align="center">
+  A browser-based ASL fingerspelling coach.<br>
+  It uses your webcam and MediaPipe hand landmarks to teach the ASL alphabet.
+</p>
 
-**Preview: finds your hand; letter checking is being built.**
+<p align="center">
+  <strong>Preview:</strong> finds your hands; letter checking is being built.
+</p>
+
+<p align="center">
+  <a href="#quick-start">Quick start</a> ·
+  <a href="#security">Security</a> ·
+  <a href="#docs">Docs</a> ·
+  <a href="LICENSE">MIT License</a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Made_with-Claude-D97757?logo=claude&logoColor=white" alt="Made with Claude">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-1A75A3" alt="License: MIT"></a>
+  <br>
+  <img src="https://img.shields.io/badge/Node.js-22.12%2B-5FA04E?logo=nodedotjs&logoColor=white" alt="Node.js 22.12+">
+  <img src="https://img.shields.io/badge/React-19.3.1-20232A?logo=react&logoColor=61DAFB" alt="React 19.3.1">
+  <img src="https://img.shields.io/badge/Vite-8.3.4-646CFF?logo=vite&logoColor=white" alt="Vite 8.3.4">
+  <img src="https://img.shields.io/badge/MediaPipe_tasks--vision-1.1.1-0097A7" alt="MediaPipe tasks-vision 1.1.1">
+  <img src="https://img.shields.io/badge/Vitest-5.0.4-6E9F18?logo=vitest&logoColor=white" alt="Vitest 5.0.4">
+  <img src="https://img.shields.io/badge/oxlint-1.88.0-142C48" alt="oxlint 1.88.0">
+</p>
+
+---
 
 ## What it does
 
@@ -10,17 +41,30 @@ A browser-based ASL fingerspelling coach. It uses your webcam and MediaPipe hand
 - Records labelled hand points for training, on the Record page.
 - Learn and Practice are placeholders until the lessons are built.
 
-## Run locally
+## Quick start
+
+> [`main`](https://github.com/lanixiligan/sema/tree/main) is the stable branch and is what's
+> deployed. Each phase is built on its own `phase-*` branch first, then merged into `main`.
+
+```sh
+git clone https://github.com/lanixiligan/sema.git
+cd sema
+npm install
+npm run dev
+```
+
+Then open http://localhost:5173. `npm install` also copies MediaPipe's files into `public/`.
 
 You need Node.js 22.12 or newer (check with `node -v`). Vite alone runs on 20.19+, but the
 tests (Vitest 5) need 22.12+, so 22.12 is the minimum for everything. Sema is developed on
 Node 22.23.1 with npm 10.9.8.
 
+Other commands:
+
 ```sh
-npm install      # also copies MediaPipe's files into public/
-npm run dev      # then open http://localhost:5173
 npm test         # unit tests (Vitest)
 npm run build    # production build into dist/
+npm run lint     # lint (oxlint)
 ```
 
 Use Chrome or Firefox. Hand tracking needs WebGL, which some privacy-focused browsers
@@ -28,7 +72,8 @@ Use Chrome or Firefox. Hand tracking needs WebGL, which some privacy-focused bro
 
 ## Versions
 
-The versions Sema is built and tested with (exact versions are pinned in `package-lock.json`):
+The versions Sema is built and tested with (exact versions are pinned in `package-lock.json`).
+The badges at the top repeat the main ones, so update them together with this table:
 
 | What | Version | Notes |
 | --- | --- | --- |
@@ -46,10 +91,21 @@ The versions Sema is built and tested with (exact versions are pinned in `packag
 The left/right hand rule was checked by hand with tasks-vision 1.1.1; check it again after
 upgrading MediaPipe (see CLAUDE.md).
 
-## Privacy
+## Security
 
 Everything runs in your browser: no backend, no accounts, and video never leaves your machine.
-Recorded hand points stay private in `data/raw/` (gitignored) and are never committed.
+
+- **The camera is yours to switch on.** The browser only asks for the camera after you press
+  Turn camera on (or Start recording, on the Record page). Sema turns it off when you switch to another tab, and after a minute with no
+  hand in view.
+- **Your data stays in this browser.** Sema saves your settings (signing hand, theme, setup
+  done) and a recording in progress in this browser's `localStorage`. Nothing is uploaded.
+- **Delete it any time.** Open the settings menu (the gear in the top bar) and choose
+  **Delete Sema's data**. After you confirm, everything Sema saved is removed and Sema starts
+  over at Welcome. Session files you've downloaded are normal files in your Downloads folder,
+  so delete those yourself.
+- **Recordings are never committed.** Recorded hand points for training stay private in
+  `data/raw/` (gitignored).
 
 ## Docs
 
