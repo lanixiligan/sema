@@ -191,6 +191,10 @@ src/
 - MediaPipe web needs WebGL2 even on the CPU delegate. `loadHandLandmarker` checks
   for WebGL2 first, then tries GPU and falls back to CPU. Each new landmarker runs
   one blank test frame, because some GPU failures only appear on the first frame.
+  When WebGL is drawn in software (SwiftShader, llvmpipe…: hardware acceleration off, no
+  graphics drivers), it goes straight to CPU (`isSoftwareRenderer` in
+  `src/vision/graphics.js`): measured 2026-10-18 in headless Chrome without a graphics
+  card, GPU ran at 2 fps and CPU at 15 fps, and below ~4 fps the camera check can't pass.
 - `runningMode: 'VIDEO'`, `numHands: 2` (since 2026-10-16; before, 1). With one, MediaPipe
   keeps tracking the first hand it finds and never sees the other, so the chosen hand went
   unseen whenever the other came first. `pickHand` (`src/vision/pickHand.js`) keeps one
