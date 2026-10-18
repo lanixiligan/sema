@@ -35,7 +35,7 @@ export default function PhoneNotice({ onContinue }) {
         <div>
           <h1>Sema is made for computers, for now</h1>
           <p>
-            It runs on phones, but the screens are designed for a laptop or desktop with a webcam. For the
+            It runs on phones, but the pages are designed for a laptop or desktop with a webcam. For the
             best experience, open this link on a computer.
           </p>
         </div>
