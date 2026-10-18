@@ -29,10 +29,11 @@ import { takeReadiness } from './takeReadiness.js'
 // "2026-11-02" in the person's own time zone.
 const today = () => new Date().toLocaleDateString('en-CA')
 
-// The Record page, in three steps (Record.dc.html):
+// The Record page, in three steps:
 // - consent: the participant's code and consent answers (or the offer to
 //   continue a session saved in this browser);
-// - recording: the camera, the chosen letter and hand, the letter tiles;
+// - recording: the letter list, the camera with the record button, and the
+//   chosen letter's card, steps and Finish;
 // - finished: after "Finish and download".
 // The camera is on only during recording: that's the only step with a camera
 // view (CameraView), and CameraProvider starts and stops it to match.
@@ -143,7 +144,6 @@ export default function RecordPage({ signingHand }) {
     setFinished(false)
   }
 
-  // Warn before leaving if there are takes that haven't been downloaded.
   // A take can start once the camera and hand model are running. It then
   // counts down and waits for the hand, so it can be started with either hand.
   const canStartTake = isDetecting && cell !== null && !finished && !recording.busy
@@ -177,6 +177,7 @@ export default function RecordPage({ signingHand }) {
     return () => document.removeEventListener('keydown', onKeyDown)
   }, [])
 
+  // Warn before leaving if there are takes that haven't been downloaded.
   const unsaved = needsDownload(session, downloaded)
   useEffect(() => {
     if (!unsaved) return
@@ -226,7 +227,6 @@ export default function RecordPage({ signingHand }) {
         // the camera, and the chosen letter, the record button and Finish at
         // the bottom (grid areas in styles.css).
         <main className="record">
-
           <div className="record-letters">
             {letters.status === 'ready' && (
               <LetterList
@@ -241,7 +241,6 @@ export default function RecordPage({ signingHand }) {
               />
             )}
           </div>
-
           <section className="record-camera" aria-label="Camera">
             {/* The camera check's panel: a header with the take's status, then
                 the video. Dark in every theme, like every camera frame. The

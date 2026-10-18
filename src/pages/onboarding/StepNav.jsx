@@ -5,7 +5,7 @@ import Link from '../../app/Link.jsx'
 // in the same place on every onboarding page and are there from the start, so
 // someone can click Next page after page without moving the mouse. Each one is
 // a link ({ to }) or a button ({ onClick }); leave one out and it isn't shown.
-// Next can be { disabled: true } (the camera check, after a camera error).
+// Next can be { disabled: true } (the camera check, until it passes).
 // It comes after the page's <main>, so Tab reaches the page's own items first.
 export default function StepNav({ previous, next }) {
   return (

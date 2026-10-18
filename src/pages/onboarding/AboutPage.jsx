@@ -34,8 +34,8 @@ const SECTIONS = [
 // Page 2, About Sema: what Sema is. Two columns: the text on the left, and on
 // the right a picture of what it describes (AboutPreview). The headline and
 // the picture, then each section, appear one after another. During setup,
-// Previous returns to Welcome. Once setup is done (opened from the settings
-// menu), Previous returns to wherever the person came from.
+// Previous returns to Welcome. Once setup is done (opened by its address),
+// Previous returns to wherever the person came from.
 export default function AboutPage({ setupDone }) {
   const reveal = useStaggeredReveal(SECTIONS.length + 1)
 

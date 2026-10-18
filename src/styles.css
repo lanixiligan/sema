@@ -415,45 +415,6 @@ body {
   outline-offset: 1px;
 }
 
-/* Secondary actions: plain text with a small drawn chevron. */
-.text-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: var(--space-2) 2px;
-  font: inherit;
-  font-size: var(--text-body);
-  font-weight: 600;
-  color: var(--accent);
-  text-decoration: none;
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-.text-link:hover {
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.text-link svg {
-  flex: 0 0 auto;
-}
-
-.text-link-quiet {
-  color: var(--text-muted);
-}
-
-.text-link:focus-visible {
-  outline: 3px solid var(--accent);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-
-.text-link-quiet:hover {
-  color: var(--text);
-}
-
 /* One motion vocabulary: things arrive by fading in and moving up 12px.
    Reduced motion: no movement, everything shown at once. */
 @keyframes reveal-in {
@@ -1489,10 +1450,6 @@ body {
   color: var(--cloud-white);
 }
 
-.camera-off-body {
-  font-size: var(--text-small);
-}
-
 /* The camera controls at the bottom of the video (CameraControls.jsx): a dark
    pill holding the camera-list arrow and the on/off button. The frame is dark
    in every theme, so these use the palette directly. */
@@ -2190,18 +2147,6 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
-}
-
-.setup-section {
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-  width: 100%;
-  max-width: 440px;
-}
-
-.setup-section-wide {
-  max-width: 480px;
 }
 
 .setup-title {
