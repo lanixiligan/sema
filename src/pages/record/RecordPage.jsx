@@ -12,7 +12,7 @@ import { useHandDetection } from '../../vision/useHandDetection.js'
 import ConsentForm from './ConsentForm.jsx'
 import FinishedStep from './FinishedStep.jsx'
 import LetterList from './LetterList.jsx'
-import TakeOverlay from './TakeOverlay.jsx'
+import TakeOverlay, { TakePanelHead } from './TakeOverlay.jsx'
 import TakePanel from './TakePanel.jsx'
 import TakeResult from './TakeResult.jsx'
 import { takeReadiness } from './takeReadiness.js'
@@ -227,18 +227,38 @@ export default function RecordPage({ signingHand }) {
           </div>
 
           <section className="record-camera" aria-label="Camera">
-            {/* The controls are hidden during a take: switching the camera or
-                the hand would spoil it. */}
-            <CameraView
-              canvasRef={canvasRef}
-              hand={hand}
-              className="record-stage"
-              offNote="Turn on your camera to start recording."
-              controls={!recording.busy && { hand: takeHand, onHandChange: setTakeHand, handLabel: 'Hand for this take' }}
+            {/* The camera check's panel: a header with the take's status, then
+                the video. Dark in every theme, like every camera frame. The
+                controls are hidden during a take: switching the camera or the
+                hand would spoil it. */}
+            <div className="camera-panel on-dark record-panel" role="group" aria-label="Camera preview">
+              <TakePanelHead recording={recording} idleText={readiness.text} />
+              <CameraView
+                canvasRef={canvasRef}
+                hand={hand}
+                className="record-stage"
+                offNote="Turn on your camera to start recording."
+                controls={!recording.busy && { hand: takeHand, onHandChange: setTakeHand, handLabel: 'Hand for this take' }}
+              >
+                <TakeOverlay recording={recording} />
+              </CameraView>
+            </div>
+            {/* Right under the picture: start a take. Space does the same,
+                as a shortcut. While a take runs the button says so and stays
+                disabled, so a second click can't start another. */}
+            <button
+              type="button"
+              className="record-take"
+              disabled={!canStartTake}
+              onClick={startTake}
+              aria-keyshortcuts="Space"
             >
-              <TakeOverlay recording={recording} idleText={readiness.text} />
-            </CameraView>
+              <span className="record-take-dot" aria-hidden="true" />
+              {recordLabel(recording.busy, cell && acceptedCount(session, cell.letter, cell.hand))}
+            </button>
           </section>
+          {/* Under the camera column's bottom line, like Finish's line beside it. */}
+          <p className="record-take-hint">You can also press Space on your keyboard.</p>
 
           <aside className="record-side" aria-label="Current take">
             {!storageOk && (
@@ -260,16 +280,6 @@ export default function RecordPage({ signingHand }) {
                 accepted={acceptedCount(session, cell.letter, cell.hand)}
               />
             )}
-            <button
-              type="button"
-              className="primary-button record-take"
-              disabled={!canStartTake}
-              onClick={startTake}
-              aria-keyshortcuts="Space"
-            >
-              {/* Space is the main way to start a take; a click works too. */}
-              Press <kbd>Space</kbd> to record
-            </button>
             {/* The last take's result and where to hold the hand next. Its two
                 lines are always there, so nothing moves when a result appears. */}
             {cell && (
@@ -291,11 +301,11 @@ export default function RecordPage({ signingHand }) {
               >
                 Finish and download
               </button>
-              <span id="record-finish-help" className="record-finish-help">
-                {session.recordings.length === 0 ? 'Record a take first' : 'Downloads your session file'}
-              </span>
             </div>
           </aside>
+          <span id="record-finish-help" className="record-finish-help">
+            {session.recordings.length === 0 ? 'Record a take first' : 'Downloads your session file'}
+          </span>
         </main>
       )}
     </>
@@ -350,4 +360,12 @@ function SavedSessionOffer({ saved, canStartNew, onContinue, onDownload, onDelet
 // Where to hold the hand for the next take, from how many are kept.
 function positionHint(kept) {
   return kept < TAKES_TARGET ? `Next take: ${POSITION_HINTS[kept]}` : 'All takes done for this hand.'
+}
+
+// The record button's label: the take it will record ("Record take 2 of 3"),
+// or that one is under way.
+function recordLabel(busy, kept) {
+  if (busy) return 'Recording…'
+  if (kept === null) return 'Record take'
+  return kept < TAKES_TARGET ? `Record take ${kept + 1} of ${TAKES_TARGET}` : 'Record another take'
 }

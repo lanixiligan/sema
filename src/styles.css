@@ -1159,10 +1159,28 @@ body {
    the letters, the camera (the widest), and the chosen letter, the record
    button and Finish at the bottom, level with the camera's. */
 .record {
+  --record-zoom: 1;
+}
+
+/* On a big window the whole step is drawn 1.25× larger, as Chrome's zoom
+   would (CSS zoom), since it reads better from where someone signs. Only
+   where it still fits without scrolling; the menu bar isn't zoomed. Lengths
+   inside a zoomed element are zoomed too, viewport units included, so the
+   camera's height formula divides the window's height by the zoom. */
+@media (min-width: 1700px) and (min-height: 930px) {
+  .record {
+    --record-zoom: 1.25;
+    zoom: var(--record-zoom);
+  }
+}
+
+.record {
   display: grid;
-  grid-template-areas: 'letters camera side';
+  grid-template-areas:
+    'letters camera side'
+    '. take-hint finish-help';
   grid-template-columns: 248px minmax(0, 1fr) 320px;
-  gap: 16px 24px;
+  gap: 8px 24px;
   align-items: start;
   width: 100%;
   max-width: 1440px;
@@ -1183,27 +1201,55 @@ body {
   display: flex;
   flex-direction: column;
   margin-top: auto;
-  align-items: stretch;
-  gap: 4px;
+}
+
+/* Under the right column's bottom line, level with the Space hint. */
+.record-finish-help {
+  grid-area: finish-help;
+  font-size: 12.5px;
+  color: var(--text-muted);
   text-align: center;
 }
 
-.record-finish-help {
-  font-size: 12.5px;
-  color: var(--text-muted);
-}
-
 .record-letters {
-  display: flex;
+  position: relative;
   grid-area: letters;
-  flex-direction: column;
   align-self: stretch;
 }
 
-/* The letters panel reaches down as far as the camera, so the three
-   columns end on one line. */
+/* The letters panel fills its column, as tall as the camera beside it, so
+   the three columns end on one line, the record button's bottom edge. It's
+   laid over the column (absolute), so its rows never make the page taller:
+   they grow or shrink to share the height, with the letters bigger. */
 .record-letters .letter-list {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.record-letters .letter-group {
+  display: flex;
+  flex-basis: 0;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.record-letters .letter-list ul {
   flex: 1 1 auto;
+}
+
+.record-letters .letter-item {
+  flex: 1 1 0;
+  min-height: 28px;
+}
+
+.record-letters .letter-row {
+  height: 100%;
+}
+
+.record-letters .letter-row-letter {
+  font-size: 19px;
 }
 
 .record-camera {
@@ -1214,17 +1260,41 @@ body {
   min-width: 0;
 }
 
-/* The camera panel fills the height the window leaves (top bar and
-   padding: 120px), so it stays the same size whichever letter is chosen, and the letters panel stretches to match. If the right
-   column is taller, the panel grows to it, so the three end on one line. The
-   video keeps its 4:3 shape inside (contain): the status bar and the controls
-   sit in the bands above and below it, off the hand, and no part of the hand
-   is ever cut off. */
+/* The camera panel fills the height the window leaves (top bar, padding,
+   the panel's header, and the record button and its hint under it: 268px), so it stays the
+   same size whichever letter is chosen, and the letters panel stretches to
+   match. If the right column is taller, the panel grows to it. The video
+   keeps its 4:3 shape inside (contain): the status bar and the controls sit
+   in the bands above and below it, off the hand, and no part of the hand is
+   ever cut off. */
 .record-stage {
   flex: 1 1 auto;
   aspect-ratio: auto;
-  min-height: clamp(420px, calc(100dvh - 120px), 760px);
-  --stage-radius: 18px;
+  min-height: clamp(320px, calc((100dvh - var(--bar-height)) / var(--record-zoom) - 196px), 630px);
+  --stage-radius: 0px;
+}
+
+/* The camera check's panel around it (header, then video), filling the
+   column's height above the record button. */
+.record-panel {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+/* The status is a little larger than the camera check's: it's read while
+   signing. The frame count keeps to the right, so the status stays centred. */
+.record-panel-head .camera-panel-status {
+  font-size: 16px;
+}
+
+.record-panel-frames {
+  position: absolute;
+  right: var(--space-5);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
 }
 
 .record-side {
@@ -1246,20 +1316,53 @@ body {
 }
 
 .record-take {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   width: 100%;
-  padding: 14px 20px;
-  white-space: nowrap;
+  min-height: 52px;
+  margin-top: 12px;
+  padding: 0 20px;
+  font: inherit;
+  font-size: var(--text-button);
+  font-weight: 700;
+  color: var(--on-accent);
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-control);
+  cursor: pointer;
 }
 
-/* The key inside "Press Space to record": an outlined key cap in the
-   button's own text colour, so it works on the light and dark buttons. */
-.record-take kbd {
-  margin: 0 var(--space-2);
-  padding: 2px 10px;
-  font-family: var(--font-mono);
-  font-size: 14px;
-  border: 1.5px solid color-mix(in srgb, currentColor 45%, transparent);
-  border-radius: 7px;
+.record-take:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.record-take:disabled {
+  color: var(--text-muted);
+  background: var(--fill-off);
+  cursor: not-allowed;
+}
+
+.record-take:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* A small round mark, like a record button's. */
+.record-take-dot {
+  width: 12px;
+  height: 12px;
+  background: currentColor;
+  border-radius: 50%;
+}
+
+.record-take-hint {
+  grid-area: take-hint;
+  margin: 0;
+  font-size: var(--text-caption);
+  color: var(--text-muted);
+  text-align: center;
 }
 
 /* Over the video (TakeOverlay.jsx). */
@@ -1269,8 +1372,8 @@ body {
   pointer-events: none;
 }
 
-/* A soft dark gradient behind the bar keeps its text readable over a bright
-   camera picture. */
+/* A status bar over a picture, with a soft dark gradient behind it so its
+   text stays readable: About's preview uses it. */
 .take-overlay-bar {
   position: absolute;
   top: 0;
@@ -1284,21 +1387,10 @@ body {
   background: linear-gradient(var(--scrim), var(--scrim-clear));
 }
 
-/* Centred and large: read at a glance while signing. */
 .take-overlay-phase {
   font-size: 22px;
   font-weight: 700;
   text-align: center;
-}
-
-/* "18 / 30 frames" keeps to the right, so the phase stays centred. */
-.take-overlay-frames {
-  position: absolute;
-  right: 20px;
-  font-family: var(--font-mono);
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--muted-on-dark);
 }
 
 .take-countdown {
@@ -1311,20 +1403,6 @@ body {
   font-weight: 800;
   color: var(--cloud-white);
   text-shadow: 0 2px 12px var(--scrim);
-}
-
-.take-progress {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  height: 6px;
-  background: var(--progress-track);
-}
-
-.take-progress div {
-  height: 100%;
-  background: var(--bright-sky);
 }
 
 /* In place of the overlay while the camera is turned off (RecordPage.jsx). */

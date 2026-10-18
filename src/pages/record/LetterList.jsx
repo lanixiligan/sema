@@ -38,7 +38,9 @@ export default function LetterList({ training, pilot, session, hand, selected, o
   const group = (id, title, letters, isPilot) => {
     const { kept, needed } = takeProgress(session, letters, [hand])
     return (
-      <section className="letter-group" aria-labelledby={id}>
+      // Each group gets a share of the panel's height for each of its rows,
+      // so every row is the same height (styles.css lets the rows grow).
+      <section className="letter-group" aria-labelledby={id} style={{ flexGrow: letters.length }}>
         <h2 id={id} className="letter-list-heading">
           {title}
           <span className="letter-list-count">
