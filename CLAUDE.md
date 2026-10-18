@@ -47,7 +47,8 @@ The development plan is `docs/project-plan.md`.
   `src/components/Logo.jsx` (top bars, Welcome): both files are in the page and CSS shows
   the dark one under `[data-theme='dark']` or `.on-dark`.
 - No backend, database or accounts. Everything runs in the browser.
-- Node 20.19+ or 22.12+ (Vite requirement).
+- Node 22.12+ (Vite needs 20.19+ or 22.12+, Vitest 5 needs 22.12+). The README lists the
+  versions in use; update its Versions table when a dependency changes.
 - `vite.config.js` allows `.app.github.dev` hosts so the dev server works in GitHub Codespaces.
 - React `StrictMode` stays on. Code must survive its double mount in development.
 
