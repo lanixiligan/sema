@@ -27,10 +27,12 @@ The development plan is `docs/project-plan.md`.
   detection loop, mirrored skeleton overlay, hand found/lost with handedness,
   detection fps and time, GPU/CPU delegate with fallback.
 - **Phase 2 (in progress):** recording, landmark normalization, classifier. The
-  recorder (2.1) is built on the `phase-2-1-recorder` branch.
-- **Phase 3.1 (being done early on `phase-2-1-recorder`):** the app shell, Welcome and
-  setup, because the recorder became the app's main page after setup. Learn and
-  Practice stay placeholders until 3.3–3.4 (`phase-3-preview`).
+  recorder (2.1) is done (2026-10-18; built on `phase-2-1-recorder`, merged into
+  `main`). Next: the pilot recording, then training (2.2).
+- **Phase 3.1 (done early, with the recorder):** the app shell, Welcome and setup,
+  because the recorder became the app's main page after setup. Learn and Practice stay
+  placeholders until 3.3–3.4 (`phase-3-preview`). What the onboarding pages say and do:
+  `docs/onboarding-pages.md` (update it when they change).
 - Later: letter recognition (`src/recognition/`). Don't create that folder early.
 
 ## Stack and constraints
@@ -150,9 +152,10 @@ src/
   every page, starts the camera when a `CameraStage` with `autoStart` (the default)
   appears, and stops it when the last one goes away. After an error or Stop it waits for a click. Switching to another
   tab (the page hidden) stops it too, with `stopReason: 'hidden'`, and it never comes back
-  by itself. No hand in view for a minute stops it as well (`stopReason: 'idle'`), after a
-  notice that counts down from 10 s (`src/camera/idleRules.js`, `src/app/useIdleCameraOff.js`,
-  `IdleNotice`); any hand resets the count.
+  by itself. No hand in view for a minute stops it as well (`stopReason: 'idle'`): after
+  10 s without a hand a notice appears and counts down the rest of the minute
+  (`src/camera/idleRules.js`, `src/app/useIdleCameraOff.js`, `IdleNotice`); any hand resets
+  the count.
 - Every camera page (camera check, Record) uses one component, `CameraView`
   (`src/components/`): the frame, the problem panel (texts `CAMERA_VIEW_*` in
   `cameraMessages.js` and `visionMessages.js`), `CameraOff` with a Turn camera on button,

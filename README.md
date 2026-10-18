@@ -6,7 +6,7 @@ A browser-based ASL fingerspelling coach. It uses your webcam and MediaPipe hand
 
 ## What it does
 
-- Finds one hand in your webcam picture and draws its 21 points.
+- Finds your hands in the webcam picture and draws their 21 points.
 - Records labelled hand points for training, on the Record page.
 - Learn and Practice are placeholders until the lessons are built.
 
@@ -59,7 +59,7 @@ Recorded hand points stay private in `data/raw/` (gitignored) and are never comm
 - [Session file format](docs/data-format.md)
 - [Guide](docs/guide.md): deploy, recording sessions, MediaPipe files, webcam, Codespaces
 - [Image attribution](docs/ATTRIBUTION.md): where the ASL hand drawings come from, and their licence
-- Onboarding page spec: docs/onboarding-pages.md (to be added)
+- [Onboarding pages](docs/onboarding-pages.md): what each page before Record says and does
 
 ## Tech
 

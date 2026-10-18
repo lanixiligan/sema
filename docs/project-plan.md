@@ -10,13 +10,13 @@ Filipino Sign Language comes only after the American version is finalized.
 
 - Phase 0, render the webcam: done.
 - Phase 1, hand tracking: done (deployed on Vercel).
-- Phase 2, recognition (8 letters plus "no letter"): now. The recorder (2.1) is built on `phase-2-1-recorder`. Next come the pilot recording, training (2.2), the live classifier (2.3) and finger hints (2.4).
-- Phase 3, the designed pages: now. The shell and setup (3.1) are built early on `phase-2-1-recorder`, and the onboarding pages were rebuilt (2026-10-18); a final frontend polish comes before merging into `main`. Learn and Practice (3.3–3.4) come next, on `phase-3-preview`.
+- Phase 2, recognition (8 letters plus "no letter"): now. The recorder (2.1) is done (2026-10-18; built on `phase-2-1-recorder`, merged into `main`). Next come the pilot recording, training (2.2), the live classifier (2.3) and finger hints (2.4).
+- Phase 3, the designed pages: now. The shell and setup (3.1) were built early, with the recorder, and are done (2026-10-18). Learn and Practice (3.3–3.4) come next, on `phase-3-preview`.
 - Phase 4, the remaining letters, then finalizing the American version: next.
 
 ## Current page sequence
 
-The copy for these pages: docs/onboarding-pages.md (to be added).
+The copy for these pages: [docs/onboarding-pages.md](onboarding-pages.md).
 
 - Welcome: `/`
 - About Sema: `/about`

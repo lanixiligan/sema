@@ -64,14 +64,19 @@ development. The file format is described in [docs/data-format.md](data-format.m
 
 **In person:** finish setup once on the laptop, then open Record. The participant
 reads "Help improve Sema" and "What gets saved", enters their code (`p03`), ticks the
-training box and clicks **Start recording**. The camera then starts by itself. Pick a
+consent box and clicks **Start recording**. The camera then starts by itself. Pick a
 letter in the column on the left and the hand (Left | Right, on the video; it starts on
-the signing hand), then press **Space** with the other hand: a 3-2-1 countdown, a wait
-until that hand is whole in view, "Hold…" with a frame count, then the result beside the
-video. Aim for 3 kept takes per letter and hand; the letter card says where to hold the
-hand (centre of the frame, a little closer, off to one side). Each kept take has its own
-delete button. At the end, click **Finish and download** (above the video); the last page names the file and offers **Start a new
-session** for the next person.
+the signing hand), then press **Space** with the other hand, or click **Record take**
+under the video: a 3-2-1 countdown, a wait until that hand is whole in view, "Hold…"
+with a frame count, then the result under the letter's steps. Aim for 3 kept takes per
+letter and hand, holding the hand somewhere a little different each time (centre of the
+frame, closer, off to one side). Hover a kept take's circle in the letter list to delete
+it. At the end, click **Finish and download** (at the bottom of the right column); the
+last page names the file and offers **Start a new session** for the next person.
+
+**On a computer Sema hasn't been used on,** open `/dev` first, click **Start camera** and
+check the Detection fps with a hand in view: 15 or more is plenty. Much lower means hand
+tracking is too slow there, and takes won't be kept.
 
 **Remotely:** send the participant the `/record` link. They do the same on their own
 computer and send you the downloaded file.
