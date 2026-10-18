@@ -4,7 +4,15 @@ import { useSharedCamera } from '../../app/sharedCamera.js'
 import CameraView from '../../components/CameraView.jsx'
 import { useLetters } from '../../recorder/letters.js'
 import { acceptedCount, addTake, deleteTake, needsDownload, newSession } from '../../recorder/sessionFile.js'
-import { clearSession, downloadSession, loadSession, rememberSessionId, saveSession } from '../../recorder/sessionStore.js'
+import {
+  clearSession,
+  downloadSession,
+  loadSession,
+  rememberDownload,
+  rememberSessionId,
+  saveSession,
+  wasDownloaded,
+} from '../../recorder/sessionStore.js'
 import { TAKES_TARGET } from '../../recorder/takeRules.js'
 import { useRecording } from '../../recorder/useRecording.js'
 import { browserName } from '../../vision/browserName.js'
@@ -29,11 +37,14 @@ const today = () => new Date().toLocaleDateString('en-CA')
 // The camera is on only during recording: that's the only step with a camera
 // view (CameraView), and CameraProvider starts and stops it to match.
 export default function RecordPage({ signingHand }) {
-  const [saved, setSaved] = useState(loadSession) // offered back when the page opens
+  // A session saved in this browser is offered back when the page opens; if
+  // it was downloaded as it is (even before a reload), it counts as downloaded.
+  const [opening] = useState(loadSavedSession)
+  const [saved, setSaved] = useState(opening.saved)
   const [session, setSession] = useState(null)
   const [finished, setFinished] = useState(false)
   const [storageOk, setStorageOk] = useState(true)
-  const [downloaded, setDownloaded] = useState(null) // the session object last downloaded
+  const [downloaded, setDownloaded] = useState(opening.downloaded) // the session object last downloaded
   const letters = useLetters()
 
   const camera = useSharedCamera()
@@ -96,13 +107,17 @@ export default function RecordPage({ signingHand }) {
     updateSession(newSession({ person, session: sessionId, consent, date: today(), browser: browserName() }))
   }
 
+  // Carries on with the saved session, on the hand of its last take.
   function continueSaved() {
+    const last = saved.recordings.at(-1)
+    if (last) setTakeHand(last.hand)
     setSession(saved)
     setSaved(null)
   }
 
   function download(current) {
     downloadSession(current)
+    rememberDownload(current)
     setDownloaded(current)
   }
 
@@ -355,6 +370,13 @@ function SavedSessionOffer({ saved, canStartNew, onContinue, onDownload, onDelet
       </section>
     </main>
   )
+}
+
+// The saved session, and the same object as `downloaded` if it was downloaded
+// unchanged, so needsDownload (which compares objects) sees no new takes.
+function loadSavedSession() {
+  const saved = loadSession()
+  return { saved, downloaded: saved && wasDownloaded(saved) ? saved : null }
 }
 
 // The record button's label: the take it will record ("Record take 2 of 3"),
