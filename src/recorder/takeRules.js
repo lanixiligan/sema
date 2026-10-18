@@ -19,9 +19,6 @@ export const MIN_MATCHED_SHARE = 0.8
 export const MIN_MATCHED = Math.round(MIN_MATCHED_SHARE * EXPECTED_SAMPLES)
 
 export const TAKES_TARGET = 3
-// Where to hold the hand for takes 1, 2 and 3 (wording from the Record design).
-export const POSITION_HINTS = ['centre of the frame', 'a little closer', 'off to one side']
-export const LIFEPRINT_URL = 'https://www.lifeprint.com/asl101/fingerspelling/'
 
 // Times are milliseconds since the take started. readyAt is when, after the
 // countdown, the take's hand was first whole in view: null until then.

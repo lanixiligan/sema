@@ -94,7 +94,8 @@ prints the accepted and rejected takes per letter and hand. If it says OK, move 
 into `data/raw/` (private, gitignored).
 
 **The letter list** is `public/languages/asl/letters.json`. Training letters are entries
-like `{ "letter": "B", "instructions": "…" }` (instructions describe the right hand);
+like `{ "letter": "B", "instructions": ["Flat hand", "…"] }` (short steps, shown as bullets
+under the letter card, describing the right hand);
 pilot-only letters have `"pilotOnly": true`. They're recorded in the pilot but left out
 of the first training set. A letter can also have `"image": "reference/B.svg"`, a reference
 picture inside `public/languages/asl/`; until then the recorder shows a placeholder.

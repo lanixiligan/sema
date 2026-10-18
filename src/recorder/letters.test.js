@@ -17,14 +17,15 @@ describe('splitLetters', () => {
     })
   })
 
-  it('collects the instructions for each letter', () => {
+  it('collects the instruction steps for each letter', () => {
     expect(
       splitLetters([
-        { letter: 'B', instructions: 'Flat hand, four fingers straight up' },
+        { letter: 'B', instructions: ['Flat hand', 'Four fingers straight up', 42, ' '] },
         { letter: 'A', pilotOnly: true },
         { letter: 'C', instructions: 42 },
+        { letter: 'D', instructions: 'Index finger points up' },
       ]).instructions,
-    ).toEqual({ B: 'Flat hand, four fingers straight up' })
+    ).toEqual({ B: ['Flat hand', 'Four fingers straight up'], D: ['Index finger points up'] })
   })
 })
 

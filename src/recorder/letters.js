@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react'
 // which letters are recorded doesn't need a code change. Entries marked
 // pilotOnly are recorded in the pilot but left out of 2.2's first training set.
 // A letter can carry "instructions" (how to form it, described for the right
-// hand) and an "image": a reference picture's path inside public/languages/asl/.
+// hand: a list of short steps, shown as bullets; one string counts as one
+// step) and an "image": a reference picture's path inside public/languages/asl/.
 export function splitLetters(entries) {
   const training = []
   const pilot = []
@@ -15,7 +16,8 @@ export function splitLetters(entries) {
     if (typeof letter !== 'string' || !/^[A-Z]$/.test(letter)) continue
     if (training.includes(letter) || pilot.includes(letter)) continue
     ;(entry.pilotOnly ? pilot : training).push(letter)
-    if (typeof entry.instructions === 'string') instructions[letter] = entry.instructions
+    const steps = [entry.instructions].flat().filter((step) => typeof step === 'string' && step.trim() !== '')
+    if (steps.length > 0) instructions[letter] = steps
     if (typeof entry.image === 'string') images[letter] = entry.image
   }
   return { training, pilot, instructions, images }

@@ -1,18 +1,18 @@
 {
   "language": "asl",
   "letters": [
-    { "letter": "B", "instructions": "Flat hand, four fingers straight up and together, thumb folded across the palm" },
-    { "letter": "C", "instructions": "Fingers and thumb curved into a C, as if holding a cup; palm faces to the side" },
-    { "letter": "D", "instructions": "Index finger points up; the other fingertips touch the thumb tip to form a circle" },
-    { "letter": "F", "instructions": "Index fingertip and thumb tip touch to form a circle; the other three fingers point up, spread" },
-    { "letter": "I", "instructions": "Pinky points up; the other fingers curled, thumb across them" },
-    { "letter": "L", "instructions": "Index points up, thumb points out to the side, forming an L; the other fingers curled" },
-    { "letter": "W", "instructions": "Index, middle and ring fingers up and spread; thumb holds the pinky down" },
-    { "letter": "Y", "instructions": "Thumb and pinky out; the other three fingers curled" },
-    { "letter": "A", "pilotOnly": true },
-    { "letter": "S", "pilotOnly": true },
-    { "letter": "M", "pilotOnly": true },
-    { "letter": "N", "pilotOnly": true },
-    { "letter": "T", "pilotOnly": true }
+    {"letter": "B", "instructions": ["Flat hand", "Four fingers straight up and together", "Thumb folded across the palm"]},
+    {"letter": "C", "instructions": ["Fingers and thumb curved into a C, as if holding a cup", "Palm faces to the side"]},
+    {"letter": "D", "instructions": ["Index finger points up", "The other fingertips touch the thumb tip to form a circle"]},
+    {"letter": "F", "instructions": ["Index fingertip and thumb tip touch to form a circle", "The other three fingers point up, spread"]},
+    {"letter": "I", "instructions": ["Pinky points up", "The other fingers curled", "Thumb across them"]},
+    {"letter": "L", "instructions": ["Index points up", "Thumb points out to the side, forming an L", "The other fingers curled"]},
+    {"letter": "W", "instructions": ["Index, middle and ring fingers up and spread", "Thumb holds the pinky down"]},
+    {"letter": "Y", "instructions": ["Thumb and pinky out", "The other three fingers curled"]},
+    {"letter": "A", "pilotOnly": true},
+    {"letter": "S", "pilotOnly": true},
+    {"letter": "M", "pilotOnly": true},
+    {"letter": "N", "pilotOnly": true},
+    {"letter": "T", "pilotOnly": true}
   ]
 }

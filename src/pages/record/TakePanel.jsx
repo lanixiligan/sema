@@ -1,9 +1,8 @@
-import { LIFEPRINT_URL, TAKES_TARGET } from '../../recorder/takeRules.js'
+import { TAKES_TARGET } from '../../recorder/takeRules.js'
 
-// The letter card: its name and kept takes on top, the reference picture,
-// how to form the letter (in a soft box), and a link to check the shape on
-// Lifeprint.
-export default function TakePanel({ cell, isPilot, instructions, image, accepted }) {
+// The letter card: its name and kept takes on top, then the reference
+// picture. How to form the letter is under the card (LetterGuide).
+export default function TakePanel({ cell, isPilot, image, accepted }) {
   const isNone = cell.letter === 'none'
   const title = isNone ? 'No letter' : `Letter ${cell.letter}${isPilot ? ' (pilot)' : ''}`
 
@@ -16,22 +15,6 @@ export default function TakePanel({ cell, isPilot, instructions, image, accepted
         </span>
       </div>
       <ReferenceImage letter={cell.letter} image={image} mirrored={cell.hand === 'left'} />
-      {(isNone || instructions) && (
-        <div className="letter-card-how">
-          <p className="letter-card-instructions">
-            {isNone
-              ? "Relax your hand, half-form a shape, or move it around. Anything that isn't a letter."
-              : `${instructions}.`}
-          </p>
-          {/* The instructions describe the right hand. */}
-          {!isNone && cell.hand === 'left' && <p className="letter-card-note">Mirror it for your left hand.</p>}
-        </div>
-      )}
-      {!isNone && (
-        <a className="letter-card-link" href={LIFEPRINT_URL} target="_blank" rel="noreferrer">
-          See it on Lifeprint ↗
-        </a>
-      )}
     </section>
   )
 }

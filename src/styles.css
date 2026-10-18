@@ -1149,8 +1149,7 @@ body {
 .danger-link:focus-visible,
 .outline-button:focus-visible,
 .letter-row:focus-visible,
-.take-mark.kept:focus-visible,
-.letter-card-link:focus-visible {
+.take-mark.kept:focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 2px;
 }
@@ -1736,23 +1735,7 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* How to form it, in a soft box under the picture. */
-.letter-card-how {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 10px 14px;
-  background: var(--surface-soft);
-  border-radius: 10px;
-}
-
-.letter-card-how p {
-  margin: 0;
-}
-
-/* Room for three lines (the longest instructions), so the column keeps its
-   height from letter to letter. */
-.letter-card-how .letter-card-instructions {
+.letter-card-instructions {
   min-height: calc(3 * 1.5em);
 }
 
@@ -1813,37 +1796,41 @@ body {
   line-height: 1.5;
 }
 
-.letter-card-note {
-  font-size: 13px;
+/* How to form the chosen letter (LetterGuide.jsx): a short bullet list
+   under the letter card. */
+.letter-guide {
+  padding: 4px 4px 0;
+}
+
+.letter-guide ul {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding-left: 20px;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.letter-guide li::marker {
+  color: var(--accent);
+}
+
+.letter-guide-note {
+  margin: 10px 0 0;
+  font-size: var(--text-caption);
   color: var(--text-muted);
 }
 
-.letter-card-link {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--accent);
-  text-decoration: none;
-}
-
-.letter-card-link:hover {
-  text-decoration: underline;
-}
-
-/* Under the record button: the last take's result (a line kept free for
-   it) and where to hold the hand next. */
+/* The last take's result, under the guide: one short line, in a space kept
+   for it even without one. */
 .record-feedback {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
+  min-height: 20px;
   text-align: center;
 }
 
-.record-feedback-result {
-  min-height: 20px;
-}
-
 .record-feedback .take-result {
+  justify-content: center;
   padding: 0;
   background: none;
 }
@@ -1858,11 +1845,6 @@ body {
   margin-top: 7px;
 }
 
-.record-feedback-hint {
-  margin: 0;
-  font-size: var(--text-caption);
-  color: var(--text-muted);
-}
 
 /* The last take's result (TakeResult.jsx). */
 .take-result {

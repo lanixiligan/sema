@@ -5,13 +5,14 @@ import CameraView from '../../components/CameraView.jsx'
 import { useLetters } from '../../recorder/letters.js'
 import { acceptedCount, addTake, deleteTake, needsDownload, newSession } from '../../recorder/sessionFile.js'
 import { clearSession, downloadSession, loadSession, rememberSessionId, saveSession } from '../../recorder/sessionStore.js'
-import { POSITION_HINTS, TAKES_TARGET } from '../../recorder/takeRules.js'
+import { TAKES_TARGET } from '../../recorder/takeRules.js'
 import { useRecording } from '../../recorder/useRecording.js'
 import { browserName } from '../../vision/browserName.js'
 import { useHandDetection } from '../../vision/useHandDetection.js'
 import ConsentForm from './ConsentForm.jsx'
 import FinishedStep from './FinishedStep.jsx'
 import LetterList from './LetterList.jsx'
+import LetterGuide from './LetterGuide.jsx'
 import TakeOverlay, { TakePanelHead } from './TakeOverlay.jsx'
 import TakePanel from './TakePanel.jsx'
 import TakeResult from './TakeResult.jsx'
@@ -275,19 +276,18 @@ export default function RecordPage({ signingHand }) {
               <TakePanel
                 cell={cell}
                 isPilot={letters.pilot.includes(cell.letter)}
-                instructions={letters.instructions[cell.letter]}
                 image={letters.images[cell.letter]}
                 accepted={acceptedCount(session, cell.letter, cell.hand)}
               />
             )}
-            {/* The last take's result and where to hold the hand next. Its two
-                lines are always there, so nothing moves when a result appears. */}
+            {cell && (
+              <LetterGuide letter={cell.letter} steps={letters.instructions[cell.letter]} hand={cell.hand} />
+            )}
+            {/* The last take's result, in a line that's always there, so
+                nothing moves when it appears. */}
             {cell && (
               <div className="record-feedback">
-                <div className="record-feedback-result">
-                  <TakeResult recording={recording} cell={cell} />
-                </div>
-                <p className="record-feedback-hint">{positionHint(acceptedCount(session, cell.letter, cell.hand))}</p>
+                <TakeResult recording={recording} cell={cell} />
               </div>
             )}
             {/* Last, at the bottom of the column: done with the session. */}
@@ -355,11 +355,6 @@ function SavedSessionOffer({ saved, canStartNew, onContinue, onDownload, onDelet
       </section>
     </main>
   )
-}
-
-// Where to hold the hand for the next take, from how many are kept.
-function positionHint(kept) {
-  return kept < TAKES_TARGET ? `Next take: ${POSITION_HINTS[kept]}` : 'All takes done for this hand.'
 }
 
 // The record button's label: the take it will record ("Record take 2 of 3"),
