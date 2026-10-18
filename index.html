@@ -3,8 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="/logos/sema-mark-light.svg" />
     <title>Sema</title>
+    <!-- The theme, set before the page first paints so a dark theme never
+         flashes white. A plain script in <head> runs before anything is drawn;
+         the app's own code loads later. Same rule as src/app/theme.js: the
+         saved choice (Light or Dark) wins, otherwise the system's. -->
+    <script>
+      ;(function () {
+        var choice = 'system'
+        try {
+          choice = JSON.parse(localStorage.getItem('sema.progress')).theme || 'system'
+        } catch (error) {}
+        var dark = choice === 'dark' || (choice !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches)
+        var theme = dark ? 'dark' : 'light'
+        document.documentElement.dataset.theme = theme
+        document.documentElement.style.colorScheme = theme
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

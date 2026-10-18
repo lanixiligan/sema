@@ -1,213 +1,83 @@
 # Sema
 
-A browser-based ASL fingerspelling coach. It will use your webcam and hand landmarks
-to teach the ASL alphabet. Everything runs in your browser: no backend, no accounts,
-and video never leaves your machine.
+A browser-based ASL fingerspelling coach. It uses your webcam and MediaPipe hand landmarks to teach the ASL alphabet.
 
-**Status: Phase 1 complete, deployed on Vercel.** The page shows your webcam (mirrored), tracks one hand with
-[MediaPipe Hand Landmarker](https://developers.google.com/edge/mediapipe/solutions/vision/hand_landmarker)
-and draws its 21 landmarks on top. It shows whether a hand is found and which one,
-the camera and detection frame rates, and the average detection time. Letter
-recognition comes in later phases.
+**Preview: finds your hand; letter checking is being built.**
 
-Live site: the link will be added here soon.
+## What it does
 
-Development plan: [docs/project-plan.md](docs/project-plan.md)
+- Finds your hands in the webcam picture and draws their 21 points.
+- Records labelled hand points for training, on the Record page.
+- Learn and Practice are placeholders until the lessons are built.
 
-Mirroring: only the display is mirrored; MediaPipe gets the camera's frames
-un-mirrored, so its Left/Right label already names the hand the user raised (right
-hand → "Right") and is used unchanged (checked by hand in Chrome, 2026-10-15).
+## Run locally
 
-## Run it
-
-You need Node.js 20.19+ or 22.12+ (check with `node -v`).
+You need Node.js 22.12 or newer (check with `node -v`). Vite alone runs on 20.19+, but the
+tests (Vitest 5) need 22.12+, so 22.12 is the minimum for everything. Sema is developed on
+Node 22.23.1 with npm 10.9.8.
 
 ```sh
-npm install
-npm run dev
+npm install      # also copies MediaPipe's files into public/
+npm run dev      # then open http://localhost:5173
+npm test         # unit tests (Vitest)
+npm run build    # production build into dist/
 ```
 
-Open http://localhost:5173 and click **Start camera**. The browser will ask for
-camera permission. The hand model loads the first time the camera starts.
+Use Chrome or Firefox. Hand tracking needs WebGL, which some privacy-focused browsers
+(such as LibreWolf) don't give to pages.
 
-Use Chrome/Chromium or Firefox. Hand tracking needs WebGL, which some
-privacy-focused browsers (such as LibreWolf) don't give to pages; the app says so
-if that happens.
+## Versions
 
-Other scripts: `npm run build` (production build into `dist/`), `npm run preview`
-(serve that build), `npm run lint`.
+The versions Sema is built and tested with (exact versions are pinned in `package-lock.json`):
 
-## MediaPipe files
+| What | Version | Notes |
+| --- | --- | --- |
+| Node.js | 22.12+ (developed on 22.23.1) | Vite needs 20.19+ or 22.12+; Vitest needs 22.12+ |
+| npm | 10.9.8 | Comes with Node |
+| Vite | 8.3.4 | Dev server and build |
+| @vitejs/plugin-react | 6.1.2 | |
+| React and React DOM | 19.3.1 | |
+| @mediapipe/tasks-vision | 1.1.1 | Its wasm files are copied from this package on install, so they always match |
+| Hand Landmarker model | float16, version 1 | `public/models/hand_landmarker.task`, 7,819,105 bytes |
+| Vitest | 5.0.4 | Unit tests |
+| oxlint | 1.88.0 | Lint |
+| Browser | Chrome (current) | Needs WebGL2 for hand tracking |
 
-MediaPipe runs as WebAssembly. The app serves its files itself instead of loading
-them from a CDN:
+The left/right hand rule was checked by hand with tasks-vision 1.1.1; check it again after
+upgrading MediaPipe (see CLAUDE.md).
 
-- **WebAssembly** (`public/mediapipe/wasm/`, not in git): copied from
-  `node_modules/@mediapipe/tasks-vision/wasm` by `npm run copy-mediapipe`, which
-  also runs automatically after every `npm install`. These files must come from the
-  same release as the installed `@mediapipe/tasks-vision` package, because the
-  JavaScript and the WebAssembly call each other by internal names. Run the script
-  again by hand if the folder is missing or after upgrading the package:
+## Privacy
 
-  ```sh
-  npm run copy-mediapipe
-  ```
+Everything runs in your browser: no backend, no accounts, and video never leaves your machine.
+Recorded hand points stay private in `data/raw/` (gitignored) and are never committed.
 
-- **Model** (`public/models/hand_landmarker.task`, in git): 7,819,105 bytes (7.5 MiB),
-  float16 version 1 from
-  `https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task`
-  (the same file as `latest` on 2026-10-15), sha256
-  `fbc2a30080c3c557093b5ddfc334698132eb341044ccee322ccf8bcf3607cde1`.
+## Docs
 
-## Performance
+- [Development plan](docs/project-plan.md)
+- [What's next](docs/NEXT.md)
+- [Benchmarks](docs/benchmarks.md)
+- [Session file format](docs/data-format.md)
+- [Guide](docs/guide.md): deploy, recording sessions, MediaPipe files, webcam, Codespaces
+- [Image attribution](docs/ATTRIBUTION.md): where the ASL hand drawings come from, and their licence
+- [Onboarding pages](docs/onboarding-pages.md): what each page before Record says and does
 
-Measured on 2026-10-15: Fedora KDE Plasma (Wayland), Ryzen 5 3600, GTX 1660 Super
-(NVIDIA proprietary driver), 8 GB RAM.
+## Tech
 
-Camera at 640 × 480. Measured with the built-in benchmark:
+React, Vite, plain JavaScript and CSS, with MediaPipe Hand Landmarker running in the browser. Hosted on Vercel.
 
-1. Start the camera and open **Developer settings** under the video.
-2. Pick the delegate and wait until **Runs on** shows it.
-3. Hold one hand in view, keep the tab in front and DevTools closed, and click
-   **Run benchmark**. It waits 2 seconds to warm up, then measures every frame
-   for 10 seconds.
-4. Click **Copy row** and paste it over the matching row below.
+## Credits
 
-A run doesn't count (no row is offered) if your hand was found in fewer than 90%
-of frames, because detection does different work with and without a hand in view,
-or if the tab was hidden, the camera stopped or the model reloaded during the run. Run each
-combination twice; if the two medians differ by more than about 10%, close other
-apps and run it again.
+- [MediaPipe Hand Landmarker](https://developers.google.com/edge/mediapipe/solutions/vision/hand_landmarker)
+  (`@mediapipe/tasks-vision`, Apache-2.0) finds the hand points.
+- Fonts: Plus Jakarta Sans, JetBrains Mono and a subset of Noto Sans Mono, under the SIL Open
+  Font License 1.1. The licences are in `public/fonts/`.
+- ASL hand drawings: at this stage, Sema uses the SVG hand drawings (A to Z) from the
+  Wikimedia Commons category [ASL letters](https://commons.wikimedia.org/wiki/Category:ASL_letters),
+  by [WPClipart](http://www.wpclipart.com/), in the public domain. They're in
+  `public/images/asl/`; [docs/ATTRIBUTION.md](docs/ATTRIBUTION.md) lists each file's source
+  and licence.
 
-Detection times were steady across three runs: about 12 ms on GPU in both
-browsers, and about 27 ms (Chrome) and 30–32 ms (Firefox) on CPU. GPU is the
-default and has plenty of headroom in both browsers; on CPU, Chrome just keeps up
-with 30 fps. Firefox's camera frame rate varied between sittings (30 fps, then
-about 20 fps even on GPU), most likely because of the webcam's auto-exposure (see
-below the table), not because of the browser or the delegate.
+## License
 
-| Browser | Delegate | Run | Camera fps | Detection fps | Detection median (ms) | Detection p95 (ms) | Detection mean (ms) |
-| ------- | -------- | --- | ---------- | ------------- | --------------------- | ------------------ | ------------------- |
-| Chrome 155 | GPU | 1 | 30.0 | 30.0 | 11.6 | 13.3 | 11.6 |
-| Chrome 155 | GPU | 2 | 30.0 | 30.0 | 11.8 | 12.8 | 11.8 |
-| Chrome 155 | GPU | 3 | 30.0 | 30.0 | 11.7 | 12.9 | 11.7 |
-| Chrome 155 | CPU | 1 | 30.0 | 29.8 | 27.1 | 35.0 | 28.3 |
-| Chrome 155 | CPU | 2 | 30.0 | 30.0 | 26.9 | 28.6 | 27.2 |
-| Chrome 155 | CPU | 3 | 30.0 | 30.0 | 27.0 | 28.2 | 27.2 |
-| Firefox 157 | GPU | 1 | 30.0 | 30.0 | 10.0 | 13.0 | 10.4 |
-| Firefox 157 | GPU | 2 | 19.6 | 19.6 | 10.0 | 16.0 | 10.6 |
-| Firefox 157 | GPU | 3 | 19.5 | 19.5 | 9.0 | 12.0 | 9.2 |
-| Firefox 157 | CPU | 1 | 22.7 | 22.5 | 32.0 | 37.0 | 32.9 |
-| Firefox 157 | CPU | 2 | 19.6 | 19.6 | 30.0 | 32.0 | 29.7 |
-| Firefox 157 | CPU | 3 | 19.6 | 19.6 | 30.0 | 31.1 | 29.9 |
-
-Run 1 was measured in one sitting and runs 2–3 in a later one, all with the A4tech
-FHD webcam. The webcam was in aperture-priority auto-exposure with
-`exposure_dynamic_framerate` on, which lets it drop below 30 fps in dim light. For
-steadier camera numbers, lock the frame rate before benchmarking (find your camera
-with `v4l2-ctl --list-devices`, then run
-`v4l2-ctl -d /dev/videoN -c exposure_dynamic_framerate=0`, and set it back to `1`
-afterwards).
-
-- **Camera fps** counts the frames the browser showed in the window
-  (`presentedFrames`), so it stays accurate when detection is slow.
-- **Detection fps** is detections per second over the same window.
-- **Median** is the typical detection time, **p95** the time 95% of frames beat
-  (it shows slow spikes), **mean** the average. Firefox rounds its clock more
-  coarsely than Chrome; the benchmark shows the step, and when it's coarse the
-  mean is the more precise number.
-
-Detection runs at most once per camera frame, so detection fps can't be higher
-than camera fps. It runs on the page's main thread, so it drops below camera fps
-when one detection takes longer than one frame (33 ms at 30 fps).
-
-## Deploy (Vercel)
-
-Sema is a static site, deployed on Vercel from the GitHub repository. The Vite
-preset works as is: Vercel runs `npm install` (whose `postinstall` copies the
-MediaPipe WebAssembly into `public/`), then `npm run build`, and serves `dist/`
-over HTTPS, which the camera requires. No base path is needed. Every push to
-`main` deploys again.
-
-## Recorded data
-
-Landmark recordings collected for training go in `data/raw/`, which is gitignored: they
-stay private and are backed up by Lanix, never committed to this public repository.
-Participants choose separately whether their recordings may be used to train Sema
-(required) and published in a public dataset (optional), and can ask Lanix to delete
-their recordings at any time. What is public: the code, evaluation results, confusion
-matrices and trained classifier weights.
-
-## Console messages you can ignore
-
-MediaPipe prints its own logs to the console. These are normal:
-
-- `INFO: Created TensorFlow Lite XNNPACK delegate for CPU.` shows in red, but it is
-  information, not an error (MediaPipe prints its logs as errors). It appears when
-  the model starts on the CPU.
-- Yellow warnings such as `Using NORM_RECT without IMAGE_DIMENSIONS…`,
-  `Feedback manager requires a model with a single signature…` and
-  `OpenGL error checking is disabled`.
-
-## Check your webcam on Fedora
-
-If the browser can't find your camera, check that Linux can see it first:
-
-```sh
-sudo dnf install v4l-utils
-v4l2-ctl --list-devices
-```
-
-Each camera is listed with one or more `/dev/videoN` entries. It's normal for one
-camera to have two (one for video, one for metadata). If your camera isn't listed,
-the problem is the cable, USB port or driver, not the browser.
-
-To see which resolutions and frame rates a camera supports:
-
-```sh
-v4l2-ctl -d /dev/video0 --list-formats-ext
-```
-
-## GitHub Codespaces
-
-`vite.config.js` allows `*.app.github.dev` hosts, so the dev server works in a
-codespace:
-
-1. Run `npm install` and `npm run dev` in the codespace terminal.
-2. Open the forwarded port 5173 from the **Ports** tab. The URL looks like
-   `https://<name>-5173.app.github.dev`.
-
-The camera you see is the one on the computer running your browser. The codespace
-only serves the page and has no camera of its own. The forwarded URL is HTTPS, which
-browsers require before they allow camera access.
-
-## Project structure
-
-```
-public/
-  models/hand_landmarker.task   the hand model (in git)
-  mediapipe/wasm/               MediaPipe WebAssembly (copied on npm install)
-scripts/
-  copy-mediapipe.js             copies the WebAssembly files into public/
-src/
-  camera/
-    useCamera.js                start/stop/switch the webcam, camera list, errors
-    useVideoStats.js            real resolution and camera frames per second
-    cameraMessages.js           plain-language camera error messages
-  vision/
-    loadHandLandmarker.js       loads the model; GPU first, CPU fallback
-    useHandLandmarker.js        creates, recreates and closes the landmarker
-    useHandDetection.js         per-frame detection loop and readouts
-    useBenchmark.js             runs the performance benchmark
-    benchmarkStats.js           median, percentiles and the README table row
-    BenchmarkPanel.jsx          the benchmark in Developer settings
-    drawHand.js                 draws the skeleton on the canvas
-    handedness.js               MediaPipe's Left/Right label -> the hand raised
-    visionMessages.js           plain-language hand-tracking messages
-  App.jsx                       the page
-  main.jsx                      entry point
-  styles.css                    all styles and color variables
-docs/
-  project-plan.md               the development plan and its status
-CLAUDE.md                       project notes and conventions for Claude Code
-```
+Sema's own code is under the [MIT License](LICENSE). The fonts, MediaPipe and the ASL hand
+drawings keep their own licences, listed under Credits.

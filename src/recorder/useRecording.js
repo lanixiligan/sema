@@ -1,0 +1,146 @@
+import { useEffect, useRef, useState } from 'react'
+import { fpsBetween, nextFrameCount } from '../camera/frameCounter.js'
+import {
+  COUNTDOWN_MS,
+  captureProgress,
+  SETTLE_MS,
+  frameFromDetection,
+  judgeTake,
+  sampleSlot,
+  takePhase,
+  tallyTake,
+} from './takeRules.js'
+
+const BUSY = ['countdown', 'waiting', 'settling', 'capturing', 'saving']
+
+// One take at a time: countdown, a wait until the take's hand is whole in
+// view (isHandReady), a short settle, capture, then the result is handed to
+// onTakeDone. Frames arrive through listenerRef from the detection loop; a
+// timer drives the phases and checks the take is still valid.
+export function useRecording({ videoRef, listenerRef, isDetecting, isHandReady, onTakeDone }) {
+  const [state, setState] = useState({ phase: 'idle' })
+  const takeRef = useRef(null)
+  // Refs so the timer always sees the latest values without restarting.
+  const isDetectingRef = useRef(isDetecting)
+  const isHandReadyRef = useRef(isHandReady)
+  const onTakeDoneRef = useRef(onTakeDone)
+
+  useEffect(() => {
+    isDetectingRef.current = isDetecting
+  }, [isDetecting])
+
+  useEffect(() => {
+    isHandReadyRef.current = isHandReady
+  }, [isHandReady])
+
+  useEffect(() => {
+    onTakeDoneRef.current = onTakeDone
+  })
+
+  // If the page goes away mid-take, stop the timer and the listener.
+  useEffect(() => () => takeRef.current?.stop(), [])
+
+  function start(letter, hand) {
+    if (takeRef.current) return
+    const video = videoRef.current
+    const startAt = performance.now()
+    // readyAt (ms since start) and captureAt (a performance.now() time) are
+    // set when the hand is first ready after the countdown.
+    const take = {
+      frames: [],
+      lastSlot: -1,
+      readyAt: null,
+      captureAt: null,
+      fpsStart: null,
+      fpsRequested: false,
+      hidden: false,
+      stop: null,
+    }
+    let timer = null
+
+    function onDetection(detection) {
+      if (take.captureAt === null) return // not capturing yet
+      const t = detection.time - take.captureAt
+      const slot = sampleSlot(t, take.lastSlot)
+      if (slot === null) return
+      take.lastSlot = slot
+      take.frames.push(frameFromDetection(detection, Math.round(t)))
+    }
+
+    function onVisibilityChange() {
+      if (document.hidden) take.hidden = true
+    }
+
+    take.stop = () => {
+      clearInterval(timer)
+      document.removeEventListener('visibilitychange', onVisibilityChange)
+      if (listenerRef.current === onDetection) listenerRef.current = null
+      if (takeRef.current === take) takeRef.current = null
+    }
+
+    function discard(message) {
+      take.stop()
+      setState({ phase: 'discarded', letter, hand, message })
+    }
+
+    async function finish() {
+      take.stop()
+      setState({ phase: 'saving', letter, hand })
+      const fpsEnd = await nextFrameCount(video)
+      const counts = tallyTake(take.frames, hand)
+      const result = {
+        letter,
+        hand,
+        counts,
+        ...judgeTake(counts),
+        cameraFps: fpsBetween(take.fpsStart, fpsEnd),
+        frames: take.frames,
+      }
+      onTakeDoneRef.current(result)
+      setState({ phase: 'review', letter, hand, result })
+    }
+
+    function tick() {
+      if (take.hidden) return discard('Cancelled: the tab was hidden.')
+      if (!isDetectingRef.current) return discard('Cancelled: the camera stopped.')
+      const elapsed = performance.now() - startAt
+      if (take.readyAt === null && elapsed >= COUNTDOWN_MS && isHandReadyRef.current) {
+        take.readyAt = elapsed
+        take.captureAt = startAt + elapsed + SETTLE_MS
+      }
+      const phase = takePhase(elapsed, take.readyAt)
+      if (phase === 'timedOut') {
+        return discard(`Cancelled: no ${hand} hand in view.`)
+      }
+      if (phase === 'capturing' && !take.fpsRequested) {
+        take.fpsRequested = true
+        nextFrameCount(video).then((count) => {
+          take.fpsStart = count
+        })
+      }
+      if (phase === 'done') return finish()
+      setState({
+        phase,
+        letter,
+        hand,
+        secondsLeft: Math.ceil((COUNTDOWN_MS - elapsed) / 1000),
+        // For "18 / 30 frames" and the bar under the video while capturing.
+        kept: take.frames.filter((f) => f.hasHand).length,
+        progress: captureProgress(elapsed, take.readyAt),
+      })
+    }
+
+    takeRef.current = take
+    listenerRef.current = onDetection
+    document.addEventListener('visibilitychange', onVisibilityChange)
+    timer = setInterval(tick, 100)
+    tick()
+  }
+
+  // Clears a finished take's result, e.g. after Undo removed that take.
+  function dismiss() {
+    if (!takeRef.current) setState({ phase: 'idle' })
+  }
+
+  return { ...state, busy: BUSY.includes(state.phase), start, dismiss }
+}

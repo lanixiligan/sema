@@ -1,167 +1,117 @@
-import { useRef, useState } from 'react'
-import { useCamera } from './camera/useCamera.js'
-import { useVideoStats } from './camera/useVideoStats.js'
-import BenchmarkPanel from './vision/BenchmarkPanel.jsx'
-import { useHandDetection } from './vision/useHandDetection.js'
-import { useHandLandmarker } from './vision/useHandLandmarker.js'
-import { LOADING_HAND_MODEL } from './vision/visionMessages.js'
+import { useEffect, useState } from 'react'
+import CameraProvider from './app/CameraProvider.jsx'
+import PhoneNotice from './app/PhoneNotice.jsx'
+import { navigate, usePathname } from './app/navigation.js'
+import { NEW_VISITOR, clearSavedData, loadProgress, saveProgress } from './app/progressStore.js'
+import { PATHS, resolveRoute } from './app/router.js'
+import { applyTheme, followTheme, systemThemeQuery } from './app/theme.js'
+import { SettingsContext } from './app/settings.js'
+import AboutPage from './pages/onboarding/AboutPage.jsx'
+import CameraCheckPage from './pages/onboarding/CameraCheckPage.jsx'
+import DevPage from './pages/dev/DevPage.jsx'
+import LearnPage from './pages/learn/LearnPage.jsx'
+import HowSemaWorksPage from './pages/onboarding/HowSemaWorksPage.jsx'
+import PrivacyPage from './pages/onboarding/PrivacyPage.jsx'
+import WelcomePage from './pages/onboarding/WelcomePage.jsx'
+import PracticePage from './pages/practice/PracticePage.jsx'
+import RecordPage from './pages/record/RecordPage.jsx'
 
+// Displays narrower than this get the phone notice (from the design).
+const SMALL_SCREEN = '(max-width: 899px)'
+
+// The app shell: reads the address, picks the page, and wraps every page in
+// the shared camera. Changing pages never reloads the browser tab.
 export default function App() {
-  const { videoRef, status, error, cameras, deviceId, start, stop, switchCamera } =
-    useCamera()
-  const isLive = status === 'live'
-  const stats = useVideoStats(videoRef, isLive)
+  const pathname = usePathname()
+  // The saved settings (signing hand, setup done). They decide where a visitor
+  // may go: setup first for a new one, straight to Record for a returning one.
+  const [progress, setProgress] = useState(loadProgress)
+  const route = resolveRoute(pathname, progress)
+  // Checked once, when the page opens: a phone doesn't change size, and a
+  // computer whose window is made narrow later shouldn't lose its page.
+  const [showPhoneNotice, setShowPhoneNotice] = useState(() => window.matchMedia(SMALL_SCREEN).matches)
 
-  const canvasRef = useRef(null)
-  const [preferredDelegate, setPreferredDelegate] = useState('GPU')
-  const handModel = useHandLandmarker(isLive, preferredDelegate)
-  const isDetecting = isLive && handModel.status === 'ready'
-  const measurementsRef = useRef(null) // filled only while a benchmark runs
-  const hand = useHandDetection({
-    videoRef,
-    canvasRef,
-    landmarkerRef: handModel.landmarkerRef,
-    measurementsRef,
-    isRunning: isDetecting,
-  })
+  // An address the visitor can't open (or that has no page of its own) is
+  // replaced rather than added to the history, so Back doesn't land on it again.
+  useEffect(() => {
+    if (route.redirect) navigate(route.redirect, { replace: true })
+  }, [route.redirect])
+
+  // Shows the chosen theme, and with System keeps following the system's
+  // setting while the app is open. Runs again when the choice changes.
+  useEffect(() => followTheme(progress.theme, systemThemeQuery(), applyTheme), [progress.theme])
+
+  // Settings changes are saved straight away. If the browser refuses, the app
+  // carries on; the settings just won't survive a reload.
+  function updateProgress(changes) {
+    const next = { ...progress, ...changes }
+    setProgress(next)
+    saveProgress(next)
+  }
+
+  // The camera check's Next. Setup doesn't ask for the signing hand, so it
+  // keeps a saved one, or Right (Record's hand toggle switches it). The
+  // settings change and the navigation happen in the same click, so React
+  // applies them in one render: the router never sees one without the other.
+  function finishSetup() {
+    updateProgress({ signingHand: progress.signingHand ?? 'right', setupDone: true })
+    navigate(PATHS.record)
+  }
+
+  // The settings menu's Delete Sema's data (after the person confirmed):
+  // everything saved in this browser goes, and Sema starts over as for a new
+  // visitor, on Welcome. It doesn't reload the tab: going to Welcome closes
+  // Record (its unsaved session in memory with it) and the camera, and the
+  // settings in memory go back to a new visitor's in the same render.
+  // Nothing is saved again until the person changes a setting.
+  function deleteData() {
+    const cleared = clearSavedData()
+    setProgress(NEW_VISITOR)
+    navigate(PATHS.welcome)
+    return cleared
+  }
+
+  // The notice replaces the app rather than covering it, so nothing behind it
+  // (such as the camera) starts.
+  if (showPhoneNotice) return <PhoneNotice onContinue={() => setShowPhoneNotice(false)} />
+
+  const settings = { theme: progress.theme, setTheme: (theme) => updateProgress({ theme }), deleteData }
 
   return (
-    <>
-      <header className="top-bar">Sema</header>
-
-      <main className="page">
-        <div className="stage">
-          {/* The video and the hand overlay share one CSS rule (.video,
-              .overlay in styles.css) that mirrors them with scaleX(-1), so it
-              feels like looking in a mirror. Only the display is flipped: the
-              frames, and the landmarks MediaPipe finds in them, are not. The
-              overlay is drawn in un-mirrored video coordinates and flipped by
-              the same CSS, which keeps the skeleton on the hand.
-              Both elements are always rendered so their refs are ready. */}
-          <video
-            ref={videoRef}
-            className="video"
-            autoPlay
-            playsInline
-            muted
+    <SettingsContext value={settings}>
+      <CameraProvider>
+        {route.page && (
+          <Page
+            name={route.page}
+            signingHand={progress.signingHand}
+            setupDone={progress.setupDone}
+            onFinishSetup={finishSetup}
           />
-          <canvas ref={canvasRef} className="overlay" />
-          {isLive ? (
-            <span className="mirror-label">Mirrored</span>
-          ) : (
-            <p className="stage-message">
-              {status === 'starting' ? 'Waiting for the camera…' : 'Camera is off'}
-            </p>
-          )}
-        </div>
-
-        <div className="controls">
-          {status === 'idle' ? (
-            <button type="button" className="button" onClick={start}>
-              Start camera
-            </button>
-          ) : (
-            <button type="button" className="button" onClick={stop}>
-              {status === 'starting' ? 'Cancel' : 'Stop camera'}
-            </button>
-          )}
-
-          {isLive && cameras.length > 0 && (
-            <label className="camera-picker">
-              Camera
-              <select
-                name="camera"
-                value={deviceId ?? ''}
-                onChange={(event) => switchCamera(event.target.value)}
-              >
-                {cameras.map((device, index) => (
-                  <option key={device.deviceId} value={device.deviceId}>
-                    {device.label || `Camera ${index + 1}`}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-        </div>
-
-        {error && (
-          <p className="error" role="alert">
-            {error}
-          </p>
         )}
-        {isLive && (handModel.error || hand.error) && (
-          <p className="error" role="alert">
-            {handModel.error || hand.error}
-          </p>
-        )}
-
-        {isLive && (
-          <>
-            <dl className="readouts">
-              <Readout label="Hand">{describeHand(handModel.status, hand.handLabel)}</Readout>
-              <Readout label="Resolution">
-                {stats.width ? `${stats.width} × ${stats.height}` : '—'}
-              </Readout>
-              <Readout label="Runs on">
-                {handModel.status === 'ready'
-                  ? describeDelegate(handModel.delegate, handModel.gpuFailed)
-                  : '—'}
-              </Readout>
-              <Readout label={stats.fpsIsMeasured ? 'Camera' : 'Camera (setting)'}>
-                {formatFps(stats.fps)}
-              </Readout>
-              <Readout label="Detection">{formatFps(hand.detectionFps)}</Readout>
-              <Readout label="Detection time">
-                {hand.detectionMs === null ? '—' : `${hand.detectionMs.toFixed(1)} ms`}
-              </Readout>
-            </dl>
-
-            <details className="dev-settings">
-              <summary>Developer settings</summary>
-              <label>
-                Hand model runs on{' '}
-                <select
-                  name="delegate"
-                  value={preferredDelegate}
-                  onChange={(event) => setPreferredDelegate(event.target.value)}
-                >
-                  <option value="GPU">GPU (falls back to CPU)</option>
-                  <option value="CPU">CPU</option>
-                </select>
-              </label>
-              <BenchmarkPanel
-                videoRef={videoRef}
-                measurementsRef={measurementsRef}
-                canRun={isDetecting}
-                delegate={handModel.delegate}
-              />
-            </details>
-          </>
-        )}
-      </main>
-    </>
+      </CameraProvider>
+    </SettingsContext>
   )
 }
 
-function Readout({ label, children }) {
-  return (
-    <div>
-      <dt>{label}</dt>
-      <dd>{children}</dd>
-    </div>
-  )
-}
-
-function describeHand(modelStatus, handLabel) {
-  if (modelStatus === 'loading' || modelStatus === 'idle') return LOADING_HAND_MODEL
-  if (modelStatus === 'error') return 'Off'
-  return handLabel ? `Hand found (${handLabel})` : 'No hand'
-}
-
-function describeDelegate(delegate, gpuFailed) {
-  return gpuFailed ? `${delegate} (GPU unavailable)` : delegate
-}
-
-function formatFps(fps) {
-  return fps ? `${Math.round(fps)} fps` : '—'
+function Page({ name, signingHand, setupDone, onFinishSetup }) {
+  switch (name) {
+    case 'welcome':
+      return <WelcomePage />
+    case 'about':
+      return <AboutPage setupDone={setupDone} />
+    case 'howSemaWorks':
+      return <HowSemaWorksPage />
+    case 'privacy':
+      return <PrivacyPage setupDone={setupDone} />
+    case 'cameraCheck':
+      return <CameraCheckPage onDone={onFinishSetup} />
+    case 'record':
+      return <RecordPage signingHand={signingHand} />
+    case 'learn':
+      return <LearnPage />
+    case 'practice':
+      return <PracticePage />
+    case 'dev':
+      return <DevPage />
+  }
 }

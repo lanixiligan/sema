@@ -1,4 +1,5 @@
 import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision'
+import { isSoftwareRenderer } from './graphics.js'
 
 // Both are served by our own app from public/. BASE_URL keeps the paths right
 // if the app is ever hosted in a subfolder (it's "/" by default).
@@ -48,7 +49,7 @@ async function createHandLandmarker(delegate) {
   const landmarker = await HandLandmarker.createFromOptions(wasmFiles, {
     baseOptions: { modelAssetBuffer: modelBytes, delegate },
     runningMode: 'VIDEO', // frames of one continuous video, so it can track
-    numHands: 1,
+    numHands: 2, // so the wanted hand is found even when the other came first (pickHand.js)
   })
   try {
     runTestFrame(landmarker)
@@ -75,22 +76,35 @@ function runTestFrame(landmarker) {
 // CPU, so without it hand tracking can't work at all. Some privacy-focused
 // browsers (LibreWolf, for one) don't give pages WebGL. MediaPipe draws into
 // an OffscreenCanvas where there is one, so test the same kind of canvas.
-function hasWebGL2() {
+// Returns null without WebGL2, or the name of what draws it (graphics.js).
+// Firefox gives the real name as RENDERER; Chrome hides it there ("WebKit
+// WebGL") and gives it through an extension, which Firefox warns about, so
+// the extension is only asked for when the plain name is hidden.
+function webGL2Renderer() {
   const canvas = self.OffscreenCanvas
     ? new OffscreenCanvas(1, 1)
     : document.createElement('canvas')
-  return canvas.getContext('webgl2') !== null
+  const gl = canvas.getContext('webgl2')
+  if (!gl) return null
+  const plain = String(gl.getParameter(gl.RENDERER) ?? '')
+  if (plain && plain !== 'WebKit WebGL') return plain
+  const info = gl.getExtension('WEBGL_debug_renderer_info')
+  return info ? String(gl.getParameter(info.UNMASKED_RENDERER_WEBGL) ?? '') : plain
 }
 
 // Creates a HandLandmarker, trying the GPU first if asked. If the GPU can't
-// be used (missing GPU features, driver trouble), falls back to the CPU.
+// be used (missing GPU features, driver trouble), falls back to the CPU. If
+// WebGL is drawn in software (no graphics card), it goes straight to the CPU,
+// which is much faster there (graphics.js).
 // Resolves to { landmarker, delegate, gpuFailed }.
 export async function loadHandLandmarker(preferredDelegate) {
-  if (!hasWebGL2()) {
+  const renderer = webGL2Renderer()
+  if (renderer === null) {
     throw namedError('WebGLUnavailableError', 'This browser offers no WebGL2 context')
   }
-
-  if (preferredDelegate === 'GPU') {
+  if (preferredDelegate === 'GPU' && isSoftwareRenderer(renderer)) {
+    console.warn(`WebGL is drawn in software (${renderer}): running hand tracking on the CPU.`)
+  } else if (preferredDelegate === 'GPU') {
     try {
       const landmarker = await createHandLandmarker('GPU')
       return { landmarker, delegate: 'GPU', gpuFailed: false }

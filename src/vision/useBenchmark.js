@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { summarize } from './benchmarkStats.js'
+import { browserName } from './browserName.js'
 
 const WARM_UP_SECONDS = 2
 const MEASURE_SECONDS = 10
@@ -40,18 +41,6 @@ function nextVideoFrame(video) {
       resolve({ time: now, frames: metadata.presentedFrames })
     })
   })
-}
-
-function browserName() {
-  const brands = navigator.userAgentData?.brands ?? []
-  const chrome =
-    brands.find((b) => b.brand === 'Google Chrome') ||
-    brands.find((b) => b.brand === 'Chromium')
-  if (chrome) {
-    return `${chrome.brand === 'Google Chrome' ? 'Chrome' : 'Chromium'} ${chrome.version}`
-  }
-  const firefox = navigator.userAgent.match(/Firefox\/(\d+)/)
-  return firefox ? `Firefox ${firefox[1]}` : 'Other browser'
 }
 
 // Measures camera and detection speed over a fixed window. While a run is

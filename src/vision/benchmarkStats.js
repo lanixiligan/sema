@@ -28,7 +28,7 @@ export function summarize(measurements, frames, seconds) {
   }
 }
 
-// One row for the README's performance table.
+// One row for the performance table in docs/benchmarks.md.
 export function toTableRow(result) {
   const cells = [
     result.browser,
