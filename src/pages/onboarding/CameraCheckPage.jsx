@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
-import { PATHS } from '../../app/router.js'
-import { useSharedCamera } from '../../app/sharedCamera.js'
-import TopBar from '../../app/TopBar.jsx'
-import CameraView from '../../components/CameraView.jsx'
-import { BOTH_HANDS_HOLD_MS, NO_HOLD, holdSecondsLeft, seeHands, steadySeen, updateHold } from '../../vision/handChecks.js'
-import { useHandDetection } from '../../vision/useHandDetection.js'
+import { PATHS } from '../../app/routing/router.js'
+import { useSharedCamera } from '../../app/shared-camera/sharedCamera.js'
+import TopBar from '../../app/layout/TopBar.jsx'
+import CameraView from '../../components/camera-view/CameraView.jsx'
+import { BOTH_HANDS_HOLD_MS, NO_HOLD, holdSecondsLeft, seeHands, steadySeen, updateHold } from '../../vision/landmarks/handChecks.js'
+import { useHandDetection } from '../../vision/tracking/useHandDetection.js'
 import StepNav from './StepNav.jsx'
 
 const NOT_SEEN = { left: 'none', right: 'none' }

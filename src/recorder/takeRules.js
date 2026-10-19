@@ -1,5 +1,5 @@
-import { normalizeHand } from '../vision/normalizeHand.js'
-import { toPhysicalHand } from '../vision/handedness.js'
+import { normalizeHand } from '../vision/landmarks/normalizeHand.js'
+import { toPhysicalHand } from '../vision/tracking/handedness.js'
 
 // One take: a countdown, then a wait until the take's hand is whole in view
 // (it may already be), a short pause so the hand can finish forming the

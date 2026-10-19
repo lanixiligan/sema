@@ -1,11 +1,11 @@
 import { useRef, useState } from 'react'
-import TopBar from '../../app/TopBar.jsx'
+import TopBar from '../../app/layout/TopBar.jsx'
 import { useCamera } from '../../camera/useCamera.js'
 import { useVideoStats } from '../../camera/useVideoStats.js'
 import BenchmarkPanel from './BenchmarkPanel.jsx'
-import { useHandDetection } from '../../vision/useHandDetection.js'
-import { useHandLandmarker } from '../../vision/useHandLandmarker.js'
-import { LOADING_HAND_MODEL } from '../../vision/visionMessages.js'
+import { useHandDetection } from '../../vision/tracking/useHandDetection.js'
+import { useHandLandmarker } from '../../vision/model/useHandLandmarker.js'
+import { LOADING_HAND_MODEL } from '../../vision/model/visionMessages.js'
 
 // The Phase 1 tracking page, unchanged: camera readouts, the hand model's
 // delegate picker and the benchmark (Developer settings). It's at /dev, not in

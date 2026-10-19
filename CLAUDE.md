@@ -66,25 +66,35 @@ The development plan is `docs/project-plan.md`.
 
 ```
 src/
-  app/          the shell: router, navigation, top bar and menu, phone notice,
-                camera provider, settings store
-  components/   parts used by more than one page folder (CameraView and its parts:
-                CameraStage, CameraControls, CameraOff, IdleNotice, StageProblem; icons.jsx
-                and the larger LineIcons.jsx; mixLetters for Learn's and Practice's art)
+  main.jsx          the entry point index.html loads
+  styles.css        all the CSS
+  app/              the shell
+    App.jsx         picks the page for the address, holds the settings
+    routing/        router, navigation, Link
+    layout/         TopBar, MenuBar, PhoneNotice
+    settings/       progressStore, settings context, theme, ThemeToggle, SettingsMenu
+    shared-camera/  CameraProvider, sharedCamera, useIdleCameraOff
+  components/       parts used by more than one page folder
+    camera-view/    CameraView and its parts: CameraStage, CameraControls, CameraOff,
+                    IdleNotice, StageProblem
+    icons/          icons.jsx and the larger LineIcons.jsx
+    placeholder/    PlaceholderPage and mixLetters (Learn's and Practice's art)
+    Logo.jsx
   pages/
-    onboarding/ Welcome; the intro pages About Sema, How Sema works and How Sema
-                handles your data (+ IntroLayout); Camera check; StepNav
-    record/     the Record page and its parts
-    learn/      the Learn placeholder
-    practice/   the Practice placeholder
-    dev/        the Phase 1 page at /dev (+ BenchmarkPanel)
-  camera/       webcam logic: useCamera hook, error messages, video stats
-  vision/       hand tracking: model loading, detection loop, drawing, handedness,
-                normalization, the camera check's rules
-  recorder/     recording logic: take rules, useRecording, session file and storage
-  App.jsx       the shell: picks the page for the address
-  main.jsx
-  styles.css
+    onboarding/     Welcome; Camera check; StepNav (used by intro/ and the camera check)
+      intro/        About Sema, How Sema works, How Sema handles your data, and their
+                    parts (IntroLayout, AboutPreview, HandSketch, useStaggeredReveal…)
+    record/         the Record page and its parts
+    learn/          the Learn placeholder
+    practice/       the Practice placeholder
+    dev/            the Phase 1 page at /dev (+ BenchmarkPanel)
+  camera/           webcam logic: useCamera hook, error messages, video stats, idle rules
+  vision/           hand tracking
+    model/          loading the hand model, WebGL and browser checks, error messages
+    tracking/       the detection loop, picking a hand, handedness, drawing the hand
+    landmarks/      math on the hand points: normalization, the camera check's rules
+    benchmark/      the /dev benchmark's hook and statistics
+  recorder/         recording logic: take rules, useRecording, session file and storage
 ```
 
 ## Routing
@@ -94,9 +104,9 @@ src/
   folders never import from each other: anything two page folders need goes in
   `src/components/`, and logic with no page stays in `src/recorder/`, `src/vision/`
   and `src/camera/`.
-- `src/app/router.js` maps each path to a page (`PATHS`, `resolveRoute`); unknown
-  paths redirect to `/`. `src/app/navigation.js` changes pages with the History API
-  (`navigate`, `usePathname`); links between pages use `<Link>` from `src/app/Link.jsx`.
+- `src/app/routing/router.js` maps each path to a page (`PATHS`, `resolveRoute`); unknown
+  paths redirect to `/`. `src/app/routing/navigation.js` changes pages with the History API
+  (`navigate`, `usePathname`); links between pages use `<Link>` from `src/app/routing/Link.jsx`.
 - `vercel.json` rewrites every path to `index.html`; Vercel serves real files first.
 - `/dev` is the Phase 1 tracking page with the benchmark. It's not in the menu.
 - Setup redirects live in `resolveRoute`: a new visitor opening Record, Learn or
@@ -104,16 +114,16 @@ src/
 
 ## Settings
 
-- The signing hand and "setup done" are kept by `src/app/progressStore.js`
+- The signing hand and "setup done" are kept by `src/app/settings/progressStore.js`
   (`localStorage` key `sema.progress`, with a version number). Pages never touch
   `localStorage` directly; `App.jsx` holds the settings and passes them down.
 - The theme (Light / Dark / System, default System) is saved in the same store and chosen with
-  the icon toggle at the right of every page's top bar (`src/app/ThemeToggle.jsx`, in
-  `TopBar`). The settings menu (`src/app/SettingsMenu.jsx`, a gear with no text, last in the
+  the icon toggle at the right of every page's top bar (`src/app/settings/ThemeToggle.jsx`, in
+  `TopBar`). The settings menu (`src/app/settings/SettingsMenu.jsx`, a gear with no text, last in the
   bar on the main pages) holds only Delete Sema's data: after a confirm it removes every `sema.*`
   localStorage key (`clearSavedData` in `progressStore.js`) and App starts over as a new
   visitor on Welcome, without a reload. The theme and the delete reach the top bar through
-  `SettingsContext` (`src/app/settings.js`). `src/app/theme.js` sets `data-theme` on
+  `SettingsContext` (`src/app/settings/settings.js`). `src/app/settings/theme.js` sets `data-theme` on
   `<html>`; a small script in `index.html` sets it before the first paint. In `styles.css`,
   rules use colour roles (`--bg`, `--text`, `--accent`…), with a light set on `:root` and a
   dark set on `[data-theme='dark']` and `.on-dark`. Palette colours are used directly only
@@ -137,7 +147,7 @@ src/
   stretch so the last ends level with the panel's bottom. Next stays closed until
   the check passes. Finishing setup keeps a saved signing hand
   or sets Right; the camera controls' hand toggle switches it. The rules (`seeHands`,
-  `steadySeen`, `updateHold`, `holdSecondsLeft`) are in `src/vision/handChecks.js`. Its error titles and texts come from the design and
+  `steadySeen`, `updateHold`, `holdSecondsLeft`) are in `src/vision/landmarks/handChecks.js`. Its error titles and texts come from the design and
   live in `cameraMessages.js` and `visionMessages.js`; `useCamera` returns an
   `errorKind` and `useHandLandmarker` an `errorName` so pages can pick them.
 
@@ -148,16 +158,16 @@ src/
   (`CameraStage autoStart={false}`). Record's recording step starts it on arrival, since the
   person just pressed Start recording. It stays off on Welcome, the intro pages and
   Record's consent/finished steps, and turns off whenever no camera view is on screen.
-- `CameraProvider` (`src/app/`) does this: it owns the camera and the hand model for
+- `CameraProvider` (`src/app/shared-camera/`) does this: it owns the camera and the hand model for
   every page, starts the camera when a `CameraStage` with `autoStart` (the default)
   appears, and stops it when the last one goes away. After an error or Stop it waits for a click. Switching to another
   tab (the page hidden) stops it too, with `stopReason: 'hidden'`, and it never comes back
   by itself. No hand in view for a minute stops it as well (`stopReason: 'idle'`): after
   10 s without a hand a notice appears and counts down the rest of the minute
-  (`src/camera/idleRules.js`, `src/app/useIdleCameraOff.js`, `IdleNotice`); any hand resets
+  (`src/camera/idleRules.js`, `src/app/shared-camera/useIdleCameraOff.js`, `IdleNotice`); any hand resets
   the count.
 - Every camera page (camera check, Record) uses one component, `CameraView`
-  (`src/components/`): the frame, the problem panel (texts `CAMERA_VIEW_*` in
+  (`src/components/camera-view/`): the frame, the problem panel (texts `CAMERA_VIEW_*` in
   `cameraMessages.js` and `visionMessages.js`), `CameraOff` with a Turn camera on button,
   the idle timeout, and `CameraControls` (on/off, the camera list; the page passes options
   or `false`). The page keeps its own hand detection and passes its overlays as children,
@@ -197,11 +207,11 @@ src/
   one blank test frame, because some GPU failures only appear on the first frame.
   When WebGL is drawn in software (SwiftShader, llvmpipe…: hardware acceleration off, no
   graphics drivers), it goes straight to CPU (`isSoftwareRenderer` in
-  `src/vision/graphics.js`): measured 2026-10-18 in headless Chrome without a graphics
+  `src/vision/model/graphics.js`): measured 2026-10-18 in headless Chrome without a graphics
   card, GPU ran at 2 fps and CPU at 15 fps, and below ~4 fps the camera check can't pass.
 - `runningMode: 'VIDEO'`, `numHands: 2` (since 2026-10-16; before, 1). With one, MediaPipe
   keeps tracking the first hand it finds and never sees the other, so the chosen hand went
-  unseen whenever the other came first. `pickHand` (`src/vision/pickHand.js`) keeps one
+  unseen whenever the other came first. `pickHand` (`src/vision/tracking/pickHand.js`) keeps one
   hand: the page's `wantedHand` if found, else the first. Only that hand is drawn and
   passed on (the camera check passes `drawAllHands` to draw both; its listener also
   gets every hand as `hands`). Benchmark numbers from before this change were measured with one hand, so
@@ -221,7 +231,7 @@ src/
   canvas clips them; no special handling needed.
 - **Handedness rule** (checked by hand on 2026-10-15, Chrome, tasks-vision 1.1.1):
   for our un-mirrored frames, MediaPipe's label already names the hand actually
-  raised (right hand → "Right"). `toPhysicalHand` in `src/vision/handedness.js`
+  raised (right hand → "Right"). `toPhysicalHand` in `src/vision/tracking/handedness.js`
   passes it through unchanged. If frames are ever mirrored before detection, swap
   it. Re-check after upgrading MediaPipe.
 - Performance numbers come from the benchmark in Developer settings on `/dev`
@@ -237,7 +247,7 @@ src/
 ## Recorder conventions
 
 - Session files follow `docs/data-format.md`. Bump `format` when the layout changes and
-  `normalization` when `src/vision/normalizeHand.js` changes; `scripts/check-session.js`
+  `normalization` when `src/vision/landmarks/normalizeHand.js` changes; `scripts/check-session.js`
   lists the versions it accepts.
 - The left-hand flip uses the detected hand, for now (an open decision in the plan).
 - Take timing and the sampling interval are constants in `src/recorder/takeRules.js`;
@@ -288,6 +298,6 @@ Sans Mono holding only σ ῆ μ α (loaded only where they appear). Colors are 
 
 Never use Bright Sky for text on a light background: it fails contrast.
 
-The hand overlay (in `src/vision/drawHand.js`) uses Bright Sky bones, Cloud White
+The hand overlay (in `src/vision/tracking/drawHand.js`) uses Bright Sky bones, Cloud White
 joints, and a dark outline `#0C1D30` under both so it shows over any background or
 skin tone.

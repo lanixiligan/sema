@@ -1,6 +1,6 @@
-import { goBack } from '../../app/navigation.js'
-import { PATHS } from '../../app/router.js'
-import { CameraIcon, CameraOffIcon, NoAccountIcon, ShieldCheckIcon } from '../../components/LineIcons.jsx'
+import { goBack } from '../../../app/routing/navigation.js'
+import { PATHS } from '../../../app/routing/router.js'
+import { CameraIcon, CameraOffIcon, NoAccountIcon, ShieldCheckIcon } from '../../../components/icons/LineIcons.jsx'
 import IntroLayout from './IntroLayout.jsx'
 import { useStaggeredReveal } from './useStaggeredReveal.js'
 

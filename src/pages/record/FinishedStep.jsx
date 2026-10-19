@@ -1,4 +1,4 @@
-import { CheckIcon } from '../../components/icons.jsx'
+import { CheckIcon } from '../../components/icons/icons.jsx'
 import { sessionFileName } from '../../recorder/sessionFile.js'
 
 // After "Finish and download": thanks, how many takes were kept, and where the

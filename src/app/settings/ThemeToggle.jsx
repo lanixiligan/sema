@@ -1,5 +1,5 @@
 import { useId } from 'react'
-import { MonitorIcon, MoonIcon, SunIcon } from '../components/icons.jsx'
+import { MonitorIcon, MoonIcon, SunIcon } from '../../components/icons/icons.jsx'
 import { useSettings } from './settings.js'
 
 const OPTIONS = [

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { CameraOffIcon, FileSendIcon, HandPointsIcon } from '../../components/LineIcons.jsx'
+import { CameraOffIcon, FileSendIcon, HandPointsIcon } from '../../components/icons/LineIcons.jsx'
 import { isValidPersonCode, nextSessionId, normalizePersonCode } from '../../recorder/sessionFile.js'
 import { loadUsedSessionIds } from '../../recorder/sessionStore.js'
 

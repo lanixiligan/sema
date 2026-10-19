@@ -1,4 +1,4 @@
-import { NORMALIZATION_VERSION } from '../vision/normalizeHand.js'
+import { NORMALIZATION_VERSION } from '../vision/landmarks/normalizeHand.js'
 import { TAKES_TARGET } from './takeRules.js'
 
 // Builds the session file described in docs/data-format.md. Everything here

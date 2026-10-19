@@ -1,6 +1,6 @@
-import Link from '../app/Link.jsx'
-import MenuBar from '../app/MenuBar.jsx'
-import { PATHS } from '../app/router.js'
+import Link from '../../app/routing/Link.jsx'
+import MenuBar from '../../app/layout/MenuBar.jsx'
+import { PATHS } from '../../app/routing/router.js'
 
 // A page that isn't available yet (Learn and Practice, until Phase 3): the
 // usual menu, then one centred column with the page's own art, what's coming,

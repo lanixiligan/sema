@@ -1,6 +1,6 @@
-import Link from './Link.jsx'
-import { PATHS } from './router.js'
-import SettingsMenu from './SettingsMenu.jsx'
+import Link from '../routing/Link.jsx'
+import { PATHS } from '../routing/router.js'
+import SettingsMenu from '../settings/SettingsMenu.jsx'
 import TopBar from './TopBar.jsx'
 
 const MENU = [

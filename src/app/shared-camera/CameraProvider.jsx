@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useCamera } from '../camera/useCamera.js'
-import { useHandLandmarker } from '../vision/useHandLandmarker.js'
+import { useCamera } from '../../camera/useCamera.js'
+import { useHandLandmarker } from '../../vision/model/useHandLandmarker.js'
 import { CameraContext } from './sharedCamera.js'
 
 // The camera and the hand model, shared by every page through React context.

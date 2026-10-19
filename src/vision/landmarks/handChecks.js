@@ -1,4 +1,4 @@
-import { toPhysicalHand } from './handedness.js'
+import { toPhysicalHand } from '../tracking/handedness.js'
 
 // How far inside the frame's edges every hand point must be for "whole hand in
 // view", as a fraction of the frame (0.02 = 2%).

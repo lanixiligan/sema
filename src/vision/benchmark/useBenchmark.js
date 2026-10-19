@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { summarize } from './benchmarkStats.js'
-import { browserName } from './browserName.js'
+import { browserName } from '../model/browserName.js'
 
 const WARM_UP_SECONDS = 2
 const MEASURE_SECONDS = 10

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import Logo from '../components/Logo.jsx'
+import Logo from '../../components/Logo.jsx'
 
 // Shown instead of the app on small screens (App decides when): Sema's pages
 // are designed for a computer with a webcam. "Continue on this phone" shows

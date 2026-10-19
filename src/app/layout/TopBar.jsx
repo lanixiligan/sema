@@ -1,7 +1,7 @@
-import Logo from '../components/Logo.jsx'
-import Link from './Link.jsx'
-import { PATHS } from './router.js'
-import ThemeToggle from './ThemeToggle.jsx'
+import Logo from '../../components/Logo.jsx'
+import Link from '../routing/Link.jsx'
+import { PATHS } from '../routing/router.js'
+import ThemeToggle from '../settings/ThemeToggle.jsx'
 
 // The thin bar at the top of every page: the logo and a quiet "Preview"
 // (Sema's only preview signal) on the left, then what the page adds: the menu

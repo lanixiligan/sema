@@ -1,4 +1,4 @@
-import { CheckIcon, CloseIcon } from '../../components/icons.jsx'
+import { CheckIcon, CloseIcon } from '../../components/icons/icons.jsx'
 import { classLabel } from '../../recorder/letters.js'
 import { TAKES_TARGET } from '../../recorder/takeRules.js'
 

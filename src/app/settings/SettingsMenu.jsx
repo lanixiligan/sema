@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import { SettingsIcon } from '../components/icons.jsx'
+import { SettingsIcon } from '../../components/icons/icons.jsx'
 import { useSettings } from './settings.js'
 
 // The settings menu at the right of the menu bar: a gear (no text, so it's
