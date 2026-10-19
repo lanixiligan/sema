@@ -61,7 +61,7 @@ Check a file before keeping it: `npm run check-session -- <file>`.
 | Field | Meaning |
 | --- | --- |
 | `format` | Version of this layout. **Bump it whenever the layout changes.** |
-| `normalization` | Version of the normalization that produced `landmarks`. **Bump it whenever `src/vision/normalizeHand.js` changes.** |
+| `normalization` | Version of the normalization that produced `landmarks`. **Bump it whenever `src/vision/landmarks/normalizeHand.js` changes.** |
 | `language` | `"asl"` |
 | `person`, `session` | The participant code (`p03`) and session ID (`2026-11-02a`). Session IDs can repeat across people. |
 | `browser` | Browser and major version, e.g. `"Chrome 155"`. |
@@ -102,7 +102,7 @@ One per kept frame of an accepted take.
 | Field | Meaning |
 | --- | --- |
 | `letter`, `hand` | The label (what was asked for). |
-| `detected`, `detectedScore` | MediaPipe's handedness for this frame, converted to the physical hand (`src/vision/handedness.js`) and lowercased, and its confidence (0–1, 2 decimals). |
+| `detected`, `detectedScore` | MediaPipe's handedness for this frame, converted to the physical hand (`src/vision/tracking/handedness.js`) and lowercased, and its confidence (0–1, 2 decimals). |
 | `recording`, `take` | The recording this frame belongs to. **Never split one recording between training and testing.** |
 | `t` | Milliseconds since capture started. |
 | `width`, `height` | The video's real frame size. |
@@ -125,7 +125,7 @@ MediaPipe's handedness is. **Training filters to `detected == hand`.**
 
 ## Normalization (version 1)
 
-`src/vision/normalizeHand.js`, applied per frame:
+`src/vision/landmarks/normalizeHand.js`, applied per frame:
 
 1. **Equal units:** `x × width`, `y × height`, `z × width` (pixels on both axes).
 2. **Wrist to origin:** subtract point 0 from every point.

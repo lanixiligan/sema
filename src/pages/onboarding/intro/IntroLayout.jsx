@@ -1,5 +1,5 @@
-import TopBar from '../../app/TopBar.jsx'
-import StepNav from './StepNav.jsx'
+import TopBar from '../../../app/layout/TopBar.jsx'
+import StepNav from '../StepNav.jsx'
 
 // The frame the three intro pages share: the top bar, the page's own items
 // in the middle (revealed one by one), and Previous and Next along the

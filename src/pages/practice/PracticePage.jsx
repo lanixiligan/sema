@@ -1,6 +1,6 @@
-import PlaceholderPage from '../../components/PlaceholderPage.jsx'
+import PlaceholderPage from '../../components/placeholder/PlaceholderPage.jsx'
 import { useLetters } from '../../recorder/letters.js'
-import { mixLetters } from '../../components/mixLetters.js'
+import { mixLetters } from '../../components/placeholder/mixLetters.js'
 
 // Practice, until it arrives after Learn (Phase 3.4). The art is a staggered
 // row of the training letters in mixed order, because practice mixes letters.

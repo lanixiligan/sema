@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useSharedCamera } from '../app/sharedCamera.js'
+import { useSharedCamera } from '../../app/shared-camera/sharedCamera.js'
 
 // The camera view: the shared camera's video, the hand overlay canvas, and
 // whatever the page puts on top (children). The camera can only be on while

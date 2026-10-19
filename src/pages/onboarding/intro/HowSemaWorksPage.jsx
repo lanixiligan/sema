@@ -1,6 +1,6 @@
-import { PATHS } from '../../app/router.js'
+import { PATHS } from '../../../app/routing/router.js'
 import IntroLayout from './IntroLayout.jsx'
-import { BookIcon, HandPointsIcon, ScanIcon } from '../../components/LineIcons.jsx'
+import { BookIcon, HandPointsIcon, ScanIcon } from '../../../components/icons/LineIcons.jsx'
 import { useStaggeredReveal } from './useStaggeredReveal.js'
 
 const STEPS = [

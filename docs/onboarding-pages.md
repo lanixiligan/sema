@@ -15,13 +15,13 @@ so update this document when they change.
 | 5 | Camera check (setup) | `/setup/camera` | `CameraCheckPage.jsx` |
 
 - A **new visitor** starts on Welcome. Opening Record, Learn or Practice sends them back
-  to Welcome (`resolveRoute` in `src/app/router.js`).
+  to Welcome (`resolveRoute` in `src/app/routing/router.js`).
 - Finishing the camera check finishes setup. A **returning visitor** opening `/` goes
   straight to Record. The intro pages can still be opened by their address. Then About's
   Previous and the data page's Previous go back to wherever the person came from, and the
   data page has no Next.
 - On a **small screen** (narrower than 900px), the phone notice replaces the whole app
-  first (`src/app/PhoneNotice.jsx`, below).
+  first (`src/app/layout/PhoneNotice.jsx`, below).
 - **Delete Sema's data** (the gear menu on the main pages) makes the visitor new again.
 
 ## What every onboarding page shares
@@ -131,7 +131,7 @@ the browser ask for the camera.
 | Show other hand | One hand in view |
 | Show wrists | Both hands in view, a wrist cut off |
 
-**The rule** (`src/vision/handChecks.js`): both hands up and whole (wrist in view) at the
+**The rule** (`src/vision/landmarks/handChecks.js`): both hands up and whole (wrist in view) at the
 same time for 3 seconds. With two hands, left and right come from where they are in the
 picture, because MediaPipe's left/right label can flip while a hand turns. One hand alone
 can never pass. A gap of more than 300 ms starts the 3 seconds again.

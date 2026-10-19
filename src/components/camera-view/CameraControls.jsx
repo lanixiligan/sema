@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import { useSharedCamera } from '../app/sharedCamera.js'
-import { CheckIcon, ChevronIcon, HandIcon, VideoIcon, VideoOffIcon } from './icons.jsx'
+import { useSharedCamera } from '../../app/shared-camera/sharedCamera.js'
+import { CheckIcon, ChevronIcon, HandIcon, VideoIcon, VideoOffIcon } from '../icons/icons.jsx'
 
 const HANDS = [
   { id: 'left', name: 'Left' },

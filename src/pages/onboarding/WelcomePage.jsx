@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import Link from '../../app/Link.jsx'
-import { PATHS } from '../../app/router.js'
-import TopBar from '../../app/TopBar.jsx'
+import Link from '../../app/routing/Link.jsx'
+import { PATHS } from '../../app/routing/router.js'
+import TopBar from '../../app/layout/TopBar.jsx'
 import Logo from '../../components/Logo.jsx'
 
 // Whether Welcome has already played its entrance. A module variable lives

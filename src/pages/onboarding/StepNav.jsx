@@ -1,4 +1,4 @@
-import Link from '../../app/Link.jsx'
+import Link from '../../app/routing/Link.jsx'
 
 // Previous and Next, the way through the onboarding pages: quiet text along
 // the bottom of the page, Previous at the left and Next at the right. They sit

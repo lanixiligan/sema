@@ -1,5 +1,5 @@
-import { useSharedCamera } from '../app/sharedCamera.js'
-import { VideoOffIcon } from './icons.jsx'
+import { useSharedCamera } from '../../app/shared-camera/sharedCamera.js'
+import { VideoOffIcon } from '../icons/icons.jsx'
 
 // Shown over a camera view while the camera is off (turned off, stopped
 // because the person switched to another tab, or because no hand was in view

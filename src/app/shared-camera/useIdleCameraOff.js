@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { idleSecondsLeft, shouldTurnOff } from '../camera/idleRules.js'
+import { idleSecondsLeft, shouldTurnOff } from '../../camera/idleRules.js'
 import { useSharedCamera } from './sharedCamera.js'
 
 // Turns the shared camera off when no hand has been in view for a minute

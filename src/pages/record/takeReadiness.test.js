@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { LOADING_HAND_MODEL } from '../../vision/visionMessages.js'
+import { LOADING_HAND_MODEL } from '../../vision/model/visionMessages.js'
 import { takeReadiness } from './takeReadiness.js'
 
 // Everything ready: camera live, model loaded, the left hand whole in view.

@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { clearHand, drawHand, drawHands } from './drawHand.js'
-import { isWholeHand } from './handChecks.js'
+import { isWholeHand } from '../landmarks/handChecks.js'
 import { toPhysicalHand } from './handedness.js'
 import { listHands, pickHand } from './pickHand.js'
-import { getDetectionErrorMessage } from './visionMessages.js'
+import { getDetectionErrorMessage } from '../model/visionMessages.js'
 
 // How long the hand must be missing before we say "No hand". Without this the
 // readout would flicker whenever a single frame misses the hand.

@@ -1,5 +1,5 @@
-import { goBack } from '../../app/navigation.js'
-import { PATHS } from '../../app/router.js'
+import { goBack } from '../../../app/routing/navigation.js'
+import { PATHS } from '../../../app/routing/router.js'
 import AboutPreview from './AboutPreview.jsx'
 import IntroLayout from './IntroLayout.jsx'
 import { useStaggeredReveal } from './useStaggeredReveal.js'

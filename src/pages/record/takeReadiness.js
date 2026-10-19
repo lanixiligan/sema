@@ -1,4 +1,4 @@
-import { LOADING_HAND_MODEL } from '../../vision/visionMessages.js'
+import { LOADING_HAND_MODEL } from '../../vision/model/visionMessages.js'
 
 // Whether a take can start, and what the top of the video says. A take needs
 // the camera on, the hand model loaded, and the hand chosen for the take

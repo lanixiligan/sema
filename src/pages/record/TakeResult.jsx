@@ -1,4 +1,4 @@
-import { CheckIcon } from '../../components/icons.jsx'
+import { CheckIcon } from '../../components/icons/icons.jsx'
 
 // The last take's result, in one short line: kept (soft blue) or not kept /
 // cancelled (amber, with the main reason in plain words; the file keeps the
