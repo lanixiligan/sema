@@ -29,6 +29,17 @@ describe('splitLetters', () => {
   })
 })
 
+describe('unavailable letters', () => {
+  it('leaves out letters marked unavailable, like J and Z that move', () => {
+    expect(splitLetters([{ letter: 'I' }, { letter: 'J', unavailable: 'Moves' }, { letter: 'Z', unavailable: 'Moves' }])).toEqual({
+      training: ['I'],
+      pilot: [],
+      instructions: {},
+      images: {},
+    })
+  })
+})
+
 describe('reference images', () => {
   it('collects the image path for each letter that has one', () => {
     expect(

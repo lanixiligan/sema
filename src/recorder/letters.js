@@ -16,6 +16,8 @@ export function splitLetters(entries) {
     const letter = entry?.letter
     if (typeof letter !== 'string' || !/^[A-Z]$/.test(letter)) continue
     if (training.includes(letter) || pilot.includes(letter)) continue
+    // J and Z move, so they can't be recorded or classified yet (Phase 4).
+    if (entry.unavailable) continue
     ;(entry.pilotOnly ? pilot : training).push(letter)
     const steps = [entry.instructions].flat().filter((step) => typeof step === 'string' && step.trim() !== '')
     if (steps.length > 0) instructions[letter] = steps

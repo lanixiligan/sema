@@ -9,10 +9,23 @@
     {"letter": "L", "instructions": ["Index points up", "Thumb points out to the side, forming an L", "The other fingers curled"], "image": "images/asl/l.svg"},
     {"letter": "W", "instructions": ["Index, middle and ring fingers up and spread", "Thumb holds the pinky down"], "image": "images/asl/w.svg"},
     {"letter": "Y", "instructions": ["Thumb and pinky out", "The other three fingers curled"], "image": "images/asl/y.svg"},
-    {"letter": "A", "pilotOnly": true, "image": "images/asl/a.svg"},
-    {"letter": "S", "pilotOnly": true, "image": "images/asl/s.svg"},
-    {"letter": "M", "pilotOnly": true, "image": "images/asl/m.svg"},
-    {"letter": "N", "pilotOnly": true, "image": "images/asl/n.svg"},
-    {"letter": "T", "pilotOnly": true, "image": "images/asl/t.svg"}
+    {"letter": "A", "pilotOnly": true, "instructions": ["Make a fist", "Thumb rests along the side of the index finger, pointing up"], "image": "images/asl/a.svg"},
+    {"letter": "S", "pilotOnly": true, "instructions": ["Make a fist", "Thumb wraps across the front of the fingers"], "image": "images/asl/s.svg"},
+    {"letter": "M", "pilotOnly": true, "instructions": ["Index, middle and ring fingers fold down over the thumb", "The thumb pokes out under those three fingers"], "image": "images/asl/m.svg"},
+    {"letter": "N", "pilotOnly": true, "instructions": ["Index and middle fingers fold down over the thumb", "The thumb sits under those two fingers"], "image": "images/asl/n.svg"},
+    {"letter": "T", "pilotOnly": true, "instructions": ["Make a fist", "Thumb tucks between the index and middle fingers"], "image": "images/asl/t.svg"},
+    {"letter": "E", "instructions": ["All fingers bend down, tips resting on the palm", "Thumb tucks under the fingertips"], "image": "images/asl/e.svg"},
+    {"letter": "G", "instructions": ["Index finger and thumb point sideways, parallel", "Palm faces inward", "The other fingers curled"], "image": "images/asl/g.svg"},
+    {"letter": "H", "instructions": ["Index and middle fingers extend together, pointing sideways", "The other fingers curled, thumb tucked in"], "image": "images/asl/h.svg"},
+    {"letter": "K", "instructions": ["Index and middle fingers up in a V", "Thumb rests on the base of the middle finger"], "image": "images/asl/k.svg"},
+    {"letter": "O", "instructions": ["All fingertips curve down to touch the thumb tip", "Fingers and thumb form an O"], "image": "images/asl/o.svg"},
+    {"letter": "P", "instructions": ["Make a K, then point it down", "Palm faces down or toward you"], "image": "images/asl/p.svg"},
+    {"letter": "Q", "instructions": ["Make a G, then point it down", "Index finger and thumb point to the floor"], "image": "images/asl/q.svg"},
+    {"letter": "R", "instructions": ["Index and middle fingers point up", "Middle finger crosses over the index finger", "The other fingers curled"], "image": "images/asl/r.svg"},
+    {"letter": "U", "instructions": ["Index and middle fingers up and together", "The other fingers curled, thumb holds them down"], "image": "images/asl/u.svg"},
+    {"letter": "V", "instructions": ["Index and middle fingers up and apart, like a peace sign", "The other fingers curled, thumb holds them down"], "image": "images/asl/v.svg"},
+    {"letter": "X", "instructions": ["Make a fist", "Index finger bends into a hook"], "image": "images/asl/x.svg"},
+    {"letter": "J", "unavailable": "Moves: starts as I, then the pinky draws a J in the air", "instructions": ["Hold the I handshape (pinky up)", "Draw a J in the air with the pinky"], "image": "images/asl/j.svg"},
+    {"letter": "Z", "unavailable": "Moves: the index finger draws a Z in the air", "instructions": ["Point the index finger", "Draw a Z in the air with it"], "image": "images/asl/z.svg"}
   ]
 }
