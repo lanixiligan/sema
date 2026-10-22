@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import DevTopBar from '../DevTopBar.jsx'
 import { useSharedCamera } from '../../../app/shared-camera/sharedCamera.js'
+import CameraPanel from '../../../components/camera-view/CameraPanel.jsx'
 import CameraView from '../../../components/camera-view/CameraView.jsx'
 import { useLetters } from '../../../recorder/letters.js'
 import { acceptedCount, addTake, deleteTake, needsDownload, newSession } from '../../../recorder/sessionFile.js'
@@ -21,7 +22,8 @@ import ConsentForm from './ConsentForm.jsx'
 import FinishedStep from './FinishedStep.jsx'
 import LetterList from './LetterList.jsx'
 import LetterGuide from './LetterGuide.jsx'
-import TakeOverlay, { TakePanelHead } from './TakeOverlay.jsx'
+import TakeOverlay from './TakeOverlay.jsx'
+import { takePanelHead } from './takePanelHead.jsx'
 import TakePanel from './TakePanel.jsx'
 import TakeResult from './TakeResult.jsx'
 import { takeReadiness } from './takeReadiness.js'
@@ -242,12 +244,10 @@ export default function RecordPage({ signingHand }) {
             )}
           </div>
           <section className="record-camera" aria-label="Camera">
-            {/* The camera check's panel: a header with the take's status, then
-                the video. Dark in every theme, like every camera frame. The
-                controls are hidden during a take: switching the camera or the
-                hand would spoil it. */}
-            <div className="camera-panel on-dark record-panel" role="group" aria-label="Camera preview">
-              <TakePanelHead recording={recording} idleText={readiness.text} />
+            {/* The shared camera panel: a header with the take's status, then
+                the video. The controls are hidden during a take: switching the
+                camera or the hand would spoil it. */}
+            <CameraPanel className="record-panel" {...takePanelHead(recording, readiness.text)}>
               <CameraView
                 canvasRef={canvasRef}
                 hand={hand}
@@ -257,7 +257,7 @@ export default function RecordPage({ signingHand }) {
               >
                 <TakeOverlay recording={recording} />
               </CameraView>
-            </div>
+            </CameraPanel>
             {/* Right under the picture: start a take. Space does the same,
                 as a shortcut. While a take runs the button says so and stays
                 disabled, so a second click can't start another. */}

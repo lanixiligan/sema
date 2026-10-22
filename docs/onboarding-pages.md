@@ -112,8 +112,9 @@ with: it saves Right.
      your hands.
   2. **Show both hands**: Hold both hands up with your wrists in view.
   3. **Hold still**: Keep both hands visible for three seconds.
-- The camera panel: a header with a short status and, along its bottom edge, a line
-  that fills over the three seconds; then the camera.
+- The camera panel (`CameraPanel`, the same on every camera page): a header with a short
+  status, large and white, and along its bottom edge a line that fills over the three
+  seconds; then the camera.
 
 **The camera never starts by itself here.** The panel opens with "Camera is off" and "Turn
 it on when you're ready. Sema only looks for your hands." The button says "Loading hand

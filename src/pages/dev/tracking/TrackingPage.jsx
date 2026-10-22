@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import DevTopBar from '../DevTopBar.jsx'
+import CameraPanel from '../../../components/camera-view/CameraPanel.jsx'
 import { useCamera } from '../../../camera/useCamera.js'
 import { useVideoStats } from '../../../camera/useVideoStats.js'
 import BenchmarkPanel from './BenchmarkPanel.jsx'
@@ -11,7 +12,8 @@ import { LOADING_HAND_MODEL } from '../../../vision/model/visionMessages.js'
 // delegate picker and the benchmark (Developer settings). It's at
 // /dev/tracking (until 2026-10-22, /dev), a developer tool, and keeps its own
 // camera instead of the app's shared one, so the delegate picker and the
-// benchmark work exactly as before.
+// benchmark work exactly as before. Only its frame changed (2026-10-23): it
+// sits in the camera panel every camera page uses.
 export default function TrackingPage() {
   const { videoRef, status, error, cameras, deviceId, start, stop, switchCamera } =
     useCamera()
@@ -36,30 +38,33 @@ export default function TrackingPage() {
       <DevTopBar title="Tracking and benchmark" />
 
       <main className="page">
-        <div className="stage">
-          {/* The video and the hand overlay share one CSS rule (.video,
-              .overlay in styles.css) that mirrors them with scaleX(-1), so it
-              feels like looking in a mirror. Only the display is flipped: the
-              frames, and the landmarks MediaPipe finds in them, are not. The
-              overlay is drawn in un-mirrored video coordinates and flipped by
-              the same CSS, which keeps the skeleton on the hand.
-              Both elements are always rendered so their refs are ready. */}
-          <video
-            ref={videoRef}
-            className="video"
-            autoPlay
-            playsInline
-            muted
-          />
-          <canvas ref={canvasRef} className="overlay" />
-          {isLive ? (
-            <span className="mirror-label">Mirrored</span>
-          ) : (
-            <p className="stage-message">
-              {status === 'starting' ? 'Waiting for the camera…' : 'Camera is off'}
-            </p>
-          )}
-        </div>
+        {/* The shared camera panel, around this page's own video. */}
+        <CameraPanel {...trackingStatus(status, error, handModel, hand)}>
+          <div className="stage tracking-stage">
+            {/* The video and the hand overlay share one CSS rule (.video,
+                .overlay in styles.css) that mirrors them with scaleX(-1), so it
+                feels like looking in a mirror. Only the display is flipped: the
+                frames, and the landmarks MediaPipe finds in them, are not. The
+                overlay is drawn in un-mirrored video coordinates and flipped by
+                the same CSS, which keeps the skeleton on the hand.
+                Both elements are always rendered so their refs are ready. */}
+            <video
+              ref={videoRef}
+              className="video"
+              autoPlay
+              playsInline
+              muted
+            />
+            <canvas ref={canvasRef} className="overlay" />
+            {isLive ? (
+              <span className="mirror-label">Mirrored</span>
+            ) : (
+              <p className="stage-message">
+                {status === 'starting' ? 'Waiting for the camera…' : 'Camera is off'}
+              </p>
+            )}
+          </div>
+        </CameraPanel>
 
         <div className="controls">
           {status === 'idle' ? (
@@ -156,6 +161,17 @@ function Readout({ label, children }) {
       <dd>{children}</dd>
     </div>
   )
+}
+
+// The panel's status, short; the error lines under the controls explain a
+// failure in full.
+function trackingStatus(cameraStatus, cameraError, handModel, hand) {
+  if (cameraError) return { status: 'Camera problem', tone: 'warn' }
+  if (cameraStatus === 'idle') return { status: 'Camera off' }
+  if (cameraStatus === 'starting') return { status: 'Starting…' }
+  if (handModel.status === 'error' || hand.error) return { status: 'Tracking problem', tone: 'warn' }
+  if (handModel.status !== 'ready') return { status: LOADING_HAND_MODEL }
+  return hand.handLabel ? { status: `${hand.handLabel} hand found`, tone: 'ok' } : { status: 'No hand' }
 }
 
 function describeHand(modelStatus, handLabel) {

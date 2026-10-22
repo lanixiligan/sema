@@ -577,6 +577,11 @@ body {
   clip-path: inset(0 round var(--stage-radius));
 }
 
+/* /dev/tracking's frame, inside the camera panel, whose corners round it. */
+.tracking-stage {
+  --stage-radius: 0px;
+}
+
 /* The video and the hand overlay must stay exactly on top of each other, so
    they share every rule. The canvas is sized to the video's aspect ratio, so
    object-fit: contain places both identically. scaleX(-1) mirrors both.
@@ -1775,7 +1780,7 @@ p.try-now {
 .record-stage {
   flex: 1 1 auto;
   aspect-ratio: auto;
-  min-height: clamp(320px, calc((100dvh - var(--bar-height)) / var(--record-zoom) - 196px), 630px);
+  min-height: clamp(320px, calc((100dvh - var(--bar-height)) / var(--record-zoom) - 223px), 630px);
   --stage-radius: 0px;
 }
 
@@ -1787,12 +1792,7 @@ p.try-now {
   flex-direction: column;
 }
 
-/* The status is a little larger than the camera check's: it's read while
-   signing. The frame count keeps to the right, so the status stays centred. */
-.record-panel-head .camera-panel-status {
-  font-size: 16px;
-}
-
+/* The frame count keeps to the right, so the status stays centred. */
 .record-panel-frames {
   position: absolute;
   right: var(--space-5);
@@ -3248,7 +3248,7 @@ p.try-now {
      when the height cap applies (aspect-ratio would shrink it). */
   width: 100%;
   aspect-ratio: 4 / 3;
-  max-height: clamp(300px, calc(100dvh - 290px), 600px);
+  max-height: clamp(300px, calc(100dvh - 320px), 600px);
   --stage-radius: 0px;
 }
 
@@ -3336,9 +3336,9 @@ p.try-now {
   color: var(--text-muted);
 }
 
-/* The camera panel: a header ("Camera preview" and the status, the 3-second
-   line along its bottom edge), then the video, in one frame, dark in every
-   theme. */
+/* The camera panel (CameraPanel.jsx), on every camera page: a header (the
+   status, large and white, and the line along its bottom edge), then the
+   video, in one frame, dark in every theme. */
 .camera-panel {
   overflow: hidden;
   color: var(--text);
@@ -3352,13 +3352,13 @@ p.try-now {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-3) var(--space-5) 15px;
+  padding: 20px var(--space-5) 22px;
 }
 
 .camera-panel-status {
-  font-size: var(--text-small);
+  font-size: 24px;
   font-weight: 600;
-  color: var(--text-muted);
+  color: var(--white);
 }
 
 .camera-panel-status.ok {
@@ -3369,15 +3369,15 @@ p.try-now {
   color: var(--warning);
 }
 
-/* The 3-second line, which is also the header's bottom edge: it fills once,
-   over BOTH_HANDS_HOLD_MS (set inline), each time a hold starts; a new hold
-   starts a new line. Full once the check passes. */
+/* The line along the header's bottom edge: for a hold, it fills once over
+   the hold's time (set inline) each time a hold starts, so a new hold starts
+   a new line, and is full once it passes; on Record, it follows the take. */
 .camera-progress {
   position: absolute;
   right: 0;
   bottom: 0;
   left: 0;
-  height: 3px;
+  height: 4px;
   overflow: hidden;
   background: var(--progress-track);
 }

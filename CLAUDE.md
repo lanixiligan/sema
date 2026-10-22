@@ -95,8 +95,9 @@ src/
     settings/       progressStore, settings context, theme, ThemeToggle, SettingsMenu
     shared-camera/  CameraProvider, sharedCamera, useIdleCameraOff
   components/       parts used by more than one page folder
-    camera-view/    CameraView and its parts: CameraStage, CameraControls, CameraOff,
-                    IdleNotice, StageProblem
+    camera-view/    CameraPanel (the dark frame with the status header), CameraView and
+                    its parts: CameraStage, CameraControls, CameraOff, IdleNotice,
+                    StageProblem
     icons/          icons.jsx and the larger LineIcons.jsx
     placeholder/    PlaceholderPage and mixLetters (Learn's and Practice's art)
     Logo.jsx
@@ -232,6 +233,12 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   the idle timeout, and `CameraControls` (on/off, the camera list; the page passes options
   or `false`). The page keeps its own hand detection and passes its overlays as children,
   shown while the camera is live.
+- Every camera page, `/dev/tracking` included, puts its camera in one panel,
+  `CameraPanel` (2026-10-23; before, each page copied the markup and its header looked
+  different): a dark frame in every theme, a header with the page's short status (24px,
+  white, or `tone` 'ok' accent / 'warn' amber), and a line along the header's bottom edge
+  that fills over a hold (`hold`) or to a share (`fill`, Record's take). The look lives
+  only in the shared `.camera-panel*` rules in `styles.css`.
   Pages never call
   `useCamera` or `useHandLandmarker` themselves, except `/dev/tracking`, which keeps its own
   camera and its Start camera button.

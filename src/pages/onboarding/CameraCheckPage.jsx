@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { PATHS } from '../../app/routing/router.js'
 import { useSharedCamera } from '../../app/shared-camera/sharedCamera.js'
 import TopBar from '../../app/layout/TopBar.jsx'
+import CameraPanel from '../../components/camera-view/CameraPanel.jsx'
 import CameraView from '../../components/camera-view/CameraView.jsx'
 import { BOTH_HANDS_HOLD_MS, NO_HOLD, holdSecondsLeft, seeHands, steadySeen, updateHold } from '../../vision/landmarks/handChecks.js'
 import { useHandDetection } from '../../vision/tracking/useHandDetection.js'
@@ -105,23 +106,11 @@ export default function CameraCheckPage({ onDone }) {
         </section>
 
         <section className="camera-check-preview">
-          {/* Dark in every theme, like every camera frame (.on-dark). */}
-          <div className="camera-panel on-dark" role="group" aria-label="Camera preview">
-            <div className="camera-panel-head">
-              {/* A live region: screen readers hear each new status. */}
-              <span className={`camera-panel-status ${tone}`} role="status">
-                {status}
-              </span>
-              <div className="camera-progress" aria-hidden="true">
-                {(holding || passed) && (
-                  <span
-                    key={passed ? 'passed' : holdStart}
-                    className={passed ? 'full' : 'filling'}
-                    style={{ animationDuration: `${BOTH_HANDS_HOLD_MS}ms` }}
-                  />
-                )}
-              </div>
-            </div>
+          <CameraPanel
+            status={status}
+            tone={tone}
+            hold={(holding || passed) && { start: holdStart, ms: BOTH_HANDS_HOLD_MS, done: passed }}
+          >
             {/* The camera waits for the person: arriving here isn't a choice
                 to turn it on, so the browser only asks after Turn camera on. */}
             <CameraView
@@ -131,7 +120,7 @@ export default function CameraCheckPage({ onDone }) {
               autoStart={false}
               offNote="Turn it on when you're ready. Sema only looks for your hands."
             />
-          </div>
+          </CameraPanel>
         </section>
       </main>
       <StepNav previous={{ to: PATHS.privacy }} next={{ onClick: onDone, disabled: !passed }} />
