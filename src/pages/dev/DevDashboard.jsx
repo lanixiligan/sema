@@ -2,8 +2,9 @@ import { useId } from 'react'
 import Link from '../../app/routing/Link.jsx'
 import { PATHS } from '../../app/routing/router.js'
 import DevTopBar from './DevTopBar.jsx'
-// The latest training runs' headline numbers: step 5's small model
-// (training/train_small.py) and step 4's k-NN (training/train.py).
+// The latest training runs' headline numbers: the small model that /try
+// and the live site use (training/train_small.py) and step 4's k-NN
+// (training/train.py).
 import smallResults from '../../../training/reports/small.json'
 import knnResults from '../../../training/reports/knn.json'
 
@@ -22,6 +23,11 @@ const TOOLS = [
     to: PATHS.devExtract,
     title: 'Extract hand points',
     about: 'Runs a public dataset’s photos (ASL-HG, ASLYset) through Sema’s hand model and normalization. Needs the photos on this computer.',
+  },
+  {
+    to: PATHS.try,
+    title: 'Try the classifier',
+    about: 'Now the main page, at /try: live letter guesses for every hand in view. The k-NN switch is there under npm run dev.',
   },
 ]
 
@@ -48,7 +54,7 @@ export default function DevDashboard({ onLock }) {
             </li>
           ))}
         </ul>
-        <Results results={smallResults} title="Small model" />
+        <Results results={smallResults} title="Small model (on /try and the live site)" />
         <Results results={knnResults} title="k-NN, for comparison" />
       </main>
     </>

@@ -11,12 +11,12 @@ describe('resolveRoute', () => {
     }
   })
 
-  it('sends a returning visitor from Welcome to Learn', () => {
-    expect(resolveRoute('/', returning)).toEqual({ redirect: '/learn' })
+  it('sends a returning visitor from Welcome to Try', () => {
+    expect(resolveRoute('/', returning)).toEqual({ redirect: '/try' })
   })
 
-  it('sends a new visitor from Learn and Practice to Welcome', () => {
-    for (const path of ['/learn', '/practice']) {
+  it('sends a new visitor from Try, Learn and Practice to Welcome', () => {
+    for (const path of ['/try', '/learn', '/practice']) {
       expect(resolveRoute(path, newVisitor)).toEqual({ redirect: '/' })
     }
   })
@@ -32,6 +32,10 @@ describe('resolveRoute', () => {
     expect(resolveRoute('/dev/tracking', newVisitor)).toEqual({ page: 'devTracking' })
     expect(resolveRoute('/dev/extract', newVisitor)).toEqual({ page: 'devExtract' })
     expect(resolveRoute('/dev/record', newVisitor)).toEqual({ page: 'devRecord' })
+  })
+
+  it('no longer has Try inside the developer tools', () => {
+    expect(resolveRoute('/dev/try', returning)).toEqual({ redirect: '/' })
   })
 
   it('no longer has Record outside the developer tools', () => {

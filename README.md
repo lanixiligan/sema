@@ -38,7 +38,9 @@
 ## What it does
 
 - Finds your hands in the webcam picture and draws their 21 points.
-- Records labelled hand points for training, on the Record page.
+- Try (`/try`): pick a letter, make it in front of the webcam, and hold it for 3 seconds while
+  Sema checks the handshape. It covers the 24 letters that don't move; J and Z come later.
+- Records labelled hand points for testing, on the Record page (a developer tool, `/dev/record`).
 - Learn and Practice are placeholders until the lessons are built.
 
 ## Quick start
@@ -135,8 +137,16 @@ React, Vite, plain JavaScript and CSS, with MediaPipe Hand Landmarker running in
   by [WPClipart](http://www.wpclipart.com/), in the public domain. They're in
   `public/images/asl/`; [docs/ATTRIBUTION.md](docs/ATTRIBUTION.md) lists each file's source
   and licence.
+- Letter model: `public/models/asl-letters.json` is trained on hand points taken from the
+  photos of [ASL-HG: American Sign Language Hand Gesture Image Dataset](https://data.mendeley.com/datasets/j4y5w2c8w9/1)
+  by Md. Famidul Islam Pranto, Md. Rifatul Islam, Md. Ali Akbor, Nabonita Ghosh, Md. Rahatun
+  Alam, Sudipto Chaki and Md Masudul Islam (Mendeley Data, 2025,
+  [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)), and of
+  [ASLYset](https://data.mendeley.com/datasets/xs6mvhx6rh/1) by Miguel Rivera (Mendeley Data,
+  2019, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)). Sema doesn't include the
+  photos; [docs/ATTRIBUTION.md](docs/ATTRIBUTION.md) says what was changed.
 
 ## License
 
-Sema's own code is under the [MIT License](LICENSE). The fonts, MediaPipe and the ASL hand
-drawings keep their own licences, listed under Credits.
+Sema's own code is under the [MIT License](LICENSE). The fonts, MediaPipe, the ASL hand
+drawings and the ASL-HG and ASLYset datasets keep their own licences, listed under Credits.

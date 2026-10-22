@@ -92,6 +92,7 @@
   --button-text: var(--white);
   --button-hover: color-mix(in srgb, var(--ink), var(--white) 14%);
   --fill-off: var(--disabled); /* disabled buttons, empty progress segments */
+  --tile-off: var(--line-strong); /* a letter tile that can't be picked: darker than the page */
   --segment-track: var(--segment);
   --segment-on: var(--white);
   --highlight: var(--ice-tint);
@@ -169,6 +170,7 @@
   --button-text: var(--ink);
   --button-hover: var(--cloud-white);
   --fill-off: var(--progress-track);
+  --tile-off: var(--night);
   --segment-track: var(--night-raised);
   --segment-on: var(--progress-track);
   --highlight: var(--sky-night);
@@ -946,6 +948,365 @@ body {
    margin they have under the benchmark. */
 .extract .button-quiet {
   margin-top: 0;
+}
+
+/* Try (/try), Practice's prototype: Record's three columns. The intro (and,
+   under npm run dev, the model switch) on top, then the letter to make, the
+   camera, and the letter guide. Narrower windows stack them in that order. */
+.try {
+  display: grid;
+  grid-template-areas:
+    'intro intro intro'
+    'results camera guide';
+  grid-template-columns: 248px minmax(0, 1fr) 320px;
+  gap: 16px 24px;
+  align-items: start;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 20px 48px 28px;
+}
+
+.try-intro {
+  grid-area: intro;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.try-intro p {
+  margin: 0;
+  font-size: var(--text-small);
+  color: var(--text-muted);
+}
+
+.try-results {
+  grid-area: results;
+}
+
+.try-camera {
+  grid-area: camera;
+  min-width: 0;
+}
+
+.try-note,
+.try-model {
+  margin: 0;
+  font-size: var(--text-small);
+  color: var(--text-muted);
+}
+
+.try-model {
+  margin-top: 12px;
+  padding: 0 2px;
+  font-size: var(--text-caption);
+}
+
+@media (max-width: 899px) {
+  .try {
+    grid-template-areas: 'intro' 'results' 'camera' 'guide';
+    grid-template-columns: minmax(0, 1fr);
+    padding: 20px 16px 28px;
+  }
+
+  .try-intro {
+    flex-wrap: wrap;
+  }
+}
+
+/* The letter to make: big, with its drawing, how to form it, and what Sema
+   sees right now. */
+.try-target {
+  padding: 16px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.try-target h2 {
+  margin: 0;
+  font-size: var(--text-caption);
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.try-target-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 6px 0 12px;
+}
+
+.try-letter {
+  margin: 0;
+  font-size: 4.5rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--text);
+}
+
+/* Drawings are black lines: on white in both themes (AslDrawing.jsx). */
+.try-target-drawing {
+  flex: 0 0 80px;
+  height: 80px;
+  padding: 4px;
+  background: var(--white);
+  border-radius: 8px;
+}
+
+.try-steps {
+  margin: 0;
+  padding-left: 18px;
+  font-size: var(--text-small);
+  line-height: 1.5;
+}
+
+.try-steps-note,
+.try-now p {
+  margin: 8px 0 0;
+  font-size: var(--text-caption);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.try-now {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.try-now p:first-child {
+  margin-top: 0;
+}
+
+p.try-now {
+  font-size: var(--text-caption);
+  color: var(--text-muted);
+  margin-bottom: 0;
+}
+
+.try-stage {
+  --stage-radius: 0px;
+}
+
+/* Held for 3 seconds: a dark film over the picture with the result, Try
+   again, and a reminder that the guide picks the next letter. */
+.try-done {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  color: var(--cloud-white);
+  text-align: center;
+  background: var(--scrim);
+}
+
+.try-done-title {
+  margin: 0;
+  font-size: 2.5rem;
+  font-weight: 800;
+}
+
+.try-done-note {
+  margin: 0;
+  font-size: var(--text-small);
+  color: var(--muted-on-dark);
+}
+
+.asl-drawing {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.asl-drawing.mirrored {
+  transform: scaleX(-1);
+}
+
+/* The letter guide: Record's panel look, every letter's drawing in a grid of
+   four. Each tile is a button that picks the letter; the picked one is lit.
+   A dot marks the 8 that work best; J and Z (they move) are darkened. */
+.try-guide {
+  grid-area: guide;
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+}
+
+.try-guide-title {
+  margin: 0 0 8px;
+  padding: 0 4px;
+  font-size: var(--text-small);
+  font-weight: 700;
+}
+
+.try-guide-tiles {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.try-guide-tile {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 4px 4px 3px;
+  font: inherit;
+  font-size: var(--text-caption);
+  font-weight: 700;
+  color: var(--text);
+  text-align: center;
+  cursor: pointer;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.try-guide-tile:hover {
+  border-color: var(--border-strong);
+}
+
+.try-guide-tile:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* A 2px ring (the border and an inset shadow), so it stands out in both themes. */
+.try-guide-tile[aria-pressed='true'] {
+  background: var(--highlight);
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+/* Darker than the other tiles in both themes, its drawing dimmed. */
+.try-guide-tile.moving {
+  color: var(--text-muted);
+  cursor: not-allowed;
+  background: var(--tile-off);
+  border-color: var(--tile-off);
+}
+
+.try-guide-tile.moving .try-guide-drawing {
+  opacity: 0.45;
+}
+
+.try-guide-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+/* In the label row, left of the letter, clear of the drawing's white backing. */
+.try-guide-tile .try-guide-dot {
+  position: absolute;
+  bottom: 7px;
+  left: 7px;
+}
+
+.try-guide-swatch {
+  display: inline-block;
+  width: 12px;
+  height: 10px;
+  background: var(--tile-off);
+  border-radius: 2px;
+}
+
+.try-guide-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-top: 10px;
+  padding: 0 4px;
+  font-size: var(--text-caption);
+  color: var(--text-muted);
+}
+
+.try-guide-legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.try-guide-drawing {
+  display: block;
+  height: 46px;
+  margin-bottom: 2px;
+  padding: 3px;
+  background: var(--white);
+  border-radius: 5px;
+}
+
+/* Stacked, the guide is full width: as many tiles per row as fit, so they
+   stay tile-shaped. (After the rule above, so it wins.) */
+@media (max-width: 899px) {
+  .try-guide-tiles {
+    grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  }
+}
+
+/* Small model / k-NN: the theme toggle's look, with words instead of icons. */
+.try-switch {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.try-switch-track {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--segment-track);
+  border-radius: var(--radius-control);
+}
+
+.try-switch label {
+  position: relative;
+}
+
+.try-switch input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.try-switch-option {
+  display: block;
+  padding: 4px 14px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-radius: var(--radius-segment);
+}
+
+.try-switch label:hover .try-switch-option,
+.try-switch input:checked + .try-switch-option {
+  color: var(--text);
+}
+
+.try-switch input:checked + .try-switch-option {
+  background: var(--segment-on);
+}
+
+.try-switch input:focus-visible + .try-switch-option {
+  outline: 3px solid var(--accent);
+  outline-offset: 1px;
 }
 
 .benchmark-results {
