@@ -28,3 +28,19 @@ public/mediapipe/
 
 # Recorded landmark data: private, never committed (see docs/guide.md, "Recorded data")
 data/raw/
+
+# Downloaded public datasets (ASL-HG and the others, about 1 GB each): too large for git,
+# kept by their own licences
+data/public/
+
+# Hand points extracted from public datasets at /dev/extract: large, and rebuilt from the photos
+data/extracted/
+
+# Python bytecode (training/)
+__pycache__/
+
+# Trained models (training/train.py): they hold every training hand, so they stay out of git
+data/models/
+
+# Brainstorming mockups (superpowers visual companion)
+.superpowers/

@@ -1,0 +1,4 @@
+# Training only: runs offline on Lanix's computer, never in the app.
+# Developed with Python 3.14.8.
+numpy==2.5.3
+scikit-learn==1.9.1

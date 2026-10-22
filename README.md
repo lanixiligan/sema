@@ -87,6 +87,9 @@ The badges at the top repeat the main ones, so update them together with this ta
 | Vitest | 5.0.4 | Unit tests |
 | oxlint | 1.88.0 | Lint |
 | Browser | Chrome (current) | Needs WebGL2 for hand tracking |
+| Python | 3.14.8 | Training only (`training/`), offline; never in the app |
+| numpy | 2.5.3 | Training only |
+| scikit-learn | 1.9.1 | Training only |
 
 The left/right hand rule was checked by hand with tasks-vision 1.1.1; check it again after
 upgrading MediaPipe (see CLAUDE.md).

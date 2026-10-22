@@ -1,0 +1,100 @@
+{
+  "date": "2026-10-23",
+  "classifier": "logistic regression",
+  "threshold": 0.622,
+  "trainingHands": 27463,
+  "signers": 14,
+  "passShare": 0.9,
+  "heldOut": {
+    "mean": 0.945,
+    "byDataset": {
+      "asl-hg": 0.947,
+      "aslyset": 0.935
+    },
+    "letters": {
+      "A": 1.0,
+      "B": 0.999,
+      "C": 0.97,
+      "D": 0.953,
+      "E": 0.977,
+      "F": 0.994,
+      "G": 0.979,
+      "H": 0.99,
+      "I": 0.998,
+      "K": 0.998,
+      "L": 0.997,
+      "M": 0.992,
+      "N": 0.817,
+      "O": 0.991,
+      "P": 0.957,
+      "Q": 0.933,
+      "R": 0.835,
+      "S": 0.87,
+      "T": 0.848,
+      "U": 0.842,
+      "V": 0.914,
+      "W": 0.999,
+      "X": 0.831,
+      "Y": 0.998
+    }
+  },
+  "recordings": {
+    "frames": 1440,
+    "letters": {
+      "B": {
+        "left": 1.0,
+        "right": 1.0,
+        "takesRight": 6,
+        "takes": 6
+      },
+      "C": {
+        "left": 1.0,
+        "right": 1.0,
+        "takesRight": 6,
+        "takes": 6
+      },
+      "D": {
+        "left": 1.0,
+        "right": 1.0,
+        "takesRight": 6,
+        "takes": 6
+      },
+      "F": {
+        "left": 1.0,
+        "right": 1.0,
+        "takesRight": 6,
+        "takes": 6
+      },
+      "I": {
+        "left": 1.0,
+        "right": 1.0,
+        "takesRight": 6,
+        "takes": 6
+      },
+      "L": {
+        "left": 1.0,
+        "right": 1.0,
+        "takesRight": 6,
+        "takes": 6
+      },
+      "W": {
+        "left": 1.0,
+        "right": 1.0,
+        "takesRight": 6,
+        "takes": 6
+      },
+      "Y": {
+        "left": 1.0,
+        "right": 1.0,
+        "takesRight": 6,
+        "takes": 6
+      }
+    }
+  },
+  "datasets": [
+    "sema-extracted-asl-hg-2026-10-22.json",
+    "sema-extracted-aslyset-2026-10-22.json"
+  ],
+  "setting": "C = 1",
+  "report": "training/reports/small.md"
+}
