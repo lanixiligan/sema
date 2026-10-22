@@ -15,6 +15,7 @@ export const PATHS = {
   // the dashboard, then each tool. Not in the menu.
   dev: '/dev',
   devTracking: '/dev/tracking',
+  devExtract: '/dev/extract',
   devRecord: '/dev/record',
 }
 

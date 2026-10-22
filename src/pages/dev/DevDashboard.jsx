@@ -18,6 +18,11 @@ const TOOLS = [
     title: 'Record',
     about: 'Records takes of each letter as hand points, for the test set, and downloads the session file.',
   },
+  {
+    to: PATHS.devExtract,
+    title: 'Extract hand points',
+    about: 'Runs a public dataset’s photos (ASL-HG, ASLYset) through Sema’s hand model and normalization. Needs the photos on this computer.',
+  },
 ]
 
 // /dev: every developer tool, and how the classifier did in the last training run.

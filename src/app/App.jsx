@@ -17,7 +17,7 @@ import PracticePage from '../pages/practice/PracticePage.jsx'
 // The developer pages, behind their access code. Loaded on demand (lazy), so
 // visitors who never open /dev never download them.
 const DevArea = lazy(() => import('../pages/dev/DevArea.jsx'))
-const DEV_PAGES = ['dev', 'devTracking', 'devRecord']
+const DEV_PAGES = ['dev', 'devTracking', 'devExtract', 'devRecord']
 
 // Displays narrower than this get the phone notice (from the design).
 const SMALL_SCREEN = '(max-width: 899px)'

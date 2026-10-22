@@ -1,6 +1,7 @@
 import { isUnlocked } from './devAccess.js'
 import DevDashboard from './DevDashboard.jsx'
 import DevGate from './DevGate.jsx'
+import ExtractPage from './extract/ExtractPage.jsx'
 import RecordPage from './record/RecordPage.jsx'
 import TrackingPage from './tracking/TrackingPage.jsx'
 
@@ -17,6 +18,8 @@ export default function DevArea({ page, signingHand, devAccess, onAccessChange }
       return <DevDashboard onLock={() => onAccessChange(null)} />
     case 'devTracking':
       return <TrackingPage />
+    case 'devExtract':
+      return <ExtractPage />
     case 'devRecord':
       return <RecordPage signingHand={signingHand} />
   }

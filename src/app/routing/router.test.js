@@ -30,6 +30,7 @@ describe('resolveRoute', () => {
   it('serves the developer dashboard and each tool, without setup', () => {
     expect(resolveRoute('/dev', newVisitor)).toEqual({ page: 'dev' })
     expect(resolveRoute('/dev/tracking', newVisitor)).toEqual({ page: 'devTracking' })
+    expect(resolveRoute('/dev/extract', newVisitor)).toEqual({ page: 'devExtract' })
     expect(resolveRoute('/dev/record', newVisitor)).toEqual({ page: 'devRecord' })
   })
 

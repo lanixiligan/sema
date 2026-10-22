@@ -942,6 +942,12 @@ body {
   color: var(--warning);
 }
 
+/* The extract tool: its buttons share one row, so the quiet ones drop the
+   margin they have under the benchmark. */
+.extract .button-quiet {
+  margin-top: 0;
+}
+
 .benchmark-results {
   display: flex;
   flex-wrap: wrap;
