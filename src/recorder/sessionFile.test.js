@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest'
 import {
   acceptedCount,
   addTake,
-  attemptCount,
   isValidPersonCode,
   makeRecordingId,
   needsDownload,
@@ -154,7 +153,6 @@ describe('addTake', () => {
     let s = addTake(session(), take({ status: 'rejected', reason: 'x' }))
     s = addTake(s, take())
     expect(s.recordings.map((r) => r.recording)).toEqual(['p03-2026-11-02a-W-left-1', 'p03-2026-11-02a-W-left-2'])
-    expect(attemptCount(s, 'W', 'left')).toBe(2)
     expect(acceptedCount(s, 'W', 'left')).toBe(1)
     expect(acceptedCount(s, 'W', 'right')).toBe(0)
   })

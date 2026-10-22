@@ -51,11 +51,6 @@ function takesFor(session, letter, hand) {
   return session.recordings.filter((r) => r.letter === letter && r.hand === hand)
 }
 
-// All attempts still in the session, accepted or rejected.
-export function attemptCount(session, letter, hand) {
-  return takesFor(session, letter, hand).length
-}
-
 // One more than the highest take number for this letter and hand, counting
 // rejected attempts. Deleting a take can leave a gap, but a number still in
 // the session is never reused, so every recording ID stays unique.
