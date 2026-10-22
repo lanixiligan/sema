@@ -1,6 +1,6 @@
 # Session file format
 
-The recorder (`/record`, milestone 2.1) saves one JSON file per session:
+The recorder (`/dev/record`, milestone 2.1) saves one JSON file per session:
 `sema-asl-<person>-<session>.json`. This is the reference for that file.
 Design background: [recorder-design.md](archive/recorder-design.md).
 
@@ -81,7 +81,7 @@ the hand or the letter.
 | Field | Meaning |
 | --- | --- |
 | `recording` | `<person>-<session>-<letter>-<hand>-<take>`. Unique within a session and across `data/raw/`. |
-| `letter` | `"A"`–`"Z"`, or `"none"` for the "no letter" class. |
+| `letter` | `"A"`–`"Z"`. Sessions recorded before 2026-10-23 can also hold `"none"` (a "no letter" class, since dropped: Sema only checks the letter it asked for); training skips those takes. |
 | `hand` | The hand the participant was asked to use: `"left"` or `"right"`. |
 | `take` | Take number for this letter and hand: one more than the highest so far, counting rejected attempts. A deleted take leaves a gap; numbers are never reused within a session. |
 | `status` | `"accepted"` or `"rejected"`. |
@@ -137,3 +137,62 @@ MediaPipe's handedness is. **Training filters to `detected == hand`.**
    H points sideways).
 
 Frames whose palm length is about zero are treated as having no hand.
+
+## Extracted files (public datasets)
+
+`/dev/extract` (a developer tool, behind the access code) runs a public dataset's photos through the same
+hand model and normalization as the recorder, and saves one file:
+`sema-extracted-<dataset>-<date>.json`. Keep it in `data/extracted/` (gitignored). How to run
+it: [dev.md](dev.md#extract-hand-points).
+
+Each dataset lives in its own folder in `data/public/` (gitignored), and the folder's name
+is the dataset's name (`DATASETS` in `src/pages/dev/extract/extractFile.js`). A model trained
+on one must credit its authors.
+
+- **ASL-HG**, `data/public/asl-hg/` (Mendeley Data, CC BY 4.0,
+  [doi:10.17632/j4y5w2c8w9.1](https://data.mendeley.com/datasets/j4y5w2c8w9/1)): 36,000
+  photos, 300×300, of 10 signers, in one folder per label (A–Z, 0–9), 100 photos per signer
+  and label, named `P<signer>_<label>_<number>.jpg`.
+- **ASLYset**, `data/public/aslyset/` (Mendeley Data, CC BY 4.0,
+  [doi:10.17632/xs6mvhx6rh.1](https://data.mendeley.com/datasets/xs6mvhx6rh/1)): 5,200
+  photos, 416×416 PNG, of 4 signers, webcam pictures in an office. `images/User<n>/<label>/`
+  holds 50 photos per signer and label, named `User<n>_<LABEL>_<number>.png`. The labels are
+  the 24 static letters, in lowercase folders, and two other signs, FN and SP, which are
+  skipped. `labels/` holds YOLO boxes, not photos.
+
+None of Sema's code reads the photos outside `/dev/extract`.
+
+How the points are made: the app's own `loadHandLandmarker` (2 hands, GPU or CPU), switched
+to IMAGE mode with `setOptions({ runningMode: 'IMAGE' })` so each photo is detected on its
+own, with nothing carried over from the photo before. Each hand found then goes through the
+recorder's `frameFromDetection` (handedness, the left-hand flip, `normalizeHand`) and is
+rounded like a session file.
+
+### Header
+
+| Field | Meaning |
+| --- | --- |
+| `kind` | `"extracted"`. Session files have no `kind`. |
+| `format` | Version of this layout, numbered separately from session files. |
+| `normalization`, `language` | As in a session file. |
+| `dataset` | The dataset's folder name: `"asl-hg"` or `"aslyset"`. |
+| `browser`, `delegate` | Where it ran: `"Chrome 155"`, and `"GPU"` or `"CPU"` (they can give slightly different points). |
+| `date` | The day it ran. |
+| `photos` | Photos read. |
+| `complete` | `false` if the run was stopped before the last photo. |
+| `misses` | `{ image, reason }` for each photo with no sample: `"no hand"` or `"unreadable"`. |
+
+### Samples
+
+Laid out like a session file's samples, with these differences:
+
+| Field | Meaning |
+| --- | --- |
+| `person` | The dataset and signer, from the file name: `P10_B_1000.jpg` gives `asl-hg-p10` and `User3_N_30.png` gives `aslyset-p03`, so they never clash with each other or with Sema's own codes. **Split training and testing by `person`, never by photo:** one signer's photos of a letter are nearly alike. |
+| `letter` | The photo's label: `"A"`–`"Z"`, or a digit `"0"`–`"9"`. Digits 6 and 9 have the same handshapes as W and F. |
+| `image` | The photo, as `<folder>/<file name>`, the folder being the label's (`B/P10_B_1000.jpg`, `n/User3_N_30.png`). |
+| `handsFound` | Hands in the photo. With two, each hand is its own sample; cleaning decides what to keep. |
+
+There is no `hand`, `session`, `recording`, `take` or `t`: the photos don't say which hand
+was used, and they aren't takes. `detected` and `detectedScore` mean the same as in a
+session file.

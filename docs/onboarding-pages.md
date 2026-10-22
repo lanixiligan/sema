@@ -1,7 +1,7 @@
 # Onboarding pages
 
-What a new visitor sees before Record, and what each page says. This describes the pages
-as built on 2026-10-18; the page files in `src/pages/onboarding/` are the source of truth,
+What a new visitor sees before Try (the main page for now), and what each page says. This describes the pages
+as built on 2026-10-18 (since 2026-10-22, setup leads to Try instead of Record); the page files in `src/pages/onboarding/` are the source of truth,
 so update this document when they change.
 
 ## The flow
@@ -14,10 +14,12 @@ so update this document when they change.
 | 4 | How Sema handles your data | `/privacy` | `PrivacyPage.jsx` |
 | 5 | Camera check (setup) | `/setup/camera` | `CameraCheckPage.jsx` |
 
-- A **new visitor** starts on Welcome. Opening Record, Learn or Practice sends them back
+- A **new visitor** starts on Welcome. Opening Try, Learn or Practice sends them back
   to Welcome (`resolveRoute` in `src/app/routing/router.js`).
 - Finishing the camera check finishes setup. A **returning visitor** opening `/` goes
-  straight to Record. The intro pages can still be opened by their address. Then About's
+  straight to Try (to Record until 2026-10-22, then briefly Learn; Record is now a developer
+  tool, `/dev/record`).
+  The intro pages can still be opened by their address. Then About's
   Previous and the data page's Previous go back to wherever the person came from, and the
   data page has no Next.
 - On a **small screen** (narrower than 900px), the phone notice replaces the whole app
@@ -100,11 +102,11 @@ Each claim was checked against the code (see the comment at the top of `PrivacyP
 
 Setup's one page. Two columns: three numbered steps on the left, the camera panel on the
 right. Previous: How Sema handles your data. **Next stays closed until the check passes**,
-then finishes setup and opens Record. Setup doesn't ask which hand the visitor signs
-with: it saves Right, and the Left | Right switch on Record's camera picks the hand per take.
+then finishes setup and opens Try. Setup doesn't ask which hand the visitor signs
+with: it saves Right.
 
 - Headline: **Check your camera**
-- Text: Let's make sure your camera is ready before you start recording.
+- Text: Let's make sure your camera is ready before you start.
 - The steps, a checklist ticked off from what the camera and hand tracking really do:
   1. **Enable your camera**: Allow camera access when your browser asks, so Sema can see
      your hands.
@@ -163,4 +165,3 @@ On a screen narrower than 900px, instead of the app:
   webcam. For the best experience, open this link on a computer."
 - Buttons: **Copy link** (then "Link copied"), **Continue on this phone** (shows the app
   until the page is reloaded)
-- Footer: "Here to help record letters? Please use a computer for the recorder."

@@ -26,11 +26,20 @@ The development plan is `docs/project-plan.md`.
 - **Phase 1 (done, deployed on Vercel):** hand tracking with MediaPipe Hand Landmarker in `src/vision/`:
   detection loop, mirrored skeleton overlay, hand found/lost with handedness,
   detection fps and time, GPU/CPU delegate with fallback.
-- **Phase 2 (in progress):** recording, landmark normalization, classifier. The
-  recorder (2.1) is done (2026-10-18; built on `phase-2-1-recorder`, merged into
-  `main`). Next: the pilot recording, then training (2.2).
+- **Phase 2 (done 2026-10-23, on `phase-2-2-training`):** recording, landmark
+  normalization, classifier, for the 24 static letters (J and Z wait for Phase 4). The
+  recorder (2.1, done 2026-10-18, merged into `main`); Lanix's first test session
+  (2026-10-20, p00: the 8 letters, both hands). Training (2.2): `/dev/extract` turns public
+  datasets' photos (ASL-HG, ASLYset) into hand points, `training/` cleans them
+  (`training/reports/cleaning-<dataset>.md`) and tests a k-NN and two small models
+  (`training/reports/knn.md`, `small.md`); logistic regression is the model in the browser.
+  The live check (2.3) is Try (`/try`): Sema only checks the letter the person picked,
+  so there is no "none" class anywhere. The finger hints (2.4) moved to Phase 3. The model
+  keeps improving during later phases, judged by the same held-out tests.
 - **Phase 3.1 (done early, with the recorder):** the app shell, Welcome and setup,
-  because the recorder became the app's main page after setup. Learn and Practice stay
+  because the recorder was the app's main page after setup (since 2026-10-22 it's a
+  developer tool, `/dev/record`, and setup leads to Try, `/try`, the classifier live:
+  the main page for now). Learn and Practice stay
   placeholders until 3.3–3.4 (`phase-3-preview`). What the onboarding pages say and do:
   `docs/onboarding-pages.md` (update it when they change).
 - Later: letter recognition (`src/recognition/`). Don't create that folder early.
@@ -40,7 +49,8 @@ The development plan is `docs/project-plan.md`.
 - React + Vite + plain JavaScript (`.jsx` / `.js`). No TypeScript.
 - No UI framework, no CSS framework. Plain CSS in `src/styles.css`.
 - No new dependencies without asking first. Approved so far: `@mediapipe/tasks-vision`,
-  `vitest` (dev only).
+  `vitest` (dev only), and for offline training only (Python, `training/requirements.txt`)
+  `numpy` and `scikit-learn`.
 - Serve every asset from the app itself, never from a CDN. Fonts are `.woff2` files in
   `public/fonts/` with their OFL licences, declared with `@font-face` in `styles.css`.
 - Logos are SVGs in `public/logos/`: `sema-mark-*` (the mark alone) and `sema-logo-*`
@@ -61,6 +71,16 @@ The development plan is `docs/project-plan.md`.
 - `npm run lint`: oxlint
 - `npm run copy-mediapipe`: copy MediaPipe's wasm into `public/mediapipe/wasm/`
   (also runs on `postinstall`)
+- `npm run dev-code -- "a long passphrase"`: set the developer pages' access code
+- `python3 -m unittest discover training`: the training code's tests
+- `python3 training/clean.py data/extracted/<file>.json`: clean one dataset's extracted hand
+  points and write `training/reports/cleaning-<dataset>.md`
+- `python3 training/train.py data/extracted/<file>.json [...] data/raw/<session>.json [...]`:
+  train the k-NN classifier on every extracted file given (any order; each file is sorted by
+  its content), test it, and write `training/reports/knn.md`
+- `python3 training/train_small.py` with the same files: train
+  the small models (after train.py), test them next to the k-NN, write
+  `training/reports/small.md`, and save the better one as `public/models/asl-letters.json`
 
 ## Folder structure
 
@@ -80,22 +100,33 @@ src/
     icons/          icons.jsx and the larger LineIcons.jsx
     placeholder/    PlaceholderPage and mixLetters (Learn's and Practice's art)
     Logo.jsx
+    AslDrawing.jsx  a letter's drawing (public/images/asl/, a left hand), facing a given
+                    hand; DRAWN_HAND (Record's reference picture, Try's cards and guide)
   pages/
     onboarding/     Welcome; Camera check; StepNav (used by intro/ and the camera check)
       intro/        About Sema, How Sema works, How Sema handles your data, and their
                     parts (IntroLayout, AboutPreview, HandSketch, useStaggeredReveal…)
-    record/         the Record page and its parts
+    try/            Try (/try), the main page for now and Practice's prototype: pick a
+                    letter in the guide (GuidePanel), hold it 3 s (letterHold), and the
+                    models' JS copies (networkModel, knnModel)
     learn/          the Learn placeholder
     practice/       the Practice placeholder
-    dev/            the Phase 1 page at /dev (+ BenchmarkPanel)
+    dev/            the developer tools behind an access code: DevArea (the gate, then
+                    the page), DevGate, DevDashboard (/dev), DevTopBar, devAccess
+      tracking/     the Phase 1 page at /dev/tracking (+ BenchmarkPanel)
+      extract/      /dev/extract: dataset photos → hand points
+      record/       /dev/record: the recorder (the Record page) and its parts
   camera/           webcam logic: useCamera hook, error messages, video stats, idle rules
   vision/           hand tracking
     model/          loading the hand model, WebGL and browser checks, error messages
-    tracking/       the detection loop, picking a hand, handedness, drawing the hand
+    tracking/       the detection loop, picking a hand, handedness, smoothing and
+                    drawing the hand
     landmarks/      math on the hand points: normalization, the camera check's rules
-    benchmark/      the /dev benchmark's hook and statistics
+    benchmark/      the /dev/tracking benchmark's hook and statistics
   recorder/         recording logic: take rules, useRecording, session file and storage
 ```
+
+Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.md`).
 
 ## Routing
 
@@ -108,15 +139,43 @@ src/
   paths redirect to `/`. `src/app/routing/navigation.js` changes pages with the History API
   (`navigate`, `usePathname`); links between pages use `<Link>` from `src/app/routing/Link.jsx`.
 - `vercel.json` rewrites every path to `index.html`; Vercel serves real files first.
-- `/dev` is the Phase 1 tracking page with the benchmark. It's not in the menu.
-- Setup redirects live in `resolveRoute`: a new visitor opening Record, Learn or
-  Practice goes to Welcome; a returning visitor opening `/` goes to Record.
+- The developer tools live under `/dev`, on the live site too, behind an access code, and
+  aren't in the menu. Everything about them (the code, each tool, the benchmark results) is
+  in `docs/dev.md`; keep it up to date when a tool changes (2026-10-22; before, `/dev` was the tracking page, with no code).
+  `/dev` is a dashboard: a card per tool and the latest training results
+  (`training/reports/small.json`, then `knn.json` to compare). The tools: `/dev/tracking` (the Phase 1 page with the
+  benchmark), `/dev/extract` (a public dataset's photos through Sema's hand model and
+  normalization, `docs/data-format.md` "Extracted files"), and `/dev/record` (the recorder; until
+  2026-10-22 it was the main page, at `/record`).
+- The access code is a keep-out sign, not a lock (no server): only its SHA-256 fingerprint
+  ships, in `src/pages/dev/dev-code.json`, set with `npm run dev-code -- "passphrase"` (12+
+  characters). The browser remembers it as `devAccess` in `progressStore.js`; Delete Sema's
+  data or Lock forgets it, and a new code locks every browser out. `App.jsx` loads
+  `DevArea.jsx` with `lazy()`, so visitors who never open `/dev` never download the tools.
+- Try (`/try`, the main page for now; until 2026-10-22 the developer tool `/dev/try`) is
+  Practice's prototype (2026-10-22): pick a letter in the guide (B at first), make it, and
+  hold it for 3 s (`LETTER_HOLD_MS` in `src/pages/try/letterHold.js`). The hold counts while
+  any whole hand's guess is that letter and sure; a gap over 300 ms restarts it. Then
+  "That's B!" with Try again; the next letter is picked by hand. The guide shows all 26:
+  a dot marks the 8 tested on Lanix's recordings, and J and Z (they move) are darkened and
+  can't be picked. Try runs
+  the small model (step 5 of 2.2): `public/models/asl-letters.json`, committed (weights only,
+  a few KB), so it works on the live site; its JS copy (`src/pages/try/networkModel.js`) must give the same answers as
+  `forward()` in `training/small.py`. The k-NN (step 4): `data/models/knn-asl.json`
+  (gitignored, 11 MB), offered by a switch only under `npm run dev`, with a line naming the
+  model; `knnModel.js` must match `training/knn.py`.
+  The small model is trained on ASL-HG and, since 2026-10-23, ASLYset (both CC BY 4.0): keep
+  their credits in `docs/ATTRIBUTION.md` and the README, and add one for any dataset added.
+- Setup redirects live in `resolveRoute`: a new visitor opening Try, Learn or Practice goes
+  to Welcome; a returning visitor opening `/` goes to Try. Finishing setup opens Try. The developer pages, Record
+  included, don't need setup.
 
 ## Settings
 
 - The signing hand and "setup done" are kept by `src/app/settings/progressStore.js`
   (`localStorage` key `sema.progress`, with a version number). Pages never touch
-  `localStorage` directly; `App.jsx` holds the settings and passes them down.
+  `localStorage` directly; `App.jsx` holds the settings and passes them down. The same
+  store keeps `devAccess`, the fingerprint of the developer pages' access code once entered.
 - The theme (Light / Dark / System, default System) is saved in the same store and chosen with
   the icon toggle at the right of every page's top bar (`src/app/settings/ThemeToggle.jsx`, in
   `TopBar`). The settings menu (`src/app/settings/SettingsMenu.jsx`, a gear with no text, last in the
@@ -156,7 +215,8 @@ src/
 - The camera check never starts the camera by itself: it opens with "Camera is off" and a
   Turn camera on button, and the browser only asks for the camera after that click
   (`CameraStage autoStart={false}`). Record's recording step starts it on arrival, since the
-  person just pressed Start recording. It stays off on Welcome, the intro pages and
+  person just pressed Start recording. Try waits for a click too, so landing on Sema never
+  turns the camera on. It stays off on Welcome, the intro pages and
   Record's consent/finished steps, and turns off whenever no camera view is on screen.
 - `CameraProvider` (`src/app/shared-camera/`) does this: it owns the camera and the hand model for
   every page, starts the camera when a `CameraStage` with `autoStart` (the default)
@@ -166,14 +226,14 @@ src/
   10 s without a hand a notice appears and counts down the rest of the minute
   (`src/camera/idleRules.js`, `src/app/shared-camera/useIdleCameraOff.js`, `IdleNotice`); any hand resets
   the count.
-- Every camera page (camera check, Record) uses one component, `CameraView`
+- Every camera page (camera check, Try, Record) uses one component, `CameraView`
   (`src/components/camera-view/`): the frame, the problem panel (texts `CAMERA_VIEW_*` in
   `cameraMessages.js` and `visionMessages.js`), `CameraOff` with a Turn camera on button,
   the idle timeout, and `CameraControls` (on/off, the camera list; the page passes options
   or `false`). The page keeps its own hand detection and passes its overlays as children,
   shown while the camera is live.
   Pages never call
-  `useCamera` or `useHandLandmarker` themselves, except `/dev`, which keeps its own
+  `useCamera` or `useHandLandmarker` themselves, except `/dev/tracking`, which keeps its own
   camera and its Start camera button.
 - Constraints: video only, ideal 640×480, `facingMode: 'user'`. Ideal values are
   requests; read `videoWidth`/`videoHeight` for the real size.
@@ -227,6 +287,12 @@ src/
   `scaleX(-1)`). Draw in un-mirrored video pixels: `x * videoWidth`,
   `y * videoHeight`. The canvas buffer is the video's real resolution ×
   `devicePixelRatio`. Draw with the Canvas 2D API, not DrawingUtils.
+- Smoothing (2026-10-22): the drawn points go through a One Euro filter
+  (`src/vision/tracking/smoothHands.js`), because the points shook, most on closed
+  handshapes, and Hand Landmarker has no smoothing option. Only the drawing is
+  smoothed: the listener (recorder, camera check, Try) still gets raw points.
+  Each hand keeps its own filters, matched by wrist position, and starts fresh after
+  300 ms unseen. `MIN_CUTOFF` and `BETA` are tuned by eye in Chrome.
 - Landmarks can go below 0 or above 1 when the hand is partly out of frame. The
   canvas clips them; no special handling needed.
 - **Handedness rule** (checked by hand on 2026-10-15, Chrome, tasks-vision 1.1.1):
@@ -234,7 +300,8 @@ src/
   raised (right hand → "Right"). `toPhysicalHand` in `src/vision/tracking/handedness.js`
   passes it through unchanged. If frames are ever mirrored before detection, swap
   it. Re-check after upgrading MediaPipe.
-- Performance numbers come from the benchmark in Developer settings on `/dev`
+- Performance numbers come from the benchmark in Developer settings on `/dev/tracking`
+  (results in `docs/dev.md`)
   (`useBenchmark.js`, `benchmarkStats.js`, `BenchmarkPanel.jsx`): 2 s warm-up, 10 s
   window, camera fps from `presentedFrames`, detection median/p95/mean. A run is
   rejected if a hand was found in under 90% of frames, the tab was hidden, or the
@@ -252,10 +319,13 @@ src/
 - The left-hand flip uses the detected hand, for now (an open decision in the plan).
 - Take timing and the sampling interval are constants in `src/recorder/takeRules.js`;
   a take passes when `kept − mismatched ≥ 24`.
-- `data/raw/` is gitignored and private; never commit recorded sessions.
+- `data/raw/` is gitignored and private; never commit recorded sessions. Downloaded
+  datasets (`data/public/`, a folder each: `asl-hg/`, `aslyset/`) and extracted files
+  (`data/extracted/`) are gitignored too.
 - `npm test` runs Vitest; keep pure logic in small modules with tests next to them.
-- Letters come from `public/languages/asl/letters.json`; `pilotOnly` letters are
-  recorded in the pilot but excluded from 2.2's first training set.
+- Letters come from `public/languages/asl/letters.json`. `pilotOnly` letters were to be
+  left out of 2.2's first training set; since 2026-10-22 training uses all 24 static
+  letters from the public photos, and Lanix's recordings are the test (`docs/project-plan.md`).
 
 ## Design reference
 

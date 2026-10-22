@@ -116,11 +116,12 @@ Everything runs in your browser: no backend, no accounts, and video never leaves
 
 - [Development plan](docs/project-plan.md)
 - [What's next](docs/NEXT.md)
-- [Benchmarks](docs/benchmarks.md)
+- [Developer pages](docs/dev.md): the access code, the tools at `/dev`, and the benchmark results
 - [Session file format](docs/data-format.md)
 - [Guide](docs/guide.md): deploy, recording sessions, MediaPipe files, webcam, Codespaces
-- [Image attribution](docs/ATTRIBUTION.md): where the ASL hand drawings come from, and their licence
-- [Onboarding pages](docs/onboarding-pages.md): what each page before Record says and does
+- [Attribution](docs/ATTRIBUTION.md): where the ASL hand drawings and the letter model's training
+  photos come from, and their licences
+- [Onboarding pages](docs/onboarding-pages.md): what each page before Try says and does
 
 ## Tech
 
