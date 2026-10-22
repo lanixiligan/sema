@@ -157,12 +157,13 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
 - Practice (`/practice`, the main page for now) was Try (`/try`, which now redirects to
   `/practice`) until 2026-10-23, and before 2026-10-22 the developer tool `/dev/try`.
   Record's three columns: the letter guide on the left, the camera (with the Left | Right
-  switch in its controls, which changes the saved signing hand, so the drawings face it;
-  either hand can make the letter) in the middle, and the letter's card on the right: its
-  drawing large, its steps, and a "Right now" line per hand. Pick a letter in the guide (B at
+  switch in its controls, which changes the saved signing hand, Right by default, so the
+  drawings face it; since 2026-10-23 only that hand is drawn and judged, and the status says
+  "Show B with your right hand") in the middle, and the letter's card on the right: its
+  drawing large, its steps, and a "Right now" line for the signing hand. Pick a letter in the guide (B at
   first), make it, and
   hold it for 3 s (`LETTER_HOLD_MS` in `src/pages/practice/letterHold.js`). The hold counts while
-  any whole hand's guess is that letter and sure, and the hand passes the letter's shape
+  the signing hand's whole-hand guess is that letter and sure, and the hand passes the letter's shape
   rules (`src/vision/landmarks/letterShapes.js`, 2026-10-23: only B so far, fingers together
   and thumb across the palm, since the model called an open hand B); a gap over 300 ms
   restarts it. Then

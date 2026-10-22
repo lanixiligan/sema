@@ -193,10 +193,12 @@ hand) as buttons that pick the letter; a dot marks the 8 tested on Lanix's recor
 J and Z (they move) are darkened and disabled. In the middle, the camera in the camera
 check's panel: a short status, and a line that fills over the 3 seconds; then "That's B!"
 over the picture with Try again. Its controls have Record's Left | Right switch, which here
-changes the saved signing hand (the drawings face it); either hand can make the letter. On
+changes the saved signing hand (Right by default; the drawings face it). Since 2026-10-23
+only the signing hand counts: the status says "Show B with your right hand", the other hand
+gets no points drawn, and it can't make the letter (before, either hand could). On
 the right, the letter's card with its drawing large, its steps from `letters.json` (where it
-has them) and a "Right now" line per hand in view (the guess and how sure, or "not sure").
-The hold counts while any whole hand's guess
+has them) and a "Right now" line for the signing hand (the guess and how sure, or "not sure").
+The hold counts while the signing hand's whole-hand guess
 is the letter and sure, and the hand passes the letter's shape rules; a gap over 300 ms
 restarts it (`src/pages/practice/letterHold.js`, with tests). The shape rules
 (`src/vision/landmarks/letterShapes.js`, 2026-10-23) catch hands the model only takes for a

@@ -17,7 +17,7 @@ describe('showsLetter', () => {
     expect(showsLetter([{ ...sureA, fix: null }], 'A')).toBe(true)
   })
 
-  it('counts either hand', () => {
+  it('counts any hand it is given (Practice only gives the signing hand)', () => {
     expect(showsLetter([{ ...sureA, letter: 'S' }, { ...sureA, hand: 'left' }], 'A')).toBe(true)
   })
 })
@@ -60,6 +60,7 @@ describe('practiceStatus', () => {
     secondsLeft: null,
     guesses: [],
     target: 'A',
+    hand: 'right',
   }
 
   it('reports problems first, in amber', () => {
@@ -82,8 +83,12 @@ describe('practiceStatus', () => {
   })
 
   it('says what to do otherwise', () => {
-    expect(practiceStatus(ready).status).toBe('Make A')
+    expect(practiceStatus(ready).status).toBe('Show A with your right hand')
     expect(practiceStatus({ ...ready, guesses: [{ whole: false }] }).status).toBe('Show your whole hand')
-    expect(practiceStatus({ ...ready, guesses: [{ ...sureA, letter: 'S' }] }).status).toBe('Make A')
+    expect(practiceStatus({ ...ready, guesses: [{ ...sureA, letter: 'S' }] }).status).toBe('Show A with your right hand')
+  })
+
+  it('names the signing hand', () => {
+    expect(practiceStatus({ ...ready, hand: 'left' }).status).toBe('Show A with your left hand')
   })
 })

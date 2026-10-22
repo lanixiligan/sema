@@ -65,27 +65,29 @@ const FIRST_LETTER = 'B'
 // the 3 seconds) with the hand switch in its controls, and the letter to make
 // on the right (its drawing, large, how to form it, what Sema sees right
 // now). The drawings face the signing hand, the saved setting the hand switch
-// changes; either hand can make the letter. The camera waits for a click, as on
+// changes (Right by default); only that hand is drawn and judged. The camera waits for a click, as on
 // the camera check: landing on Sema never turns it on. Each hand goes through
 // the recorder's own frameFromDetection, so it's normalized exactly as recorded.
 export default function PracticePage({ signingHand, onSigningHandChange, model = 'small' }) {
   const camera = useSharedCamera()
   const { handModel } = camera
   const isDetecting = camera.status === 'live' && handModel.status === 'ready'
+  const drawnHand = signingHand ?? 'right'
   const canvasRef = useRef(null)
   const listenerRef = useRef(null)
+  // Only the signing hand's points are drawn; the other hand gets none, as on
+  // Record (useHandDetection's wantedHand).
   const hand = useHandDetection({
     videoRef: camera.videoRef,
     canvasRef,
     landmarkerRef: handModel.landmarkerRef,
     listenerRef,
     isRunning: isDetecting,
-    drawAllHands: true,
+    wantedHand: drawnHand,
   })
   const kind = MODELS[SHOW_DEV_TOOLS ? model : 'small']
   const loaded = useModelFile(kind)
   const letters = useLetters()
-  const drawnHand = signingHand ?? 'right'
 
   // The letter to make, and each round of it: picking a letter or Try again
   // starts a new round, which starts the hold over.
@@ -113,7 +115,11 @@ export default function PracticePage({ signingHand, onSigningHandChange, model =
     listenerRef.current = (detection) => {
       if (done) return
       const now = detection.time
-      const frame = detection.hands.map((h) => guess(kind, loaded.model, h, detection)).filter(Boolean)
+      // Only the signing hand counts: the other one isn't drawn, so it
+      // mustn't be able to make the letter either.
+      const frame = detection.hands
+        .map((h) => guess(kind, loaded.model, h, detection))
+        .filter((g) => g && g.hand === drawnHand)
       hold = updateLetterHold(hold, showsLetter(frame, target), now)
       setHoldStart(hold.start)
       setSecondsLeft(holdSecondsLeft(hold, now))
@@ -128,12 +134,12 @@ export default function PracticePage({ signingHand, onSigningHandChange, model =
     }
     return () => {
       listenerRef.current = null
-      // So a new round, or the other model, starts from nothing.
+      // So a new round, the other model or the other hand starts from nothing.
       setGuesses([])
       setHoldStart(null)
       setSecondsLeft(null)
     }
-  }, [kind, loaded, target, round, moving])
+  }, [kind, loaded, target, round, moving, drawnHand])
 
   // Only what's true now counts: with the camera or tracking stopped, no hand
   // is in view and no hold is running.
@@ -148,6 +154,7 @@ export default function PracticePage({ signingHand, onSigningHandChange, model =
     secondsLeft: holding ? secondsLeft : null,
     guesses: shown,
     target,
+    hand: drawnHand,
     moving,
   })
   return (
@@ -205,7 +212,7 @@ export default function PracticePage({ signingHand, onSigningHandChange, model =
             </div>
           </section>
           <LetterGuide steps={letters.instructions[target]} hand={drawnHand} />
-          {!moving && loaded.status === 'ready' && isDetecting && <RightNow guesses={shown} target={target} />}
+          {!moving && loaded.status === 'ready' && isDetecting && <RightNow guesses={shown} target={target} hand={drawnHand} />}
           {loaded.status === 'loading' && <p className="practice-note">Loading the model…</p>}
           {loaded.status === 'error' && (
             <p className="error" role="alert">
@@ -218,10 +225,10 @@ export default function PracticePage({ signingHand, onSigningHandChange, model =
   )
 }
 
-// What Sema sees right now, one line per hand in view, so it's clear why the
-// hold isn't counting. The small model gives a percentage; the k-NN doesn't.
-function RightNow({ guesses, target }) {
-  if (guesses.length === 0) return <p className="practice-now">Right now: no hand in view</p>
+// What Sema sees of the signing hand right now, so it's clear why the hold
+// isn't counting. The small model gives a percentage; the k-NN doesn't.
+function RightNow({ guesses, target, hand }) {
+  if (guesses.length === 0) return <p className="practice-now">Right now: no {hand} hand in view</p>
   return (
     <div className="practice-now">
       {guesses.map((g, i) => (
