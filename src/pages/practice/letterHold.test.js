@@ -12,6 +12,11 @@ describe('showsLetter', () => {
     expect(showsLetter([], 'A')).toBe(false)
   })
 
+  it('needs the letter\'s shape rules to pass', () => {
+    expect(showsLetter([{ ...sureA, fix: 'Fold your thumb across your palm.' }], 'A')).toBe(false)
+    expect(showsLetter([{ ...sureA, fix: null }], 'A')).toBe(true)
+  })
+
   it('counts either hand', () => {
     expect(showsLetter([{ ...sureA, letter: 'S' }, { ...sureA, hand: 'left' }], 'A')).toBe(true)
   })

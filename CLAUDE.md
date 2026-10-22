@@ -122,7 +122,8 @@ src/
     model/          loading the hand model, WebGL and browser checks, error messages
     tracking/       the detection loop, picking a hand, handedness, smoothing and
                     drawing the hand
-    landmarks/      math on the hand points: normalization, the camera check's rules
+    landmarks/      math on the hand points: normalization, the camera check's rules,
+                    letters' shape rules (letterShapes)
     benchmark/      the /dev/tracking benchmark's hook and statistics
   recorder/         recording logic: take rules, useRecording, session file and storage
 ```
@@ -161,7 +162,10 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   drawing large, its steps, and a "Right now" line per hand. Pick a letter in the guide (B at
   first), make it, and
   hold it for 3 s (`LETTER_HOLD_MS` in `src/pages/practice/letterHold.js`). The hold counts while
-  any whole hand's guess is that letter and sure; a gap over 300 ms restarts it. Then
+  any whole hand's guess is that letter and sure, and the hand passes the letter's shape
+  rules (`src/vision/landmarks/letterShapes.js`, 2026-10-23: only B so far, fingers together
+  and thumb across the palm, since the model called an open hand B); a gap over 300 ms
+  restarts it. Then
   "That's B!" with Try again; the next letter is picked by hand. The guide shows all 26:
   a dot marks the 8 tested on Lanix's recordings, and J and Z (they move) are darkened and
   can't be picked. Practice runs

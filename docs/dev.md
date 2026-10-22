@@ -197,8 +197,12 @@ changes the saved signing hand (the drawings face it); either hand can make the 
 the right, the letter's card with its drawing large, its steps from `letters.json` (where it
 has them) and a "Right now" line per hand in view (the guess and how sure, or "not sure").
 The hold counts while any whole hand's guess
-is the letter and sure; a gap over 300 ms restarts it (`src/pages/practice/letterHold.js`, with
-tests). Like training, it only judges a whole hand (every point, wrist included, in view).
+is the letter and sure, and the hand passes the letter's shape rules; a gap over 300 ms
+restarts it (`src/pages/practice/letterHold.js`, with tests). The shape rules
+(`src/vision/landmarks/letterShapes.js`, 2026-10-23) catch hands the model only takes for a
+letter. Only B has them so far: fingers together and thumb across the palm, because the
+model called an open hand, and digits 4 and 8, B. When the picked letter fails one, its
+"Right now" line says what to change ("almost B. Fold your thumb across your palm."). Like training, it only judges a whole hand (every point, wrist included, in view).
 
 - **Small model** (the default; step 5 of 2.2): `public/models/asl-letters.json`, which
   `training/train_small.py` writes: the better of logistic regression and a small neural

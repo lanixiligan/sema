@@ -8,6 +8,7 @@ import LetterGuide from '../../components/LetterGuide.jsx'
 import { useLetters } from '../../recorder/letters.js'
 import { frameFromDetection } from '../../recorder/takeRules.js'
 import { isWholeHand } from '../../vision/landmarks/handChecks.js'
+import { shapeFix } from '../../vision/landmarks/letterShapes.js'
 import { useHandDetection } from '../../vision/tracking/useHandDetection.js'
 import GuidePanel from './GuidePanel.jsx'
 import * as knnModel from './knnModel.js'
@@ -204,7 +205,7 @@ export default function PracticePage({ signingHand, onSigningHandChange, model =
             </div>
           </section>
           <LetterGuide steps={letters.instructions[target]} hand={drawnHand} />
-          {!moving && loaded.status === 'ready' && isDetecting && <RightNow guesses={shown} />}
+          {!moving && loaded.status === 'ready' && isDetecting && <RightNow guesses={shown} target={target} />}
           {loaded.status === 'loading' && <p className="practice-note">Loading the model…</p>}
           {loaded.status === 'error' && (
             <p className="error" role="alert">
@@ -219,22 +220,25 @@ export default function PracticePage({ signingHand, onSigningHandChange, model =
 
 // What Sema sees right now, one line per hand in view, so it's clear why the
 // hold isn't counting. The small model gives a percentage; the k-NN doesn't.
-function RightNow({ guesses }) {
+function RightNow({ guesses, target }) {
   if (guesses.length === 0) return <p className="practice-now">Right now: no hand in view</p>
   return (
     <div className="practice-now">
       {guesses.map((g, i) => (
         <p key={i}>
-          {g.hand === 'left' ? 'Left hand' : 'Right hand'}: {seenText(g)}
+          {g.hand === 'left' ? 'Left hand' : 'Right hand'}: {seenText(g, target)}
         </p>
       ))}
     </div>
   )
 }
 
-function seenText(g) {
+function seenText(g, target) {
   if (!g.whole) return 'show the whole hand'
   if (!g.sure) return 'not sure'
+  // Near the letter but failing its shape rules: what to change if it's the
+  // letter being made, and otherwise not that letter at all.
+  if (g.fix) return g.letter === target ? `almost ${g.letter}. ${g.fix}` : 'not sure'
   return 'confidence' in g ? `${g.letter}, ${percent(g.confidence)} sure` : g.letter
 }
 
@@ -244,7 +248,10 @@ function guess(kind, model, hand, { width, height }) {
   if (!frame.hasHand) return null
   // Training only used whole hands (training/dataset.py), and so does Record.
   if (!isWholeHand(hand.landmarks)) return { hand: frame.detected, whole: false }
-  return { hand: frame.detected, whole: true, ...kind.classify(model, frame.landmarks) }
+  // The model always names its closest letter; the letter's shape rules catch
+  // hands that are only near it, such as an open hand for B.
+  const result = kind.classify(model, frame.landmarks)
+  return { hand: frame.detected, whole: true, ...result, fix: shapeFix(result.letter, frame.landmarks) }
 }
 
 const percent = (share) => `${Math.round(share * 100)}%`
