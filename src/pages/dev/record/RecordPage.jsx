@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import MenuBar from '../../app/layout/MenuBar.jsx'
-import { useSharedCamera } from '../../app/shared-camera/sharedCamera.js'
-import CameraView from '../../components/camera-view/CameraView.jsx'
-import { useLetters } from '../../recorder/letters.js'
-import { acceptedCount, addTake, deleteTake, needsDownload, newSession } from '../../recorder/sessionFile.js'
+import DevTopBar from '../DevTopBar.jsx'
+import { useSharedCamera } from '../../../app/shared-camera/sharedCamera.js'
+import CameraView from '../../../components/camera-view/CameraView.jsx'
+import { useLetters } from '../../../recorder/letters.js'
+import { acceptedCount, addTake, deleteTake, needsDownload, newSession } from '../../../recorder/sessionFile.js'
 import {
   clearSession,
   downloadSession,
@@ -12,11 +12,11 @@ import {
   rememberSessionId,
   saveSession,
   wasDownloaded,
-} from '../../recorder/sessionStore.js'
-import { TAKES_TARGET } from '../../recorder/takeRules.js'
-import { useRecording } from '../../recorder/useRecording.js'
-import { browserName } from '../../vision/model/browserName.js'
-import { useHandDetection } from '../../vision/tracking/useHandDetection.js'
+} from '../../../recorder/sessionStore.js'
+import { TAKES_TARGET } from '../../../recorder/takeRules.js'
+import { useRecording } from '../../../recorder/useRecording.js'
+import { browserName } from '../../../vision/model/browserName.js'
+import { useHandDetection } from '../../../vision/tracking/useHandDetection.js'
 import ConsentForm from './ConsentForm.jsx'
 import FinishedStep from './FinishedStep.jsx'
 import LetterList from './LetterList.jsx'
@@ -80,7 +80,7 @@ export default function RecordPage({ signingHand }) {
   })
   // Until one is picked, the chosen letter is the first that still needs
   // takes for this hand (worked out on each render, so it stays current).
-  const allLetters = letters.status === 'ready' ? [...letters.training, 'none', ...letters.pilot] : []
+  const allLetters = letters.status === 'ready' ? [...letters.training, ...letters.pilot] : []
   const letter =
     pickedLetter ?? (session && allLetters.find((l) => acceptedCount(session, l, takeHand) < TAKES_TARGET)) ?? allLetters[0] ?? null
   const cell = session && letter ? { letter, hand: takeHand } : null
@@ -199,7 +199,7 @@ export default function RecordPage({ signingHand }) {
 
   return (
     <>
-      <MenuBar active="record" />
+      <DevTopBar title="Record" />
 
       {step === 'consent' && saved && (
         <SavedSessionOffer
@@ -295,7 +295,7 @@ export default function RecordPage({ signingHand }) {
               />
             )}
             {cell && (
-              <LetterGuide letter={cell.letter} steps={letters.instructions[cell.letter]} hand={cell.hand} />
+              <LetterGuide steps={letters.instructions[cell.letter]} hand={cell.hand} />
             )}
             {/* The last take's result, in a line that's always there, so
                 nothing moves when it appears. */}

@@ -1,5 +1,5 @@
-import { CheckIcon } from '../../components/icons/icons.jsx'
-import { sessionFileName } from '../../recorder/sessionFile.js'
+import { CheckIcon } from '../../../components/icons/icons.jsx'
+import { sessionFileName } from '../../../recorder/sessionFile.js'
 
 // After "Finish and download": thanks, how many takes were kept, and where the
 // file went. The camera is off here (no camera view on this step).

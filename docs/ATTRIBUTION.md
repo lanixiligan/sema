@@ -1,11 +1,54 @@
-# ASL letter illustrations: attribution
+# Attribution
+
+Where Sema's third-party content comes from, and under which licence.
+
+## The letter model's training data
+
+The small letter model, `public/models/asl-letters.json` (made by `training/train_small.py`), is
+trained on hand points taken from the photos of two datasets: ASL-HG (since 2026-10-22) and
+ASLYset (since 2026-10-23).
+
+### ASL-HG
+
+
+- **Dataset:** ASL-HG: American Sign Language Hand Gesture Image Dataset, version 1, published
+  on Mendeley Data on 11 November 2025.
+- **Authors:** Md. Famidul Islam Pranto, Md. Rifatul Islam, Md. Ali Akbor, Nabonita Ghosh, Md.
+  Rahatun Alam, Sudipto Chaki, Md Masudul Islam.
+- **Source:** https://data.mendeley.com/datasets/j4y5w2c8w9/1 (doi:10.17632/j4y5w2c8w9.1)
+- **Licence:** [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). It allows use,
+  changes and redistribution, commercial included, as long as the authors are credited, the
+  licence is linked, and changes are indicated.
+- **Changes:** Sema doesn't include or redistribute the photos. `/dev/extract` ran them through
+  MediaPipe's hand model and Sema's normalization, `training/` kept the 24 static letters and
+  dropped unusable samples (`training/reports/cleaning-asl-hg.md`), and a model was trained on the
+  resulting hand points. The model file holds only the learned weights: no photos, no hand points.
+- Checked on the dataset's Mendeley page on 2026-10-22. The dataset's authors don't endorse Sema.
+
+### ASLYset
+
+- **Dataset:** ASLYset, version 1, published on Mendeley Data on 31 October 2019: 5,200 photos
+  of 4 people making the 24 static ASL letters and two other signs, with YOLO boxes.
+- **Author:** Miguel Rivera.
+- **Source:** https://data.mendeley.com/datasets/xs6mvhx6rh/1 (doi:10.17632/xs6mvhx6rh.1)
+- **Licence:** [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), with the same
+  conditions as ASL-HG: credit the author, link the licence, indicate changes.
+- **Changes:** Sema doesn't include or redistribute the photos or the boxes. `/dev/extract`
+  ran the photos of the 24 letters through MediaPipe's hand model and Sema's normalization
+  (the two other signs and the boxes were not used), `training/` dropped unusable samples
+  (`training/reports/cleaning-aslyset.md`), and the model was trained on the resulting hand
+  points together with ASL-HG's. The model file holds only the learned weights.
+- Checked on the dataset's Mendeley page (and its public API record) on 2026-10-23. The
+  dataset's author doesn't endorse Sema.
+
+## ASL letter illustrations
 
 The 26 SVGs in `public/images/asl/` (`a.svg` … `z.svg`) are the original files from the Wikimedia
 Commons category [ASL letters](https://commons.wikimedia.org/wiki/Category:ASL_letters),
 downloaded on 2026-10-18 and saved unchanged (byte for byte; each matches the SHA-1 that
 Commons lists for it). Only the filenames were changed, to lowercase letters.
 
-## Licence (the same for every file, checked on each file's description page)
+### Licence (the same for every file, checked on each file's description page)
 
 - **Author:** [wpclipart.com](http://www.wpclipart.com/legal.html) (WPClipart). The files'
   own metadata names the creator as "edited by Paul Sherman" (WPClipart's editor), rights
@@ -21,7 +64,7 @@ Commons lists for it). Only the filenames were changed, to lowercase letters.
   didn't load on 2026-10-18 (Cloudflare error 522, the site not answering). The licence
   above comes from Wikimedia Commons and the files' own metadata, which agree.
 
-## Files
+### Files
 
 | Letter | File | Original filename | Commons page | Original file | SHA-1 |
 | --- | --- | --- | --- | --- | --- |

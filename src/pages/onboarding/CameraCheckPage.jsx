@@ -89,7 +89,7 @@ export default function CameraCheckPage({ onDone }) {
         <section className="camera-check-text">
           <div>
             <h1 className="setup-title">Check your camera</h1>
-            <p className="setup-lead">Let's make sure your camera is ready before you start recording.</p>
+            <p className="setup-lead">Let's make sure your camera is ready before you start.</p>
           </div>
           <ol className="setup-steps">
             <Step n={1} state={steps[0]} title="Enable your camera">

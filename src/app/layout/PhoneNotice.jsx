@@ -48,8 +48,6 @@ export default function PhoneNotice({ onContinue }) {
           </button>
         </div>
       </main>
-
-      <p className="phone-notice-footer">Here to help record letters? Please use a computer for the recorder.</p>
     </div>
   )
 }

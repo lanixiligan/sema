@@ -27,11 +27,16 @@ describe('progressStore', () => {
     expect(loadProgress()).toEqual(NEW_VISITOR)
   })
 
-  it('saves and loads the signing hand, setup and theme', () => {
+  it('saves and loads the signing hand, setup, theme and developer access', () => {
     vi.stubGlobal('localStorage', fakeStorage())
-    const progress = { version: PROGRESS_VERSION, signingHand: 'left', setupDone: true, theme: 'dark' }
+    const progress = { version: PROGRESS_VERSION, signingHand: 'left', setupDone: true, theme: 'dark', devAccess: 'ab12' }
     expect(saveProgress(progress)).toBe(true)
     expect(loadProgress()).toEqual(progress)
+  })
+
+  it('gives settings saved before developer access existed none', () => {
+    vi.stubGlobal('localStorage', fakeStorage(saved({ version: PROGRESS_VERSION, signingHand: 'left', setupDone: true, theme: 'dark' })))
+    expect(loadProgress().devAccess).toBeNull()
   })
 
   it('gives settings saved before the theme existed the default theme', () => {

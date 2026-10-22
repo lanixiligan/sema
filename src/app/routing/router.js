@@ -9,16 +9,23 @@ export const PATHS = {
   privacy: '/privacy',
   // Setup's one page: it finds the signing hand.
   cameraCheck: '/setup/camera',
-  record: '/record',
+  // The letter classifier, live: the main page for now (2026-10-22), until
+  // Learn's lessons arrive.
+  try: '/try',
   learn: '/learn',
   practice: '/practice',
+  // The developer tools, behind an access code (src/pages/dev/DevArea.jsx):
+  // the dashboard, then each tool. Not in the menu.
   dev: '/dev',
+  devTracking: '/dev/tracking',
+  devExtract: '/dev/extract',
+  devRecord: '/dev/record',
 }
 
 // Pages that need setup finished first.
-const NEEDS_SETUP = ['record', 'learn', 'practice']
+const NEEDS_SETUP = ['try', 'learn', 'practice']
 
-// Which page a path shows, as { page: 'record' }, or { redirect: '/' } to
+// Which page a path shows, as { page: 'learn' }, or { redirect: '/' } to
 // send the person somewhere else. `progress` is the saved settings
 // (progressStore): a new visitor goes through setup first, and a returning one
 // skips Welcome. A trailing slash is ignored.
@@ -26,7 +33,7 @@ export function resolveRoute(pathname, { setupDone }) {
   const path = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname
   const page = Object.keys(PATHS).find((name) => PATHS[name] === path)
   if (!page) return { redirect: PATHS.welcome }
-  if (page === 'welcome' && setupDone) return { redirect: PATHS.record }
+  if (page === 'welcome' && setupDone) return { redirect: PATHS.try }
   if (NEEDS_SETUP.includes(page) && !setupDone) return { redirect: PATHS.welcome }
   return { page }
 }

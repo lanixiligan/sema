@@ -45,7 +45,7 @@ export default function PrivacyPage({ setupDone }) {
   return (
     <IntroLayout
       reveal={reveal}
-      previous={setupDone ? { onClick: () => goBack(PATHS.record) } : { to: PATHS.howSemaWorks }}
+      previous={setupDone ? { onClick: () => goBack(PATHS.try) } : { to: PATHS.howSemaWorks }}
       next={setupDone ? undefined : { to: PATHS.cameraCheck }}
     >
       <div className="privacy">

@@ -1,4 +1,4 @@
-import { EXPECTED_SAMPLES } from '../../recorder/takeRules.js'
+import { EXPECTED_SAMPLES } from '../../../recorder/takeRules.js'
 
 // The camera panel's header on Record (the same panel as the camera check's):
 // the take's phase, or what Sema sees (idleText) while no take runs or a take

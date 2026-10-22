@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { toTableRow } from '../../vision/benchmark/benchmarkStats.js'
-import { BENCHMARK_SECONDS, MIN_HAND_SHARE, useBenchmark } from '../../vision/benchmark/useBenchmark.js'
+import { toTableRow } from '../../../vision/benchmark/benchmarkStats.js'
+import { BENCHMARK_SECONDS, MIN_HAND_SHARE, useBenchmark } from '../../../vision/benchmark/useBenchmark.js'
 
 // Developer tool: measures camera and detection speed under fixed conditions
-// and gives a row for the performance table in docs/benchmarks.md.
+// and gives a row for the benchmark results table in docs/dev.md.
 export default function BenchmarkPanel({ videoRef, measurementsRef, canRun, delegate }) {
   const benchmark = useBenchmark({ videoRef, measurementsRef, canRun, delegate })
   const [copyStatus, setCopyStatus] = useState(null) // null | 'copied' | 'failed'

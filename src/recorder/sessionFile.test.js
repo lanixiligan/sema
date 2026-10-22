@@ -77,8 +77,8 @@ describe('makeRecordingId', () => {
     expect(makeRecordingId({ person: 'p03', session: '2026-11-02a', letter: 'W', hand: 'left', take: 2 })).toBe(
       'p03-2026-11-02a-W-left-2',
     )
-    expect(makeRecordingId({ person: 'p03', session: '2026-11-02a', letter: 'none', hand: 'right', take: 1 })).toBe(
-      'p03-2026-11-02a-none-right-1',
+    expect(makeRecordingId({ person: 'p03', session: '2026-11-02a', letter: 'C', hand: 'right', take: 1 })).toBe(
+      'p03-2026-11-02a-C-right-1',
     )
   })
 })
@@ -208,7 +208,7 @@ describe('takeProgress', () => {
     s = addTake(s, take({ letter: 'W', hand: 'left' }))
     s = addTake(s, take({ letter: 'W', hand: 'right' }))
     s = addTake(s, take({ letter: 'B', hand: 'left', status: 'rejected', reason: 'too-few-frames' }))
-    expect(takeProgress(s, ['B', 'W', 'none'])).toEqual({ kept: 2, needed: 18 })
+    expect(takeProgress(s, ['B', 'W', 'C'])).toEqual({ kept: 2, needed: 18 })
   })
 
   it('counts at most 3 takes per letter and hand', () => {

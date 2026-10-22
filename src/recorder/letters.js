@@ -24,10 +24,6 @@ export function splitLetters(entries) {
   return { training, pilot, instructions, images }
 }
 
-export function classLabel(letter) {
-  return letter === 'none' ? 'No letter' : letter
-}
-
 export function useLetters() {
   const [state, setState] = useState({ status: 'loading', training: [], pilot: [], instructions: {}, images: {} })
 

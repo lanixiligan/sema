@@ -1,17 +1,18 @@
 import { useRef, useState } from 'react'
-import TopBar from '../../app/layout/TopBar.jsx'
-import { useCamera } from '../../camera/useCamera.js'
-import { useVideoStats } from '../../camera/useVideoStats.js'
+import DevTopBar from '../DevTopBar.jsx'
+import { useCamera } from '../../../camera/useCamera.js'
+import { useVideoStats } from '../../../camera/useVideoStats.js'
 import BenchmarkPanel from './BenchmarkPanel.jsx'
-import { useHandDetection } from '../../vision/tracking/useHandDetection.js'
-import { useHandLandmarker } from '../../vision/model/useHandLandmarker.js'
-import { LOADING_HAND_MODEL } from '../../vision/model/visionMessages.js'
+import { useHandDetection } from '../../../vision/tracking/useHandDetection.js'
+import { useHandLandmarker } from '../../../vision/model/useHandLandmarker.js'
+import { LOADING_HAND_MODEL } from '../../../vision/model/visionMessages.js'
 
 // The Phase 1 tracking page, unchanged: camera readouts, the hand model's
-// delegate picker and the benchmark (Developer settings). It's at /dev, not in
-// the menu, and keeps its own camera instead of the app's shared one, so the
-// delegate picker and the benchmark work exactly as before.
-export default function DevPage() {
+// delegate picker and the benchmark (Developer settings). It's at
+// /dev/tracking (until 2026-10-22, /dev), a developer tool, and keeps its own
+// camera instead of the app's shared one, so the delegate picker and the
+// benchmark work exactly as before.
+export default function TrackingPage() {
   const { videoRef, status, error, cameras, deviceId, start, stop, switchCamera } =
     useCamera()
   const isLive = status === 'live'
@@ -32,7 +33,7 @@ export default function DevPage() {
 
   return (
     <>
-      <TopBar>Developer page</TopBar>
+      <DevTopBar title="Tracking and benchmark" />
 
       <main className="page">
         <div className="stage">

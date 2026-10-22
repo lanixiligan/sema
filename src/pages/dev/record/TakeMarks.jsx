@@ -1,6 +1,5 @@
-import { CheckIcon, CloseIcon } from '../../components/icons/icons.jsx'
-import { classLabel } from '../../recorder/letters.js'
-import { TAKES_TARGET } from '../../recorder/takeRules.js'
+import { CheckIcon, CloseIcon } from '../../../components/icons/icons.jsx'
+import { TAKES_TARGET } from '../../../recorder/takeRules.js'
 
 // A letter's takes for the chosen hand, as three small circles: a filled
 // circle with a tick for each kept take, a plain ring for the rest. A kept
@@ -15,7 +14,7 @@ export default function TakeMarks({ letter, takes, onDelete, disabled }) {
       {Array.from({ length: TAKES_TARGET }, (_, i) => {
         const take = takes[i]
         if (!take) return <span key={i} className="take-mark" aria-hidden="true" />
-        const label = `Delete take ${i + 1} of ${classLabel(letter)}`
+        const label = `Delete take ${i + 1} of ${letter}`
         return (
           <button
             key={take.recording}

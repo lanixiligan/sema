@@ -11,7 +11,7 @@ let entrancePlayed = false
 
 // Page 1, Welcome: the shared top bar (the name and "Preview", as on every
 // page), then one centred column, sized to fit 1280×720 without scrolling.
-// Only new visitors see it; returning ones go straight to Record.
+// Only new visitors see it; returning ones go straight to Try.
 export default function WelcomePage() {
   const [animate] = useState(() => !entrancePlayed)
   useEffect(() => {
