@@ -42,7 +42,7 @@ export default function AboutPage({ setupDone }) {
   return (
     <IntroLayout
       reveal={reveal}
-      previous={setupDone ? { onClick: () => goBack(PATHS.try) } : { to: PATHS.welcome }}
+      previous={setupDone ? { onClick: () => goBack(PATHS.practice) } : { to: PATHS.welcome }}
       next={{ to: PATHS.howSemaWorks }}
     >
       <div className="split">

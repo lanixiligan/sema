@@ -1,13 +1,17 @@
 // Sema's settings, kept in this browser's localStorage so they survive a
 // reload: the signing hand, whether setup is done, the theme (theme.js), and
 // the developer pages' access (the fingerprint of the code entered on /dev,
-// src/pages/dev/devAccess.js).
+// src/pages/dev/devAccess.js) and which classifier Practice runs (chosen on
+// /dev).
 // Pages never touch localStorage themselves; they go through this module, so
 // per-letter progress (3.2) or accounts (Phase 5) can be added in one place.
 import { DEFAULT_THEME, THEMES } from './theme.js'
 
 const KEY = 'sema.progress'
 const HANDS = ['left', 'right']
+// The classifiers Practice can run: the small model (the default, and the one
+// on the live site) and the k-NN (step 4), which only exists under npm run dev.
+export const DEV_MODELS = ['small', 'knn']
 
 export const PROGRESS_VERSION = 1
 export const NEW_VISITOR = {
@@ -16,6 +20,7 @@ export const NEW_VISITOR = {
   setupDone: false,
   theme: DEFAULT_THEME,
   devAccess: null,
+  devModel: 'small',
 }
 
 // The saved settings, or NEW_VISITOR if there are none, they can't be read,
@@ -34,6 +39,7 @@ export function loadProgress() {
       setupDone: saved.setupDone === true && signingHand !== null,
       theme: THEMES.includes(saved.theme) ? saved.theme : DEFAULT_THEME,
       devAccess: typeof saved.devAccess === 'string' ? saved.devAccess : null,
+      devModel: DEV_MODELS.includes(saved.devModel) ? saved.devModel : 'small',
     }
   } catch {
     return NEW_VISITOR

@@ -118,7 +118,6 @@
 
   /* Radii */
   --radius-pill: 999px; /* buttons */
-  --radius-panel: 32px; /* dark art panels */
   --radius-card: 16px;
   --radius-control: 10px; /* inputs, segmented controls */
   --radius-segment: 7px; /* one option inside a segmented control */
@@ -138,7 +137,6 @@
   --bar-height: 56px;
   --page-gutter: clamp(20px, 4vw, 48px);
   --page-max: 1200px;
-  --reading-max: 760px;
   --menu-width: 260px;
 
   /* Motion */
@@ -893,6 +891,77 @@ body {
   color: var(--warning);
 }
 
+/* Which model Practice runs (DevDashboard.jsx): the theme toggle's look, with
+   words instead of icons. */
+.dev-model {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin: 32px 0 0;
+  padding: 0;
+  border: none;
+}
+
+.dev-model legend {
+  float: left;
+  margin-right: 16px;
+  padding: 0;
+  font-size: var(--text-small);
+  font-weight: 700;
+}
+
+.dev-model-track {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--segment-track);
+  border-radius: var(--radius-control);
+}
+
+.dev-model label {
+  position: relative;
+}
+
+.dev-model input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.dev-model-option {
+  display: block;
+  padding: 4px 14px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-radius: var(--radius-segment);
+}
+
+.dev-model label:hover .dev-model-option,
+.dev-model input:checked + .dev-model-option {
+  color: var(--text);
+}
+
+.dev-model input:checked + .dev-model-option {
+  background: var(--segment-on);
+}
+
+.dev-model input:focus-visible + .dev-model-option {
+  outline: 3px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.dev-model p {
+  margin: 0;
+  font-size: var(--text-caption);
+  color: var(--text-muted);
+}
+
 .dev-results {
   margin-top: 40px;
 }
@@ -955,16 +1024,41 @@ body {
   margin-top: 0;
 }
 
-/* Try (/try), Practice's prototype: Record's three columns. The intro (and,
-   under npm run dev, the model switch) on top, then the letter to make, the
-   camera, and the letter guide. Narrower windows stack them in that order. */
-.try {
+/* Practice (/practice; Try, at /try, until 2026-10-23): Record's three
+   columns, which start and end on the same lines. The letter guide on the
+   left, the camera (the widest), and the letter to make on the right: its
+   card with the drawing large, how to form it, what Sema sees right now, and
+   under npm run dev the model switch at the bottom. Narrower windows stack
+   them: the letter, the camera, then the guide. */
+.practice {
+  --practice-zoom: 1;
+}
+
+/* On a wide window the page is drawn 1.25x larger, as Record does (CSS zoom,
+   Chrome's page zoom); the menu bar above it isn't zoomed. Lengths inside a
+   zoomed element are zoomed too, so the camera's height divides the window's
+   by the zoom. */
+@media (min-width: 1500px) {
+  .practice {
+    --practice-zoom: 1.25;
+    zoom: var(--practice-zoom);
+  }
+}
+
+/* A static page on a desktop window: exactly the height under the menu bar,
+   so nothing scrolls. (Stacked on narrow windows, where it scrolls.) */
+@media (min-width: 900px) {
+  .practice {
+    height: calc((100dvh - var(--bar-height)) / var(--practice-zoom));
+    overflow: hidden;
+  }
+}
+
+.practice {
   display: grid;
-  grid-template-areas:
-    'intro intro intro'
-    'results camera guide';
-  grid-template-columns: 248px minmax(0, 1fr) 320px;
-  gap: 16px 24px;
+  grid-template-areas: 'guide camera side';
+  grid-template-columns: 330px minmax(0, 1fr) 320px;
+  gap: 24px;
   align-items: start;
   width: 100%;
   max-width: 1440px;
@@ -972,133 +1066,87 @@ body {
   padding: 20px 48px 28px;
 }
 
-.try-intro {
-  grid-area: intro;
+.practice-camera {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-}
-
-.try-intro p {
-  margin: 0;
-  font-size: var(--text-small);
-  color: var(--text-muted);
-}
-
-.try-results {
-  grid-area: results;
-}
-
-.try-camera {
   grid-area: camera;
+  flex-direction: column;
+  align-self: stretch;
   min-width: 0;
 }
 
-.try-note,
-.try-model {
+/* The camera check's panel around it (header, then video), filling the
+   column's height. */
+.practice-panel {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+/* As on Record: the camera fills the height the window leaves (top bar,
+   padding and the panel's header: 120px), so it stays the same size whichever
+   letter is picked. The video keeps its 4:3 shape inside, never cut off. */
+.practice-stage {
+  flex: 1 1 auto;
+  aspect-ratio: auto;
+  min-height: clamp(320px, calc((100dvh - var(--bar-height)) / var(--practice-zoom) - 120px), 720px);
+  --stage-radius: 0px;
+}
+
+.practice-side {
+  display: flex;
+  grid-area: side;
+  flex-direction: column;
+  align-self: stretch;
+  gap: 10px;
+}
+
+/* The drawing fills the card's width (Record's reference picture). */
+.practice-side .reference-image-drawing {
+  padding: 20px;
+}
+
+.practice-note {
   margin: 0;
   font-size: var(--text-small);
   color: var(--text-muted);
-}
-
-.try-model {
-  margin-top: 12px;
-  padding: 0 2px;
-  font-size: var(--text-caption);
 }
 
 @media (max-width: 899px) {
-  .try {
-    grid-template-areas: 'intro' 'results' 'camera' 'guide';
+  .practice {
+    grid-template-areas: 'side' 'camera' 'guide';
     grid-template-columns: minmax(0, 1fr);
     padding: 20px 16px 28px;
   }
-
-  .try-intro {
-    flex-wrap: wrap;
-  }
 }
 
-/* The letter to make: big, with its drawing, how to form it, and what Sema
-   sees right now. */
-.try-target {
-  padding: 16px 18px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-}
-
-.try-target h2 {
-  margin: 0;
-  font-size: var(--text-caption);
-  font-weight: 500;
-  color: var(--text-muted);
-}
-
-.try-target-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin: 6px 0 12px;
-}
-
-.try-letter {
-  margin: 0;
-  font-size: 4.5rem;
-  font-weight: 800;
-  line-height: 1;
-  color: var(--text);
-}
-
-/* Drawings are black lines: on white in both themes (AslDrawing.jsx). */
-.try-target-drawing {
-  flex: 0 0 80px;
-  height: 80px;
-  padding: 4px;
-  background: var(--white);
-  border-radius: 8px;
-}
-
-.try-steps {
-  margin: 0;
-  padding-left: 18px;
-  font-size: var(--text-small);
-  line-height: 1.5;
-}
-
-.try-steps-note,
-.try-now p {
+/* What Sema sees right now, under the steps. */
+.practice-now p {
   margin: 8px 0 0;
   font-size: var(--text-caption);
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
 }
 
-.try-now {
-  margin-top: 14px;
-  padding-top: 10px;
+.practice-now {
+  margin-top: 4px;
+  padding: 10px 4px 0;
   border-top: 1px solid var(--border);
 }
 
-.try-now p:first-child {
+.practice-now p:first-child {
   margin-top: 0;
 }
 
-p.try-now {
+p.practice-now {
   font-size: var(--text-caption);
   color: var(--text-muted);
   margin-bottom: 0;
 }
 
-.try-stage {
-  --stage-radius: 0px;
-}
-
 /* Held for 3 seconds: a dark film over the picture with the result, Try
-   again, and a reminder that the guide picks the next letter. */
-.try-done {
+   again, and a reminder that the guide picks the next letter. Also the film
+   for J and Z, which can't be checked yet. */
+.practice-done {
   position: absolute;
   inset: 0;
   display: flex;
@@ -1106,18 +1154,19 @@ p.try-now {
   align-items: center;
   justify-content: center;
   gap: 14px;
+  padding: 0 24px;
   color: var(--cloud-white);
   text-align: center;
   background: var(--scrim);
 }
 
-.try-done-title {
+.practice-done-title {
   margin: 0;
   font-size: 2.5rem;
   font-weight: 800;
 }
 
-.try-done-note {
+.practice-done-note {
   margin: 0;
   font-size: var(--text-small);
   color: var(--muted-on-dark);
@@ -1134,25 +1183,29 @@ p.try-now {
   transform: scaleX(-1);
 }
 
-/* The letter guide: Record's panel look, every letter's drawing in a grid of
-   four. Each tile is a button that picks the letter; the picked one is lit.
-   A dot marks the 8 that work best; J and Z (they move) are darkened. */
-.try-guide {
+/* The letter guide, in the left column: Record's letter panel look, as tall
+   as the camera beside it, every letter's drawing in a grid of four. Each
+   tile is a button that picks the letter; the picked one is lit. A dot marks
+   the 8 that work best; J and Z (they move) are darkened. */
+.practice-guide {
+  display: flex;
   grid-area: guide;
+  flex-direction: column;
+  align-self: stretch;
   padding: 12px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-card);
 }
 
-.try-guide-title {
-  margin: 0 0 8px;
+.practice-guide-title {
+  margin: 0 0 12px;
   padding: 0 4px;
   font-size: var(--text-small);
   font-weight: 700;
 }
 
-.try-guide-tiles {
+.practice-guide-tiles {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 6px;
@@ -1161,13 +1214,13 @@ p.try-now {
   list-style: none;
 }
 
-.try-guide-tile {
+.practice-guide-tile {
   position: relative;
   display: block;
   width: 100%;
   padding: 4px 4px 3px;
   font: inherit;
-  font-size: var(--text-caption);
+  font-size: 17px;
   font-weight: 700;
   color: var(--text);
   text-align: center;
@@ -1177,141 +1230,61 @@ p.try-now {
   border-radius: 8px;
 }
 
-.try-guide-tile:hover {
+.practice-guide-tile:hover {
   border-color: var(--border-strong);
 }
 
-.try-guide-tile:focus-visible {
+.practice-guide-tile:focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 1px;
 }
 
 /* A 2px ring (the border and an inset shadow), so it stands out in both themes. */
-.try-guide-tile[aria-pressed='true'] {
+.practice-guide-tile[aria-pressed='true'] {
   background: var(--highlight);
   border-color: var(--accent);
   box-shadow: inset 0 0 0 1px var(--accent);
 }
 
 /* Darker than the other tiles in both themes, its drawing dimmed. */
-.try-guide-tile.moving {
+.practice-guide-tile.moving {
   color: var(--text-muted);
-  cursor: not-allowed;
   background: var(--tile-off);
   border-color: var(--tile-off);
 }
 
-.try-guide-tile.moving .try-guide-drawing {
+.practice-guide-tile.moving[aria-pressed='true'] {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.practice-guide-tile.moving .practice-guide-drawing {
   opacity: 0.45;
 }
 
-.try-guide-dot {
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  background: var(--accent);
-  border-radius: 50%;
-}
-
-/* In the label row, left of the letter, clear of the drawing's white backing. */
-.try-guide-tile .try-guide-dot {
-  position: absolute;
-  bottom: 7px;
-  left: 7px;
-}
-
-.try-guide-swatch {
-  display: inline-block;
-  width: 12px;
-  height: 10px;
-  background: var(--tile-off);
-  border-radius: 2px;
-}
-
-.try-guide-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 16px;
-  margin-top: 10px;
-  padding: 0 4px;
-  font-size: var(--text-caption);
-  color: var(--text-muted);
-}
-
-.try-guide-legend > span {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.try-guide-drawing {
+.practice-guide-drawing {
   display: block;
-  height: 46px;
+  height: 40px;
   margin-bottom: 2px;
   padding: 3px;
   background: var(--white);
   border-radius: 5px;
 }
 
-/* Stacked, the guide is full width: as many tiles per row as fit, so they
-   stay tile-shaped. (After the rule above, so it wins.) */
-@media (max-width: 899px) {
-  .try-guide-tiles {
-    grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+/* Short windows (a 1280×720 laptop): smaller drawings, so the guide's seven
+   rows fit beside the camera without the page scrolling. */
+@media (max-height: 800px) {
+  .practice-guide-drawing {
+    height: 32px;
   }
 }
 
-/* Small model / k-NN: the theme toggle's look, with words instead of icons. */
-.try-switch {
-  flex-shrink: 0;
-  margin: 0;
-  padding: 0;
-  border: none;
-}
-
-.try-switch-track {
-  display: inline-flex;
-  gap: 2px;
-  padding: 3px;
-  background: var(--segment-track);
-  border-radius: var(--radius-control);
-}
-
-.try-switch label {
-  position: relative;
-}
-
-.try-switch input {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.try-switch-option {
-  display: block;
-  padding: 4px 14px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  border-radius: var(--radius-segment);
-}
-
-.try-switch label:hover .try-switch-option,
-.try-switch input:checked + .try-switch-option {
-  color: var(--text);
-}
-
-.try-switch input:checked + .try-switch-option {
-  background: var(--segment-on);
-}
-
-.try-switch input:focus-visible + .try-switch-option {
-  outline: 3px solid var(--accent);
-  outline-offset: 1px;
+/* Stacked, the guide is full width: as many tiles per row as fit, so they
+   stay tile-shaped. (After the rule above, so it wins.) */
+@media (max-width: 899px) {
+  .practice-guide-tiles {
+    grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  }
 }
 
 .benchmark-results {

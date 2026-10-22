@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { LETTER_HOLD_MS, NO_HOLD, heldLongEnough, holdSecondsLeft, showsLetter, tryStatus, updateLetterHold } from './letterHold.js'
+import { LETTER_HOLD_MS, NO_HOLD, heldLongEnough, holdSecondsLeft, showsLetter, practiceStatus, updateLetterHold } from './letterHold.js'
 
 const sureA = { hand: 'right', whole: true, letter: 'A', sure: true }
 
@@ -45,7 +45,7 @@ describe('the 3 seconds', () => {
   })
 })
 
-describe('tryStatus', () => {
+describe('practiceStatus', () => {
   const ready = {
     cameraStatus: 'live',
     cameraError: null,
@@ -58,27 +58,27 @@ describe('tryStatus', () => {
   }
 
   it('reports problems first, in amber', () => {
-    expect(tryStatus({ ...ready, cameraError: 'x', passed: true })).toEqual({ status: 'Camera problem', tone: 'warn' })
-    expect(tryStatus({ ...ready, trackingError: true })).toEqual({ status: 'Tracking problem', tone: 'warn' })
+    expect(practiceStatus({ ...ready, cameraError: 'x', passed: true })).toEqual({ status: 'Camera problem', tone: 'warn' })
+    expect(practiceStatus({ ...ready, trackingError: true })).toEqual({ status: 'Tracking problem', tone: 'warn' })
   })
 
   it('says when the letter was held', () => {
-    expect(tryStatus({ ...ready, passed: true, cameraStatus: 'idle' })).toEqual({ status: "That's A!", tone: 'ok' })
+    expect(practiceStatus({ ...ready, passed: true, cameraStatus: 'idle' })).toEqual({ status: "That's A!", tone: 'ok' })
   })
 
   it('waits for the camera and the models', () => {
-    expect(tryStatus({ ...ready, cameraStatus: 'idle' }).status).toBe('Camera off')
-    expect(tryStatus({ ...ready, cameraStatus: 'starting' }).status).toBe('Starting…')
-    expect(tryStatus({ ...ready, ready: false }).status).toBe('Getting ready…')
+    expect(practiceStatus({ ...ready, cameraStatus: 'idle' }).status).toBe('Camera off')
+    expect(practiceStatus({ ...ready, cameraStatus: 'starting' }).status).toBe('Starting…')
+    expect(practiceStatus({ ...ready, ready: false }).status).toBe('Getting ready…')
   })
 
   it('counts down while holding', () => {
-    expect(tryStatus({ ...ready, secondsLeft: 2 })).toEqual({ status: 'Hold it… 2', tone: 'ok' })
+    expect(practiceStatus({ ...ready, secondsLeft: 2 })).toEqual({ status: 'Hold it… 2', tone: 'ok' })
   })
 
   it('says what to do otherwise', () => {
-    expect(tryStatus(ready).status).toBe('Make A')
-    expect(tryStatus({ ...ready, guesses: [{ whole: false }] }).status).toBe('Show your whole hand')
-    expect(tryStatus({ ...ready, guesses: [{ ...sureA, letter: 'S' }] }).status).toBe('Make A')
+    expect(practiceStatus(ready).status).toBe('Make A')
+    expect(practiceStatus({ ...ready, guesses: [{ whole: false }] }).status).toBe('Show your whole hand')
+    expect(practiceStatus({ ...ready, guesses: [{ ...sureA, letter: 'S' }] }).status).toBe('Make A')
   })
 })

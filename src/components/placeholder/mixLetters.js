@@ -1,4 +1,4 @@
-// Up to `count` letters in a mixed order for the Learn and Practice art:
+// Up to `count` letters in a mixed order for Learn's art:
 // alternately from the start and the end of the list (B, Y, C, W, D…). Always
 // the same order, so the page doesn't change on every visit.
 export function mixLetters(letters, count = 5) {

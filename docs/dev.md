@@ -18,7 +18,7 @@ Contents:
   benchmark, and the results
 - [Record](#record)
 - [Extract hand points](#extract-hand-points)
-- [Try the classifier](#try-the-classifier): now a main page, `/try`
+- [Practice (the classifier)](#practice-the-classifier): now a main page, `/practice`
 - [Where the code is](#where-the-code-is): and how to add a tool
 
 ## Access code
@@ -49,7 +49,10 @@ possibility; that's why `npm run dev-code` asks for at least 12 characters.
 
 ## The dashboard
 
-`/dev` has a card for each tool, then the latest classifier results: accuracy on people the
+`/dev` has a card for each tool, then (under `npm run dev` only) a **Practice model** switch,
+Small model or k-NN, which says which classifier `/practice` runs. The choice is saved in this
+browser and Practice follows it; the live site has one model, so it has no switch. Then the
+latest classifier results: accuracy on people the
 classifier has never seen, per letter, and on the recorded test set. The numbers come from
 `training/reports/knn.json`, which `python3 training/train.py …` writes (see
 `training/README.md`); the live site shows the version last committed. Letters below the bar
@@ -178,20 +181,23 @@ carried over from the photo before (VIDEO mode, the app's, follows a hand from f
 frame). Each hand found goes through the recorder's own `frameFromDetection`, so the
 normalization is exactly the one recordings get.
 
-## Try the classifier
+## Practice (the classifier)
 
-Since 2026-10-22 this is a main page, `/try` (the one returning visitors start on), not a
-developer tool: before, it was `/dev/try`. Its developer parts only show under `npm run dev`:
-a switch between two classifiers and a line naming the model. Since 2026-10-22 it's
-Practice's prototype: pick a letter, make it, and hold it for 3 seconds. It has Record's
-three columns. On the left, the letter to make, big, with its drawing, its steps from
-`letters.json` (where it has them) and a "Right now" line per hand in view (the guess and
-how sure, or "not sure"). In the middle, the camera in the camera check's panel: a short
-status, and a line that fills over the 3 seconds; then "That's B!" over the picture with
-Try again. On the right, the letter guide: all 26 letters' drawings (facing the signing
+Since 2026-10-22 this is a main page (the one returning visitors start on), not a developer
+tool: before, it was `/dev/try`. It was Try, at `/try`, until 2026-10-23; now it's Practice,
+at `/practice`, and `/try` redirects there. Its developer parts only show under
+`npm run dev`, at the bottom of the right column: a line naming the model (which model runs
+is chosen on the dashboard, see "The dashboard"). Pick a letter, make it, and hold it for 3 seconds. It has Record's
+three columns. On the left, the letter guide: all 26 letters' drawings (facing the signing
 hand) as buttons that pick the letter; a dot marks the 8 tested on Lanix's recordings, and
-J and Z (they move) are darkened and disabled. The hold counts while any whole hand's guess
-is the letter and sure; a gap over 300 ms restarts it (`src/pages/try/letterHold.js`, with
+J and Z (they move) are darkened and disabled. In the middle, the camera in the camera
+check's panel: a short status, and a line that fills over the 3 seconds; then "That's B!"
+over the picture with Try again. Its controls have Record's Left | Right switch, which here
+changes the saved signing hand (the drawings face it); either hand can make the letter. On
+the right, the letter's card with its drawing large, its steps from `letters.json` (where it
+has them) and a "Right now" line per hand in view (the guess and how sure, or "not sure").
+The hold counts while any whole hand's guess
+is the letter and sure; a gap over 300 ms restarts it (`src/pages/practice/letterHold.js`, with
 tests). Like training, it only judges a whole hand (every point, wrist included, in view).
 
 - **Small model** (the default; step 5 of 2.2): `public/models/asl-letters.json`, which
@@ -201,8 +207,8 @@ tests). Like training, it only judges a whole hand (every point, wrist included,
   percentage. It's trained on ASL-HG (CC BY 4.0), credited in `docs/ATTRIBUTION.md` and the
   README; keep that credit while the model ships.
 - **k-NN** (step 4): `data/models/knn-asl.json`, which `training/train.py` writes (gitignored:
-  11 MB, and it holds every training hand). So the switch offers it only under `npm run dev`.
-  Its card shows the distance to the nearest training hands.
+  11 MB, and it holds every training hand). So the dashboard's switch offers it only under
+  `npm run dev`. Practice had that switch itself until 2026-10-23.
 
 Each JavaScript copy must give the same answers as its Python: `networkModel.js` as
 `forward()` in `training/small.py`, `knnModel.js` as `training/knn.py`. Checked on 2026-10-22

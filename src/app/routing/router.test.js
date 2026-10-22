@@ -11,14 +11,19 @@ describe('resolveRoute', () => {
     }
   })
 
-  it('sends a returning visitor from Welcome to Try', () => {
-    expect(resolveRoute('/', returning)).toEqual({ redirect: '/try' })
+  it('sends a returning visitor from Welcome to Practice', () => {
+    expect(resolveRoute('/', returning)).toEqual({ redirect: '/practice' })
   })
 
-  it('sends a new visitor from Try, Learn and Practice to Welcome', () => {
-    for (const path of ['/try', '/learn', '/practice']) {
+  it('sends a new visitor from Learn and Practice to Welcome', () => {
+    for (const path of ['/learn', '/practice']) {
       expect(resolveRoute(path, newVisitor)).toEqual({ redirect: '/' })
     }
+  })
+
+  it('sends the old Try address to Practice', () => {
+    expect(resolveRoute('/try', returning)).toEqual({ redirect: '/practice' })
+    expect(resolveRoute('/try/', returning)).toEqual({ redirect: '/practice' })
   })
 
   it('lets a new visitor open Welcome, the intro pages, the camera check and /dev', () => {

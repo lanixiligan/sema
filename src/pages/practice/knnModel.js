@@ -1,7 +1,7 @@
 import { NORMALIZATION_VERSION } from '../../vision/landmarks/normalizeHand.js'
 
 // The k-nearest-neighbours classifier from training/knn.py, in the browser,
-// for the Try page (/try), under npm run dev only. training/train.py saves the model as
+// for the Practice page (/practice), under npm run dev only. training/train.py saves the model as
 // data/models/knn-asl.json: every training hand's 63 numbers (one flat list),
 // each one's letter, k, and the "not sure" threshold. To judge a hand: find
 // the k training hands most like it and take the letter most of them have;

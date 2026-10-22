@@ -1,6 +1,6 @@
 import { HAND_HOLD_MS, NO_HOLD } from '../../vision/landmarks/handChecks.js'
 
-// Try's practice round: pick a letter, make it, hold it for LETTER_HOLD_MS.
+// Practice's round: pick a letter, make it, hold it for LETTER_HOLD_MS.
 // The hold counts while any whole hand's guess is that letter and sure (at
 // or over the model's "not sure" line). Like the camera check's hold, a gap
 // shorter than HAND_HOLD_MS doesn't end it, so one odd frame can't restart
@@ -8,7 +8,11 @@ import { HAND_HOLD_MS, NO_HOLD } from '../../vision/landmarks/handChecks.js'
 export const LETTER_HOLD_MS = 3000
 export { NO_HOLD }
 
-// guesses: one per hand in view, as TryPage's guess() makes them.
+// J and Z move; the classifier only knows still shapes, so these can be picked
+// (to see how they're made) but Sema can't check them yet.
+export const MOVING_LETTERS = ['J', 'Z']
+
+// guesses: one per hand in view, as PracticePage's guess() makes them.
 export function showsLetter(guesses, letter) {
   return guesses.some((g) => g.whole && g.sure && g.letter === letter)
 }
@@ -34,9 +38,10 @@ export function heldLongEnough(hold, now) {
 // well, 'warn' (amber) on a problem, '' otherwise. The problem panel on the
 // video explains a failure in full. `ready`: the hand model and the letter
 // model are both loaded.
-export function tryStatus({ cameraStatus, cameraError, trackingError, ready, passed, secondsLeft, guesses, target }) {
+export function practiceStatus({ cameraStatus, cameraError, trackingError, ready, passed, secondsLeft, guesses, target, moving = false }) {
   if (cameraError) return { status: 'Camera problem', tone: 'warn' }
   if (trackingError) return { status: 'Tracking problem', tone: 'warn' }
+  if (moving && cameraStatus === 'live') return { status: `${target} isn't available yet`, tone: '' }
   if (passed) return { status: `That's ${target}!`, tone: 'ok' }
   if (cameraStatus === 'idle') return { status: 'Camera off', tone: '' }
   if (cameraStatus === 'starting') return { status: 'Starting…', tone: '' }

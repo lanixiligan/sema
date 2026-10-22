@@ -2,8 +2,8 @@ import PlaceholderPage from '../../components/placeholder/PlaceholderPage.jsx'
 import { mixLetters } from '../../components/placeholder/mixLetters.js'
 import { useLetters } from '../../recorder/letters.js'
 
-// Learn, until the lessons arrive (Phase 3.3). The art is the same staggered
-// row of the training letters in mixed order as on Practice.
+// Learn, until the lessons arrive (Phase 3.3). The art is a staggered
+// row of the training letters in mixed order (mixLetters.js).
 export default function LearnPage() {
   const letters = useLetters()
 

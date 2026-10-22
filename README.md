@@ -38,10 +38,11 @@
 ## What it does
 
 - Finds your hands in the webcam picture and draws their 21 points.
-- Try (`/try`): pick a letter, make it in front of the webcam, and hold it for 3 seconds while
-  Sema checks the handshape. It covers the 24 letters that don't move; J and Z come later.
+- Practice (`/practice`): pick a letter, make it in front of the webcam, and hold it for 3
+  seconds while Sema checks the handshape. It covers the 24 letters that don't move; J and Z
+  come later.
 - Records labelled hand points for testing, on the Record page (a developer tool, `/dev/record`).
-- Learn and Practice are placeholders until the lessons are built.
+- Learn is a placeholder until the lessons are built.
 
 ## Quick start
 
@@ -121,7 +122,7 @@ Everything runs in your browser: no backend, no accounts, and video never leaves
 - [Guide](docs/guide.md): deploy, recording sessions, MediaPipe files, webcam, Codespaces
 - [Attribution](docs/ATTRIBUTION.md): where the ASL hand drawings and the letter model's training
   photos come from, and their licences
-- [Onboarding pages](docs/onboarding-pages.md): what each page before Try says and does
+- [Onboarding pages](docs/onboarding-pages.md): what each page before Practice says and does
 
 ## Tech
 

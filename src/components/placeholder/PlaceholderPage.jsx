@@ -1,6 +1,6 @@
 import MenuBar from '../../app/layout/MenuBar.jsx'
 
-// A page that isn't available yet (Learn and Practice, until Phase 3): the
+// A page that isn't available yet (Learn, until Phase 3.3): the
 // usual menu, then one centred column with the page's own art and what's
 // coming.
 export default function PlaceholderPage({ active, art, title, children }) {

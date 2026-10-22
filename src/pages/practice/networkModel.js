@@ -1,7 +1,7 @@
 import { NORMALIZATION_VERSION } from '../../vision/landmarks/normalizeHand.js'
 
-// The small model from training/small.py, in the browser, for the Try
-// page (/try). training/train_small.py saves it as public/models/asl-letters.json:
+// The small model from training/small.py, in the browser, for the Practice
+// page (/practice). training/train_small.py saves it as public/models/asl-letters.json:
 // the 63 numbers' mean and scale, then layers of weights. Logistic regression
 // is one layer; the small neural network two. To judge a hand: scale its
 // numbers, then for each layer, every output is its row of weights times the

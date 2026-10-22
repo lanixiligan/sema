@@ -2,7 +2,7 @@ import { useId } from 'react'
 import Link from '../../app/routing/Link.jsx'
 import { PATHS } from '../../app/routing/router.js'
 import DevTopBar from './DevTopBar.jsx'
-// The latest training runs' headline numbers: the small model that /try
+// The latest training runs' headline numbers: the small model that /practice
 // and the live site use (training/train_small.py) and step 4's k-NN
 // (training/train.py).
 import smallResults from '../../../training/reports/small.json'
@@ -25,14 +25,25 @@ const TOOLS = [
     about: 'Runs a public dataset’s photos (ASL-HG, ASLYset) through Sema’s hand model and normalization. Needs the photos on this computer.',
   },
   {
-    to: PATHS.try,
-    title: 'Try the classifier',
-    about: 'Now the main page, at /try: live letter guesses for every hand in view. The k-NN switch is there under npm run dev.',
+    to: PATHS.practice,
+    title: 'Practice (the classifier)',
+    about: 'The main page, at /practice (until 2026-10-23, Try at /try): pick a letter and hold it for 3 seconds.',
   },
 ]
 
-// /dev: every developer tool, and how the classifier did in the last training run.
-export default function DevDashboard({ onLock }) {
+// The classifiers Practice can run, in the order of DEV_MODELS (progressStore.js).
+const MODEL_CHOICES = [
+  { id: 'small', label: 'Small model', about: 'logistic regression, 14 KB: the one on the live site' },
+  { id: 'knn', label: 'k-NN', about: 'the 11 MB comparison, from data/models/knn-asl.json' },
+]
+// The k-NN's file is gitignored (11 MB), so only npm run dev has it: the live
+// site has one model, and nothing to switch.
+const CAN_SWITCH_MODEL = import.meta.env.DEV
+
+// /dev: every developer tool, which model Practice runs (under npm run dev),
+// and how the classifier did in the last training run. `model` is the saved
+// choice (progressStore.js) and onModelChange saves a new one.
+export default function DevDashboard({ model, onModelChange, onLock }) {
   return (
     <>
       <DevTopBar />
@@ -54,10 +65,34 @@ export default function DevDashboard({ onLock }) {
             </li>
           ))}
         </ul>
-        <Results results={smallResults} title="Small model (on /try and the live site)" />
+        {CAN_SWITCH_MODEL && <ModelSwitch model={model} onChange={onModelChange} />}
+        <Results results={smallResults} title="Small model (on /practice and the live site)" />
         <Results results={knnResults} title="k-NN, for comparison" />
       </main>
     </>
+  )
+}
+
+// Which classifier Practice runs: real radio buttons, like the theme toggle, so
+// screen readers announce one "Practice model" group and the arrow keys move
+// between them. The choice is saved, so Practice keeps it after a reload.
+function ModelSwitch({ model, onChange }) {
+  const name = useId()
+  const aboutId = useId()
+  const chosen = MODEL_CHOICES.find((choice) => choice.id === model) ?? MODEL_CHOICES[0]
+  return (
+    <fieldset className="dev-model" aria-describedby={aboutId}>
+      <legend>Practice model</legend>
+      <div className="dev-model-track">
+        {MODEL_CHOICES.map(({ id, label }) => (
+          <label key={id}>
+            <input type="radio" name={name} value={id} checked={chosen.id === id} onChange={() => onChange(id)} />
+            <span className="dev-model-option">{label}</span>
+          </label>
+        ))}
+      </div>
+      <p id={aboutId}>Practice runs the {chosen.label.toLowerCase()}: {chosen.about}.</p>
+    </fieldset>
   )
 }
 

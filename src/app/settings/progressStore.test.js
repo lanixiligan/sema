@@ -27,9 +27,16 @@ describe('progressStore', () => {
     expect(loadProgress()).toEqual(NEW_VISITOR)
   })
 
-  it('saves and loads the signing hand, setup, theme and developer access', () => {
+  it('saves and loads the signing hand, setup, theme, developer access and model', () => {
     vi.stubGlobal('localStorage', fakeStorage())
-    const progress = { version: PROGRESS_VERSION, signingHand: 'left', setupDone: true, theme: 'dark', devAccess: 'ab12' }
+    const progress = {
+      version: PROGRESS_VERSION,
+      signingHand: 'left',
+      setupDone: true,
+      theme: 'dark',
+      devAccess: 'ab12',
+      devModel: 'knn',
+    }
     expect(saveProgress(progress)).toBe(true)
     expect(loadProgress()).toEqual(progress)
   })
@@ -37,6 +44,16 @@ describe('progressStore', () => {
   it('gives settings saved before developer access existed none', () => {
     vi.stubGlobal('localStorage', fakeStorage(saved({ version: PROGRESS_VERSION, signingHand: 'left', setupDone: true, theme: 'dark' })))
     expect(loadProgress().devAccess).toBeNull()
+  })
+
+  it('gives settings saved before the model choice existed, or with an unknown one, the small model', () => {
+    vi.stubGlobal('localStorage', fakeStorage(saved({ version: PROGRESS_VERSION, signingHand: 'left', setupDone: true })))
+    expect(loadProgress().devModel).toBe('small')
+    vi.stubGlobal(
+      'localStorage',
+      fakeStorage(saved({ version: PROGRESS_VERSION, signingHand: 'left', setupDone: true, devModel: 'forest' })),
+    )
+    expect(loadProgress().devModel).toBe('small')
   })
 
   it('gives settings saved before the theme existed the default theme', () => {

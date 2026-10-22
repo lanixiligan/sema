@@ -33,14 +33,14 @@ The development plan is `docs/project-plan.md`.
   datasets' photos (ASL-HG, ASLYset) into hand points, `training/` cleans them
   (`training/reports/cleaning-<dataset>.md`) and tests a k-NN and two small models
   (`training/reports/knn.md`, `small.md`); logistic regression is the model in the browser.
-  The live check (2.3) is Try (`/try`): Sema only checks the letter the person picked,
+  The live check (2.3) is Practice (`/practice`; Try, `/try`, until 2026-10-23): Sema only checks the letter the person picked,
   so there is no "none" class anywhere. The finger hints (2.4) moved to Phase 3. The model
   keeps improving during later phases, judged by the same held-out tests.
 - **Phase 3.1 (done early, with the recorder):** the app shell, Welcome and setup,
   because the recorder was the app's main page after setup (since 2026-10-22 it's a
-  developer tool, `/dev/record`, and setup leads to Try, `/try`, the classifier live:
-  the main page for now). Learn and Practice stay
-  placeholders until 3.3–3.4 (`phase-3-preview`). What the onboarding pages say and do:
+  developer tool, `/dev/record`, and setup leads to Practice, `/practice`, the classifier
+  live: the main page for now). Practice is Try renamed (2026-10-23), its placeholder gone;
+  Learn stays a placeholder until 3.3 (`phase-3-preview`). What the onboarding pages say and do:
   `docs/onboarding-pages.md` (update it when they change).
 - Later: letter recognition (`src/recognition/`). Don't create that folder early.
 
@@ -99,19 +99,19 @@ src/
                     its parts: CameraStage, CameraControls, CameraOff, IdleNotice,
                     StageProblem
     icons/          icons.jsx and the larger LineIcons.jsx
-    placeholder/    PlaceholderPage and mixLetters (Learn's and Practice's art)
+    placeholder/    PlaceholderPage and mixLetters (Learn's art)
     Logo.jsx
+    LetterGuide.jsx how to form a letter, its steps from letters.json (Record, Practice)
     AslDrawing.jsx  a letter's drawing (public/images/asl/, a left hand), facing a given
-                    hand; DRAWN_HAND (Record's reference picture, Try's cards and guide)
+                    hand; DRAWN_HAND (Record's reference picture, Practice's card and guide)
   pages/
     onboarding/     Welcome; Camera check; StepNav (used by intro/ and the camera check)
       intro/        About Sema, How Sema works, How Sema handles your data, and their
                     parts (IntroLayout, AboutPreview, HandSketch, useStaggeredReveal…)
-    try/            Try (/try), the main page for now and Practice's prototype: pick a
-                    letter in the guide (GuidePanel), hold it 3 s (letterHold), and the
-                    models' JS copies (networkModel, knnModel)
     learn/          the Learn placeholder
-    practice/       the Practice placeholder
+    practice/       Practice (/practice; Try until 2026-10-23), the main page for now:
+                    pick a letter in the guide (GuidePanel), hold it 3 s (letterHold),
+                    and the models' JS copies (networkModel, knnModel)
     dev/            the developer tools behind an access code: DevArea (the gate, then
                     the page), DevGate, DevDashboard (/dev), DevTopBar, devAccess
       tracking/     the Phase 1 page at /dev/tracking (+ BenchmarkPanel)
@@ -153,22 +153,30 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   characters). The browser remembers it as `devAccess` in `progressStore.js`; Delete Sema's
   data or Lock forgets it, and a new code locks every browser out. `App.jsx` loads
   `DevArea.jsx` with `lazy()`, so visitors who never open `/dev` never download the tools.
-- Try (`/try`, the main page for now; until 2026-10-22 the developer tool `/dev/try`) is
-  Practice's prototype (2026-10-22): pick a letter in the guide (B at first), make it, and
-  hold it for 3 s (`LETTER_HOLD_MS` in `src/pages/try/letterHold.js`). The hold counts while
+- Practice (`/practice`, the main page for now) was Try (`/try`, which now redirects to
+  `/practice`) until 2026-10-23, and before 2026-10-22 the developer tool `/dev/try`.
+  Record's three columns: the letter guide on the left, the camera (with the Left | Right
+  switch in its controls, which changes the saved signing hand, so the drawings face it;
+  either hand can make the letter) in the middle, and the letter's card on the right: its
+  drawing large, its steps, and a "Right now" line per hand. Pick a letter in the guide (B at
+  first), make it, and
+  hold it for 3 s (`LETTER_HOLD_MS` in `src/pages/practice/letterHold.js`). The hold counts while
   any whole hand's guess is that letter and sure; a gap over 300 ms restarts it. Then
   "That's B!" with Try again; the next letter is picked by hand. The guide shows all 26:
   a dot marks the 8 tested on Lanix's recordings, and J and Z (they move) are darkened and
-  can't be picked. Try runs
+  can't be picked. Practice runs
   the small model (step 5 of 2.2): `public/models/asl-letters.json`, committed (weights only,
-  a few KB), so it works on the live site; its JS copy (`src/pages/try/networkModel.js`) must give the same answers as
+  a few KB), so it works on the live site; its JS copy (`src/pages/practice/networkModel.js`) must give the same answers as
   `forward()` in `training/small.py`. The k-NN (step 4): `data/models/knn-asl.json`
-  (gitignored, 11 MB), offered by a switch only under `npm run dev`, with a line naming the
-  model; `knnModel.js` must match `training/knn.py`.
+  (gitignored, 11 MB), chosen with a switch on the `/dev` dashboard (2026-10-23; before, on
+  Practice itself), only under `npm run dev`: the choice is `devModel` in the settings store
+  (`DEV_MODELS`), Practice takes it as the `model` prop and under `npm run dev` names the
+  model in a line; `knnModel.js` must match `training/knn.py`. The live site always runs
+  the small model.
   The small model is trained on ASL-HG and, since 2026-10-23, ASLYset (both CC BY 4.0): keep
   their credits in `docs/ATTRIBUTION.md` and the README, and add one for any dataset added.
-- Setup redirects live in `resolveRoute`: a new visitor opening Try, Learn or Practice goes
-  to Welcome; a returning visitor opening `/` goes to Try. Finishing setup opens Try. The developer pages, Record
+- Setup redirects live in `resolveRoute`: a new visitor opening Learn or Practice goes
+  to Welcome; a returning visitor opening `/` goes to Practice. Finishing setup opens Practice. The developer pages, Record
   included, don't need setup.
 
 ## Settings
@@ -216,7 +224,7 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
 - The camera check never starts the camera by itself: it opens with "Camera is off" and a
   Turn camera on button, and the browser only asks for the camera after that click
   (`CameraStage autoStart={false}`). Record's recording step starts it on arrival, since the
-  person just pressed Start recording. Try waits for a click too, so landing on Sema never
+  person just pressed Start recording. Practice waits for a click too, so landing on Sema never
   turns the camera on. It stays off on Welcome, the intro pages and
   Record's consent/finished steps, and turns off whenever no camera view is on screen.
 - `CameraProvider` (`src/app/shared-camera/`) does this: it owns the camera and the hand model for
@@ -227,7 +235,7 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   10 s without a hand a notice appears and counts down the rest of the minute
   (`src/camera/idleRules.js`, `src/app/shared-camera/useIdleCameraOff.js`, `IdleNotice`); any hand resets
   the count.
-- Every camera page (camera check, Try, Record) uses one component, `CameraView`
+- Every camera page (camera check, Practice, Record) uses one component, `CameraView`
   (`src/components/camera-view/`): the frame, the problem panel (texts `CAMERA_VIEW_*` in
   `cameraMessages.js` and `visionMessages.js`), `CameraOff` with a Turn camera on button,
   the idle timeout, and `CameraControls` (on/off, the camera list; the page passes options
@@ -297,7 +305,7 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
 - Smoothing (2026-10-22): the drawn points go through a One Euro filter
   (`src/vision/tracking/smoothHands.js`), because the points shook, most on closed
   handshapes, and Hand Landmarker has no smoothing option. Only the drawing is
-  smoothed: the listener (recorder, camera check, Try) still gets raw points.
+  smoothed: the listener (recorder, camera check, Practice) still gets raw points.
   Each hand keeps its own filters, matched by wrist position, and starts fresh after
   300 ms unseen. `MIN_CUTOFF` and `BETA` are tuned by eye in Chrome.
 - Landmarks can go below 0 or above 1 when the hand is partly out of frame. The

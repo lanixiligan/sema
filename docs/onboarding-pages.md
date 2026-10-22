@@ -1,7 +1,7 @@
 # Onboarding pages
 
-What a new visitor sees before Try (the main page for now), and what each page says. This describes the pages
-as built on 2026-10-18 (since 2026-10-22, setup leads to Try instead of Record); the page files in `src/pages/onboarding/` are the source of truth,
+What a new visitor sees before Practice (the main page for now), and what each page says. This describes the pages
+as built on 2026-10-18 (since 2026-10-22, setup leads to Try instead of Record, and since 2026-10-23 Try is Practice); the page files in `src/pages/onboarding/` are the source of truth,
 so update this document when they change.
 
 ## The flow
@@ -14,10 +14,10 @@ so update this document when they change.
 | 4 | How Sema handles your data | `/privacy` | `PrivacyPage.jsx` |
 | 5 | Camera check (setup) | `/setup/camera` | `CameraCheckPage.jsx` |
 
-- A **new visitor** starts on Welcome. Opening Try, Learn or Practice sends them back
+- A **new visitor** starts on Welcome. Opening Learn or Practice sends them back
   to Welcome (`resolveRoute` in `src/app/routing/router.js`).
 - Finishing the camera check finishes setup. A **returning visitor** opening `/` goes
-  straight to Try (to Record until 2026-10-22, then briefly Learn; Record is now a developer
+  straight to Practice (to Record until 2026-10-22, then briefly Learn, then Try, renamed Practice on 2026-10-23; Record is now a developer
   tool, `/dev/record`).
   The intro pages can still be opened by their address. Then About's
   Previous and the data page's Previous go back to wherever the person came from, and the
@@ -102,7 +102,7 @@ Each claim was checked against the code (see the comment at the top of `PrivacyP
 
 Setup's one page. Two columns: three numbered steps on the left, the camera panel on the
 right. Previous: How Sema handles your data. **Next stays closed until the check passes**,
-then finishes setup and opens Try. Setup doesn't ask which hand the visitor signs
+then finishes setup and opens Practice. Setup doesn't ask which hand the visitor signs
 with: it saves Right.
 
 - Headline: **Check your camera**

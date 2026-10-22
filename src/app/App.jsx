@@ -9,7 +9,6 @@ import { SettingsContext } from './settings/settings.js'
 import AboutPage from '../pages/onboarding/intro/AboutPage.jsx'
 import CameraCheckPage from '../pages/onboarding/CameraCheckPage.jsx'
 import LearnPage from '../pages/learn/LearnPage.jsx'
-import TryPage from '../pages/try/TryPage.jsx'
 import HowSemaWorksPage from '../pages/onboarding/intro/HowSemaWorksPage.jsx'
 import PrivacyPage from '../pages/onboarding/intro/PrivacyPage.jsx'
 import WelcomePage from '../pages/onboarding/WelcomePage.jsx'
@@ -28,7 +27,7 @@ const SMALL_SCREEN = '(max-width: 899px)'
 export default function App() {
   const pathname = usePathname()
   // The saved settings (signing hand, setup done). They decide where a visitor
-  // may go: setup first for a new one, straight to Try for a returning one.
+  // may go: setup first for a new one, straight to Practice for a returning one.
   const [progress, setProgress] = useState(loadProgress)
   const route = resolveRoute(pathname, progress)
   // Checked once, when the page opens: a phone doesn't change size, and a
@@ -59,7 +58,7 @@ export default function App() {
   // router never sees one without the other.
   function finishSetup() {
     updateProgress({ signingHand: progress.signingHand ?? 'right', setupDone: true })
-    navigate(PATHS.try)
+    navigate(PATHS.practice)
   }
 
   // The settings menu's Delete Sema's data (after the person confirmed):
@@ -90,6 +89,9 @@ export default function App() {
             signingHand={progress.signingHand}
             setupDone={progress.setupDone}
             onFinishSetup={finishSetup}
+            onSigningHandChange={(signingHand) => updateProgress({ signingHand })}
+            devModel={progress.devModel}
+            onDevModelChange={(devModel) => updateProgress({ devModel })}
             devAccess={progress.devAccess}
             onDevAccessChange={(devAccess) => updateProgress({ devAccess })}
           />
@@ -99,13 +101,25 @@ export default function App() {
   )
 }
 
-function Page({ name, signingHand, setupDone, onFinishSetup, devAccess, onDevAccessChange }) {
+function Page({
+  name,
+  signingHand,
+  setupDone,
+  onFinishSetup,
+  onSigningHandChange,
+  devModel,
+  onDevModelChange,
+  devAccess,
+  onDevAccessChange,
+}) {
   if (DEV_PAGES.includes(name)) {
     return (
       <Suspense fallback={null}>
         <DevArea
           page={name}
           signingHand={signingHand}
+          devModel={devModel}
+          onModelChange={onDevModelChange}
           devAccess={devAccess}
           onAccessChange={onDevAccessChange}
         />
@@ -123,11 +137,9 @@ function Page({ name, signingHand, setupDone, onFinishSetup, devAccess, onDevAcc
       return <PrivacyPage setupDone={setupDone} />
     case 'cameraCheck':
       return <CameraCheckPage onDone={onFinishSetup} />
-    case 'try':
-      return <TryPage signingHand={signingHand} />
     case 'learn':
       return <LearnPage />
     case 'practice':
-      return <PracticePage />
+      return <PracticePage signingHand={signingHand} onSigningHandChange={onSigningHandChange} model={devModel} />
   }
 }
