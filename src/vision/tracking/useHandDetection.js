@@ -3,6 +3,7 @@ import { clearHand, drawHand, drawHands } from './drawHand.js'
 import { isWholeHand } from '../landmarks/handChecks.js'
 import { toPhysicalHand } from './handedness.js'
 import { listHands, pickHand } from './pickHand.js'
+import { createHandSmoother } from './smoothHands.js'
 import { getDetectionErrorMessage } from '../model/visionMessages.js'
 
 // How long the hand must be missing before we say "No hand". Without this the
@@ -23,7 +24,8 @@ const NO_STATS = { detectionFps: null, detectionMs: null }
 // drawAllHands (optional): draw every hand found, not just the picked one
 // (the camera check, which looks at both hands).
 // The listener gets the picked hand (landmarks, handedness) and, as `hands`,
-// every hand found (pickHand.js's listHands).
+// every hand found (pickHand.js's listHands). It gets the raw points: only the
+// drawing is smoothed (smoothHands.js).
 export function useHandDetection({
   videoRef,
   canvasRef,
@@ -65,6 +67,8 @@ export function useHandDetection({
     let lastHandSeenAt = 0
     let shownLabel = null
     let shownWhole = false
+    // Steadies the drawn points; new each time the loop starts.
+    const smoothHands = createHandSmoother()
 
     let windowStart = performance.now()
     let detections = 0
@@ -123,10 +127,14 @@ export function useHandDetection({
         const label = toPhysicalHand(picked.handedness.categoryName)
         // The other hand is cleared straight away: no points on the wrong hand.
         const wanted = wantedHandRef.current
+        // The timestamp, not `now`: it always increases, so the smoothing's
+        // time step is never zero.
         if (drawAllHands) {
-          drawHands(canvas, hands.map((hand) => hand.landmarks), video.videoWidth, video.videoHeight)
+          const smoothed = smoothHands(hands.map((hand) => hand.landmarks), timestamp)
+          drawHands(canvas, smoothed, video.videoWidth, video.videoHeight)
         } else if (!wanted || label.toLowerCase() === wanted) {
-          drawHand(canvas, landmarks, video.videoWidth, video.videoHeight)
+          const [smoothed] = smoothHands([landmarks], timestamp)
+          drawHand(canvas, smoothed, video.videoWidth, video.videoHeight)
         } else {
           clearHand(canvas)
         }
