@@ -2,10 +2,9 @@ import { takeProgress } from '../../../recorder/sessionFile.js'
 import { TAKES_TARGET } from '../../../recorder/takeRules.js'
 import TakeMarks from './TakeMarks.jsx'
 
-// The letters to record, in a panel on the left, in two groups: the training
-// letters, then the pilot letters (recorded for
-// testing, not training yet), their letters drawn fainter. Each group's
-// heading counts its kept takes for the chosen hand; each row shows its own
+// The letters to record, in a panel on the left, in one list from A to Z. The
+// pilot letters (recorded for testing, not training yet) have their letters
+// drawn fainter. The heading counts all the kept takes for the chosen hand; each row shows its own
 // as three marks (TakeMarks, where a kept take can be deleted), and the
 // chosen letter is highlighted. The marks sit on top of the row's right end,
 // not inside its button (a button can't hold other buttons).
@@ -34,28 +33,23 @@ export default function LetterList({ training, pilot, session, hand, selected, o
     )
   }
 
-  const group = (id, title, letters, isPilot) => {
-    const { kept, needed } = takeProgress(session, letters, [hand])
-    return (
-      // Each group gets a share of the panel's height for each of its rows,
-      // so every row is the same height (styles.css lets the rows grow).
-      <section className="letter-group" aria-labelledby={id} style={{ flexGrow: letters.length }}>
-        <h2 id={id} className="letter-list-heading">
-          {title}
+  const all = [...training, ...pilot].sort()
+  const { kept, needed } = takeProgress(session, all, [hand])
+
+  return (
+    <nav className="letter-list" aria-label="Letters">
+      {/* The rows share the panel's height, so every row is the same height
+          (styles.css lets them grow). */}
+      <section className="letter-group" aria-labelledby="letter-list-main">
+        <h2 id="letter-list-main" className="letter-list-heading">
+          Letters
           <span className="letter-list-count">
             {kept} / {needed}
             <span className="visually-hidden"> takes, {hand} hand</span>
           </span>
         </h2>
-        <ul>{letters.map((letter) => row(letter, isPilot))}</ul>
+        <ul>{all.map((letter) => row(letter, pilot.includes(letter)))}</ul>
       </section>
-    )
-  }
-
-  return (
-    <nav className="letter-list" aria-label="Letters">
-      {group('letter-list-main', 'Letters', training, false)}
-      {pilot.length > 0 && group('letter-list-pilot', 'Pilot letters', pilot, true)}
     </nav>
   )
 }

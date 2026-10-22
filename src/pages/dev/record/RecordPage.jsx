@@ -80,7 +80,7 @@ export default function RecordPage({ signingHand }) {
   })
   // Until one is picked, the chosen letter is the first that still needs
   // takes for this hand (worked out on each render, so it stays current).
-  const allLetters = letters.status === 'ready' ? [...letters.training, ...letters.pilot] : []
+  const allLetters = letters.status === 'ready' ? [...letters.training, ...letters.pilot].sort() : []
   const letter =
     pickedLetter ?? (session && allLetters.find((l) => acceptedCount(session, l, takeHand) < TAKES_TARGET)) ?? allLetters[0] ?? null
   const cell = session && letter ? { letter, hand: takeHand } : null

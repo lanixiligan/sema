@@ -1731,13 +1731,13 @@ p.try-now {
   inset: 0;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 }
 
 .record-letters .letter-group {
   display: flex;
-  flex-basis: 0;
+  flex: 1 0 auto;
   flex-direction: column;
-  min-height: 0;
 }
 
 .record-letters .letter-list ul {
@@ -1746,7 +1746,7 @@ p.try-now {
 
 .record-letters .letter-item {
   flex: 1 1 0;
-  min-height: 28px;
+  min-height: 22px;
 }
 
 .record-letters .letter-row {
@@ -2413,12 +2413,6 @@ p.try-now {
   margin: 0;
   padding: 0;
   list-style: none;
-}
-
-.letter-group + .letter-group {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
 }
 
 .letter-list-heading {
