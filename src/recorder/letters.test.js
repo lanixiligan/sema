@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { classLabel, splitLetters } from './letters.js'
+import { splitLetters } from './letters.js'
 
 describe('splitLetters', () => {
   it('separates training letters from pilot-only letters', () => {
@@ -39,12 +39,5 @@ describe('reference images', () => {
         { letter: 'D', image: 7 },
       ]).images,
     ).toEqual({ B: 'reference/B.svg', A: 'reference/A.svg' })
-  })
-})
-
-describe('classLabel', () => {
-  it('names the no-letter class', () => {
-    expect(classLabel('none')).toBe('No letter')
-    expect(classLabel('W')).toBe('W')
   })
 })

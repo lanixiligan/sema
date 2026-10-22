@@ -4,7 +4,6 @@ import SettingsMenu from '../settings/SettingsMenu.jsx'
 import TopBar from './TopBar.jsx'
 
 const MENU = [
-  { page: 'record', label: 'Record' },
   { page: 'learn', label: 'Learn' },
   { page: 'practice', label: 'Practice' },
 ]

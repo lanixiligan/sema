@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { Suspense, lazy, useEffect, useState } from 'react'
 import CameraProvider from './shared-camera/CameraProvider.jsx'
 import PhoneNotice from './layout/PhoneNotice.jsx'
 import { navigate, usePathname } from './routing/navigation.js'
@@ -8,13 +8,16 @@ import { applyTheme, followTheme, systemThemeQuery } from './settings/theme.js'
 import { SettingsContext } from './settings/settings.js'
 import AboutPage from '../pages/onboarding/intro/AboutPage.jsx'
 import CameraCheckPage from '../pages/onboarding/CameraCheckPage.jsx'
-import DevPage from '../pages/dev/DevPage.jsx'
 import LearnPage from '../pages/learn/LearnPage.jsx'
 import HowSemaWorksPage from '../pages/onboarding/intro/HowSemaWorksPage.jsx'
 import PrivacyPage from '../pages/onboarding/intro/PrivacyPage.jsx'
 import WelcomePage from '../pages/onboarding/WelcomePage.jsx'
 import PracticePage from '../pages/practice/PracticePage.jsx'
-import RecordPage from '../pages/record/RecordPage.jsx'
+
+// The developer pages, behind their access code. Loaded on demand (lazy), so
+// visitors who never open /dev never download them.
+const DevArea = lazy(() => import('../pages/dev/DevArea.jsx'))
+const DEV_PAGES = ['dev', 'devTracking', 'devRecord']
 
 // Displays narrower than this get the phone notice (from the design).
 const SMALL_SCREEN = '(max-width: 899px)'
@@ -24,7 +27,7 @@ const SMALL_SCREEN = '(max-width: 899px)'
 export default function App() {
   const pathname = usePathname()
   // The saved settings (signing hand, setup done). They decide where a visitor
-  // may go: setup first for a new one, straight to Record for a returning one.
+  // may go: setup first for a new one, straight to Learn for a returning one.
   const [progress, setProgress] = useState(loadProgress)
   const route = resolveRoute(pathname, progress)
   // Checked once, when the page opens: a phone doesn't change size, and a
@@ -50,19 +53,19 @@ export default function App() {
   }
 
   // The camera check's Next. Setup doesn't ask for the signing hand, so it
-  // keeps a saved one, or Right (Record's hand toggle switches it). The
-  // settings change and the navigation happen in the same click, so React
-  // applies them in one render: the router never sees one without the other.
+  // keeps a saved one, or Right. The settings change and the navigation
+  // happen in the same click, so React applies them in one render: the
+  // router never sees one without the other.
   function finishSetup() {
     updateProgress({ signingHand: progress.signingHand ?? 'right', setupDone: true })
-    navigate(PATHS.record)
+    navigate(PATHS.learn)
   }
 
   // The settings menu's Delete Sema's data (after the person confirmed):
   // everything saved in this browser goes, and Sema starts over as for a new
   // visitor, on Welcome. It doesn't reload the tab: going to Welcome closes
-  // Record (its unsaved session in memory with it) and the camera, and the
-  // settings in memory go back to a new visitor's in the same render.
+  // the page and the camera, and the settings in memory go back to a new
+  // visitor's in the same render.
   // Nothing is saved again until the person changes a setting.
   function deleteData() {
     const cleared = clearSavedData()
@@ -86,6 +89,8 @@ export default function App() {
             signingHand={progress.signingHand}
             setupDone={progress.setupDone}
             onFinishSetup={finishSetup}
+            devAccess={progress.devAccess}
+            onDevAccessChange={(devAccess) => updateProgress({ devAccess })}
           />
         )}
       </CameraProvider>
@@ -93,7 +98,19 @@ export default function App() {
   )
 }
 
-function Page({ name, signingHand, setupDone, onFinishSetup }) {
+function Page({ name, signingHand, setupDone, onFinishSetup, devAccess, onDevAccessChange }) {
+  if (DEV_PAGES.includes(name)) {
+    return (
+      <Suspense fallback={null}>
+        <DevArea
+          page={name}
+          signingHand={signingHand}
+          devAccess={devAccess}
+          onAccessChange={onDevAccessChange}
+        />
+      </Suspense>
+    )
+  }
   switch (name) {
     case 'welcome':
       return <WelcomePage />
@@ -105,13 +122,9 @@ function Page({ name, signingHand, setupDone, onFinishSetup }) {
       return <PrivacyPage setupDone={setupDone} />
     case 'cameraCheck':
       return <CameraCheckPage onDone={onFinishSetup} />
-    case 'record':
-      return <RecordPage signingHand={signingHand} />
     case 'learn':
       return <LearnPage />
     case 'practice':
       return <PracticePage />
-    case 'dev':
-      return <DevPage />
   }
 }

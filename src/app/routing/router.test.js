@@ -11,12 +11,12 @@ describe('resolveRoute', () => {
     }
   })
 
-  it('sends a returning visitor from Welcome to Record', () => {
-    expect(resolveRoute('/', returning)).toEqual({ redirect: '/record' })
+  it('sends a returning visitor from Welcome to Learn', () => {
+    expect(resolveRoute('/', returning)).toEqual({ redirect: '/learn' })
   })
 
-  it('sends a new visitor from Record, Learn and Practice to Welcome', () => {
-    for (const path of ['/record', '/learn', '/practice']) {
+  it('sends a new visitor from Learn and Practice to Welcome', () => {
+    for (const path of ['/learn', '/practice']) {
       expect(resolveRoute(path, newVisitor)).toEqual({ redirect: '/' })
     }
   })
@@ -25,6 +25,16 @@ describe('resolveRoute', () => {
     for (const page of ['welcome', 'about', 'howSemaWorks', 'privacy', 'cameraCheck', 'dev']) {
       expect(resolveRoute(PATHS[page], newVisitor)).toEqual({ page })
     }
+  })
+
+  it('serves the developer dashboard and each tool, without setup', () => {
+    expect(resolveRoute('/dev', newVisitor)).toEqual({ page: 'dev' })
+    expect(resolveRoute('/dev/tracking', newVisitor)).toEqual({ page: 'devTracking' })
+    expect(resolveRoute('/dev/record', newVisitor)).toEqual({ page: 'devRecord' })
+  })
+
+  it('no longer has Record outside the developer tools', () => {
+    expect(resolveRoute('/record', returning)).toEqual({ redirect: '/' })
   })
 
   it('serves the intro pages at their own addresses', () => {
@@ -38,7 +48,7 @@ describe('resolveRoute', () => {
   })
 
   it('ignores a trailing slash', () => {
-    expect(resolveRoute('/record/', returning)).toEqual({ page: 'record' })
+    expect(resolveRoute('/learn/', returning)).toEqual({ page: 'learn' })
   })
 
   it('sends unknown paths to Welcome', () => {

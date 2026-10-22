@@ -1,5 +1,7 @@
 // Sema's settings, kept in this browser's localStorage so they survive a
-// reload: the signing hand, whether setup is done, and the theme (theme.js).
+// reload: the signing hand, whether setup is done, the theme (theme.js), and
+// the developer pages' access (the fingerprint of the code entered on /dev,
+// src/pages/dev/devAccess.js).
 // Pages never touch localStorage themselves; they go through this module, so
 // per-letter progress (3.2) or accounts (Phase 5) can be added in one place.
 import { DEFAULT_THEME, THEMES } from './theme.js'
@@ -8,7 +10,13 @@ const KEY = 'sema.progress'
 const HANDS = ['left', 'right']
 
 export const PROGRESS_VERSION = 1
-export const NEW_VISITOR = { version: PROGRESS_VERSION, signingHand: null, setupDone: false, theme: DEFAULT_THEME }
+export const NEW_VISITOR = {
+  version: PROGRESS_VERSION,
+  signingHand: null,
+  setupDone: false,
+  theme: DEFAULT_THEME,
+  devAccess: null,
+}
 
 // The saved settings, or NEW_VISITOR if there are none, they can't be read,
 // or they're from another version. localStorage itself can throw (site data
@@ -25,6 +33,7 @@ export function loadProgress() {
       signingHand,
       setupDone: saved.setupDone === true && signingHand !== null,
       theme: THEMES.includes(saved.theme) ? saved.theme : DEFAULT_THEME,
+      devAccess: typeof saved.devAccess === 'string' ? saved.devAccess : null,
     }
   } catch {
     return NEW_VISITOR

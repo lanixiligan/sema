@@ -1,10 +1,9 @@
-import { classLabel } from '../../recorder/letters.js'
-import { takeProgress } from '../../recorder/sessionFile.js'
-import { TAKES_TARGET } from '../../recorder/takeRules.js'
+import { takeProgress } from '../../../recorder/sessionFile.js'
+import { TAKES_TARGET } from '../../../recorder/takeRules.js'
 import TakeMarks from './TakeMarks.jsx'
 
 // The letters to record, in a panel on the left, in two groups: the training
-// letters and "None" (no letter), then the pilot letters (recorded for
+// letters, then the pilot letters (recorded for
 // testing, not training yet), their letters drawn fainter. Each group's
 // heading counts its kept takes for the chosen hand; each row shows its own
 // as three marks (TakeMarks, where a kept take can be deleted), and the
@@ -24,11 +23,11 @@ export default function LetterList({ training, pilot, session, hand, selected, o
           type="button"
           className={classes.join(' ')}
           aria-pressed={isSelected}
-          aria-label={`${classLabel(letter)}, ${Math.min(kept, TAKES_TARGET)} of ${TAKES_TARGET} takes`}
+          aria-label={`${letter}, ${Math.min(kept, TAKES_TARGET)} of ${TAKES_TARGET} takes`}
           disabled={disabled}
           onClick={() => onSelect(letter)}
         >
-          <span className="letter-row-letter">{letter === 'none' ? 'None' : letter}</span>
+          <span className="letter-row-letter">{letter}</span>
         </button>
         <TakeMarks letter={letter} takes={takes} onDelete={onDelete} disabled={disabled} />
       </li>
@@ -55,7 +54,7 @@ export default function LetterList({ training, pilot, session, hand, selected, o
 
   return (
     <nav className="letter-list" aria-label="Letters">
-      {group('letter-list-main', 'Letters', [...training, 'none'], false)}
+      {group('letter-list-main', 'Letters', training, false)}
       {pilot.length > 0 && group('letter-list-pilot', 'Pilot letters', pilot, true)}
     </nav>
   )

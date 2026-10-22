@@ -1,15 +1,10 @@
-import { TAKES_TARGET } from '../../recorder/takeRules.js'
-
-// The hand the reference drawings show (public/images/asl/, from Wikimedia
-// Commons): a left hand. The picture is mirrored for the other hand, so it
-// always matches the hand the take is for.
-const DRAWN_HAND = 'left'
+import { DRAWN_HAND } from '../../../components/AslDrawing.jsx'
+import { TAKES_TARGET } from '../../../recorder/takeRules.js'
 
 // The letter card: its name and kept takes on top, then the reference
 // picture. How to form the letter is under the card (LetterGuide).
 export default function TakePanel({ cell, isPilot, image, accepted }) {
-  const isNone = cell.letter === 'none'
-  const title = isNone ? 'No letter' : `Letter ${cell.letter}${isPilot ? ' (pilot)' : ''}`
+  const title = `Letter ${cell.letter}${isPilot ? ' (pilot)' : ''}`
 
   return (
     <section className="letter-card letter-card-record" aria-label="Current letter">
@@ -27,7 +22,7 @@ export default function TakePanel({ cell, isPilot, image, accepted }) {
 // The reference picture once letters.json has one ("image", a path inside
 // public/), mirrored when the take is for the hand it doesn't show, on a
 // white backing in both themes: the drawings are black lines, which a dark
-// card would swallow. Without one ("None"), a placeholder with the letter.
+// card would swallow. Without one, a placeholder with the letter.
 function ReferenceImage({ letter, image, mirrored }) {
   if (image) {
     return (
@@ -43,7 +38,7 @@ function ReferenceImage({ letter, image, mirrored }) {
   return (
     <div className="reference-image reference-image-empty">
       <span className="reference-image-letter" aria-hidden="true">
-        {letter === 'none' ? '–' : letter}
+        {letter}
       </span>
       <span className="reference-image-note">Photo coming soon</span>
     </div>

@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { CameraOffIcon, FileSendIcon, HandPointsIcon } from '../../components/icons/LineIcons.jsx'
-import { isValidPersonCode, nextSessionId, normalizePersonCode } from '../../recorder/sessionFile.js'
-import { loadUsedSessionIds } from '../../recorder/sessionStore.js'
+import { CameraOffIcon, FileSendIcon, HandPointsIcon } from '../../../components/icons/LineIcons.jsx'
+import { isValidPersonCode, nextSessionId, normalizePersonCode } from '../../../recorder/sessionFile.js'
+import { loadUsedSessionIds } from '../../../recorder/sessionStore.js'
 
 // Record's first step: the participant's code, the session ID (filled in),
 // what gets saved, and consent to use the recordings to train Sema, which is
