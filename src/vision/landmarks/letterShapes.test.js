@@ -35,6 +35,29 @@ describe('shapeFix', () => {
     expect(shapeFix('B', handWith({ ...knuckles, ...spread, ...thumbIn }))).toBe('Keep your fingers together.')
   })
 
+  describe('Z', () => {
+    const pointing = { 6: [0.3, -1.3], 8: [0.3, -1.9] }
+    const indexCurled = { 6: [0.3, -1.3], 8: [0.3, -1.0] }
+    const curled = { 10: [0.05, -1.2], 12: [0.05, -0.8], 14: [-0.1, -1.15], 16: [-0.1, -0.8], 18: [-0.3, -1.05], 20: [-0.25, -0.75] }
+    const straight = { 10: [0.05, -1.4], 12: [0.05, -1.9], 14: [-0.1, -1.35], 16: [-0.1, -1.8], 18: [-0.3, -1.25], 20: [-0.35, -1.6] }
+
+    it('passes the index pointing, the others curled, the thumb across', () => {
+      expect(shapeFix('Z', handWith({ ...knuckles, ...pointing, ...curled, ...thumbIn }))).toBe(null)
+    })
+
+    it('asks for the index finger when it is curled too (a fist)', () => {
+      expect(shapeFix('Z', handWith({ ...knuckles, ...indexCurled, ...curled, ...thumbIn }))).toBe('Point your index finger.')
+    })
+
+    it('asks to curl the other fingers when they are up', () => {
+      expect(shapeFix('Z', handWith({ ...knuckles, ...pointing, ...straight, ...thumbIn }))).toBe('Curl your other fingers into your palm.')
+    })
+
+    it('asks for the thumb when it sticks out', () => {
+      expect(shapeFix('Z', handWith({ ...knuckles, ...pointing, ...curled, ...thumbOut }))).toBe('Fold your thumb over your curled fingers.')
+    })
+  })
+
   it('leaves letters without rules to the model', () => {
     expect(shapeFix('C', handWith({ ...knuckles, ...spread, ...thumbOut }))).toBe(null)
   })
