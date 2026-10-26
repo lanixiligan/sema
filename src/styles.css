@@ -1143,9 +1143,9 @@ p.practice-now {
   margin-bottom: 0;
 }
 
-/* Held for 3 seconds: a dark film over the picture with the result, Try
-   again, and a reminder that the guide picks the next letter. Also the film
-   for J and Z, which can't be checked yet. */
+/* Held for 3 seconds (or Z traced): a dark film over the picture with the
+   result, Try again, and a reminder that the guide picks the next letter. Also
+   the film for J, which can't be checked yet. */
 .practice-done {
   position: absolute;
   inset: 0;

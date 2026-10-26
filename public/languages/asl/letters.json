@@ -26,6 +26,6 @@
     {"letter": "V", "instructions": ["Index and middle fingers up and apart, like a peace sign", "The other fingers curled, thumb holds them down"], "image": "images/asl/v.svg"},
     {"letter": "X", "instructions": ["Make a fist", "Index finger bends into a hook"], "image": "images/asl/x.svg"},
     {"letter": "J", "unavailable": "Moves: starts as I, then the pinky draws a J in the air", "instructions": ["Hold the I handshape (pinky up)", "Draw a J in the air with the pinky"], "image": "images/asl/j.svg"},
-    {"letter": "Z", "unavailable": "Moves: the index finger draws a Z in the air", "instructions": ["Point the index finger", "Draw a Z in the air with it"], "image": "images/asl/z.svg"}
+    {"letter": "Z", "unavailable": "Moves: the index finger draws a Z in the air", "instructions": ["Index finger points up", "The other fingers curled, thumb folded over them", "Put the fingertip on point 1 and trace the Z to point 2"], "image": "images/asl/z.svg"}
   ]
 }

@@ -91,4 +91,11 @@ describe('practiceStatus', () => {
   it('names the signing hand', () => {
     expect(practiceStatus({ ...ready, hand: 'left' }).status).toBe('Show A with your left hand')
   })
+
+  it('guides a traced letter (Z): point 1, then the line to point 2', () => {
+    const z = { ...ready, target: 'Z', traced: true }
+    expect(practiceStatus(z)).toEqual({ status: 'Put your right index finger on point 1', tone: '' })
+    expect(practiceStatus({ ...z, tracing: true })).toEqual({ status: 'Follow the line to point 2…', tone: 'ok' })
+    expect(practiceStatus({ ...z, tracing: true, passed: true })).toEqual({ status: "That's Z!", tone: 'ok' })
+  })
 })

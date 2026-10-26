@@ -9,13 +9,16 @@ import { useLetters } from '../../recorder/letters.js'
 import { frameFromDetection } from '../../recorder/takeRules.js'
 import { isWholeHand } from '../../vision/landmarks/handChecks.js'
 import { shapeFix } from '../../vision/landmarks/letterShapes.js'
+import { NO_TRACE, fingertip, traceDone, traceShare, updateTrace, zPath } from '../../vision/landmarks/zTrace.js'
 import { useHandDetection } from '../../vision/tracking/useHandDetection.js'
+import { drawTrace } from './drawTrace.js'
 import GuidePanel from './GuidePanel.jsx'
 import * as knnModel from './knnModel.js'
 import {
   LETTER_HOLD_MS,
   MOVING_LETTERS,
   NO_HOLD,
+  TRACED_LETTERS,
   heldLongEnough,
   holdSecondsLeft,
   practiceStatus,
@@ -93,11 +96,17 @@ export default function PracticePage({ signingHand, onSigningHandChange, model =
   // starts a new round, which starts the hold over.
   const [target, setTarget] = useState(FIRST_LETTER)
   const moving = MOVING_LETTERS.includes(target)
+  const traced = TRACED_LETTERS.includes(target)
   const [round, setRound] = useState(0)
   const [passed, setPassed] = useState(false)
   const [guesses, setGuesses] = useState([])
   const [holdStart, setHoldStart] = useState(null)
   const [secondsLeft, setSecondsLeft] = useState(null)
+  // Z's trace: started on the dot, how much is traced (0 to 1), and the
+  // canvas under the hand drawing that shows it.
+  const [tracing, setTracing] = useState(false)
+  const [traceFill, setTraceFill] = useState(0)
+  const traceCanvasRef = useRef(null)
   function startRound(letter) {
     setTarget(letter)
     setPassed(false)
@@ -107,8 +116,9 @@ export default function PracticePage({ signingHand, onSigningHandChange, model =
   // The detection loop calls the listener on every frame, with every hand.
   // State only changes when a value does, so React skips most of these.
   useEffect(() => {
-    // A moving letter (J, Z) can't be checked, so nothing is judged or held.
-    if (loaded.status !== 'ready' || moving) return
+    // A moving letter (J) can't be checked, so nothing is judged or held; Z is
+    // traced instead (the next effect).
+    if (loaded.status !== 'ready' || moving || traced) return
     let shownAt = 0
     let hold = NO_HOLD
     let done = false
@@ -139,7 +149,37 @@ export default function PracticePage({ signingHand, onSigningHandChange, model =
       setHoldStart(null)
       setSecondsLeft(null)
     }
-  }, [kind, loaded, target, round, moving, drawnHand])
+  }, [kind, loaded, target, round, moving, traced, drawnHand])
+
+  // Z: no classifier. Every frame draws the Z and moves the trace on with the
+  // signing hand's index fingertip, while that hand makes Z's handshape
+  // (zTrace.js). The drawing goes straight to the canvas, not through state.
+  useEffect(() => {
+    if (!traced) return
+    let trace = NO_TRACE
+    let done = false
+    listenerRef.current = (detection) => {
+      if (done) return
+      const aspect = detection.width / detection.height
+      const path = zPath(drawnHand, aspect)
+      trace = updateTrace(trace, zFingertip(detection, drawnHand, aspect), detection.time, path)
+      const canvas = traceCanvasRef.current
+      if (canvas) drawTrace(canvas, path, trace.along, detection.width, detection.height)
+      setTracing(trace.along !== null)
+      // In whole percent, so the state only changes when the panel line would.
+      setTraceFill(Math.round(traceShare(trace, path) * 100) / 100)
+      if (traceDone(trace)) {
+        done = true
+        setPassed(true)
+      }
+    }
+    // The canvas needs no clearing: each frame redraws it from scratch.
+    return () => {
+      listenerRef.current = null
+      setTracing(false)
+      setTraceFill(0)
+    }
+  }, [traced, round, drawnHand])
 
   // Only what's true now counts: with the camera or tracking stopped, no hand
   // is in view and no hold is running.
@@ -149,14 +189,23 @@ export default function PracticePage({ signingHand, onSigningHandChange, model =
     cameraStatus: camera.status,
     cameraError: camera.error,
     trackingError: handModel.status === 'error' || Boolean(hand.error),
-    ready: handModel.status === 'ready' && loaded.status === 'ready',
+    ready: handModel.status === 'ready' && (traced || loaded.status === 'ready'),
     passed,
     secondsLeft: holding ? secondsLeft : null,
     guesses: shown,
     target,
     hand: drawnHand,
     moving,
+    traced,
+    tracing: isDetecting && tracing,
   })
+  // Z's panel line fills as the Z is traced, instead of over a hold.
+  const fill = passed ? 1 : traceFill
+  const traceLine = traced && (passed || (isDetecting && tracing)) && {
+    share: fill,
+    label: `${target} traced`,
+    text: `${Math.round(fill * 100)}%`,
+  }
   return (
     <>
       <MenuBar active="practice" />
@@ -171,16 +220,19 @@ export default function PracticePage({ signingHand, onSigningHandChange, model =
             className="practice-panel"
             status={status}
             tone={tone}
-            hold={(holding || passed) && { start: holdStart, ms: LETTER_HOLD_MS, done: passed }}
+            hold={!traced && (holding || passed) && { start: holdStart, ms: LETTER_HOLD_MS, done: passed }}
+            fill={traceLine}
           >
             {/* The hand switch, as on Record: here it changes the signing
-                hand, so the drawings face the hand being used. */}
+                hand, so the drawings face the hand being used. Z's line is
+                drawn under the hand. */}
             <CameraView
               canvasRef={canvasRef}
               hand={hand}
               className="practice-stage"
               autoStart={false}
               controls={{ hand: drawnHand, onHandChange: onSigningHandChange, handLabel: 'Signing hand' }}
+              underlay={traced && <canvas ref={traceCanvasRef} className="overlay" aria-hidden="true" />}
             >
               {moving && (
                 <div className="practice-done">
@@ -212,7 +264,9 @@ export default function PracticePage({ signingHand, onSigningHandChange, model =
             </div>
           </section>
           <LetterGuide steps={letters.instructions[target]} hand={drawnHand} />
-          {!moving && loaded.status === 'ready' && isDetecting && <RightNow guesses={shown} target={target} hand={drawnHand} />}
+          {!moving && !traced && loaded.status === 'ready' && isDetecting && (
+            <RightNow guesses={shown} target={target} hand={drawnHand} />
+          )}
           {loaded.status === 'loading' && <p className="practice-note">Loading the model…</p>}
           {loaded.status === 'error' && (
             <p className="error" role="alert">
@@ -247,6 +301,18 @@ function seenText(g, target) {
   // letter being made, and otherwise not that letter at all.
   if (g.fix) return g.letter === target ? `almost ${g.letter}. ${g.fix}` : 'not sure'
   return 'confidence' in g ? `${g.letter}, ${percent(g.confidence)} sure` : g.letter
+}
+
+// The signing hand's index fingertip (zTrace.js's frame heights), or null when
+// that hand isn't in view or isn't making Z's handshape.
+function zFingertip({ hands, width, height }, signingHand, aspect) {
+  for (const hand of hands) {
+    const frame = frameFromDetection({ ...hand, width, height }, null)
+    if (frame.hasHand && frame.detected === signingHand && !shapeFix('Z', frame.landmarks)) {
+      return fingertip(hand.landmarks, aspect)
+    }
+  }
+  return null
 }
 
 // One hand's guess, or null if its points are unusable.

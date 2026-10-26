@@ -9,9 +9,12 @@ import { HAND_HOLD_MS, NO_HOLD } from '../../vision/landmarks/handChecks.js'
 export const LETTER_HOLD_MS = 3000
 export { NO_HOLD }
 
-// J and Z move; the classifier only knows still shapes, so these can be picked
-// (to see how they're made) but Sema can't check them yet.
-export const MOVING_LETTERS = ['J', 'Z']
+// J moves; the classifier only knows still shapes, so it can be picked (to see
+// how it's made) but Sema can't check it yet.
+export const MOVING_LETTERS = ['J']
+// Z moves too, but is checked without the classifier: the person traces a Z
+// drawn on the camera view (src/vision/landmarks/zTrace.js), since 2026-10-24.
+export const TRACED_LETTERS = ['Z']
 
 // guesses: one per hand in view, as PracticePage's guess() makes them (it
 // only passes the signing hand's).
@@ -39,8 +42,23 @@ export function heldLongEnough(hold, now) {
 // The camera panel's short status and its tone: 'ok' (accent) while it's going
 // well, 'warn' (amber) on a problem, '' otherwise. The problem panel on the
 // video explains a failure in full. `ready`: the hand model and the letter
-// model are both loaded. `hand`: the signing hand, 'left' or 'right'.
-export function practiceStatus({ cameraStatus, cameraError, trackingError, ready, passed, secondsLeft, guesses, target, hand, moving = false }) {
+// model are both loaded (for a traced letter, only the hand model). `hand`: the
+// signing hand, 'left' or 'right'. `traced`: the letter is traced (Z), and
+// `tracing` once the fingertip has started on point 1.
+export function practiceStatus({
+  cameraStatus,
+  cameraError,
+  trackingError,
+  ready,
+  passed,
+  secondsLeft,
+  guesses,
+  target,
+  hand,
+  moving = false,
+  traced = false,
+  tracing = false,
+}) {
   if (cameraError) return { status: 'Camera problem', tone: 'warn' }
   if (trackingError) return { status: 'Tracking problem', tone: 'warn' }
   if (moving && cameraStatus === 'live') return { status: `${target} isn't available yet`, tone: '' }
@@ -48,6 +66,10 @@ export function practiceStatus({ cameraStatus, cameraError, trackingError, ready
   if (cameraStatus === 'idle') return { status: 'Camera off', tone: '' }
   if (cameraStatus === 'starting') return { status: 'Starting…', tone: '' }
   if (!ready) return { status: 'Getting ready…', tone: '' }
+  if (traced) {
+    if (tracing) return { status: 'Follow the line to point 2…', tone: 'ok' }
+    return { status: `Put your ${hand} index finger on point 1`, tone: '' }
+  }
   if (secondsLeft !== null) return { status: `Hold it… ${secondsLeft}`, tone: 'ok' }
   if (guesses.length > 0 && guesses.every((g) => !g.whole)) return { status: 'Show your whole hand', tone: '' }
   return { status: `Show ${target} with your ${hand} hand`, tone: '' }
