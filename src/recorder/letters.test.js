@@ -38,6 +38,16 @@ describe('unavailable letters', () => {
       images: {},
     })
   })
+
+  it('still keeps their steps and image, for Practice', () => {
+    const z = { letter: 'Z', unavailable: 'Moves', instructions: ['Point the index finger'], image: 'images/asl/z.svg' }
+    expect(splitLetters([z])).toEqual({
+      training: [],
+      pilot: [],
+      instructions: { Z: ['Point the index finger'] },
+      images: { Z: 'images/asl/z.svg' },
+    })
+  })
 })
 
 describe('reference images', () => {

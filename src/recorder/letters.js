@@ -15,13 +15,14 @@ export function splitLetters(entries) {
   for (const entry of entries ?? []) {
     const letter = entry?.letter
     if (typeof letter !== 'string' || !/^[A-Z]$/.test(letter)) continue
-    if (training.includes(letter) || pilot.includes(letter)) continue
-    // J and Z move, so they can't be recorded or classified yet (Phase 4).
-    if (entry.unavailable) continue
-    ;(entry.pilotOnly ? pilot : training).push(letter)
+    if (training.includes(letter) || pilot.includes(letter) || letter in instructions) continue
     const steps = [entry.instructions].flat().filter((step) => typeof step === 'string' && step.trim() !== '')
     if (steps.length > 0) instructions[letter] = steps
     if (typeof entry.image === 'string') images[letter] = entry.image
+    // J and Z move, so they can't be recorded or classified; Practice still
+    // shows how to make them (and traces Z).
+    if (entry.unavailable) continue
+    ;(entry.pilotOnly ? pilot : training).push(letter)
   }
   return { training, pilot, instructions, images }
 }
