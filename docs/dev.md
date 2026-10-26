@@ -190,7 +190,11 @@ at `/practice`, and `/try` redirects there. Its developer parts only show under
 is chosen on the dashboard, see "The dashboard"). Pick a letter, make it, and hold it for 3 seconds. It has Record's
 three columns. On the left, the letter guide: all 26 letters' drawings (facing the signing
 hand) as buttons that pick the letter; a dot marks the 8 tested on Lanix's recordings, and
-J and Z (they move) are darkened and disabled. In the middle, the camera in the camera
+J (it moves) is darkened and can't be checked. Z (since 2026-10-24) is traced instead of
+held: a Z drawn under the hand, to follow with the index fingertip from point 1, in order,
+to point 2 at its end, while the hand keeps Z's handshape (`src/vision/landmarks/zTrace.js`, the rules in
+`letterShapes.js`); the panel's line fills as it's traced, and a slip over 0.8 s starts it
+over. In the middle, the camera in the camera
 check's panel: a short status, and a line that fills over the 3 seconds; then "That's B!"
 over the picture with Try again. Its controls have Record's Left | Right switch, which here
 changes the saved signing hand (Right by default; the drawings face it). Since 2026-10-23

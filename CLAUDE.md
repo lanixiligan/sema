@@ -26,7 +26,7 @@ The development plan is `docs/project-plan.md`.
 - **Phase 1 (done, deployed on Vercel):** hand tracking with MediaPipe Hand Landmarker in `src/vision/`:
   detection loop, mirrored skeleton overlay, hand found/lost with handedness,
   detection fps and time, GPU/CPU delegate with fallback.
-- **Phase 2 (done 2026-10-23, on `phase-2-2-training`):** recording, landmark
+- **Phase 2 (done 2026-10-23, merged into `main`):** recording, landmark
   normalization, classifier, for the 24 static letters (J and Z wait for Phase 4). The
   recorder (2.1, done 2026-10-18, merged into `main`); Lanix's first test session
   (2026-10-20, p00: the 8 letters, both hands). Training (2.2): `/dev/extract` turns public
@@ -42,6 +42,9 @@ The development plan is `docs/project-plan.md`.
   live: the main page for now). Practice is Try renamed (2026-10-23), its placeholder gone;
   Learn stays a placeholder until 3.3 (`phase-3-preview`). What the onboarding pages say and do:
   `docs/onboarding-pages.md` (update it when they change).
+- **Phase 4 (started 2026-10-24, on `phase-3-preview`, before Learn 3.3):** the
+  remaining letters. Z is done: traced on Practice instead of classified (see Routing). J
+  is next, still unavailable.
 - Later: letter recognition (`src/recognition/`). Don't create that folder early.
 
 ## Stack and constraints
@@ -168,8 +171,14 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   and thumb across the palm, since the model called an open hand B); a gap over 300 ms
   restarts it. Then
   "That's B!" with Try again; the next letter is picked by hand. The guide shows all 26:
-  a dot marks the 8 tested on Lanix's recordings, and J and Z (they move) are darkened and
-  can't be picked. Practice runs
+  a dot marks the 8 tested on Lanix's recordings, and J (it moves) is darkened and
+  can't be checked (`MOVING_LETTERS`). Z (`TRACED_LETTERS`, 2026-10-24) skips the model:
+  a Z is drawn on its own canvas under the hand drawing (`CameraView`'s `underlay`), and the
+  signing hand traces it with the index fingertip from the dot, in order, within a tolerance,
+  and passes on reaching point 2 along the line, while passing Z's shape rules (index up, others curled, thumb across); a slip over 0.8 s
+  restarts it, and the panel's line fills as it's traced (`src/vision/landmarks/zTrace.js`,
+  `src/pages/practice/drawTrace.js`; design in
+  `docs/superpowers/specs/2026-10-24-z-trace-design.md`). Practice runs
   the small model (step 5 of 2.2): `public/models/asl-letters.json`, committed (weights only,
   a few KB), so it works on the live site; its JS copy (`src/pages/practice/networkModel.js`) must give the same answers as
   `forward()` in `training/small.py`. The k-NN (step 4): `data/models/knn-asl.json`
