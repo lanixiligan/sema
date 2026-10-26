@@ -58,16 +58,21 @@ function drawOneHand(ctx, canvas, landmarks, videoWidth, videoHeight) {
   const unit = videoWidth / 640
 
   // All outlines first, then all bones, so no outline cuts across a bone.
+  // The outline stays fully opaque (it's what keeps the hand visible over
+  // any background or skin tone); the bone and joint colours are drawn at
+  // partial opacity so the skeleton reads as more subtle.
   const { bone, joint, outline } = handColors(canvas)
-  strokeBones(ctx, points, outline, 6 * unit)
-  strokeBones(ctx, points, bone, 3 * unit)
+  strokeBones(ctx, points, outline, 3 * unit)
+  ctx.globalAlpha = 0.85
+  strokeBones(ctx, points, bone, 1.5 * unit)
+  ctx.globalAlpha = 1
 
   ctx.fillStyle = joint
   ctx.strokeStyle = outline
-  ctx.lineWidth = 1.5 * unit
+  ctx.lineWidth = 1 * unit
   for (const point of points) {
     ctx.beginPath()
-    ctx.arc(point.x, point.y, 4 * unit, 0, Math.PI * 2)
+    ctx.arc(point.x, point.y, 3.5 * unit, 0, Math.PI * 2)
     ctx.fill()
     ctx.stroke()
   }
