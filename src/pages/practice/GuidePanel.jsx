@@ -1,5 +1,4 @@
 import AslDrawing from '../../components/AslDrawing.jsx'
-import { MOVING_LETTERS } from './letterHold.js'
 
 const LETTERS = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ']
 
@@ -14,27 +13,21 @@ export default function GuidePanel({ hand, selected, onSelect }) {
         Letter guide
       </h2>
       <ul className="practice-guide-tiles">
-        {LETTERS.map((letter) => {
-          const moving = MOVING_LETTERS.includes(letter)
-          return (
-            <li key={letter}>
-              <button
-                type="button"
-                className={`practice-guide-tile${moving ? ' moving' : ''}`}
-                aria-pressed={letter === selected}
-                onClick={() => onSelect(letter)}
-              >
-                <span className="practice-guide-drawing">
-                  <AslDrawing letter={letter} hand={hand} />
-                </span>
-                {letter}
-                <span className="visually-hidden">
-                  {moving ? ', moves, not available yet' : ''}
-                </span>
-              </button>
-            </li>
-          )
-        })}
+        {LETTERS.map((letter) => (
+          <li key={letter}>
+            <button
+              type="button"
+              className="practice-guide-tile"
+              aria-pressed={letter === selected}
+              onClick={() => onSelect(letter)}
+            >
+              <span className="practice-guide-drawing">
+                <AslDrawing letter={letter} hand={hand} />
+              </span>
+              {letter}
+            </button>
+          </li>
+        ))}
       </ul>
     </section>
   )

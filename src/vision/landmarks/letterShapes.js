@@ -29,15 +29,21 @@ const MAX_SPREAD = 1.3
 // finger's knuckle. B measured up to 0.55; a thumb out to the side from 0.84.
 const MAX_THUMB_REACH = 0.7
 
-// Z's index finger is straight: its tip at least this many times as far from
-// the wrist as its middle joint (about 1.4 when straight up, under 1 when
-// curled). Tuned by eye; pointed at the camera it looks shorter.
+// Z's index finger (J's pinky) is straight: its tip at least this many times
+// as far from the wrist as its middle joint (about 1.4 when straight up, under
+// 1 when curled). Tuned by eye; pointed at the camera it looks shorter.
 const MIN_POINTING = 1.05
-// Z's other fingers may be only half curled: a tip up to this many times as
+// The other fingers may be only half curled: a tip up to this many times as
 // far from the wrist as its middle joint.
 const MAX_CURL = 1.1
-// Z's thumb may be further from the palm than B's (a moving hand opens it).
+// Z's and J's thumb may be further from the palm than B's (a moving hand opens it).
 const MAX_Z_THUMB_REACH = 1.0
+
+// Each finger as [tip, middle joint].
+const INDEX = [INDEX_TIP, INDEX_MIDDLE_JOINT]
+const MIDDLE = [MIDDLE_TIP, MIDDLE_MIDDLE_JOINT]
+const RING = [RING_TIP, RING_MIDDLE_JOINT]
+const PINKY = [PINKY_TIP, PINKY_MIDDLE_JOINT]
 
 const point = (landmarks, i) => ({ x: landmarks[3 * i], y: landmarks[3 * i + 1] })
 const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y)
@@ -54,18 +60,14 @@ function thumbAcrossPalm(landmarks) {
   return distance(point(landmarks, THUMB_TIP), point(landmarks, RING_BASE)) <= MAX_THUMB_REACH
 }
 
-function indexPointing(landmarks) {
-  return fromWrist(landmarks, INDEX_TIP) >= MIN_POINTING * fromWrist(landmarks, INDEX_MIDDLE_JOINT)
+function pointing(landmarks, [tip, joint]) {
+  return fromWrist(landmarks, tip) >= MIN_POINTING * fromWrist(landmarks, joint)
 }
 
 // A curled finger's tip is no further from the wrist than its middle joint
 // (a little further is allowed: MAX_CURL).
-function othersCurled(landmarks) {
-  return [
-    [MIDDLE_TIP, MIDDLE_MIDDLE_JOINT],
-    [RING_TIP, RING_MIDDLE_JOINT],
-    [PINKY_TIP, PINKY_MIDDLE_JOINT],
-  ].every(([tip, joint]) => fromWrist(landmarks, tip) <= MAX_CURL * fromWrist(landmarks, joint))
+function curled(landmarks, fingers) {
+  return fingers.every(([tip, joint]) => fromWrist(landmarks, tip) <= MAX_CURL * fromWrist(landmarks, joint))
 }
 
 function thumbNearPalm(landmarks) {
@@ -74,16 +76,22 @@ function thumbNearPalm(landmarks) {
 
 // Each letter's rules, in the order of its instructions (letters.json), with
 // what to tell the person. A letter with no rules goes by the model alone.
-// Z has no model at all (it moves): its rules are the whole handshape check,
-// held while tracing (zTrace.js).
+// J and Z have no model at all (they move): their rules are the whole
+// handshape check, held before and while tracing (zTrace.js, jTrace.js). J's
+// are I's handshape, kept under J so the letter I still goes by the model alone.
 const RULES = {
   B: [
     { passes: fingersTogether, fix: 'Keep your fingers together.' },
     { passes: thumbAcrossPalm, fix: 'Fold your thumb across your palm.' },
   ],
+  J: [
+    { passes: (landmarks) => pointing(landmarks, PINKY), fix: 'Point your pinky up.' },
+    { passes: (landmarks) => curled(landmarks, [INDEX, MIDDLE, RING]), fix: 'Curl your other fingers into your palm.' },
+    { passes: thumbNearPalm, fix: 'Fold your thumb over your curled fingers.' },
+  ],
   Z: [
-    { passes: indexPointing, fix: 'Point your index finger.' },
-    { passes: othersCurled, fix: 'Curl your other fingers into your palm.' },
+    { passes: (landmarks) => pointing(landmarks, INDEX), fix: 'Point your index finger.' },
+    { passes: (landmarks) => curled(landmarks, [MIDDLE, RING, PINKY]), fix: 'Curl your other fingers into your palm.' },
     { passes: thumbNearPalm, fix: 'Fold your thumb over your curled fingers.' },
   ],
 }

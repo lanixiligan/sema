@@ -17,7 +17,12 @@ function traceColors(canvas) {
   return colors
 }
 
-// Draws the Z (path, in frame heights: zTrace.js) with the part up to `along`
+// Empties the canvas: J's line before the I is held, and after a slip.
+export function clearTrace(canvas) {
+  canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
+}
+
+// Draws the Z or J (path, in frame heights: zTrace.js, jTrace.js) with the part up to `along`
 // filled in, a dot (1) where it starts and a ring (2) where it ends. Like drawHand.js, in the un-mirrored
 // video's pixels on a canvas mirrored by CSS.
 export function drawTrace(canvas, path, along, videoWidth, videoHeight) {

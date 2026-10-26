@@ -92,7 +92,6 @@
   --button-text: var(--white);
   --button-hover: color-mix(in srgb, var(--ink), var(--white) 14%);
   --fill-off: var(--disabled); /* disabled buttons, empty progress segments */
-  --tile-off: var(--line-strong); /* a letter tile that can't be picked: darker than the page */
   --segment-track: var(--segment);
   --segment-on: var(--white);
   --highlight: var(--ice-tint);
@@ -168,7 +167,6 @@
   --button-text: var(--ink);
   --button-hover: var(--cloud-white);
   --fill-off: var(--progress-track);
-  --tile-off: var(--night);
   --segment-track: var(--night-raised);
   --segment-on: var(--progress-track);
   --highlight: var(--sky-night);
@@ -1143,9 +1141,8 @@ p.practice-now {
   margin-bottom: 0;
 }
 
-/* Held for 3 seconds (or Z traced): a dark film over the picture with the
-   result, Try again, and a reminder that the guide picks the next letter. Also
-   the film for J, which can't be checked yet. */
+/* Held for 3 seconds (or J or Z traced): a dark film over the picture with the
+   result, Try again, and a reminder that the guide picks the next letter. */
 .practice-done {
   position: absolute;
   inset: 0;
@@ -1244,22 +1241,6 @@ p.practice-now {
   background: var(--highlight);
   border-color: var(--accent);
   box-shadow: inset 0 0 0 1px var(--accent);
-}
-
-/* Darker than the other tiles in both themes, its drawing dimmed. */
-.practice-guide-tile.moving {
-  color: var(--text-muted);
-  background: var(--tile-off);
-  border-color: var(--tile-off);
-}
-
-.practice-guide-tile.moving[aria-pressed='true'] {
-  border-color: var(--accent);
-  box-shadow: inset 0 0 0 1px var(--accent);
-}
-
-.practice-guide-tile.moving .practice-guide-drawing {
-  opacity: 0.45;
 }
 
 .practice-guide-drawing {

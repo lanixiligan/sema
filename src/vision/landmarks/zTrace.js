@@ -34,7 +34,7 @@ const MAX_BACK = 0.2
 // trace, so a few odd frames can't. Longer than the 300 ms of every other hold
 // in Sema: a hand in motion often drops the handshape for a moment.
 const GAP_MS = 800
-const INDEX_TIP = 8
+export const INDEX_TIP = 8
 
 // No trace yet: `along` is how far along the line the fingertip has got (null
 // before it starts at the dot), `lastOnAt` when it was last on the line, and
@@ -47,9 +47,10 @@ export function zPath(hand, aspect) {
   return Z_CORNERS.map((p) => ({ x: (hand === 'right' ? 1 - p.x : p.x) * aspect, y: p.y }))
 }
 
-// The index fingertip of MediaPipe's 21 raw points, in frame heights.
-export function fingertip(rawLandmarks, aspect) {
-  const tip = rawLandmarks[INDEX_TIP]
+// A fingertip of MediaPipe's 21 raw points (the index's, unless another point
+// is given: J's pinky), in frame heights.
+export function fingertip(rawLandmarks, aspect, point = INDEX_TIP) {
+  const tip = rawLandmarks[point]
   return { x: tip.x * aspect, y: tip.y }
 }
 
@@ -110,24 +111,29 @@ export function closestAlong(path, point, from, to) {
 }
 
 // One frame of the trace. tip: the fingertip in frame heights, or null when
-// the signing hand isn't in view or isn't making Z's handshape.
-export function updateTrace(trace, tip, now, path) {
+// the signing hand isn't in view or isn't making the letter's handshape.
+// `scale` multiplies the tolerance and the steps, for a line drawn bigger or
+// smaller than Z (J's, sized to the hand: jTrace.js). After a slip the trace
+// starts over at the dot; with `restart: false` it just ends (NO_TRACE): J's
+// line goes, and J starts over from the I.
+export function updateTrace(trace, tip, now, path, { restart = true, scale = 1 } = {}) {
+  const tolerance = TRACE_TOLERANCE * scale
   if (trace.along === null) {
-    // It starts with the fingertip on the dot at the Z's start.
-    const onStart = tip !== null && distance(tip, path[0]) <= TRACE_TOLERANCE
+    // It starts with the fingertip on the dot at the line's start.
+    const onStart = tip !== null && distance(tip, path[0]) <= tolerance
     return onStart ? { along: 0, lastOnAt: now, done: false } : NO_TRACE
   }
   if (tip !== null) {
-    const nearest = closestAlong(path, tip, trace.along - MAX_BACK, trace.along + MAX_STEP)
-    if (nearest.distance <= TRACE_TOLERANCE) {
+    const nearest = closestAlong(path, tip, trace.along - MAX_BACK * scale, trace.along + MAX_STEP * scale)
+    if (nearest.distance <= tolerance) {
       // On the line here, so reaching the end dot means it was followed there.
-      const done = distance(tip, path.at(-1)) <= TRACE_TOLERANCE
+      const done = distance(tip, path.at(-1)) <= tolerance
       return { along: Math.max(trace.along, nearest.along), lastOnAt: now, done }
     }
   }
   if (now - trace.lastOnAt < GAP_MS) return trace
   // Off the line too long: start over, which may already be on the dot again.
-  return updateTrace(NO_TRACE, tip, now, path)
+  return restart ? updateTrace(NO_TRACE, tip, now, path, { scale }) : NO_TRACE
 }
 
 // How much of the Z is traced, 0 to 1.

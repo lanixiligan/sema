@@ -9,12 +9,11 @@ import { HAND_HOLD_MS, NO_HOLD } from '../../vision/landmarks/handChecks.js'
 export const LETTER_HOLD_MS = 3000
 export { NO_HOLD }
 
-// J moves; the classifier only knows still shapes, so it can be picked (to see
-// how it's made) but Sema can't check it yet.
-export const MOVING_LETTERS = ['J']
-// Z moves too, but is checked without the classifier: the person traces a Z
-// drawn on the camera view (src/vision/landmarks/zTrace.js), since 2026-10-24.
-export const TRACED_LETTERS = ['Z']
+// J and Z move, and the classifier only knows still shapes, so they're checked
+// without it: the person traces the letter drawn on the camera view (Z since
+// 2026-10-24, src/vision/landmarks/zTrace.js; J since 2026-10-26, after
+// holding I, jTrace.js).
+export const TRACED_LETTERS = ['J', 'Z']
 
 // guesses: one per hand in view, as PracticePage's guess() makes them (it
 // only passes the signing hand's).
@@ -43,8 +42,9 @@ export function heldLongEnough(hold, now) {
 // well, 'warn' (amber) on a problem, '' otherwise. The problem panel on the
 // video explains a failure in full. `ready`: the hand model and the letter
 // model are both loaded (for a traced letter, only the hand model). `hand`: the
-// signing hand, 'left' or 'right'. `traced`: the letter is traced (Z), and
-// `tracing` once the fingertip has started on point 1.
+// signing hand, 'left' or 'right'. `traced`: the letter is traced (J, Z), and
+// `tracing` once the fingertip has started on point 1; before J's line
+// appears, `holdingI` while the I is being held.
 export function practiceStatus({
   cameraStatus,
   cameraError,
@@ -55,19 +55,22 @@ export function practiceStatus({
   guesses,
   target,
   hand,
-  moving = false,
   traced = false,
   tracing = false,
+  holdingI = false,
 }) {
   if (cameraError) return { status: 'Camera problem', tone: 'warn' }
   if (trackingError) return { status: 'Tracking problem', tone: 'warn' }
-  if (moving && cameraStatus === 'live') return { status: `${target} isn't available yet`, tone: '' }
   if (passed) return { status: `That's ${target}!`, tone: 'ok' }
   if (cameraStatus === 'idle') return { status: 'Camera off', tone: '' }
   if (cameraStatus === 'starting') return { status: 'Starting…', tone: '' }
   if (!ready) return { status: 'Getting ready…', tone: '' }
   if (traced) {
     if (tracing) return { status: 'Follow the line to point 2…', tone: 'ok' }
+    if (target === 'J') {
+      if (holdingI) return { status: 'Hold the I…', tone: 'ok' }
+      return { status: `Make I with your ${hand} hand`, tone: '' }
+    }
     return { status: `Put your ${hand} index finger on point 1`, tone: '' }
   }
   if (secondsLeft !== null) return { status: `Hold it… ${secondsLeft}`, tone: 'ok' }

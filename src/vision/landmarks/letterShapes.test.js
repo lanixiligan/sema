@@ -58,6 +58,33 @@ describe('shapeFix', () => {
     })
   })
 
+  describe('J (the I handshape)', () => {
+    const pinkyUp = { 18: [-0.3, -1.2], 20: [-0.35, -1.6] }
+    const pinkyCurled = { 18: [-0.3, -1.05], 20: [-0.25, -0.75] }
+    const curled = { 6: [0.3, -1.3], 8: [0.3, -0.9], 10: [0.05, -1.2], 12: [0.05, -0.8], 14: [-0.1, -1.15], 16: [-0.1, -0.8] }
+    const indexUp = { ...curled, 8: [0.3, -1.9] }
+
+    it('passes the pinky up, the others curled, the thumb across', () => {
+      expect(shapeFix('J', handWith({ ...knuckles, ...pinkyUp, ...curled, ...thumbIn }))).toBe(null)
+    })
+
+    it('asks for the pinky when it is curled too (a fist)', () => {
+      expect(shapeFix('J', handWith({ ...knuckles, ...pinkyCurled, ...curled, ...thumbIn }))).toBe('Point your pinky up.')
+    })
+
+    it('asks to curl the other fingers when one is up', () => {
+      expect(shapeFix('J', handWith({ ...knuckles, ...pinkyUp, ...indexUp, ...thumbIn }))).toBe('Curl your other fingers into your palm.')
+    })
+
+    it('asks for the thumb when it sticks out (a Y)', () => {
+      expect(shapeFix('J', handWith({ ...knuckles, ...pinkyUp, ...curled, ...thumbOut }))).toBe('Fold your thumb over your curled fingers.')
+    })
+
+    it('leaves the letter I to the model', () => {
+      expect(shapeFix('I', handWith({ ...knuckles, ...pinkyCurled, ...curled, ...thumbOut }))).toBe(null)
+    })
+  })
+
   it('leaves letters without rules to the model', () => {
     expect(shapeFix('C', handWith({ ...knuckles, ...spread, ...thumbOut }))).toBe(null)
   })

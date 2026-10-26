@@ -40,7 +40,8 @@
 - Finds your hands in the webcam picture and draws their 21 points.
 - Practice (`/practice`): pick a letter, make it in front of the webcam, and hold it for 3
   seconds while Sema checks the handshape. It covers the 24 letters that don't move, and Z:
-  trace the Z drawn on the camera view with your index finger. J comes later.
+  trace the Z drawn on the camera view with your index finger. And J: hold I, then trace
+  the J that appears at your pinky.
 - Records labelled hand points for testing, on the Record page (a developer tool, `/dev/record`).
 - Learn is a placeholder until the lessons are built.
 

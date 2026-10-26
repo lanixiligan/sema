@@ -98,4 +98,12 @@ describe('practiceStatus', () => {
     expect(practiceStatus({ ...z, tracing: true })).toEqual({ status: 'Follow the line to point 2…', tone: 'ok' })
     expect(practiceStatus({ ...z, tracing: true, passed: true })).toEqual({ status: "That's Z!", tone: 'ok' })
   })
+
+  it('guides J: make I, hold it, then the line to point 2', () => {
+    const j = { ...ready, target: 'J', traced: true }
+    expect(practiceStatus(j)).toEqual({ status: 'Make I with your right hand', tone: '' })
+    expect(practiceStatus({ ...j, holdingI: true })).toEqual({ status: 'Hold the I…', tone: 'ok' })
+    expect(practiceStatus({ ...j, tracing: true })).toEqual({ status: 'Follow the line to point 2…', tone: 'ok' })
+    expect(practiceStatus({ ...j, tracing: true, passed: true })).toEqual({ status: "That's J!", tone: 'ok' })
+  })
 })

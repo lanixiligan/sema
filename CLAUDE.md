@@ -43,8 +43,8 @@ The development plan is `docs/project-plan.md`.
   Learn stays a placeholder until 3.3 (`phase-3-preview`). What the onboarding pages say and do:
   `docs/onboarding-pages.md` (update it when they change).
 - **Phase 4 (started 2026-10-24, on `phase-3-preview`, before Learn 3.3):** the
-  remaining letters. Z is done: traced on Practice instead of classified (see Routing). J
-  is next, still unavailable.
+  remaining letters. Z (2026-10-24) and J (2026-10-26) are done: traced on Practice instead
+  of classified (see Routing).
 - Later: letter recognition (`src/recognition/`). Don't create that folder early.
 
 ## Stack and constraints
@@ -171,8 +171,14 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   and thumb across the palm, since the model called an open hand B); a gap over 300 ms
   restarts it. Then
   "That's B!" with Try again; the next letter is picked by hand. The guide shows all 26:
-  a dot marks the 8 tested on Lanix's recordings, and J (it moves) is darkened and
-  can't be checked (`MOVING_LETTERS`). Z (`TRACED_LETTERS`, 2026-10-24) skips the model:
+  a dot marks the 8 tested on Lanix's recordings. J and Z move, so they skip the model
+  (`TRACED_LETTERS`; before 2026-10-26 J was darkened and couldn't be checked). J: hold I
+  (J's shape rules, `letterShapes.js`) for 1 s, the panel's line filling, then a curvy J
+  appears with point 1 on the pinky tip, as tall as the hand (wrist to pinky tip, so its
+  size follows the hand and its distance from the camera; the tolerance scales with it),
+  moved inside the frame near its edge, and the pinky traces it to point 2 like Z's line;
+  a slip over 0.8 s removes the J and it starts over from the I
+  (`src/vision/landmarks/jTrace.js`). Z (2026-10-24):
   a Z is drawn on its own canvas under the hand drawing (`CameraView`'s `underlay`), and the
   signing hand traces it with the index fingertip from the dot, in order, within a tolerance,
   and passes on reaching point 2 along the line, while passing Z's shape rules (index up, others curled, thumb across); a slip over 0.8 s
