@@ -39,7 +39,9 @@ The development plan is `docs/project-plan.md`.
 - **Phase 3.1 (done early, with the recorder):** the app shell, Welcome and setup,
   because the recorder was the app's main page after setup (since 2026-10-22 it's a
   developer tool, `/dev/record`, and setup leads to Learn, `/learn`, the classifier
-  live: the main page). Learn (3.3, started 2026-10-27, `phase-3-preview`) teaches the letters one at a time, A to Z, and absorbed Practice (the free sandbox, Try renamed on 2026-10-23) the same day, because the two had become nearly the same page: the letter guide of all 26 on the left, the camera, and the letter's drawing and finger checklist on the right; a 1.5 s hold to pass, then Next letter (nothing saved yet). Every page, one line each:
+  live: the main page). Learn (3.3, started 2026-10-27, `phase-3-preview`) teaches the letters one at a time, A to Z, and absorbed Practice (the free sandbox, Try renamed on 2026-10-23) the same day, because the two had become nearly the same page: the letter guide of all 26 on the left, the camera, and the letter's drawing and finger checklist on the right; a 1.5 s hold to pass, then Next letter (nothing saved yet). Phase 3 is done for now
+  (2026-10-27): what's left, saving progress first, is added along the way (the plan's
+  Phase 3 line). Every page, one line each:
   `docs/sema-pages.md` (update it when a page is added, renamed or moved).
 - **Phase 4 (started 2026-10-24, on `phase-3-preview`, before Learn 3.3):** the
   remaining letters. Z (2026-10-24) and J (2026-10-26) are done: traced on Learn instead
