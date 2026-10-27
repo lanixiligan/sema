@@ -26,22 +26,26 @@ The development plan is `docs/project-plan.md`.
 - **Phase 1 (done, deployed on Vercel):** hand tracking with MediaPipe Hand Landmarker in `src/vision/`:
   detection loop, mirrored skeleton overlay, hand found/lost with handedness,
   detection fps and time, GPU/CPU delegate with fallback.
-- **Phase 2 (done 2026-10-23, on `phase-2-2-training`):** recording, landmark
+- **Phase 2 (done 2026-10-23, merged into `main`):** recording, landmark
   normalization, classifier, for the 24 static letters (J and Z wait for Phase 4). The
   recorder (2.1, done 2026-10-18, merged into `main`); Lanix's first test session
   (2026-10-20, p00: the 8 letters, both hands). Training (2.2): `/dev/extract` turns public
   datasets' photos (ASL-HG, ASLYset) into hand points, `training/` cleans them
   (`training/reports/cleaning-<dataset>.md`) and tests a k-NN and two small models
   (`training/reports/knn.md`, `small.md`); logistic regression is the model in the browser.
-  The live check (2.3) is Practice (`/practice`; Try, `/try`, until 2026-10-23): Sema only checks the letter the person picked,
+  The live check (2.3) is Learn (`/learn`; Practice, `/practice`, until 2026-10-27, and Try, `/try`, until 2026-10-23): Sema only checks the letter the person picked,
   so there is no "none" class anywhere. The finger hints (2.4) moved to Phase 3. The model
   keeps improving during later phases, judged by the same held-out tests.
 - **Phase 3.1 (done early, with the recorder):** the app shell, Welcome and setup,
   because the recorder was the app's main page after setup (since 2026-10-22 it's a
-  developer tool, `/dev/record`, and setup leads to Practice, `/practice`, the classifier
-  live: the main page for now). Practice is Try renamed (2026-10-23), its placeholder gone;
-  Learn stays a placeholder until 3.3 (`phase-3-preview`). What the onboarding pages say and do:
-  `docs/onboarding-pages.md` (update it when they change).
+  developer tool, `/dev/record`, and setup leads to Learn, `/learn`, the classifier
+  live: the main page). Learn (3.3, started 2026-10-27, `phase-3-preview`) teaches the letters one at a time, A to Z, and absorbed Practice (the free sandbox, Try renamed on 2026-10-23) the same day, because the two had become nearly the same page: the letter guide of all 26 on the left, the camera, and the letter's drawing and finger checklist on the right; a 1.5 s hold to pass, then Next letter (nothing saved yet). Phase 3 is done for now
+  (2026-10-27): what's left, saving progress first, is added along the way (the plan's
+  Phase 3 line). Every page, one line each:
+  `docs/sema-pages.md` (update it when a page is added, renamed or moved).
+- **Phase 4 (started 2026-10-24, on `phase-3-preview`, before Learn 3.3):** the
+  remaining letters. Z (2026-10-24) and J (2026-10-26) are done: traced on Learn instead
+  of classified (see Routing).
 - Later: letter recognition (`src/recognition/`). Don't create that folder early.
 
 ## Stack and constraints
@@ -99,19 +103,20 @@ src/
                     its parts: CameraStage, CameraControls, CameraOff, IdleNotice,
                     StageProblem
     icons/          icons.jsx and the larger LineIcons.jsx
-    placeholder/    PlaceholderPage and mixLetters (Learn's art)
+    letter-check/   the letter check Learn and Quiz share (2026-10-27; before, in
+                    pages/practice/): useLetterCheck (model, hold, J and Z traces),
+                    letterHold, drawTrace, and the models' JS copies (networkModel, knnModel)
     Logo.jsx
-    LetterGuide.jsx how to form a letter, its steps from letters.json (Record, Practice)
     AslDrawing.jsx  a letter's drawing (public/images/asl/, a left hand), facing a given
-                    hand; DRAWN_HAND (Record's reference picture, Practice's card and guide)
+                    hand; DRAWN_HAND (Record's reference picture, Learn's card and guide)
   pages/
-    onboarding/     Welcome; Camera check; StepNav (used by intro/ and the camera check)
-      intro/        About Sema, How Sema works, How Sema handles your data, and their
-                    parts (IntroLayout, AboutPreview, HandSketch, useStaggeredReveal…)
-    learn/          the Learn placeholder
-    practice/       Practice (/practice; Try until 2026-10-23), the main page for now:
-                    pick a letter in the guide (GuidePanel), hold it 3 s (letterHold),
-                    and the models' JS copies (networkModel, knnModel)
+    onboarding/     Welcome; Camera check
+    about/          About (/about, 2026-10-27, in the menu): what Sema is, how it works and how
+                    it handles your data, three sections in one scrolling page; AboutPreview, HandSketch
+    learn/          Learn (/learn; Practice, /practice, until 2026-10-27), the main page: the
+                    letter guide (GuidePanel), the lesson and its FingerChecklist; hold a letter 1.5 s
+    quiz/           Quiz (/quiz, 2026-10-27): letters or words from memory, no hints;
+                    its state (quizRounds); words from public/languages/asl/words.json
     dev/            the developer tools behind an access code: DevArea (the gate, then
                     the page), DevGate, DevDashboard (/dev), DevTopBar, devAccess
       tracking/     the Phase 1 page at /dev/tracking (+ BenchmarkPanel)
@@ -122,8 +127,11 @@ src/
     model/          loading the hand model, WebGL and browser checks, error messages
     tracking/       the detection loop, picking a hand, handedness, smoothing and
                     drawing the hand
-    landmarks/      math on the hand points: normalization, the camera check's rules,
-                    letters' shape rules (letterShapes)
+    landmarks/      math on the hand points: MediaPipe's point numbers and the finger
+                    numbers (handPoints), normalization, the camera check's rules,
+                    measuring a hand (handMeasures), the letters' shape rules and the
+                    letter lists LETTERS and TRACED_LETTERS (letterShapes), and whether a
+                    hand makes a letter (letterMatch: matchLetter, the checklist's ticks)
     benchmark/      the /dev/tracking benchmark's hook and statistics
   recorder/         recording logic: take rules, useRecording, session file and storage
 ```
@@ -154,34 +162,65 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   characters). The browser remembers it as `devAccess` in `progressStore.js`; Delete Sema's
   data or Lock forgets it, and a new code locks every browser out. `App.jsx` loads
   `DevArea.jsx` with `lazy()`, so visitors who never open `/dev` never download the tools.
-- Practice (`/practice`, the main page for now) was Try (`/try`, which now redirects to
-  `/practice`) until 2026-10-23, and before 2026-10-22 the developer tool `/dev/try`.
+- Learn (`/learn`, the main page) was Practice (`/practice`, which now redirects to
+  `/learn`) until 2026-10-27, and before that Try (`/try`, also redirected) until 2026-10-23, and before 2026-10-22 the developer tool `/dev/try`.
   Record's three columns: the letter guide on the left, the camera (with the Left | Right
   switch in its controls, which changes the saved signing hand, Right by default, so the
   drawings face it; since 2026-10-23 only that hand is drawn and judged, and the status says
   "Show B with your right hand") in the middle, and the letter's card on the right: its
-  drawing large, its steps, and a "Right now" line for the signing hand. Pick a letter in the guide (B at
-  first), make it, and
-  hold it for 3 s (`LETTER_HOLD_MS` in `src/pages/practice/letterHold.js`). The hold counts while
-  the signing hand's whole-hand guess is that letter and sure, and the hand passes the letter's shape
-  rules (`src/vision/landmarks/letterShapes.js`, 2026-10-23: only B so far, fingers together
-  and thumb across the palm, since the model called an open hand B); a gap over 300 ms
-  restarts it. Then
-  "That's B!" with Try again; the next letter is picked by hand. The guide shows all 26:
-  a dot marks the 8 tested on Lanix's recordings, and J and Z (they move) are darkened and
-  can't be picked. Practice runs
+  drawing large, its finger checklist, and, under `npm run dev`, a "Right now" line for the
+  signing hand. It starts at A; pick any letter in the guide, make it, and
+  hold it for 1.5 s (`LETTER_HOLD_MS` in `src/components/letter-check/letterHold.js`). The hold counts while
+  the signing hand meets the letter's finger conditions (`src/vision/landmarks/letterShapes.js`,
+  2026-10-27): joint bends, thumb place and
+  finger spread scored 0 to 1 per condition, met when the overall score is high enough and no
+  other still letter fits clearly better (`matchLetter` in `letterMatch.js`). Learn lists them as a checklist
+  (`FingerChecklist.jsx`), finger names with their number, 1 thumb to 5 pinky (`src/vision/landmarks/handPoints.js`,
+  the same numbers as on the hand drawing's fingertips), ticked live. The
+  model no longer decides; it only gives the "Right now" line (`showsLetter` in `letterHold.js`
+  says how to make it agree again). A gap over 300 ms restarts it. Then
+  "That's B!" with Next letter and Try again (since 2026-10-27). The guide shows all 26
+  letters' drawings, as a list or a grid. J and Z move, so they skip the model
+  (`TRACED_LETTERS`; before 2026-10-26 J was darkened and couldn't be checked). J: hold I
+  (J's shape rules, `letterShapes.js`) for 1 s, the panel's line filling, then a curvy J
+  appears with point 1 on the pinky tip, as tall as the hand (wrist to pinky tip, so its
+  size follows the hand and its distance from the camera; the tolerance scales with it),
+  moved inside the frame near its edge, and the pinky traces it to point 2 like Z's line;
+  a slip over 0.8 s removes the J and it starts over from the I
+  (`src/vision/landmarks/jTrace.js`). Z (2026-10-24):
+  a Z is drawn on its own canvas under the hand drawing (`CameraView`'s `underlay`), and the
+  signing hand traces it with the index fingertip from the dot, in order, within a tolerance,
+  and passes on reaching point 2 along the line, while passing Z's shape rules (index up, others curled, thumb across); a slip over 0.8 s
+  restarts it, and the panel's line fills as it's traced (`src/vision/landmarks/zTrace.js`,
+  `src/components/letter-check/drawTrace.js`). Learn runs
   the small model (step 5 of 2.2): `public/models/asl-letters.json`, committed (weights only,
-  a few KB), so it works on the live site; its JS copy (`src/pages/practice/networkModel.js`) must give the same answers as
+  a few KB), so it works on the live site; its JS copy (`src/components/letter-check/networkModel.js`) must give the same answers as
   `forward()` in `training/small.py`. The k-NN (step 4): `data/models/knn-asl.json`
   (gitignored, 11 MB), chosen with a switch on the `/dev` dashboard (2026-10-23; before, on
   Practice itself), only under `npm run dev`: the choice is `devModel` in the settings store
-  (`DEV_MODELS`), Practice takes it as the `model` prop and under `npm run dev` names the
-  model in a line; `knnModel.js` must match `training/knn.py`. The live site always runs
+  (`DEV_MODELS`), Learn and the quiz take it as the `model` prop (only Learn's "Right now"
+  line shows its guess); `knnModel.js` must match `training/knn.py`. The live site always runs
   the small model.
   The small model is trained on ASL-HG and, since 2026-10-23, ASLYset (both CC BY 4.0): keep
   their credits in `docs/ATTRIBUTION.md` and the README, and add one for any dataset added.
-- Setup redirects live in `resolveRoute`: a new visitor opening Learn or Practice goes
-  to Welcome; a returning visitor opening `/` goes to Practice. Finishing setup opens Practice. The developer pages, Record
+- Quiz (`/quiz`, 2026-10-27, in the menu after Learn) tests what was learned. `/quiz` is the choice;
+  Letters and Words each have their own page, `/quiz/letters` and `/quiz/words` (one `QuizFlow` runs
+  both, then the results; Start again asks new items, Choose another quiz goes back to `/quiz`). Choose
+  Letters (10 random, never the same twice in a row) or Words (5 from
+  `public/languages/asl/words.json`, no doubled letters, and none starting with the letter the
+  one before ended on), then sign each letter from memory,
+  with no steps or hints (none for now: reliability first), only an eye button
+  (2026-10-27) that peeks at the current letter's drawing: a peeked pass still counts, marked with
+  a small eye in the results ("8 of 10 (3 with a peek)"). Each letter is checked
+  exactly as on Learn (`useLetterCheck`); a pass shows "That's B!" for 1 s and moves on,
+  Skip counts it as missed. Then the score and every letter marked; End quiz (red) stops early and
+  shows the results too, the letters not reached left blank. Results aren't saved. The
+  camera starts on arrival (the person just chose a quiz). While it runs the page is minimal
+  (2026-10-27): the camera on the left (its hand switch and camera buttons in a footer under the
+  picture), on the right the count and End quiz, the letter large with its eye, the quiz's steps
+  (one per item, from the quiz state) and a quiet Skip letter; a words quiz also shows the word under the letter.
+- Setup redirects live in `resolveRoute`: a new visitor opening Learn or Quiz goes
+  to Welcome; a returning visitor opening `/` goes to Learn. Get started (Welcome's, or About's) opens the camera check, and passing it (its Continue button) finishes setup and opens Learn. The developer pages, Record
   included, don't need setup.
 
 ## Settings
@@ -190,6 +229,9 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   (`localStorage` key `sema.progress`, with a version number). Pages never touch
   `localStorage` directly; `App.jsx` holds the settings and passes them down. The same
   store keeps `devAccess`, the fingerprint of the developer pages' access code once entered.
+- The letter hold time is fixed at 1.5 s (`LETTER_HOLD_MS`). Until 2026-10-27 it was 3 s, and
+  for a few hours that day a Hold 2s | 3s | 5s switch in the camera controls (`holdSeconds` in
+  the store) let the person choose; Lanix had the switch removed and the default cut to 1.5 s.
 - The theme (Light / Dark / System, default System) is saved in the same store and chosen with
   the icon toggle at the right of every page's top bar (`src/app/settings/ThemeToggle.jsx`, in
   `TopBar`). The settings menu (`src/app/settings/SettingsMenu.jsx`, a gear with no text, last in the
@@ -202,11 +244,16 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   dark set on `[data-theme='dark']` and `.on-dark`. Palette colours are used directly only
   where a colour never changes (the camera frame, hand drawings). Every page follows the
   theme; `.on-dark` is only for parts that sit on the dark camera frame (the camera menu).
-- The onboarding pages (the three intro pages and the camera check) move on with quiet
-  Previous / Next text from `StepNav.jsx`, in a row along the bottom that is the same on
-  every one of them, so Next never moves and is there from the start. There is no Skip
-  intro. Welcome keeps its Get started button.
-- Setup is one page, the camera check, and it doesn't ask for the signing hand. It draws
+- No onboarding page has Previous / Next (`StepNav` was removed 2026-10-27). About scrolls,
+  and a new visitor gets a Get started button at its end; the camera check ends with a
+  Continue button.
+- Setup is Welcome's Get started, which opens the camera check (`startSetup` in `App.jsx`);
+  the check's Continue keeps a saved signing hand or sets Right, and opens Learn (`finishSetup`).
+  The camera check was out of the flow for a few hours on 2026-10-27 and came back the same
+  day at Lanix's request. About is optional and Welcome no longer links to it (the "What is Sema?" link was
+  removed 2026-10-27); it is in the menu, and its Get started button, for a new visitor, opens the camera check too. Until 2026-10-27 About was three intro pages;
+  `/how-it-works` and `/privacy` redirect to `/about`.
+- The camera check doesn't ask for the signing hand. It draws
   every hand it finds and passes once both hands are up and whole (wrist in view) at the
   same time for 3 s (`BOTH_HANDS_HOLD_MS`); a gap over 300 ms restarts the count. With two
   hands, left and right come from position (the person's right hand is on the un-mirrored
@@ -217,8 +264,9 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   state, and a camera panel: a header (a short status, centred, with a line along its
   bottom edge that fills over the 3 s), then the 4:3 video with only the camera controls
   on it. The steps column (420px) and the panel (620px) are the same height: the steps
-  stretch so the last ends level with the panel's bottom. Next stays closed until
-  the check passes. Finishing setup keeps a saved signing hand
+  stretch so the last ends level with the panel's bottom. When the check passes,
+  "✓ Camera ready" flashes over the video for ~2 s, and a Continue button appears under
+  the steps (it stays). There is no Previous / Next. Finishing setup keeps a saved signing hand
   or sets Right; the camera controls' hand toggle switches it. The rules (`seeHands`,
   `steadySeen`, `updateHold`, `holdSecondsLeft`) are in `src/vision/landmarks/handChecks.js`. Its error titles and texts come from the design and
   live in `cameraMessages.js` and `visionMessages.js`; `useCamera` returns an
@@ -229,8 +277,8 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
 - The camera check never starts the camera by itself: it opens with "Camera is off" and a
   Turn camera on button, and the browser only asks for the camera after that click
   (`CameraStage autoStart={false}`). Record's recording step starts it on arrival, since the
-  person just pressed Start recording. Practice waits for a click too, so landing on Sema never
-  turns the camera on. It stays off on Welcome, the intro pages and
+  person just pressed Start recording. Learn waits for a click too, so landing on Sema never
+  turns the camera on. It stays off on Welcome, About and
   Record's consent/finished steps, and turns off whenever no camera view is on screen.
 - `CameraProvider` (`src/app/shared-camera/`) does this: it owns the camera and the hand model for
   every page, starts the camera when a `CameraStage` with `autoStart` (the default)
@@ -240,7 +288,7 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   10 s without a hand a notice appears and counts down the rest of the minute
   (`src/camera/idleRules.js`, `src/app/shared-camera/useIdleCameraOff.js`, `IdleNotice`); any hand resets
   the count.
-- Every camera page (camera check, Practice, Record) uses one component, `CameraView`
+- Every camera page (camera check, Learn, Quiz, Record) uses one component, `CameraView`
   (`src/components/camera-view/`): the frame, the problem panel (texts `CAMERA_VIEW_*` in
   `cameraMessages.js` and `visionMessages.js`), `CameraOff` with a Turn camera on button,
   the idle timeout, and `CameraControls` (on/off, the camera list; the page passes options
@@ -278,7 +326,7 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   `public/models/hand_landmarker.task` is committed (float16 v1, 7,819,105 bytes,
   sha256 `fbc2a300…7cde1`).
 - Load the model when a camera view first appears (or the camera first starts), never on
-  page load, so Welcome and the intro pages download nothing. Until it's ready, Turn camera
+  page load, so Welcome and About download nothing. Until it's ready, Turn camera
   on says "Loading hand model…" and waits, and so does the controls' camera button. Keep it loaded
   across Stop/Start and across pages (it lives in `CameraProvider`). Close it on
   unmount.
@@ -310,7 +358,7 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
 - Smoothing (2026-10-22): the drawn points go through a One Euro filter
   (`src/vision/tracking/smoothHands.js`), because the points shook, most on closed
   handshapes, and Hand Landmarker has no smoothing option. Only the drawing is
-  smoothed: the listener (recorder, camera check, Practice) still gets raw points.
+  smoothed: the listener (recorder, camera check, Learn) still gets raw points.
   Each hand keeps its own filters, matched by wrist position, and starts fresh after
   300 ms unseen. `MIN_CUTOFF` and `BETA` are tuned by eye in Chrome.
 - Landmarks can go below 0 or above 1 when the hand is partly out of frame. The
@@ -343,9 +391,10 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   datasets (`data/public/`, a folder each: `asl-hg/`, `aslyset/`) and extracted files
   (`data/extracted/`) are gitignored too.
 - `npm test` runs Vitest; keep pure logic in small modules with tests next to them.
-- Letters come from `public/languages/asl/letters.json`. `pilotOnly` letters were to be
-  left out of 2.2's first training set; since 2026-10-22 training uses all 24 static
-  letters from the public photos, and Lanix's recordings are the test (`docs/project-plan.md`).
+- Every page takes the letters from `LETTERS` in `letterShapes.js`; Record records all but
+  `TRACED_LETTERS` (J and Z). Until 2026-10-27 they came from `public/languages/asl/letters.json`
+  (removed, with its steps: the finger checklist says the same). Training uses all 24 static letters from the public photos, and Lanix's
+  recordings are the test (`docs/project-plan.md`).
 
 ## Design reference
 
@@ -368,13 +417,18 @@ Sans Mono holding only σ ῆ μ α (loaded only where they appear). Colors are 
 | `--deep-cobalt`    | `#142C48` | Text; dark surfaces such as the video frame      |
 | `--bright-sky`     | `#36A7D9` | Accents on dark surfaces only                    |
 | `--deep-sky`       | `#1A75A3` | Buttons and links on light surfaces, white text  |
-| `--cloud-white`    | `#F5F7F8` | Page background                                  |
+| `--cloud-white`    | `#F5F7F8` | Hand joints; no longer the page                  |
+| `--sky-wash`       | `#E3F4FA` | Light theme's page background (2026-10-27)       |
+| `--sky-mist`       | `#F3F9FC` | Quiet panels and About's band on the wash        |
+| `--sky-soft`       | `#C9E6F3` | Highlights and toggle tracks on the wash         |
+| `--sky-line`       | `#C9DDE9` | Borders and dividers on the wash                 |
+| `--sky-line-strong`| `#A9C6D8` | Input and letter-tile borders on the wash        |
 | `--white`          | `#FFFFFF` | Cards and the menu bar                           |
-| `--ice-tint`       | `#E3F4FA` | The Preview pill, soft highlights                |
+| `--ice-tint`       | `#E3F4FA` | Unused now (was the Preview pill)                |
 | `--line`           | `#E1E7ED` | Borders and dividers on light surfaces           |
 | `--line-strong`    | `#C3CED9` | Input and letter-tile borders                    |
 | `--disabled`       | `#D3DCE5` | Disabled buttons                                 |
-| `--chip`           | `#EEF2F5` | The small "preview" pills in the menu            |
+| `--chip`           | `#EEF2F5` | Unused now (was the menu's "preview" pills)      |
 | `--segment`        | `#E7EDF2` | Track behind a Left/Right toggle                 |
 | `--amber`          | `#B45309` | Warning text and marks on light backgrounds      |
 | `--amber-on-dark`  | `#E8A23A` | Warnings on dark surfaces                        |

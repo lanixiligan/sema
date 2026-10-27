@@ -5,7 +5,8 @@ import TopBar from './TopBar.jsx'
 
 const MENU = [
   { page: 'learn', label: 'Learn' },
-  { page: 'practice', label: 'Practice' },
+  { page: 'quiz', label: 'Quiz' },
+  { page: 'about', label: 'About' },
 ]
 
 // The top bar on the main pages, with the menu, and on the right whatever the

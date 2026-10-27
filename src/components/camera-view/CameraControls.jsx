@@ -1,14 +1,14 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { useSharedCamera } from '../../app/shared-camera/sharedCamera.js'
-import { CheckIcon, ChevronIcon, HandIcon, VideoIcon, VideoOffIcon } from '../icons/icons.jsx'
+import { CheckIcon, ChevronIcon, VideoIcon, VideoOffIcon } from '../icons/icons.jsx'
 
 const HANDS = [
-  { id: 'left', name: 'Left' },
-  { id: 'right', name: 'Right' },
+  { id: 'left', name: 'Left hand' },
+  { id: 'right', name: 'Right hand' },
 ]
 
 // The controls on the camera view, as in a video call: when the page passes
-// `onHandChange`, a Left | Right switch after a hand icon; then an arrow that
+// `onHandChange`, a Left hand | Right hand switch; then an arrow that
 // opens the list of cameras and a camera button that turns it off and on. They sit at the
 // bottom of the view, or wherever the page's `className` puts them (the camera
 // check: the top-right corner, since its checks fill the bottom).
@@ -86,10 +86,7 @@ export default function CameraControls({ hand, onHandChange, handLabel, classNam
         {onHandChange && (
           <>
             {/* aria-pressed marks the hand that's on. */}
-            <div className="camera-controls-hands" role="group" aria-label={handLabel}>
-              <span className="camera-controls-hands-label" aria-hidden="true">
-                <HandIcon size={16} />
-              </span>
+            <div className="camera-controls-segment" role="group" aria-label={handLabel}>
               {HANDS.map((option) => (
                 <button
                   key={option.id}

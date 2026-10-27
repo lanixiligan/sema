@@ -46,7 +46,7 @@ over HTTPS, which the camera requires. No base path is needed. Every push to
 Sema is a single HTML file that picks its page from the address (`/learn`, `/dev`, `/dev/record`,
 …). `vercel.json` rewrites every path to `index.html`, so opening or refreshing any of
 them loads the app, which then shows the right page. Vercel serves real files first,
-so the model, MediaPipe's files, the fonts and `letters.json` load as usual.
+so the model, MediaPipe's files, the fonts and `words.json` load as usual.
 `npm run dev` and `npm run preview` do the same locally.
 
 ## Recorded data
@@ -63,7 +63,7 @@ matrices and trained classifier weights.
 The recorder collects labelled hand landmarks for training (milestone 2.1). It's a
 developer tool, Record: `/dev/record` on the live site, `http://localhost:5173/dev/record`
 in development, behind the developer access code ([dev.md](dev.md#access-code)). It
-needs no setup. The file format is described in [docs/data-format.md](data-format.md).
+needs no setup. The file format is described in [data-format.md](data-format.md).
 
 **In person:** open `/dev/record` on the laptop (enter the access code if it asks). The participant
 reads "Help improve Sema" and "What gets saved", enters their code (`p03`), ticks the
@@ -71,7 +71,7 @@ consent box and clicks **Start recording**. The camera then starts by itself. Pi
 letter in the column on the left and the hand (Left | Right, on the video; it starts on
 the signing hand), then press **Space** with the other hand, or click **Record take**
 under the video: a 3-2-1 countdown, a wait until that hand is whole in view, "Hold…"
-with a frame count, then the result under the letter's steps. Aim for 3 kept takes per
+with a frame count, then the result under the letter's drawing. Aim for 3 kept takes per
 letter and hand, holding the hand somewhere a little different each time (centre of the
 frame, closer, off to one side). Hover a kept take's circle in the letter list to delete
 it. At the end, click **Finish and download** (at the bottom of the right column); the
@@ -105,15 +105,12 @@ consent, and that no recording ID is used twice (in the file or in `data/raw/`),
 prints the accepted and rejected takes per letter and hand. If it says OK, move the file
 into `data/raw/` (private, gitignored).
 
-**The letter list** is `public/languages/asl/letters.json`. Training letters are entries
-like `{ "letter": "B", "instructions": ["Flat hand", "…"] }` (short steps, shown as bullets
-under the letter card, describing the right hand);
-pilot-only letters have `"pilotOnly": true`. They're recorded in the pilot. (They were
-to be left out of the first training set; since 2026-10-22 training uses all 24 static
-letters from public photos, see `docs/project-plan.md`.) Each letter has `"image": "images/asl/b.svg"`, its reference
-drawing (a path inside `public/`; the drawings' source is in `docs/ATTRIBUTION.md`). The
-letter card shows it on white. The drawings show a left hand, so the card mirrors them for
-right-hand takes; without one it shows a placeholder.
+**The letter list** is `LETTERS` in `src/vision/landmarks/letterShapes.js`, next to each
+letter's finger conditions; Record records all but `TRACED_LETTERS` (J and Z, which move).
+Until 2026-10-27 it was `public/languages/asl/letters.json`, with each letter's steps, now
+replaced by the finger checklist. A letter's drawing is `public/images/asl/<letter>.svg`
+(`AslDrawing.jsx`; the drawings' source is in `docs/ATTRIBUTION.md`), shown on white. The
+drawings show a left hand, so they're mirrored for the right hand.
 
 ## Check your webcam on Fedora
 

@@ -1,8 +1,8 @@
 import HandSketch from './HandSketch.jsx'
 
 // About Sema's picture: one panel built from the Record page's parts. On top,
-// the camera frame with a hand drawn as Sema draws it, labelled "Handshape
-// preview"; under a thin line, the letter it shows. It shows what the text beside it says
+// the camera frame with a hand drawn as Sema draws it, labelled "Handshape";
+// under a thin line, the letter it shows. It shows what the text beside it says
 // (a letter, your hand at the camera), so screen readers skip it.
 
 export default function AboutPreview({ className = '' }) {
@@ -12,7 +12,7 @@ export default function AboutPreview({ className = '' }) {
         <HandSketch className="about-preview-hand" />
         <div className="take-overlay">
           <div className="take-overlay-bar">
-            <span className="take-overlay-phase">Handshape preview</span>
+            <span className="take-overlay-phase">Handshape</span>
           </div>
         </div>
       </div>

@@ -3,7 +3,6 @@ import DevTopBar from '../DevTopBar.jsx'
 import { useSharedCamera } from '../../../app/shared-camera/sharedCamera.js'
 import CameraPanel from '../../../components/camera-view/CameraPanel.jsx'
 import CameraView from '../../../components/camera-view/CameraView.jsx'
-import { useLetters } from '../../../recorder/letters.js'
 import { acceptedCount, addTake, deleteTake, needsDownload, newSession } from '../../../recorder/sessionFile.js'
 import {
   clearSession,
@@ -17,11 +16,11 @@ import {
 import { TAKES_TARGET } from '../../../recorder/takeRules.js'
 import { useRecording } from '../../../recorder/useRecording.js'
 import { browserName } from '../../../vision/model/browserName.js'
+import { LETTERS, TRACED_LETTERS } from '../../../vision/landmarks/letterShapes.js'
 import { useHandDetection } from '../../../vision/tracking/useHandDetection.js'
 import ConsentForm from './ConsentForm.jsx'
 import FinishedStep from './FinishedStep.jsx'
 import LetterList from './LetterList.jsx'
-import LetterGuide from '../../../components/LetterGuide.jsx'
 import TakeOverlay from './TakeOverlay.jsx'
 import { takePanelHead } from './takePanelHead.jsx'
 import TakePanel from './TakePanel.jsx'
@@ -31,11 +30,15 @@ import { takeReadiness } from './takeReadiness.js'
 // "2026-11-02" in the person's own time zone.
 const today = () => new Date().toLocaleDateString('en-CA')
 
+// The letters Record can record: all but J and Z, which move (until
+// 2026-10-27 the list came from public/languages/asl/letters.json).
+const RECORDABLE = LETTERS.filter((letter) => !TRACED_LETTERS.includes(letter))
+
 // The Record page, in three steps:
 // - consent: the participant's code and consent answers (or the offer to
 //   continue a session saved in this browser);
 // - recording: the letter list, the camera with the record button, and the
-//   chosen letter's card, steps and Finish;
+//   chosen letter's card and Finish;
 // - finished: after "Finish and download".
 // The camera is on only during recording: that's the only step with a camera
 // view (CameraView), and CameraProvider starts and stops it to match.
@@ -48,7 +51,6 @@ export default function RecordPage({ signingHand }) {
   const [finished, setFinished] = useState(false)
   const [storageOk, setStorageOk] = useState(true)
   const [downloaded, setDownloaded] = useState(opening.downloaded) // the session object last downloaded
-  const letters = useLetters()
 
   const camera = useSharedCamera()
   const { videoRef, handModel } = camera
@@ -82,9 +84,8 @@ export default function RecordPage({ signingHand }) {
   })
   // Until one is picked, the chosen letter is the first that still needs
   // takes for this hand (worked out on each render, so it stays current).
-  const allLetters = letters.status === 'ready' ? [...letters.training, ...letters.pilot].sort() : []
   const letter =
-    pickedLetter ?? (session && allLetters.find((l) => acceptedCount(session, l, takeHand) < TAKES_TARGET)) ?? allLetters[0] ?? null
+    pickedLetter ?? (session && RECORDABLE.find((l) => acceptedCount(session, l, takeHand) < TAKES_TARGET)) ?? RECORDABLE[0] ?? null
   const cell = session && letter ? { letter, hand: takeHand } : null
 
   const recording = useRecording({
@@ -230,18 +231,15 @@ export default function RecordPage({ signingHand }) {
         // the bottom (grid areas in styles.css).
         <main className="record">
           <div className="record-letters">
-            {letters.status === 'ready' && (
-              <LetterList
-                training={letters.training}
-                pilot={letters.pilot}
-                session={session}
-                hand={takeHand}
-                selected={cell}
-                onSelect={setLetter}
-                onDelete={deleteOne}
-                disabled={recording.busy}
-              />
-            )}
+            <LetterList
+              letters={RECORDABLE}
+              session={session}
+              hand={takeHand}
+              selected={cell}
+              onSelect={setLetter}
+              onDelete={deleteOne}
+              disabled={recording.busy}
+            />
           </div>
           <section className="record-camera" aria-label="Camera">
             {/* The shared camera panel: a header with the take's status, then
@@ -281,21 +279,8 @@ export default function RecordPage({ signingHand }) {
                 Not saved in this browser. Download before closing.
               </p>
             )}
-            {letters.status === 'error' && (
-              <p className="record-note" role="alert">
-                Couldn't load the letter list (public/languages/asl/letters.json).
-              </p>
-            )}
             {cell && (
-              <TakePanel
-                cell={cell}
-                isPilot={letters.pilot.includes(cell.letter)}
-                image={letters.images[cell.letter]}
-                accepted={acceptedCount(session, cell.letter, cell.hand)}
-              />
-            )}
-            {cell && (
-              <LetterGuide steps={letters.instructions[cell.letter]} hand={cell.hand} />
+              <TakePanel cell={cell} accepted={acceptedCount(session, cell.letter, cell.hand)} />
             )}
             {/* The last take's result, in a line that's always there, so
                 nothing moves when it appears. */}

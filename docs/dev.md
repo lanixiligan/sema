@@ -18,7 +18,8 @@ Contents:
   benchmark, and the results
 - [Record](#record)
 - [Extract hand points](#extract-hand-points)
-- [Practice (the classifier)](#practice-the-classifier): now a main page, `/practice`
+- [Learn (the classifier)](#learn-the-classifier): a main page, `/learn`, with developer parts
+  under `npm run dev`
 - [Where the code is](#where-the-code-is): and how to add a tool
 
 ## Access code
@@ -49,16 +50,18 @@ possibility; that's why `npm run dev-code` asks for at least 12 characters.
 
 ## The dashboard
 
-`/dev` has a card for each tool, then (under `npm run dev` only) a **Practice model** switch,
-Small model or k-NN, which says which classifier `/practice` runs. The choice is saved in this
-browser and Practice follows it; the live site has one model, so it has no switch. Then the
-latest classifier results: accuracy on people the
-classifier has never seen, per letter, and on the recorded test set. The numbers come from
-`training/reports/knn.json`, which `python3 training/train.py …` writes (see
-`training/README.md`); the live site shows the version last committed. Letters below the bar
-(90% for now, still a proposal in the plan) are amber, and percentages are rounded down, so a
-letter only shows 90% if it really reached it. The full report is
-`training/reports/knn.md`.
+`/dev` has a card for each tool, then (under `npm run dev` only) a **Letter model** switch,
+Small model or k-NN, which says which classifier Learn and the quiz run (it only gives Learn's
+"Right now" guess: the finger conditions decide). The choice is saved in this browser; the live
+site has one model, so it has no switch. Then the latest training results, twice: the small
+model's, the one on Learn and the live site (`training/reports/small.json`, which
+`python3 training/train_small.py …` writes), then the k-NN's for comparison
+(`training/reports/knn.json`, from `python3 training/train.py …`; see `training/README.md`).
+Each gives the accuracy on people the classifier has never seen, per letter, and on the recorded
+test set, and names its full report; the live site shows the versions last committed. Letters
+below the bar (90%, `PASS_SHARE` in `training/train.py`: once the bar for switching a letter on,
+before every letter could be picked) are amber, and percentages are rounded down, so a letter
+only shows 90% if it really reached it.
 
 ## Tracking and benchmark
 
@@ -143,7 +146,7 @@ How to run a session is in [guide.md](guide.md#recording-sessions). Until 2026-1
 the app's main page, at `/record`, where setup led; it moved here once the classifier was
 trained, since recordings are now only the test set. It uses the app's shared camera, like
 the camera check, and needs no setup. Its top bar has no gear: Delete Sema's data (the gear
-on Learn and Practice) also removes a session saved in this browser.
+on Learn, Quiz and About) also removes a session saved in this browser.
 
 ## Extract hand points
 
@@ -181,37 +184,52 @@ carried over from the photo before (VIDEO mode, the app's, follows a hand from f
 frame). Each hand found goes through the recorder's own `frameFromDetection`, so the
 normalization is exactly the one recordings get.
 
-## Practice (the classifier)
+## Learn (the classifier)
 
-Since 2026-10-22 this is a main page (the one returning visitors start on), not a developer
-tool: before, it was `/dev/try`. It was Try, at `/try`, until 2026-10-23; now it's Practice,
-at `/practice`, and `/try` redirects there. Its developer parts only show under
-`npm run dev`, at the bottom of the right column: a line naming the model (which model runs
-is chosen on the dashboard, see "The dashboard"). Pick a letter, make it, and hold it for 3 seconds. It has Record's
-three columns. On the left, the letter guide: all 26 letters' drawings (facing the signing
-hand) as buttons that pick the letter; a dot marks the 8 tested on Lanix's recordings, and
-J and Z (they move) are darkened and disabled. In the middle, the camera in the camera
-check's panel: a short status, and a line that fills over the 3 seconds; then "That's B!"
-over the picture with Try again. Its controls have Record's Left | Right switch, which here
-changes the saved signing hand (Right by default; the drawings face it). Since 2026-10-23
-only the signing hand counts: the status says "Show B with your right hand", the other hand
-gets no points drawn, and it can't make the letter (before, either hand could). On
-the right, the letter's card with its drawing large, its steps from `letters.json` (where it
-has them) and a "Right now" line for the signing hand (the guess and how sure, or "not sure").
-The hold counts while the signing hand's whole-hand guess
-is the letter and sure, and the hand passes the letter's shape rules; a gap over 300 ms
-restarts it (`src/pages/practice/letterHold.js`, with tests). The shape rules
-(`src/vision/landmarks/letterShapes.js`, 2026-10-23) catch hands the model only takes for a
-letter. Only B has them so far: fingers together and thumb across the palm, because the
-model called an open hand, and digits 4 and 8, B. When the picked letter fails one, its
-"Right now" line says what to change ("almost B. Fold your thumb across your palm."). Like training, it only judges a whole hand (every point, wrist included, in view).
+Learn (`/learn`) is a main page, the one returning visitors start on, not a developer tool:
+the classifier page was `/dev/try` until 2026-10-22, then Try (`/try`), renamed Practice
+(`/practice`) on 2026-10-23 and merged into Learn on 2026-10-27; `/try` and `/practice`
+redirect to `/learn`. The quiz checks each letter the same way (`useLetterCheck` in
+`src/components/letter-check/`). Learn's developer part only shows under `npm run dev`, at the
+bottom of the right column: the "Right now" line, the model's guess for the signing hand (the
+letter and how sure, or "not sure"); which model runs is chosen on the dashboard (see "The
+dashboard").
+
+It has Record's three columns. On the left, the letter guide: all 26 letters' drawings (facing
+the signing hand), as a list or a grid, as buttons that pick the letter; Learn starts at A. In
+the middle, the camera in the shared camera panel: a short status, and a line that fills over
+the hold; then "That's B!" over the picture with Next letter and Try again. Its controls have
+Record's Left | Right switch, which here changes the saved signing hand (Right by default; the
+drawings face it). Since 2026-10-23 only the signing hand counts: the status says "Show B with
+your right hand", the other hand gets no points drawn, and it can't make the letter (before,
+either hand could). On the right, the letter's card with its drawing large, and its finger
+checklist, ticked live.
+
+The hold counts while the signing hand meets the letter's finger conditions
+(`src/vision/landmarks/letterShapes.js`, every letter since 2026-10-27): each is scored 0 to 1
+from the hand's measurements (`handMeasures.js`), and the letter is made when the overall score
+is high enough and no other still letter fits clearly better (`matchLetter` in
+`letterMatch.js`). Hold it for 1.5 seconds; a gap over 300 ms restarts it
+(`src/components/letter-check/letterHold.js`, with tests). The model doesn't decide (since
+2026-10-27; before, the hold needed its sure guess, and only B had shape rules on top):
+`showsLetter` in `letterHold.js` says how to make it agree again. Like training, it only judges
+a whole hand (every point, wrist included, in view).
+
+J and Z move, so they're traced instead of held. J (since 2026-10-26; before, darkened and
+unchecked) starts as I: held for 1 s (the panel's line fills), then a curvy J appears with
+point 1 on the pinky tip, as tall as the hand from wrist to pinky tip, to trace with the pinky
+to point 2 in I's handshape; a slip over 0.8 s removes it, back to the I
+(`src/vision/landmarks/jTrace.js`). Z (since 2026-10-24) is a Z drawn under the hand, to
+follow with the index fingertip from point 1, in order, to point 2 at its end, while the hand
+keeps Z's handshape (`src/vision/landmarks/zTrace.js`, the rules in `letterShapes.js`); the
+panel's line fills as it's traced, and a slip over 0.8 s starts it over.
 
 - **Small model** (the default; step 5 of 2.2): `public/models/asl-letters.json`, which
   `training/train_small.py` writes: the better of logistic regression and a small neural
   network on people it has never seen (`training/reports/small.md`). It holds only weights,
-  14 KB, so it's committed and works on the live site too. Its card shows the top letter's
-  percentage. It's trained on ASL-HG (CC BY 4.0), credited in `docs/ATTRIBUTION.md` and the
-  README; keep that credit while the model ships.
+  14 KB, so it's committed and works on the live site too. Learn's "Right now" line shows the
+  top letter's percentage. It's trained on ASL-HG and ASLYset (both CC BY 4.0), credited in
+  `docs/ATTRIBUTION.md` and the README; keep those credits while the model ships.
 - **k-NN** (step 4): `data/models/knn-asl.json`, which `training/train.py` writes (gitignored:
   11 MB, and it holds every training hand). So the dashboard's switch offers it only under
   `npm run dev`. Practice had that switch itself until 2026-10-23.

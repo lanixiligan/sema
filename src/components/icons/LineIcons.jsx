@@ -103,3 +103,14 @@ export function FileSendIcon({ size = 28 }) {
     </svg>
   )
 }
+
+// The quiz page: the score, a trophy.
+export function TrophyIcon({ size = 28 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" {...LINE}>
+      <path d="M8 4h8v6a4 4 0 0 1-8 0z" />
+      <path d="M8 6H4.5v1.5A3.5 3.5 0 0 0 8 11M16 6h3.5v1.5A3.5 3.5 0 0 1 16 11" />
+      <path d="M12 14v3.5M8.5 20.5h7M9.5 20.5L10 17.5h4l.5 3" />
+    </svg>
+  )
+}

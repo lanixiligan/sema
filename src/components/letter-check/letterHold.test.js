@@ -4,21 +4,15 @@ import { LETTER_HOLD_MS, NO_HOLD, heldLongEnough, holdSecondsLeft, showsLetter, 
 const sureA = { hand: 'right', whole: true, letter: 'A', sure: true }
 
 describe('showsLetter', () => {
-  it('needs a whole hand, sure, making the letter', () => {
-    expect(showsLetter([sureA], 'A')).toBe(true)
-    expect(showsLetter([sureA], 'B')).toBe(false)
-    expect(showsLetter([{ ...sureA, sure: false }], 'A')).toBe(false)
-    expect(showsLetter([{ hand: 'right', whole: false }], 'A')).toBe(false)
-    expect(showsLetter([], 'A')).toBe(false)
+  it('needs a whole hand that makes the letter', () => {
+    expect(showsLetter([{ ...sureA, makes: true }])).toBe(true)
+    expect(showsLetter([{ ...sureA, makes: false }])).toBe(false)
+    expect(showsLetter([{ hand: 'right', whole: false }])).toBe(false)
+    expect(showsLetter([])).toBe(false)
   })
 
-  it('needs the letter\'s shape rules to pass', () => {
-    expect(showsLetter([{ ...sureA, fix: 'Fold your thumb across your palm.' }], 'A')).toBe(false)
-    expect(showsLetter([{ ...sureA, fix: null }], 'A')).toBe(true)
-  })
-
-  it('counts any hand it is given (Practice only gives the signing hand)', () => {
-    expect(showsLetter([{ ...sureA, letter: 'S' }, { ...sureA, hand: 'left' }], 'A')).toBe(true)
+  it('goes by the conditions, not the model', () => {
+    expect(showsLetter([{ ...sureA, letter: 'S', sure: false, makes: true }])).toBe(true)
   })
 })
 
@@ -38,12 +32,13 @@ describe('updateLetterHold', () => {
   })
 })
 
-describe('the 3 seconds', () => {
+describe('the hold', () => {
   it('counts down whole seconds and passes at LETTER_HOLD_MS', () => {
     const hold = { start: 1000, lastAt: 1000 }
     expect(holdSecondsLeft(NO_HOLD, 5000)).toBe(null)
-    expect(holdSecondsLeft(hold, 1000)).toBe(3)
-    expect(holdSecondsLeft(hold, 2500)).toBe(2)
+    expect(holdSecondsLeft(hold, 1000)).toBe(2)
+    expect(holdSecondsLeft(hold, 1600)).toBe(1)
+    expect(holdSecondsLeft(hold, 2500)).toBe(0)
     expect(heldLongEnough(hold, 1000 + LETTER_HOLD_MS - 1)).toBe(false)
     expect(heldLongEnough(hold, 1000 + LETTER_HOLD_MS)).toBe(true)
     expect(heldLongEnough(NO_HOLD, 99999)).toBe(false)
@@ -90,5 +85,20 @@ describe('practiceStatus', () => {
 
   it('names the signing hand', () => {
     expect(practiceStatus({ ...ready, hand: 'left' }).status).toBe('Show A with your left hand')
+  })
+
+  it('guides a traced letter (Z): point 1, then the line to point 2', () => {
+    const z = { ...ready, target: 'Z', traced: true }
+    expect(practiceStatus(z)).toEqual({ status: 'Put your right index finger on point 1', tone: '' })
+    expect(practiceStatus({ ...z, tracing: true })).toEqual({ status: 'Follow the line to point 2…', tone: 'ok' })
+    expect(practiceStatus({ ...z, tracing: true, passed: true })).toEqual({ status: "That's Z!", tone: 'ok' })
+  })
+
+  it('guides J: make I, hold it, then the line to point 2', () => {
+    const j = { ...ready, target: 'J', traced: true }
+    expect(practiceStatus(j)).toEqual({ status: 'Make I with your right hand', tone: '' })
+    expect(practiceStatus({ ...j, holdingI: true })).toEqual({ status: 'Hold the I…', tone: 'ok' })
+    expect(practiceStatus({ ...j, tracing: true })).toEqual({ status: 'Follow the line to point 2…', tone: 'ok' })
+    expect(practiceStatus({ ...j, tracing: true, passed: true })).toEqual({ status: "That's J!", tone: 'ok' })
   })
 })

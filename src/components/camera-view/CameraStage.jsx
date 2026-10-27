@@ -6,13 +6,15 @@ import { useSharedCamera } from '../../app/shared-camera/sharedCamera.js'
 // a view is on screen (see CameraProvider). With `autoStart` (the default)
 // showing the view turns the camera on; without it, the camera waits for the
 // person to turn it on. The video and the canvas share one CSS rule that
-// mirrors them (.video and .overlay in styles.css).
-export default function CameraStage({ canvasRef, className = 'stage', autoStart = true, children }) {
+// mirrors them (.video and .overlay in styles.css). `underlay` goes between
+// the video and the hand drawing, so the hand stays on top of it (Practice's Z).
+export default function CameraStage({ canvasRef, className = 'stage', autoStart = true, underlay, children }) {
   const { attachVideo, registerView } = useSharedCamera()
   useEffect(() => registerView(autoStart), [registerView, autoStart])
   return (
     <div className={className}>
       <video ref={attachVideo} className="video" autoPlay playsInline muted />
+      {underlay}
       <canvas ref={canvasRef} className="overlay" />
       {children}
     </div>

@@ -11,23 +11,24 @@ describe('resolveRoute', () => {
     }
   })
 
-  it('sends a returning visitor from Welcome to Practice', () => {
-    expect(resolveRoute('/', returning)).toEqual({ redirect: '/practice' })
+  it('sends a returning visitor from Welcome to Learn', () => {
+    expect(resolveRoute('/', returning)).toEqual({ redirect: '/learn' })
   })
 
-  it('sends a new visitor from Learn and Practice to Welcome', () => {
-    for (const path of ['/learn', '/practice']) {
+  it('sends a new visitor from Learn and the quiz pages to Welcome', () => {
+    for (const path of ['/learn', '/quiz', '/quiz/letters', '/quiz/words']) {
       expect(resolveRoute(path, newVisitor)).toEqual({ redirect: '/' })
     }
   })
 
-  it('sends the old Try address to Practice', () => {
-    expect(resolveRoute('/try', returning)).toEqual({ redirect: '/practice' })
-    expect(resolveRoute('/try/', returning)).toEqual({ redirect: '/practice' })
+  it('sends the old Try and Practice addresses to Learn', () => {
+    for (const path of ['/try', '/try/', '/practice']) {
+      expect(resolveRoute(path, returning)).toEqual({ redirect: '/learn' })
+    }
   })
 
-  it('lets a new visitor open Welcome, the intro pages, the camera check and /dev', () => {
-    for (const page of ['welcome', 'about', 'howSemaWorks', 'privacy', 'cameraCheck', 'dev']) {
+  it('lets a new visitor open Welcome, About, the camera check and /dev', () => {
+    for (const page of ['welcome', 'about', 'cameraCheck', 'dev']) {
       expect(resolveRoute(PATHS[page], newVisitor)).toEqual({ page })
     }
   })
@@ -47,10 +48,15 @@ describe('resolveRoute', () => {
     expect(resolveRoute('/record', returning)).toEqual({ redirect: '/' })
   })
 
-  it('serves the intro pages at their own addresses', () => {
+  it('serves About to new and returning visitors', () => {
     expect(resolveRoute('/about', newVisitor)).toEqual({ page: 'about' })
-    expect(resolveRoute('/how-it-works', newVisitor)).toEqual({ page: 'howSemaWorks' })
-    expect(resolveRoute('/privacy', returning)).toEqual({ page: 'privacy' })
+    expect(resolveRoute('/about', returning)).toEqual({ page: 'about' })
+  })
+
+  it('sends the old intro addresses to About', () => {
+    for (const path of ['/how-it-works', '/privacy']) {
+      expect(resolveRoute(path, newVisitor)).toEqual({ redirect: '/about' })
+    }
   })
 
   it('no longer has a signing hand page', () => {

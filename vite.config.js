@@ -9,5 +9,10 @@ export default defineConfig({
     // Vite blocks unknown hostnames by default (protection against DNS rebinding),
     // so allow that domain and its subdomains. Not needed for localhost.
     allowedHosts: ['.app.github.dev'],
+    watch: {
+      // data/ holds ~46k dataset photos and recordings; the app never imports them.
+      // Watching them runs out of Linux's file-watcher limit (ENOSPC).
+      ignored: ['**/data/**'],
+    },
   },
 })

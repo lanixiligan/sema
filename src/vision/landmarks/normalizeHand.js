@@ -1,3 +1,5 @@
+import { FINGERS, WRIST } from './handPoints.js'
+
 // Turns MediaPipe's 21 hand landmarks into 63 numbers that describe only the
 // hand's shape: the same handshape gives the same numbers wherever it is in
 // the picture, however big it looks, and whichever hand made it.
@@ -5,8 +7,7 @@
 // session files record which version produced their landmarks.
 export const NORMALIZATION_VERSION = 1
 
-const WRIST = 0
-const MIDDLE_FINGER_BASE = 9
+const MIDDLE_FINGER_BASE = FINGERS.middle[0]
 // A palm shorter than this (in pixels) means the landmarks are unusable.
 const MIN_PALM_LENGTH = 1e-6
 

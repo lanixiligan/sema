@@ -1,8 +1,12 @@
 import { HandLandmarker } from '@mediapipe/tasks-vision'
+import { FINGER_NUMBERS, TIPS } from '../landmarks/handPoints.js'
+
+const TIP_POINTS = Object.values(TIPS)
 
 // The colours are the CSS tokens in styles.css (--bright-sky bones,
-// --cloud-white joints, --hand-outline under both, which keeps the skeleton
-// visible over any background or skin tone). A canvas can't use CSS variables
+// --cloud-white joints and fingertip badges, --deep-cobalt numbers on them,
+// --hand-outline under all of it, which keeps the skeleton visible over any
+// background or skin tone). A canvas can't use CSS variables
 // directly, so they're read from the stylesheet once, on the first drawing.
 let colors = null
 
@@ -13,6 +17,7 @@ function handColors(canvas) {
       bone: css.getPropertyValue('--bright-sky').trim(),
       joint: css.getPropertyValue('--cloud-white').trim(),
       outline: css.getPropertyValue('--hand-outline').trim(),
+      number: css.getPropertyValue('--deep-cobalt').trim(),
     }
   }
   return colors
@@ -58,18 +63,43 @@ function drawOneHand(ctx, canvas, landmarks, videoWidth, videoHeight) {
   const unit = videoWidth / 640
 
   // All outlines first, then all bones, so no outline cuts across a bone.
-  const { bone, joint, outline } = handColors(canvas)
-  strokeBones(ctx, points, outline, 6 * unit)
+  // The outline keeps the hand visible over any background or skin tone.
+  const { bone, joint, outline, number } = handColors(canvas)
+  strokeBones(ctx, points, outline, 5 * unit)
   strokeBones(ctx, points, bone, 3 * unit)
 
   ctx.fillStyle = joint
   ctx.strokeStyle = outline
-  ctx.lineWidth = 1.5 * unit
-  for (const point of points) {
+  ctx.lineWidth = 1 * unit
+  for (const [i, point] of points.entries()) {
+    // The fingertips get a badge instead, drawn last so it sits on top.
+    if (TIP_POINTS.includes(i)) continue
     ctx.beginPath()
-    ctx.arc(point.x, point.y, 4 * unit, 0, Math.PI * 2)
+    ctx.arc(point.x, point.y, 3.5 * unit, 0, Math.PI * 2)
     ctx.fill()
     ctx.stroke()
+  }
+
+  // Each fingertip: a round badge with the finger's number, 1 (thumb) to 5.
+  ctx.font = `800 ${10 * unit}px 'Plus Jakarta Sans', system-ui, sans-serif`
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  for (const [finger, tip] of Object.entries(TIPS)) {
+    const { x, y } = points[tip]
+    ctx.fillStyle = joint
+    ctx.lineWidth = 1.5 * unit
+    ctx.beginPath()
+    ctx.arc(x, y, 8 * unit, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.stroke()
+    // CSS mirrors the whole canvas, which would show the number backwards, so
+    // flip it once more around its own centre to read the right way round.
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.scale(-1, 1)
+    ctx.fillStyle = number
+    ctx.fillText(String(FINGER_NUMBERS[finger]), 0, 0.5 * unit)
+    ctx.restore()
   }
 }
 

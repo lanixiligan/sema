@@ -20,7 +20,8 @@ import StageProblem from './StageProblem.jsx'
 //   (`controls`: a hand switch, a place on the view), or `false` to hide them.
 // The page brings its own hand detection (`hand` is what useHandDetection
 // returns, drawn on `canvasRef`) and its overlays, shown while the camera is
-// live (`children`). `autoStart` is CameraStage's.
+// live: over the hand drawing (`children`) or under it (`underlay`).
+// `autoStart` is CameraStage's.
 export default function CameraView({
   canvasRef,
   hand,
@@ -28,6 +29,7 @@ export default function CameraView({
   autoStart = true,
   offNote,
   controls = {},
+  underlay,
   children,
 }) {
   const camera = useSharedCamera()
@@ -35,9 +37,10 @@ export default function CameraView({
   const isDetecting = camera.status === 'live' && handModel.status === 'ready'
   const idleSecondsLeft = useIdleCameraOff({ isDetecting, handInView: Boolean(hand.handLabel) })
   const failure = describeFailure(camera, handModel, hand.error)
+  const live = !failure && camera.status !== 'idle'
 
   return (
-    <CameraStage canvasRef={canvasRef} className={`stage ${className}`} autoStart={autoStart}>
+    <CameraStage canvasRef={canvasRef} className={`stage ${className}`} autoStart={autoStart} underlay={live && underlay}>
       {failure ? (
         <StageProblem title={failure.title} body={failure.body} onRetry={failure.canRetry ? camera.start : undefined} />
       ) : camera.status === 'idle' ? (

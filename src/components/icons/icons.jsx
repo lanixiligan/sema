@@ -2,24 +2,6 @@
 // currentColor, so the surrounding CSS picks their colour. They're decoration:
 // the text beside them says the same thing, so wrap them in aria-hidden.
 
-// An open right hand seen from the back, as you see your own raised hand:
-// four fingers up, the thumb out to the left, open at the wrist. Mirror it
-// (scaleX(-1)) for a left hand. One outline: up the thumb, over each
-// fingertip and down into the gap before the next, then down to the wrist.
-export function HandIcon({ size = 18, strokeWidth = 1.6 }) {
-  return (
-    <svg width={size} height={size} viewBox="-0.6 0 32 32" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
-      <path
-        d="M12.2 29C12.2 26.6 10.6 24.4 9.4 21.4L4.9 14.9A1.7 1.7 0 0 1 7.7 12.9L10.4 16.8
-           V6.2A1.7 1.7 0 0 1 13.8 6.2V14A0.4 0.4 0 0 0 14.6 14
-           V4.4A1.7 1.7 0 0 1 18 4.4V14A0.4 0.4 0 0 0 18.8 14
-           V5.6A1.7 1.7 0 0 1 22.2 5.6V14.5A0.4 0.4 0 0 0 23 14.5
-           V9A1.6 1.6 0 0 1 26.2 9V19C26.2 23 24 25.5 22.8 26.6V29"
-      />
-    </svg>
-  )
-}
-
 export function CheckIcon({ size = 14, strokeWidth = 2.4 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
@@ -114,6 +96,18 @@ export function MonitorIcon({ size = 16 }) {
     <svg width={size} height={size} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <rect x="1.5" y="2.5" width="13" height="8.5" rx="1.5" />
       <path d="M8 11v3M5.5 14h5" />
+    </svg>
+  )
+}
+
+// An eye, and the same eye crossed out: show and hide (the quiz's peek at a
+// letter's drawing).
+export function EyeIcon({ size = 20, off = false }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12Z" />
+      <circle cx="12" cy="12" r="3" />
+      {off && <path d="M4 4l16 16" />}
     </svg>
   )
 }

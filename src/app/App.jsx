@@ -6,13 +6,13 @@ import { NEW_VISITOR, clearSavedData, loadProgress, saveProgress } from './setti
 import { PATHS, resolveRoute } from './routing/router.js'
 import { applyTheme, followTheme, systemThemeQuery } from './settings/theme.js'
 import { SettingsContext } from './settings/settings.js'
-import AboutPage from '../pages/onboarding/intro/AboutPage.jsx'
+import AboutPage from '../pages/about/AboutPage.jsx'
 import CameraCheckPage from '../pages/onboarding/CameraCheckPage.jsx'
 import LearnPage from '../pages/learn/LearnPage.jsx'
-import HowSemaWorksPage from '../pages/onboarding/intro/HowSemaWorksPage.jsx'
-import PrivacyPage from '../pages/onboarding/intro/PrivacyPage.jsx'
 import WelcomePage from '../pages/onboarding/WelcomePage.jsx'
-import PracticePage from '../pages/practice/PracticePage.jsx'
+import LettersQuizPage from '../pages/quiz/LettersQuizPage.jsx'
+import QuizPage from '../pages/quiz/QuizPage.jsx'
+import WordsQuizPage from '../pages/quiz/WordsQuizPage.jsx'
 
 // The developer pages, behind their access code. Loaded on demand (lazy), so
 // visitors who never open /dev never download them.
@@ -27,7 +27,7 @@ const SMALL_SCREEN = '(max-width: 899px)'
 export default function App() {
   const pathname = usePathname()
   // The saved settings (signing hand, setup done). They decide where a visitor
-  // may go: setup first for a new one, straight to Practice for a returning one.
+  // may go: setup first for a new one, straight to Learn for a returning one.
   const [progress, setProgress] = useState(loadProgress)
   const route = resolveRoute(pathname, progress)
   // Checked once, when the page opens: a phone doesn't change size, and a
@@ -52,13 +52,19 @@ export default function App() {
     saveProgress(next)
   }
 
-  // The camera check's Next. Setup doesn't ask for the signing hand, so it
-  // keeps a saved one, or Right. The settings change and the navigation
+  // The camera check's Next, which ends setup. Sema doesn't ask for the
+  // signing hand, so it keeps a saved one, or Right. The settings change and the navigation
   // happen in the same click, so React applies them in one render: the
   // router never sees one without the other.
   function finishSetup() {
     updateProgress({ signingHand: progress.signingHand ?? 'right', setupDone: true })
-    navigate(PATHS.practice)
+    navigate(PATHS.learn)
+  }
+
+  // Welcome's Get started (and About's, for a new visitor) opens the camera
+  // check, setup's one page. Brought back on 2026-10-27 after a day without it.
+  function startSetup() {
+    navigate(PATHS.cameraCheck)
   }
 
   // The settings menu's Delete Sema's data (after the person confirmed):
@@ -78,7 +84,11 @@ export default function App() {
   // (such as the camera) starts.
   if (showPhoneNotice) return <PhoneNotice onContinue={() => setShowPhoneNotice(false)} />
 
-  const settings = { theme: progress.theme, setTheme: (theme) => updateProgress({ theme }), deleteData }
+  const settings = {
+    theme: progress.theme,
+    setTheme: (theme) => updateProgress({ theme }),
+    deleteData,
+  }
 
   return (
     <SettingsContext value={settings}>
@@ -88,6 +98,7 @@ export default function App() {
             name={route.page}
             signingHand={progress.signingHand}
             setupDone={progress.setupDone}
+            onStartSetup={startSetup}
             onFinishSetup={finishSetup}
             onSigningHandChange={(signingHand) => updateProgress({ signingHand })}
             devModel={progress.devModel}
@@ -105,6 +116,7 @@ function Page({
   name,
   signingHand,
   setupDone,
+  onStartSetup,
   onFinishSetup,
   onSigningHandChange,
   devModel,
@@ -128,18 +140,18 @@ function Page({
   }
   switch (name) {
     case 'welcome':
-      return <WelcomePage />
+      return <WelcomePage onStart={onStartSetup} />
     case 'about':
-      return <AboutPage setupDone={setupDone} />
-    case 'howSemaWorks':
-      return <HowSemaWorksPage />
-    case 'privacy':
-      return <PrivacyPage setupDone={setupDone} />
+      return <AboutPage setupDone={setupDone} onStart={onStartSetup} />
     case 'cameraCheck':
       return <CameraCheckPage onDone={onFinishSetup} />
     case 'learn':
-      return <LearnPage />
-    case 'practice':
-      return <PracticePage signingHand={signingHand} onSigningHandChange={onSigningHandChange} model={devModel} />
+      return <LearnPage signingHand={signingHand} onSigningHandChange={onSigningHandChange} model={devModel} />
+    case 'quiz':
+      return <QuizPage />
+    case 'quizLetters':
+      return <LettersQuizPage signingHand={signingHand} onSigningHandChange={onSigningHandChange} model={devModel} />
+    case 'quizWords':
+      return <WordsQuizPage signingHand={signingHand} onSigningHandChange={onSigningHandChange} model={devModel} />
   }
 }

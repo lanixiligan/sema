@@ -9,7 +9,7 @@ import TrackingPage from './tracking/TrackingPage.jsx'
 // this file only when a developer page is opened, so other visitors never
 // download the tools' code. `page` is the router's name for the page,
 // `signingHand` the saved setting (Record's first take is for it),
-// `devModel` the classifier Practice runs and onModelChange saves a new one
+// `devModel` the classifier Learn runs and onModelChange saves a new one
 // (the dashboard's switch), `devAccess` the fingerprint saved in this browser (progressStore.js), and
 // onAccessChange saves a new one (null locks the pages again).
 export default function DevArea({ page, signingHand, devModel, onModelChange, devAccess, onAccessChange }) {

@@ -1,12 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
-import { PATHS } from '../../app/routing/router.js'
 import { useSharedCamera } from '../../app/shared-camera/sharedCamera.js'
 import TopBar from '../../app/layout/TopBar.jsx'
 import CameraPanel from '../../components/camera-view/CameraPanel.jsx'
 import CameraView from '../../components/camera-view/CameraView.jsx'
 import { BOTH_HANDS_HOLD_MS, NO_HOLD, holdSecondsLeft, seeHands, steadySeen, updateHold } from '../../vision/landmarks/handChecks.js'
 import { useHandDetection } from '../../vision/tracking/useHandDetection.js'
-import StepNav from './StepNav.jsx'
 
 const NOT_SEEN = { left: 'none', right: 'none' }
 const HANDS = ['left', 'right']
@@ -20,7 +18,8 @@ const HANDS = ['left', 'right']
 // - the camera panel: a header with a short status, and along its bottom
 //   edge a line that fills over the 3 seconds; then the live video (only the
 //   camera controls on it).
-// Next opens once the check passes, stays open, and finishes setup.
+// When the check passes, "Camera ready" flashes over the video for a moment,
+// and a Continue button appears under the steps (it stays) and finishes setup.
 export default function CameraCheckPage({ onDone }) {
   const camera = useSharedCamera()
   const { handModel } = camera
@@ -103,6 +102,11 @@ export default function CameraCheckPage({ onDone }) {
               Keep both hands visible for three seconds.
             </Step>
           </ol>
+          {passed && (
+            <button type="button" className="primary-button camera-check-continue" onClick={onDone}>
+              Continue
+            </button>
+          )}
         </section>
 
         <section className="camera-check-preview">
@@ -119,11 +123,19 @@ export default function CameraCheckPage({ onDone }) {
               className="camera-check-stage"
               autoStart={false}
               offNote="Turn it on when you're ready. Sema only looks for your hands."
-            />
+            >
+              {/* Plays once, when the check passes: it fades in, waits, and
+                  fades out by itself (the panel's header says "Camera ready"
+                  for good, and is what screen readers get). */}
+              {passed && (
+                <div className="camera-ready-flash" aria-hidden="true">
+                  <span>✓ Camera ready</span>
+                </div>
+              )}
+            </CameraView>
           </CameraPanel>
         </section>
       </main>
-      <StepNav previous={{ to: PATHS.privacy }} next={{ onClick: onDone, disabled: !passed }} />
     </div>
   )
 }

@@ -11,10 +11,6 @@
 </p>
 
 <p align="center">
-  <strong>Preview:</strong> finds your hands; letter checking is being built.
-</p>
-
-<p align="center">
   <a href="#quick-start">Quick start</a> ·
   <a href="#security">Security</a> ·
   <a href="#docs">Docs</a> ·
@@ -38,11 +34,13 @@
 ## What it does
 
 - Finds your hands in the webcam picture and draws their 21 points.
-- Practice (`/practice`): pick a letter, make it in front of the webcam, and hold it for 3
-  seconds while Sema checks the handshape. It covers the 24 letters that don't move; J and Z
-  come later.
+- Learn (`/learn`): start at A, or pick any letter in the guide, make it in front of the webcam, and hold it for 1.5
+  seconds while Sema checks the handshape. It covers the 24 letters that don't move, and Z:
+  trace the Z drawn on the camera view with your index finger. And J: hold I, then trace
+  the J that appears at your pinky.
+- Quiz (`/quiz`): sign 10 random letters, or 5 short words letter by letter, from memory, then
+  see your score.
 - Records labelled hand points for testing, on the Record page (a developer tool, `/dev/record`).
-- Learn is a placeholder until the lessons are built.
 
 ## Quick start
 
@@ -102,7 +100,7 @@ upgrading MediaPipe (see CLAUDE.md).
 Everything runs in your browser: no backend, no accounts, and video never leaves your machine.
 
 - **The camera is yours to switch on.** The browser only asks for the camera after you press
-  Turn camera on (or Start recording, on the Record page). Sema turns it off when you switch to another tab, and after a minute with no
+  Turn camera on, open a quiz, or press Start recording on the Record page. Sema turns it off when you switch to another tab, and after a minute with no
   hand in view.
 - **Your data stays in this browser.** Sema saves your settings (signing hand, theme, setup
   done) and a recording in progress in this browser's `localStorage`. Nothing is uploaded.
@@ -115,14 +113,28 @@ Everything runs in your browser: no backend, no accounts, and video never leaves
 
 ## Docs
 
+**Plan**
+
 - [Development plan](docs/project-plan.md)
-- [What's next](docs/NEXT.md)
+
+**Reference**
+
 - [Developer pages](docs/dev.md): the access code, the tools at `/dev`, and the benchmark results
 - [Session file format](docs/data-format.md)
 - [Guide](docs/guide.md): deploy, recording sessions, MediaPipe files, webcam, Codespaces
+
+**Pages**
+
+- [Sema's pages](docs/sema-pages.md): every page in the app, one line each, with its address and file
+
+**Credits and licences**
+
 - [Attribution](docs/ATTRIBUTION.md): where the ASL hand drawings and the letter model's training
   photos come from, and their licences
-- [Onboarding pages](docs/onboarding-pages.md): what each page before Practice says and does
+
+**History**
+
+- [Archive](docs/archive/): the finished recorder's design and build plan, and the original full plan
 
 ## Tech
 
