@@ -2,19 +2,16 @@ import { takeProgress } from '../../../recorder/sessionFile.js'
 import { TAKES_TARGET } from '../../../recorder/takeRules.js'
 import TakeMarks from './TakeMarks.jsx'
 
-// The letters to record, in a panel on the left, in one list from A to Z. The
-// pilot letters (recorded for testing, not training yet) have their letters
-// drawn fainter. The heading counts all the kept takes for the chosen hand; each row shows its own
+// The letters to record, in a panel on the left, in one list from A to Z. The heading counts all the kept takes for the chosen hand; each row shows its own
 // as three marks (TakeMarks, where a kept take can be deleted), and the
 // chosen letter is highlighted. The marks sit on top of the row's right end,
 // not inside its button (a button can't hold other buttons).
-export default function LetterList({ training, pilot, session, hand, selected, onSelect, onDelete, disabled }) {
-  const row = (letter, isPilot) => {
+export default function LetterList({ letters, session, hand, selected, onSelect, onDelete, disabled }) {
+  const row = (letter) => {
     const takes = keptTakes(session, letter, hand)
     const kept = takes.length
     const isSelected = selected?.letter === letter
     const classes = ['letter-row']
-    if (isPilot) classes.push('pilot')
     if (kept >= TAKES_TARGET) classes.push('done')
     return (
       <li key={letter} className="letter-item">
@@ -33,7 +30,7 @@ export default function LetterList({ training, pilot, session, hand, selected, o
     )
   }
 
-  const all = [...training, ...pilot].sort()
+  const all = [...letters].sort()
   const { kept, needed } = takeProgress(session, all, [hand])
 
   return (
@@ -48,7 +45,7 @@ export default function LetterList({ training, pilot, session, hand, selected, o
             <span className="visually-hidden"> takes, {hand} hand</span>
           </span>
         </h2>
-        <ul>{all.map((letter) => row(letter, pilot.includes(letter)))}</ul>
+        <ul>{all.map(row)}</ul>
       </section>
     </nav>
   )
