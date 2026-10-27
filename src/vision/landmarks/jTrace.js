@@ -1,3 +1,5 @@
+import { TIPS, WRIST } from './handPoints.js'
+
 // J moves: it starts as I, then the pinky draws a J in the air. As with Z
 // (zTrace.js), Practice doesn't recognize the motion: the person holds the I
 // handshape for J_START_HOLD_MS, then a curvy J appears with its start on the
@@ -9,8 +11,6 @@
 // How long the I is held before the J appears. Shorter than a letter's 3 s
 // hold: it only shows the hand is ready.
 export const J_START_HOLD_MS = 1000
-export const PINKY_TIP = 20
-const WRIST = 0
 
 // The J as two curves (each a start, two pull points and an end), measured
 // from where it starts, for a left hand on the un-mirrored frame. On the
@@ -49,7 +49,7 @@ const MARGIN = 0.03
 // held): 1 is J_HEIGHT tall. The tolerance to trace it scales the same way.
 export function jScale(rawLandmarks, aspect) {
   const wrist = rawLandmarks[WRIST]
-  const tip = rawLandmarks[PINKY_TIP]
+  const tip = rawLandmarks[TIPS.pinky]
   const handLength = Math.hypot((tip.x - wrist.x) * aspect, tip.y - wrist.y)
   return Math.min(MAX_SCALE, (J_PER_HAND * handLength) / J_HEIGHT)
 }

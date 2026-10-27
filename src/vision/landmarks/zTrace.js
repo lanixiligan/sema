@@ -1,7 +1,8 @@
+import { TIPS } from './handPoints.js'
+
 // Z moves: the index finger draws a Z in the air. Instead of recognizing the
 // motion, Practice draws a Z on the camera view and the person traces it with
-// the index fingertip, from its start, in order, staying near the line
-// (docs/superpowers/specs/2026-10-24-z-trace-design.md).
+// the index fingertip, from its start, in order, staying near the line.
 //
 // Every point here is in frame heights: y is MediaPipe's y (0 at the top, 1
 // at the bottom) and x is MediaPipe's x times the frame's width / height
@@ -34,7 +35,6 @@ const MAX_BACK = 0.2
 // trace, so a few odd frames can't. Longer than the 300 ms of every other hold
 // in Sema: a hand in motion often drops the handshape for a moment.
 const GAP_MS = 800
-export const INDEX_TIP = 8
 
 // No trace yet: `along` is how far along the line the fingertip has got (null
 // before it starts at the dot), `lastOnAt` when it was last on the line, and
@@ -49,7 +49,7 @@ export function zPath(hand, aspect) {
 
 // A fingertip of MediaPipe's 21 raw points (the index's, unless another point
 // is given: J's pinky), in frame heights.
-export function fingertip(rawLandmarks, aspect, point = INDEX_TIP) {
+export function fingertip(rawLandmarks, aspect, point = TIPS.index) {
   const tip = rawLandmarks[point]
   return { x: tip.x * aspect, y: tip.y }
 }
