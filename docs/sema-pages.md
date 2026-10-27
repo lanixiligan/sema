@@ -1,8 +1,7 @@
 # Sema's pages
 
-Every page in the app, one line each, with its address and file. For the onboarding flow's
-full detail (what each one says, the order, the shared layout), see `docs/onboarding-pages.md`;
-for the developer tools, see `docs/dev.md`. This describes the pages as built on 2026-10-24;
+Every page in the app, one line each, with its address and file. For the developer tools,
+see `docs/dev.md`. This describes the pages as built on 2026-10-27;
 `src/app/routing/router.js` (the address list) and each page's file are the source of truth, so
 update this document when a page is added, renamed or moved.
 
@@ -11,16 +10,16 @@ update this document when a page is added, renamed or moved.
 | Page | Address | File | What it's for |
 | --- | --- | --- | --- |
 | Welcome | `/` | `src/pages/onboarding/WelcomePage.jsx` | The first thing a new visitor sees; one button, Get started. |
-| About Sema | `/about` | `src/pages/onboarding/intro/AboutPage.jsx` | What Sema is, part 1 of the intro. |
-| How Sema works | `/how-it-works` | `src/pages/onboarding/intro/HowSemaWorksPage.jsx` | What Sema is, part 2 of the intro. |
-| How Sema handles your data | `/privacy` | `src/pages/onboarding/intro/PrivacyPage.jsx` | What Sema is, part 3 of the intro. |
-| Camera check | `/setup/camera` | `src/pages/onboarding/CameraCheckPage.jsx` | Setup's one page: finds the signing hand, the last step before Practice. |
-| Learn | `/learn` | `src/pages/learn/LearnPage.jsx` | A placeholder for lessons (Phase 3.3). |
-| Practice | `/practice` | `src/pages/practice/PracticePage.jsx` | Pick a letter, sign it, hold it 3 s; the classifier live. The main page for now. |
+| About | `/about` | `src/pages/about/AboutPage.jsx` | What Sema is, how it works and how it handles your data: three sections in one scrolling page, in the menu. It was three intro pages until 2026-10-27 (`/how-it-works` and `/privacy` redirect here). |
+| Camera check | `/setup/camera` | `src/pages/onboarding/CameraCheckPage.jsx` | Setup's one page, opened by Get started: both hands whole for 3 s, then Continue opens Learn. |
+| Learn | `/learn` | `src/pages/learn/LearnPage.jsx` | The main page: the letters one at a time from A (or pick any in the guide of all 26), each with the camera, the letter's drawing and a finger checklist; hold it 1.5 s, then Next letter. It was two pages until 2026-10-27, Learn and Practice (`/practice`, which redirects here). |
+| Quiz | `/quiz` | `src/pages/quiz/QuizPage.jsx` | The choice: Letters or Words. Each has its own page, `/quiz/letters` (`LettersQuizPage.jsx`) and `/quiz/words` (`WordsQuizPage.jsx`), run by `QuizFlow.jsx`: signed from memory (no drawings, no hints); each letter checked as on Learn, or skipped; then the score. |
 
-A new visitor opening Learn or Practice is sent to Welcome first; finishing setup (the camera
-check) opens Practice. A returning visitor opening `/` goes straight to Practice. See
-`docs/onboarding-pages.md` for the full flow and what each onboarding page says.
+A new visitor goes Welcome → Camera check → Learn: Get started (on Welcome, or at the end of
+About) opens the camera check, and passing it finishes setup. A new visitor opening Learn or
+Quiz is sent to Welcome first; a returning visitor opening `/` goes straight to Learn. About is
+optional: Welcome doesn't link to it, and it's in the menu on the main pages. Old addresses
+redirect: `/try` and `/practice` to `/learn`, `/how-it-works` and `/privacy` to `/about`.
 
 ## Developer pages
 
@@ -36,7 +35,5 @@ Behind an access code, not in the menu, but live on the deployed site too. Full 
 
 ## Not yet built
 
-- A free-practice-by-letter mode already exists as Practice. Being planned: a word-spelling
-  quiz page, inspired by fingerspelling.xyz, to sit alongside it (see the brainstorming
-  conversation; no design doc yet as of 2026-10-24).
-- Learn's lessons (Phase 3.3) are not built; `/learn` is still a placeholder.
+- Progress: nothing is saved yet. Learn always starts at A, Next letter goes in A to Z order,
+  and quiz results aren't kept (per-letter progress is parked in the plan).
