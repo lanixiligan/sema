@@ -38,9 +38,10 @@ everything from the project root.
    minutes. Both are saved in `data/models/` (gitignored); the better one on unseen people is
    copied to `public/models/asl-letters.json`, which is committed and goes on the live site: it
    holds only weights (no training hands), a few KB.
-5. Try them live: `npm run dev`, then http://localhost:5173/try in Chrome (the main page; the
-   switch between the small model and the k-NN only shows under `npm run dev`). The small model
-   also works on the live site.
+5. Try them live: `npm run dev`, pick the model on the `/dev` dashboard (the switch between the
+   small model and the k-NN only shows under `npm run dev`), then open
+   http://localhost:5173/learn in Chrome: its "Right now" line shows the model's guess. The
+   small model also works on the live site.
 
 ## Data rules
 
