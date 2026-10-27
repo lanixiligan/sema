@@ -1,24 +1,19 @@
 import { HAND_HOLD_MS, NO_HOLD } from '../../vision/landmarks/handChecks.js'
 
 // Practice's round: pick a letter, make it, hold it for LETTER_HOLD_MS.
-// The hold counts while the signing hand's guess is that letter, sure (at or
-// over the model's "not sure" line), and passes the letter's shape rules
-// (letterShapes.js; `fix` says what fails). Like the camera check's hold, a gap
+// The hold counts while the signing hand meets the letter's finger
+// conditions (letterMatch.js). Like the camera check's hold, a gap
 // shorter than HAND_HOLD_MS doesn't end it, so one odd frame can't restart
-// the 3 seconds; a longer one does.
-export const LETTER_HOLD_MS = 3000
+// the 1.5 seconds; a longer one does.
+export const LETTER_HOLD_MS = 1500
 export { NO_HOLD }
 
-// J and Z move, and the classifier only knows still shapes, so they're checked
-// without it: the person traces the letter drawn on the camera view (Z since
-// 2026-10-24, src/vision/landmarks/zTrace.js; J since 2026-10-26, after
-// holding I, jTrace.js).
-export const TRACED_LETTERS = ['J', 'Z']
-
-// guesses: one per hand in view, as PracticePage's guess() makes them (it
-// only passes the signing hand's).
-export function showsLetter(guesses, letter) {
-  return guesses.some((g) => g.whole && g.sure && !g.fix && g.letter === letter)
+// guesses: one per hand in view, as useLetterCheck's guess() makes them (it
+// only passes the signing hand's); `makes`: the hand makes the target
+// (matchLetter in letterMatch.js). The conditions decide alone (2026-10-27).
+// To have the model agree as well, add: && g.sure && g.letter === letter
+export function showsLetter(guesses) {
+  return guesses.some((g) => g.whole && g.makes)
 }
 
 // hold: { start, lastAt }, as in handChecks.js (start is null with no hold).
@@ -28,7 +23,7 @@ export function updateLetterHold(hold, matching, now) {
   return holding ? hold : NO_HOLD
 }
 
-// Whole seconds left (3, 2, 1, then 0), or null with no hold.
+// Whole seconds left (2, 1, then 0), or null with no hold.
 export function holdSecondsLeft(hold, now) {
   if (hold.start === null) return null
   return Math.max(0, Math.ceil((LETTER_HOLD_MS - (now - hold.start)) / 1000))
