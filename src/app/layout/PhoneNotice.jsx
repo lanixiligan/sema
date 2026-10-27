@@ -21,7 +21,6 @@ export default function PhoneNotice({ onContinue }) {
     <div className="phone-notice">
       <header className="phone-notice-bar">
         <Logo className="wordmark-logo" />
-        <span className="preview-note">Preview</span>
       </header>
 
       <main className="phone-notice-main">
