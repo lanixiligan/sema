@@ -1,6 +1,7 @@
 import { useId } from 'react'
 import Link from '../../app/routing/Link.jsx'
 import { PATHS } from '../../app/routing/router.js'
+import DeleteDataButton from './DeleteDataButton.jsx'
 import DevTopBar from './DevTopBar.jsx'
 // The latest training runs' headline numbers: the small model that /learn
 // and the live site use (training/train_small.py) and step 4's k-NN
@@ -24,11 +25,6 @@ const TOOLS = [
     title: 'Extract hand points',
     about: 'Runs a public dataset’s photos (ASL-HG, ASLYset) through Sema’s hand model and normalization. Needs the photos on this computer.',
   },
-  {
-    to: PATHS.learn,
-    title: 'Learn (the classifier)',
-    about: 'The main page, at /learn (Learn, at /learn, until 2026-10-27): pick a letter and hold it for 1.5 seconds.',
-  },
 ]
 
 // The classifiers Learn can run, in the order of DEV_MODELS (progressStore.js).
@@ -42,7 +38,8 @@ const CAN_SWITCH_MODEL = import.meta.env.DEV
 
 // /dev: every developer tool, which model Learn runs (under npm run dev),
 // and how the classifier did in the last training run. `model` is the saved
-// choice (progressStore.js) and onModelChange saves a new one.
+// choice (progressStore.js) and onModelChange saves a new one. Beside the
+// title, Delete Sema's data (the only place it is) and Lock.
 export default function DevDashboard({ model, onModelChange, onLock }) {
   return (
     <>
@@ -50,9 +47,12 @@ export default function DevDashboard({ model, onModelChange, onLock }) {
       <main className="page dev-dashboard">
         <div className="dev-heading">
           <h1>Developer tools</h1>
-          <button type="button" className="button-quiet" onClick={onLock}>
-            Lock
-          </button>
+          <div className="dev-heading-actions">
+            <DeleteDataButton />
+            <button type="button" className="button-quiet" onClick={onLock}>
+              Lock
+            </button>
+          </div>
         </div>
         <ul className="dev-tools">
           {TOOLS.map((tool) => (

@@ -4,11 +4,10 @@ import { PATHS } from '../routing/router.js'
 import ThemeToggle from '../settings/ThemeToggle.jsx'
 
 // The thin bar at the top of every page: the logo on the left, then what the
-// page adds: the menu on the main pages (`nav`), and items on the right (`children`), then the
-// theme toggle, then `end` (the settings menu on the main pages), so that's
-// the last thing in the bar. Its colours come from the theme, or from the
-// dark set inside an always-dark page.
-export default function TopBar({ nav, children, end }) {
+// page adds: the menu on the main pages (`nav`), and items on the right
+// (`children`), then the theme toggle, the last thing in the bar. Its colours
+// come from the theme, or from the dark set inside an always-dark page.
+export default function TopBar({ nav, children }) {
   return (
     <header className="app-bar">
       <div className="app-bar-left">
@@ -20,7 +19,6 @@ export default function TopBar({ nav, children, end }) {
       <div className="app-bar-right">
         {children}
         <ThemeToggle />
-        {end}
       </div>
     </header>
   )
