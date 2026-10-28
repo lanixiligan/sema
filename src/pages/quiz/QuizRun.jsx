@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useLeaveWarning } from '../../app/routing/navigation.js'
 import AslDrawing from '../../components/AslDrawing.jsx'
 import CameraControls from '../../components/camera-view/CameraControls.jsx'
 import CameraPanel from '../../components/camera-view/CameraPanel.jsx'
@@ -7,6 +8,8 @@ import { EyeIcon } from '../../components/icons/icons.jsx'
 import { useLetterCheck } from '../../components/letter-check/useLetterCheck.js'
 import { letterClass } from './letterClass.js'
 import { NEXT_LETTER_MS, currentLetter } from './quizRounds.js'
+
+const LEAVE_QUESTION = 'Leave the quiz? Your answers so far won’t be kept.'
 
 // The quiz itself, kept minimal: the camera on the left (it starts on
 // arrival, since the person just chose a quiz), its controls in a footer, and
@@ -18,6 +21,10 @@ export default function QuizRun({ quiz, signingHand, onSigningHandChange, model,
   // quiz.step changes with every letter asked, so each one is a new check.
   const { canvasRef, traceCanvasRef, hand, drawnHand, traced, loaded, passed, ...panel } =
     useLetterCheck({ target, round: quiz.step, signingHand, model })
+
+  // Leaving mid-quiz (the menu, Back, closing the tab) asks first: results
+  // aren't saved, so the quiz would be lost. End quiz doesn't ask: it shows them.
+  useLeaveWarning(true, LEAVE_QUESTION)
 
   // The eye: a peek at this letter's drawing. `step` says which letter it was
   // for, so every new letter starts hidden and unpeeked. `used` stays true

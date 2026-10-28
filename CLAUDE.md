@@ -232,7 +232,10 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   signed from memory is solid green with a tick, since 2026-10-29). Each letter is checked
   exactly as on Learn (`useLetterCheck`); a pass shows "That's B!" for 1 s and moves on,
   Skip counts it as missed. Then the score and every letter marked; End quiz (red) stops early and
-  shows the results too, the letters not reached marked skipped. Results aren't saved. The
+  shows the results too, the letters not reached marked skipped. Results aren't saved, so leaving a
+  running quiz asks first (2026-10-29, `useLeaveWarning` in `navigation.js`): a link or the menu
+  (`navigate`), Back/Forward (the address is put back on Cancel) and closing or reloading the tab
+  (the browser's own question); End quiz and the results don't ask. The
   camera starts on arrival (the person just chose a quiz). While it runs the page is minimal
   (2026-10-27): the camera on the left (its hand switch and camera buttons in a footer under the
   picture), on the right the count and End quiz, the letter large with its eye, the quiz's steps
