@@ -3,6 +3,7 @@ import { useSharedCamera } from '../../app/shared-camera/sharedCamera.js'
 import TopBar from '../../app/layout/TopBar.jsx'
 import CameraPanel from '../../components/camera-view/CameraPanel.jsx'
 import CameraView from '../../components/camera-view/CameraView.jsx'
+import { ChevronIcon } from '../../components/icons/icons.jsx'
 import { BOTH_HANDS_HOLD_MS, NO_HOLD, holdSecondsLeft, seeHands, steadySeen, updateHold } from '../../vision/landmarks/handChecks.js'
 import { useHandDetection } from '../../vision/tracking/useHandDetection.js'
 
@@ -19,7 +20,8 @@ const HANDS = ['left', 'right']
 //   edge a line that fills over the 3 seconds; then the live video (only the
 //   camera controls on it).
 // When the check passes, "Camera ready" flashes over the video for a moment,
-// and a Continue button appears under the steps (it stays) and finishes setup.
+// and the Continue button under the steps (greyed out until then) turns on and
+// finishes setup.
 export default function CameraCheckPage({ onDone }) {
   const camera = useSharedCamera()
   const { handModel } = camera
@@ -102,11 +104,12 @@ export default function CameraCheckPage({ onDone }) {
               Keep both hands visible for three seconds.
             </Step>
           </ol>
-          {passed && (
-            <button type="button" className="primary-button camera-check-continue" onClick={onDone}>
-              Continue
-            </button>
-          )}
+          {/* Always there, so the person sees where the check leads: greyed out
+              and unclickable (disabled) until the check passes. */}
+          <button type="button" className="primary-button camera-check-continue" disabled={!passed} onClick={onDone}>
+            Continue
+            <ChevronIcon size={16} />
+          </button>
         </section>
 
         <section className="camera-check-preview">

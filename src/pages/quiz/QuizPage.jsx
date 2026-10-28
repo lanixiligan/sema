@@ -13,7 +13,7 @@ import { useWords } from './useWords.js'
 // from memory: no steps and no hints, only an eye to peek at the letter's
 // drawing (a peeked pass still counts, and is marked). QuizFlow runs the quiz
 // and its results; QuizRun checks each letter exactly as on Learn
-// (useLetterCheck: the model's sure guess and the shape rules, held 3 s; J and
+// (useLetterCheck: the finger conditions decide, held 1.5 s; J and
 // Z traced). quizRounds.js holds the quiz's state.
 // Four random letters for the Letters card's picture. Chosen once when the site
 // loads (module level, not inside the component), so they change on every
@@ -22,19 +22,30 @@ import { useWords } from './useWords.js'
 // then four different letters.
 const SAMPLE_LETTERS = [...LETTERS].sort(() => Math.random() - 0.5).slice(0, 4)
 
+// The Words card does the same with one random word from words.json. The list
+// arrives after the page opens (useWords), so the word is picked the first time
+// the list is there, then kept at module level like the letters. HAND shows
+// only until then.
+let sampleWord = null
+
+function pickSampleWord(list) {
+  if (sampleWord === null && list.length > 0) {
+    sampleWord = list[Math.floor(Math.random() * list.length)]
+  }
+  return sampleWord ?? 'HAND'
+}
+
 export default function QuizPage() {
   const words = useWords()
+  const wordLetters = [...pickSampleWord(words.list)]
   return (
     <>
       <MenuBar active="quiz" />
       <main className="quiz-choose">
         <header className="quiz-choose-head">
-          <span className="quiz-choose-eyebrow">
-            <TrophyIcon size={16} />
-            Quiz time
-          </span>
-          <h1>Choose your quiz mode</h1>
-          <p>Practice fingerspelling from memory, one letter at a time.</p>
+          <h1>
+            <TrophyIcon/> Choose your quiz mode
+          </h1>
         </header>
         <div className="quiz-choices">
           <button type="button" className="quiz-choice" onClick={() => navigate(PATHS.quizLetters)}>
@@ -65,10 +76,11 @@ export default function QuizPage() {
             <span className="quiz-choice-top" aria-hidden="true">
               {/* A short word in tiles, the first letter lit like the quiz's own word line. */}
               <span className="quiz-choice-art">
-                <span className="quiz-art-tile quiz-art-lit">H</span>
-                <span className="quiz-art-tile">A</span>
-                <span className="quiz-art-tile">N</span>
-                <span className="quiz-art-tile">D</span>
+                {wordLetters.map((letter, i) => (
+                  <span key={i} className={i === 0 ? 'quiz-art-tile quiz-art-lit' : 'quiz-art-tile'}>
+                    {letter}
+                  </span>
+                ))}
               </span>
             </span>
             <span className="quiz-choice-title">Words</span>

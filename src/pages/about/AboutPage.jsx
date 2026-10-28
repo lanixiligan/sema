@@ -30,8 +30,8 @@ const WHAT_IS_SEMA = [
   ],
   [
     <>
-      Sema is still <span className="intro-key">under development.</span> For now, it can detect your hand through your
-      webcam and guide you through the alphabet, one letter at a time.
+      Sema checks each handshape against the letter&rsquo;s finger rules, and has you trace J and Z, the two letters
+      that move. It&rsquo;s <span className="intro-key">still improving.</span>
     </>,
   ],
 ]
@@ -55,7 +55,7 @@ const STEPS = [
   {
     title: 'Understand the handshape',
     Icon: HandPointsIcon,
-    text: 'Sema is being developed to recognize letters. For now, it can detect and track your hand.',
+    text: 'Sema ticks off each finger rule as you match it. Hold the letter to pass, or trace the line for J and Z. A letter model, trained on thousands of hand photos, gives a second opinion.',
   },
 ]
 
@@ -94,9 +94,11 @@ const POINTS = [
 // check, as Welcome's does); once setup is done there is none.
 export default function AboutPage({ setupDone, onStart }) {
   // The cue at the bottom of the first section: scrolls to the next one.
-  // A button (not a link) so the address doesn't change.
+  // A button (not a link) so the address doesn't change. No behavior option:
+  // the CSS decides (scroll-behavior on html), smooth unless the person asked
+  // their system for reduced motion.
   function scrollToHow() {
-    document.getElementById('about-how-section')?.scrollIntoView({ behavior: 'smooth' })
+    document.getElementById('about-how-section')?.scrollIntoView()
   }
 
   return (
