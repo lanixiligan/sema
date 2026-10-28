@@ -11,7 +11,7 @@ update this document when a page is added, renamed or moved.
 | --- | --- | --- | --- |
 | Welcome | `/` | `src/pages/onboarding/WelcomePage.jsx` | The first thing a new visitor sees; one button, Get started. |
 | About | `/about` | `src/pages/about/AboutPage.jsx` | What Sema is, how it works and how it handles your data: three sections in one scrolling page, in the menu. It was three intro pages until 2026-10-27 (`/how-it-works` and `/privacy` redirect here). |
-| Camera check | `/setup/camera` | `src/pages/onboarding/CameraCheckPage.jsx` | Setup's one page, opened by Get started: both hands whole for 3 s, then Continue opens Learn. |
+| Camera check | `/camera-setup` | `src/pages/onboarding/CameraCheckPage.jsx` | Setup's one page, opened by Get started: both hands whole for 3 s, then Continue opens Learn. It was at `/setup/camera` until 2026-10-29 (that address redirects here). |
 | Learn | `/learn` | `src/pages/learn/LearnPage.jsx` | The main page: the letters one at a time from A (or pick any in the guide of all 26), each with the camera, the letter's drawing and a finger checklist; hold it 1.5 s, then Next letter. It was two pages until 2026-10-27, Learn and Practice (`/practice`, which redirects here). |
 | Quiz | `/quiz` | `src/pages/quiz/QuizPage.jsx` | The choice: Letters or Words. Each has its own page, `/quiz/letters` (`LettersQuizPage.jsx`) and `/quiz/words` (`WordsQuizPage.jsx`), run by `QuizFlow.jsx`: signed from memory (no drawings, no hints); each letter checked as on Learn, or skipped; then the score. |
 
@@ -19,7 +19,10 @@ A new visitor goes Welcome → Camera check → Learn: Get started (on Welcome, 
 About) opens the camera check, and passing it finishes setup. A new visitor opening Learn or
 Quiz is sent to Welcome first; a returning visitor opening `/` goes straight to Learn. About is
 optional: Welcome doesn't link to it, and it's in the menu on the main pages. Old addresses
-redirect: `/try` and `/practice` to `/learn`, `/how-it-works` and `/privacy` to `/about`.
+redirect: `/try`, `/practice`, `/dev/try` and `/record` to `/learn`; `/setup/camera` and
+`/setup/hand` to `/camera-setup`; `/how-it-works`, `/privacy` and `/setup/how-it-works` to
+`/about`. Any other address shows **Page not found** (`src/pages/not-found/NotFoundPage.jsx`,
+2026-10-29; before, it quietly went to Welcome), with one button back to the start.
 
 ## Developer pages
 

@@ -9,7 +9,7 @@ const MESSAGES_BY_ERROR_NAME = {
   OfflineError:
     "Couldn't download the hand model. Check your connection, then reload the page.",
   WebGLUnavailableError:
-    "Hand tracking needs WebGL, which this browser isn't providing. Privacy-focused browsers such as LibreWolf often block it, so try Chrome or Firefox.",
+    "Hand tracking needs WebGL, which this browser isn't providing. Turn on hardware acceleration in your browser's settings. If you can't, use a browser that supports WebGL.",
 }
 
 export function getVisionErrorMessage(error) {
@@ -26,11 +26,13 @@ export function getDetectionErrorMessage(error) {
 }
 
 // What a camera view (CameraView) shows when hand tracking can't run.
-// The WebGL text is from the design; other failures show the title below with
-// the plain message from getVisionErrorMessage.
+// Without WebGL, the first fix is the browser's hardware acceleration setting
+// (when it's off, some browsers give pages no WebGL); no browser is named
+// (2026-10-29). Other failures show the title below with the plain message
+// from getVisionErrorMessage.
 export const CAMERA_VIEW_NO_WEBGL = {
   title: "Hand tracking can't run in this browser",
-  body: "It needs WebGL, which this browser isn't giving to pages. Open Sema in Chrome or Firefox.",
+  body: "It needs WebGL, which this browser isn't giving to pages. Turn on hardware acceleration in your browser's settings. If you can't, use a browser that supports WebGL.",
 }
 
 export const CAMERA_VIEW_TRACKING_FAILED_TITLE = "Hand tracking couldn't start"

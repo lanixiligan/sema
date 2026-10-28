@@ -109,7 +109,7 @@ export const RULES = {
   C: [
     {
       text: 'All four fingers curved',
-      score: (hand) => Math.min(curved(hand.index), curved(hand.middle), curved(hand.ring)),
+      score: (hand) => Math.min(curved(hand.index), curved(hand.middle), curved(hand.ring), curved(hand.pinky)),
     },
     {
       text: 'Gap between {thumb} and fingertips',
@@ -201,17 +201,16 @@ export const RULES = {
     },
     {
       text: '{middle}, {ring} and {pinky} curved too',
-      score: (hand) => Math.min(ramp(hand.middle.total, 55, 85), ramp(hand.ring.total, 55, 85)),
+      score: (hand) =>
+        Math.min(ramp(hand.middle.total, 55, 85), ramp(hand.ring.total, 55, 85), ramp(hand.pinky.total, 55, 85)),
     },
   ],
   P: [
     up('index'),
-    up('middle'),
     down('ring'),
     down('pinky'),
     indexMiddleApart(10, 18),
     thumbBetween,
-    fingersPoint('down', 'handDirection'),
   ],
   Q: [up('index'), down('middle'), down('ring'), down('pinky'), thumbParallel, fingersPoint('down')],
   R: [

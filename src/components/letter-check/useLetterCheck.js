@@ -15,6 +15,8 @@ import {
   NO_HOLD,
   heldLongEnough,
   holdSecondsLeft,
+  modelReading,
+  modelVerdict,
   practiceStatus,
   showsLetter,
   updateLetterHold,
@@ -47,7 +49,7 @@ const MODELS = {
 // Under npm run dev the k-NN can be chosen on /dev. The live site has only
 // the small model.
 const SHOW_DEV_TOOLS = import.meta.env.DEV
-// The guesses (for Practice's "Right now" line) are passed on at most this
+// The guesses (for Learn's "Letter model" line) are passed on at most this
 // often. The detection loop runs about 30 times a second, and redrawing the
 // page that often isn't needed to read it. The hold itself is checked on
 // every frame.
@@ -60,11 +62,13 @@ const TRACES = {
   Z: { tip: TIPS.index, startHoldMs: null },
 }
 
-// Is the signing hand making `target`? The check Practice and the quiz share
-// (moved out of PracticePage on 2026-10-27, for the quiz). Every frame scores
+// Is the signing hand making `target`? The check Learn and the quiz share
+// (moved out of Practice's page on 2026-10-27, for the quiz). Every frame scores
 // the letter's finger conditions (letterShapes.js), and the letter passes
-// after a 3-second hold while they're met (letterHold.js); the classifier
-// trained in training/ only gives the "Right now" guess. J and Z are traced
+// after a 1.5-second hold while they're met (LETTER_HOLD_MS, letterHold.js). The classifier
+// trained in training/ is a second opinion that never decides (2026-10-29):
+// its guess each frame (`guesses`), and after a pass its most frequent
+// reading over the hold (`modelSaid`, modelVerdict). J and Z are traced
 // instead (zTrace.js, jTrace.js), their handshape's conditions met all along.
 // Only the signing hand is drawn and judged. Each hand goes
 // through the recorder's own frameFromDetection, so it's normalized exactly
@@ -72,8 +76,8 @@ const TRACES = {
 // `round`: a number the page changes to start the same letter over (Try
 // again), or to check the next one; a new round starts the hold over.
 // Returns what the page shows: the refs and hand for its CameraView, the
-// panel's status, tone, hold and fill, `passed`, the guesses, and the
-// conditions with their ticks (`checks`).
+// panel's status, tone, hold and fill, `passed`, the guesses, `modelSaid`, and
+// the conditions with their ticks (`checks`).
 export function useLetterCheck({ target, round, signingHand, model = 'small' }) {
   const camera = useSharedCamera()
   const { handModel } = camera
@@ -101,6 +105,9 @@ export function useLetterCheck({ target, round, signingHand, model = 'small' }) 
   const [passedKey, setPassedKey] = useState(null)
   const passed = passedKey === roundKey
   const [guesses, setGuesses] = useState([])
+  // The letter model's second opinion on the hold that passed (modelVerdict):
+  // a letter, '?' or null. Traced letters (J, Z) have none.
+  const [modelSaid, setModelSaid] = useState(null)
   // The target's finger conditions for the signing hand, ticks steadied
   // (letterShapes.js), or null with no signing hand in view.
   const [checks, setChecks] = useState(null)
@@ -122,6 +129,10 @@ export function useLetterCheck({ target, round, signingHand, model = 'small' }) 
     let hold = NO_HOLD
     let done = false
     let ticks = null
+    // The model's readings over the current hold, counted per reading, and
+    // the hold they belong to: a new hold starts a new count.
+    let readings = {}
+    let readingsFor = null
     listenerRef.current = (detection) => {
       if (done) return
       const now = detection.time
@@ -133,11 +144,18 @@ export function useLetterCheck({ target, round, signingHand, model = 'small' }) 
       const scored = frame.find((g) => g.checks)?.checks
       ticks = scored ? steadyChecks(ticks, scored) : null
       hold = updateLetterHold(hold, showsLetter(frame), now)
+      if (hold.start !== readingsFor) {
+        readings = {}
+        readingsFor = hold.start
+      }
+      const reading = modelReading(frame)
+      if (hold.start !== null && reading) readings[reading] = (readings[reading] ?? 0) + 1
       setHoldStart(hold.start)
       setSecondsLeft(holdSecondsLeft(hold, now))
       if (heldLongEnough(hold, now)) {
         done = true
         setPassedKey(roundKey)
+        setModelSaid(modelVerdict(readings))
       }
       if (now - shownAt >= SHOW_EVERY_MS) {
         shownAt = now
@@ -149,6 +167,7 @@ export function useLetterCheck({ target, round, signingHand, model = 'small' }) 
       listenerRef.current = null
       // So a new round, the other model or the other hand starts from nothing.
       setGuesses([])
+      setModelSaid(null)
       setChecks(null)
       setHoldStart(null)
       setSecondsLeft(null)
@@ -266,13 +285,22 @@ export function useLetterCheck({ target, round, signingHand, model = 'small' }) 
     traced,
     loaded,
     guesses: shown,
-    checks: isDetecting && checks ? checks : emptyChecks(target),
+    modelSaid: passed ? modelSaid : null,
+    checks: withTraceStep(target, isDetecting && checks ? checks : emptyChecks(target), passed),
     passed,
     status,
     tone,
     hold,
     fill,
   }
+}
+
+// Z's checklist ends with the trace itself, ticked once the Z is traced
+// (`passed`). It isn't one of letterShapes.js's conditions: those score the
+// hand's shape, and the trace is judged by zTrace.js.
+function withTraceStep(target, checks, passed) {
+  if (target !== 'Z') return checks
+  return [...checks, { text: 'Trace the letter', score: passed ? 1 : 0, met: passed }]
 }
 
 // The signing hand's raw points, the letter's conditions scored for it and
@@ -295,7 +323,7 @@ function guess(kind, model, hand, { width, height }, target) {
   if (!frame.hasHand) return null
   // Training only used whole hands (training/dataset.py), and so does Record.
   if (!isWholeHand(hand.landmarks)) return { hand: frame.detected, whole: false }
-  // The model's guess is only shown ("Right now"); the conditions decide.
+  // The model's guess is only shown (Learn's second opinion); the conditions decide.
   const result = kind.classify(model, frame.landmarks)
   return { hand: frame.detected, whole: true, ...result, ...matchLetter(target, frame.landmarks) }
 }

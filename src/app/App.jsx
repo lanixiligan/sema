@@ -9,6 +9,7 @@ import { SettingsContext } from './settings/settings.js'
 import AboutPage from '../pages/about/AboutPage.jsx'
 import CameraCheckPage from '../pages/onboarding/CameraCheckPage.jsx'
 import LearnPage from '../pages/learn/LearnPage.jsx'
+import NotFoundPage from '../pages/not-found/NotFoundPage.jsx'
 import WelcomePage from '../pages/onboarding/WelcomePage.jsx'
 import LettersQuizPage from '../pages/quiz/LettersQuizPage.jsx'
 import QuizPage from '../pages/quiz/QuizPage.jsx'
@@ -18,6 +19,24 @@ import WordsQuizPage from '../pages/quiz/WordsQuizPage.jsx'
 // visitors who never open /dev never download them.
 const DevArea = lazy(() => import('../pages/dev/DevArea.jsx'))
 const DEV_PAGES = ['dev', 'devTracking', 'devExtract', 'devRecord']
+
+// Each page's name in the browser tab, the page first so narrow tabs still
+// tell them apart (2026-10-29; before, every tab said "Sema"). Welcome keeps
+// index.html's plain "Sema".
+const TITLES = {
+  welcome: 'Sema',
+  about: 'About · Sema',
+  cameraCheck: 'Camera setup · Sema',
+  learn: 'Learn · Sema',
+  quiz: 'Quiz · Sema',
+  quizLetters: 'Letters quiz · Sema',
+  quizWords: 'Words quiz · Sema',
+  notFound: 'Page not found · Sema',
+  dev: 'Developer tools · Sema',
+  devTracking: 'Tracking and benchmark · Sema',
+  devExtract: 'Extract hand points · Sema',
+  devRecord: 'Record · Sema',
+}
 
 // Displays narrower than this get the phone notice (from the design).
 const SMALL_SCREEN = '(max-width: 899px)'
@@ -39,6 +58,13 @@ export default function App() {
   useEffect(() => {
     if (route.redirect) navigate(route.redirect, { replace: true })
   }, [route.redirect])
+
+  // The tab's title. One HTML page serves every page, so the browser never
+  // changes it by itself; it follows the page here. (While a redirect is on
+  // its way there's no page yet, and the title waits for it.)
+  useEffect(() => {
+    if (route.page) document.title = TITLES[route.page] ?? 'Sema'
+  }, [route.page])
 
   // Shows the chosen theme, and with System keeps following the system's
   // setting while the app is open. Runs again when the choice changes.
@@ -67,7 +93,7 @@ export default function App() {
     navigate(PATHS.cameraCheck)
   }
 
-  // The settings menu's Delete Sema's data (after the person confirmed):
+  // The developer dashboard's Delete Sema's data (after the person confirmed):
   // everything saved in this browser goes, and Sema starts over as for a new
   // visitor, on Welcome. It doesn't reload the tab: going to Welcome closes
   // the page and the camera, and the settings in memory go back to a new
@@ -153,5 +179,7 @@ function Page({
       return <LettersQuizPage signingHand={signingHand} onSigningHandChange={onSigningHandChange} model={devModel} />
     case 'quizWords':
       return <WordsQuizPage signingHand={signingHand} onSigningHandChange={onSigningHandChange} model={devModel} />
+    case 'notFound':
+      return <NotFoundPage />
   }
 }

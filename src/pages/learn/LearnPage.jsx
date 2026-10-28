@@ -12,18 +12,17 @@ import GuidePanel from './GuidePanel.jsx'
 // is still an open decision in docs/project-plan.md.)
 const LESSONS = LETTERS
 
-// The model's "Right now" line is for debugging, so only npm run dev has it.
-const SHOW_DEV_TOOLS = import.meta.env.DEV
-
 // Learn (Phase 3.3), the main page. It started on 2026-10-27 as the letters
 // one at a time, and the same day Practice (the free sandbox) was merged into
 // it, because the two had become nearly the same page. Record's three columns:
 // the guide of all 26 letters on the left (pick any, or let a pass lead to the
 // next), the camera in the middle, and the lesson on the right: the letter's
 // drawing and the live finger checklist (2026-10-27; before, also its steps
-// from letters.json, which said the same as the checklist). Make the letter and hold it for 3 seconds (letterHold.js) while
+// from letters.json, which said the same as the checklist). Make the letter and hold it for 1.5 seconds (LETTER_HOLD_MS in letterHold.js) while
 // its finger conditions are met (letterShapes.js); then "That's A!" and a
-// button to the next letter. The check itself is useLetterCheck, shared with
+// button to the next letter, with what the letter model made of the hold (a
+// second opinion that never decides: ModelOpinion, below, and the note under
+// "That's A!"). The check itself is useLetterCheck, shared with
 // the quiz. The drawings face the signing hand (the saved setting the hand
 // switch changes, Right by default); only that hand is drawn and judged. The
 // camera waits for a click: landing on Sema never turns it on. Nothing is
@@ -38,8 +37,20 @@ export default function LearnPage({ signingHand, onSigningHandChange, model = 's
     setRound((n) => n + 1)
   }
 
-  const { canvasRef, traceCanvasRef, hand, drawnHand, isDetecting, traced, loaded, guesses, checks, passed, ...panel } =
-    useLetterCheck({ target, round, signingHand, model })
+  const {
+    canvasRef,
+    traceCanvasRef,
+    hand,
+    drawnHand,
+    isDetecting,
+    traced,
+    loaded,
+    guesses,
+    modelSaid,
+    checks,
+    passed,
+    ...panel
+  } = useLetterCheck({ target, round, signingHand, model })
   const index = LESSONS.indexOf(target)
   const next = LESSONS[index + 1]
 
@@ -55,7 +66,10 @@ export default function LearnPage({ signingHand, onSigningHandChange, model = 's
         <section className="practice-camera" aria-label="Camera">
           <CameraPanel
             className="practice-panel"
-            status={panel.status}
+            // After a pass the header stays blank (a non-breaking space keeps
+            // its height, so nothing jumps): "That's A!" shows once, in the
+            // middle of the camera.
+            status={passed ? ' ' : panel.status}
             tone={panel.tone}
             hold={panel.hold}
             fill={panel.fill}
@@ -72,7 +86,20 @@ export default function LearnPage({ signingHand, onSigningHandChange, model = 's
             >
               {passed && (
                 <div className="practice-done">
-                  <p className="practice-done-title">That&rsquo;s {target}!</p>
+                  {/* role="status": with the header blank, this is what screen readers hear. */}
+                  <p className="practice-done-title" role="status">
+                    That&rsquo;s {target}!
+                  </p>
+                  {/* The letter model's second opinion on the hold (not for J
+                      and Z, which it doesn't know). */}
+                  {modelSaid && (
+                    <p className={`practice-done-note${modelSaid === target ? ' agrees' : ''}`}>
+                      <span className="model-tile" aria-hidden="true">
+                        {modelSaid}
+                      </span>
+                      {modelNote(modelSaid, target)}
+                    </p>
+                  )}
                   {next && (
                     <button type="button" className="button" onClick={() => startRound(next)}>
                       Next letter: {next}
@@ -103,8 +130,8 @@ export default function LearnPage({ signingHand, onSigningHandChange, model = 's
             </div>
           </section>
           <FingerChecklist checks={checks} />
-          {SHOW_DEV_TOOLS && !traced && loaded.status === 'ready' && isDetecting && (
-            <RightNow guesses={guesses} hand={drawnHand} />
+          {!traced && loaded.status === 'ready' && isDetecting && (
+            <ModelOpinion guesses={guesses} hand={drawnHand} target={target} />
           )}
           {loaded.status === 'loading' && <p className="practice-note">Loading the model…</p>}
           {loaded.status === 'error' && (
@@ -118,26 +145,55 @@ export default function LearnPage({ signingHand, onSigningHandChange, model = 's
   )
 }
 
-// What the letter model makes of the signing hand right now. It doesn't
-// decide the hold (the checklist does); it's there to compare. The small
-// model gives a percentage; the k-NN doesn't.
-function RightNow({ guesses, hand }) {
-  if (guesses.length === 0) return <p className="practice-now">Right now: no {hand} hand in view</p>
+// The letter model's second opinion, under the checklist (2026-10-29; before,
+// a "Right now" line only npm run dev showed): what the classifier trained in
+// training/ reads in the signing hand right now. The checklist decides the
+// pass; this is there to compare. The letter it reads sits in a tile, like the
+// guide's, filled with the accent when it's the letter being made (as a met
+// condition's tick is), then a sentence and how sure it is. The small model
+// gives a percentage; the k-NN (npm run dev only) doesn't, so its bar stays
+// empty. It updates ten times a second, so it isn't a live region: a screen
+// reader would hear it constantly.
+function ModelOpinion({ guesses, hand, target }) {
+  const g = guesses.find((guess) => guess.whole) ?? guesses[0]
+  // The letter when it's sure, '?' when not, nothing without a whole hand.
+  const reading = g?.whole ? (g.sure ? g.letter : '?') : null
+  const agrees = reading === target
+  const sure = g?.whole && 'confidence' in g ? percent(g.confidence) : null
   return (
-    <div className="practice-now">
-      {guesses.map((g, i) => (
-        <p key={i}>
-          {g.hand === 'left' ? 'Left hand' : 'Right hand'}: {seenText(g)}
+    <section className={`model-opinion${agrees ? ' agrees' : ''}`} aria-label="Letter model">
+      <span className={`model-tile${reading ? '' : ' empty'}`} aria-hidden="true">
+        {reading}
+      </span>
+      <div>
+        <p>
+          {opinionText(g, reading, hand)}
+          {sure && <span className="visually-hidden">, {sure} sure</span>}
         </p>
-      ))}
-    </div>
+        {/* Keeps its space while empty, so the column doesn't jump. */}
+        <div className={`model-meter${sure ? '' : ' is-empty'}`} aria-hidden="true">
+          <span className="model-meter-track">
+            <span className="model-meter-fill" style={{ width: sure ?? 0 }} />
+          </span>
+          <span className="model-meter-value">{sure}</span>
+        </div>
+      </div>
+    </section>
   )
 }
 
-function seenText(g) {
-  if (!g.whole) return 'show the whole hand'
-  if (!g.sure) return 'not sure'
-  return 'confidence' in g ? `${g.letter}, ${percent(g.confidence)} sure` : g.letter
+function opinionText(g, reading, hand) {
+  if (!g) return `Letter model is waiting for your ${hand} hand`
+  if (!reading) return 'Letter model needs your whole hand'
+  if (reading === '?') return 'Letter model isn’t sure'
+  return `Letter model sees ${reading}`
+}
+
+// What the model made of the whole hold, after a pass (modelVerdict).
+function modelNote(said, target) {
+  if (said === target) return 'The letter model agrees'
+  if (said === '?') return 'The letter model wasn’t sure'
+  return `The letter model read ${said}`
 }
 
 const percent = (share) => `${Math.round(share * 100)}%`

@@ -50,19 +50,22 @@ Commons lists for it). Only the filenames were changed, to lowercase letters.
 
 ### Licence (the same for every file, checked on each file's description page)
 
-- **Author:** [wpclipart.com](http://www.wpclipart.com/legal.html) (WPClipart). The files'
+- **Author:** [wpclipart.com](https://web.archive.org/web/20250712094533/https://wpclipart.com/legal.html) (WPClipart). The files'
   own metadata names the creator as "edited by Paul Sherman" (WPClipart's editor), rights
   "PD", publisher WPClipart, dated 11/11/2013.
-- **Original source:** http://www.wpclipart.com/sign_language/American_ABCs/index.html
+- **Original source:** wpclipart.com/sign_language/American_ABCs/index.html
+  ([archived copy](https://web.archive.org/web/20241011205321/https://www.wpclipart.com/sign_language/American_ABCs/index.html),
+  2024-10-11)
 - **Licence:** public domain. Each Commons page tags it `{{PD-author|wpclipart.com}}`: the
   author released it into the public domain. The metadata embedded in every SVG points to
   [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/).
 - **Requirements:** none. Public domain needs no attribution and allows use, changes and
   redistribution, commercial included. Crediting WPClipart and Wikimedia Commons is still
   good practice, and this file does it.
-- **Not checked directly:** WPClipart's own legal page (http://www.wpclipart.com/legal.html)
-  didn't load on 2026-10-18 (Cloudflare error 522, the site not answering). The licence
-  above comes from Wikimedia Commons and the files' own metadata, which agree.
+- **Not checked directly:** WPClipart's own legal page (wpclipart.com/legal.html) didn't
+  load on 2026-10-18 or 2026-10-29 (Cloudflare error 522, the site not answering), so the
+  links here go to archive.org's copies (the legal page as of 2025-07-12). The licence above
+  comes from Wikimedia Commons and the files' own metadata, which agree.
 
 ### Files
 

@@ -1,5 +1,5 @@
 // Sema's colour theme. The person chooses Light, Dark or System (the default)
-// in the settings menu; the choice is saved with the other settings in
+// with the toggle in the top bar; the choice is saved with the other settings in
 // progressStore. The page shows it through one attribute on <html>,
 // data-theme="light" or "dark", and styles.css swaps its colour variables on
 // that. index.html sets the attribute once before the first paint (so a dark

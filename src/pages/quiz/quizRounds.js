@@ -83,10 +83,11 @@ export function markLetter(quiz, mark, peeked = false) {
   return { ...quiz, at, marks, peeked: looked, step: quiz.step + 1 }
 }
 
-// Ends the quiz before the last letter (End quiz): the letters not reached stay
-// unmarked, and the results count them as not passed.
+// Ends the quiz before the last letter (End quiz): the letters not reached count
+// as skipped.
 export function endQuiz(quiz) {
-  return { ...quiz, at: null }
+  const marks = quiz.marks.map((row) => row.map((mark) => mark ?? 'skipped'))
+  return { ...quiz, at: null, marks }
 }
 
 // How many passed letters were passed after a peek at the drawing.

@@ -17,7 +17,7 @@ const HANDS = [
 // Turning the camera off stops every track, so the camera light goes out;
 // CameraProvider then leaves it off until it's turned on again. The hand model
 // stays loaded, so turning it back on is quick.
-// The list works like the settings menu: a click outside or Escape closes it.
+// The list works like a menu: a click outside or Escape closes it.
 export default function CameraControls({ hand, onHandChange, handLabel, className = '' }) {
   const camera = useSharedCamera()
   const isOn = camera.status !== 'idle' // 'starting' counts: Stop cancels it

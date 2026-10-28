@@ -18,7 +18,9 @@ export default function GuidePanel({ hand, selected, onSelect }) {
   // ones can't get there: the list stops scrolling at its ends). In Grid mode
   // it only scrolls as far as needed to show the card. We set the list's own
   // scroll position instead of calling scrollIntoView, which could also scroll
-  // the page around it.
+  // the page around it. Whether it glides or jumps is the CSS's choice
+  // (scroll-behavior on .practice-guide-tiles): smooth, unless the person asked
+  // their system for reduced motion.
   useEffect(() => {
     const list = listRef.current
     const card = list?.querySelector('[aria-pressed="true"]')
@@ -26,11 +28,11 @@ export default function GuidePanel({ hand, selected, onSelect }) {
     const top = card.offsetTop - list.offsetTop
     const bottom = top + card.offsetHeight
     if (!grid) {
-      list.scrollTo({ top: top - (list.clientHeight - card.offsetHeight) / 2, behavior: 'smooth' })
+      list.scrollTo({ top: top - (list.clientHeight - card.offsetHeight) / 2 })
     } else if (top < list.scrollTop) {
-      list.scrollTo({ top: top - 6, behavior: 'smooth' })
+      list.scrollTo({ top: top - 6 })
     } else if (bottom > list.scrollTop + list.clientHeight) {
-      list.scrollTo({ top: bottom - list.clientHeight + 6, behavior: 'smooth' })
+      list.scrollTo({ top: bottom - list.clientHeight + 6 })
     }
   }, [selected, grid])
 

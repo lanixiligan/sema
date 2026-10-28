@@ -11,9 +11,29 @@ export { NO_HOLD }
 // guesses: one per hand in view, as useLetterCheck's guess() makes them (it
 // only passes the signing hand's); `makes`: the hand makes the target
 // (matchLetter in letterMatch.js). The conditions decide alone (2026-10-27).
-// To have the model agree as well, add: && g.sure && g.letter === letter
+// The letter model is a second opinion (2026-10-29, below), not a gate: adding
+// `&& g.sure && g.letter === letter` here would make it one, so that a letter
+// passes only when the model agrees too. Lanix chose not to.
 export function showsLetter(guesses) {
   return guesses.some((g) => g.whole && g.makes)
+}
+
+// The letter model's reading of one frame: the letter when it's sure, '?'
+// when it isn't, or null with no whole signing hand to read.
+export function modelReading(guesses) {
+  const g = guesses.find((guess) => guess.whole)
+  if (!g) return null
+  return g.sure ? g.letter : '?'
+}
+
+// The letter model's second opinion on a whole hold: it never decides the
+// pass, but after one Learn says what it made of the hold. `readings` counts
+// each frame's reading ({ B: 40, '?': 3 }); the answer is the most frequent
+// one, so a frame or two can't change it: a letter, '?' (mostly not sure), or
+// null (nothing read).
+export function modelVerdict(readings) {
+  const [top] = Object.entries(readings).sort((a, b) => b[1] - a[1])
+  return top ? top[0] : null
 }
 
 // hold: { start, lastAt }, as in handChecks.js (start is null with no hold).

@@ -5,6 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/logos/sema-mark-light.svg" />
     <title>Sema</title>
+    <!-- What link previews show (LinkedIn, X, chat apps). Their crawlers don't
+         run JavaScript, so these must be here in the HTML. og:image needs the
+         full address; public/og.png is 1200×627. -->
+    <meta
+      name="description"
+      content="Learn the American Sign Language (ASL) alphabet with your webcam. Sema checks each handshape right in your browser: no account, and your video never leaves your device."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Sema" />
+    <meta property="og:title" content="Sema · ASL fingerspelling coach" />
+    <meta
+      property="og:description"
+      content="Learn the American Sign Language (ASL) alphabet with your webcam. Sema checks each handshape right in your browser: no account, and your video never leaves your device."
+    />
+    <meta property="og:url" content="https://sema-fingerspelling.vercel.app/" />
+    <meta property="og:image" content="https://sema-fingerspelling.vercel.app/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="627" />
+    <meta property="og:image:alt" content="Sema, an ASL fingerspelling coach that uses your webcam" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <!-- The colour of the browser's own bar on phones: the top bar's colour in
+         each theme (--white, and --deep-cobalt in the dark theme). -->
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#142c48" media="(prefers-color-scheme: dark)" />
     <!-- The theme, set before the page first paints so a dark theme never
          flashes white. A plain script in <head> runs before anything is drawn;
          the app's own code loads later. Same rule as src/app/settings/theme.js: the

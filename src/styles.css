@@ -81,11 +81,17 @@
   --sky-night: #163f5f; /* soft highlight on dark */
   --amber-night: #3a2a14; /* a warning note's background on dark */
   --amber-pale: #f3c98b; /* text on --amber-night */
+  --green: #1f7a4d; /* a passed letter on the quiz results (light) */
+  --green-tint: #e3f5ea;
+  --green-ink: #145a36;
+  --green-on-dark: #4cc28a; /* the same on dark */
+  --green-night: #12382a;
+  --green-pale: #a6e8c4;
   --red-on-dark: #f97066;
 
   /* Roles: the light set */
   --bg: var(--sky-wash); /* the page */
-  --surface: var(--white); /* cards, the menu bar, the settings panel */
+  --surface: var(--white); /* cards, the menu bar */
   --surface-soft: var(--sky-mist);
   --text: var(--ink);
   --text-muted: var(--muted-text);
@@ -103,6 +109,13 @@
   --warning: var(--amber);
   --warning-bg: var(--amber-tint);
   --warning-ink: var(--amber-ink);
+  /* Small warning text (under 24px). --amber is 4.44:1 on the sky wash, just
+     under the 4.5:1 small text needs, so it uses the darker amber ink (7.6:1).
+     Marks, borders and large text keep --warning. */
+  --warning-text: var(--amber-ink);
+  --success: var(--green);
+  --success-bg: var(--green-tint);
+  --success-ink: var(--green-ink);
   --danger: var(--error-red);
   --shadow-menu: 0 12px 32px rgb(12 29 48 / 0.14);
 
@@ -138,7 +151,7 @@
   --space-9: 96px;
 
   /* Layout: the same bar, side padding and widths on every page */
-  --bar-height: 56px;
+  --bar-height: 85px;
   --page-gutter: clamp(20px, 4vw, 48px);
   --page-max: 1200px;
   --menu-width: 260px;
@@ -178,6 +191,10 @@
   --warning: var(--amber-on-dark);
   --warning-bg: var(--amber-night);
   --warning-ink: var(--amber-pale);
+  --warning-text: var(--amber-on-dark); /* 7.8:1 on the dark page: as before */
+  --success: var(--green-on-dark);
+  --success-bg: var(--green-night);
+  --success-ink: var(--green-pale);
   --danger: var(--red-on-dark);
   --shadow-menu: 0 12px 32px rgb(0 0 0 / 0.4);
 
@@ -224,7 +241,7 @@ body {
 }
 
 .wordmark-logo {
-  height: 30px;
+  height: 38px;
   width: auto;
 }
 
@@ -247,7 +264,7 @@ body {
 .app-bar-right {
   display: flex;
   align-items: center;
-  gap: var(--space-5);
+  gap: var(--space-6);
   font-size: var(--text-caption);
   color: var(--text-muted);
 }
@@ -257,14 +274,14 @@ body {
 .menu {
   display: flex;
   align-self: stretch;
-  gap: var(--space-5);
-  margin-left: var(--space-6);
+  gap: 30px;
+  margin-left: 40px;
 }
 
 .menu a {
   display: flex;
   align-items: center;
-  font-size: var(--text-small);
+  font-size: 18px;
   font-weight: 500;
   color: var(--text-muted);
   text-decoration: none;
@@ -286,77 +303,6 @@ body {
   outline-offset: 2px;
 }
 
-/* The settings menu (SettingsMenu.jsx): a quiet button, and a panel that
-   opens under it, over the page. */
-.settings {
-  position: relative;
-}
-
-.settings-button {
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  padding: 0;
-  color: var(--text-muted);
-  background: none;
-  border: none;
-  border-radius: var(--radius-control);
-  cursor: pointer;
-}
-
-.settings-button:hover,
-.settings-button[aria-expanded='true'] {
-  color: var(--text);
-}
-
-.settings-panel {
-  position: absolute;
-  top: calc(100% + var(--space-2));
-  right: 0;
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  width: var(--menu-width);
-  padding: var(--space-4);
-  color: var(--text);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-menu);
-}
-
-.settings-delete {
-  align-self: flex-start;
-  padding: var(--space-1) 0;
-  font: inherit;
-  font-size: var(--text-small);
-  font-weight: 700;
-  color: var(--danger);
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-.settings-delete:hover {
-  text-decoration: underline;
-}
-
-.settings-note {
-  margin: calc(var(--space-2) * -1) 0 0; /* close under the button it explains */
-  font-size: var(--text-caption);
-  line-height: 1.5;
-  color: var(--text-muted);
-}
-
-.settings-button:focus-visible,
-.settings-delete:focus-visible {
-  outline: 3px solid var(--accent);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-
 /* The theme toggle (ThemeToggle.jsx): three icons on a track, the chosen
    one raised. Each radio input covers its icon, transparent: it still takes
    clicks, focus and arrow keys, and the icon next to it shows its state. */
@@ -368,8 +314,8 @@ body {
 
 .theme-toggle-track {
   display: flex;
-  gap: 2px;
-  padding: 3px;
+  gap: 3px;
+  padding: 4px;
   background: var(--segment-track);
   border-radius: var(--radius-control);
 }
@@ -392,10 +338,15 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 24px;
+  width: 38px;
+  height: 30px;
   color: var(--text-muted);
   border-radius: var(--radius-segment);
+}
+
+.theme-toggle-option svg {
+  width: 20px;
+  height: 20px;
 }
 
 .theme-toggle label:hover .theme-toggle-option {
@@ -410,6 +361,50 @@ body {
 .theme-toggle input:focus-visible + .theme-toggle-option {
   outline: 3px solid var(--accent);
   outline-offset: 1px;
+}
+
+/* Phones: one row was 654px wide at 390px, so the bar wraps onto two. The
+   logo, theme toggle and delete button stay on top; the menu gets its own
+   row under them, so its underline still sits on the bar's bottom edge.
+   display: contents lets the logo and the menu (both inside .app-bar-left)
+   wrap as if they were the bar's own children, and order puts the menu last.
+   --bar-height is the new total, for the pages that subtract it. */
+@media (max-width: 599px) {
+  :root {
+    --bar-height: 100px;
+  }
+
+  .app-bar {
+    flex-wrap: wrap;
+    align-content: space-between;
+    column-gap: var(--space-3);
+    row-gap: 0;
+    padding-top: var(--space-2);
+  }
+
+  .app-bar-left {
+    display: contents;
+  }
+
+  .wordmark-logo {
+    height: 30px;
+  }
+
+  .app-bar-right {
+    gap: var(--space-2);
+  }
+
+  .menu {
+    order: 1;
+    flex-basis: 100%;
+    gap: var(--space-5);
+    height: 44px;
+    margin-left: 0;
+  }
+
+  .menu a {
+    font-size: var(--text-body);
+  }
 }
 
 /* One motion vocabulary: things arrive by fading in and moving up 12px.
@@ -654,7 +649,7 @@ body {
 .error {
   margin: 16px 0 0;
   font-weight: 500;
-  color: var(--warning);
+  color: var(--warning-text);
 }
 
 /* Row 1: what's happening. Row 2: the speed numbers, side by side. */
@@ -795,7 +790,7 @@ body {
 
 .dev-gate .dev-gate-error {
   font-size: 14px;
-  color: var(--warning);
+  color: var(--warning-text);
 }
 
 .dev-gate .primary-button {
@@ -817,6 +812,13 @@ body {
 
 .dev-heading .button-quiet {
   margin-top: 0;
+}
+
+/* Delete Sema's data (red text) and Lock, side by side. */
+.dev-heading-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
 }
 
 .dev-tools {
@@ -869,7 +871,7 @@ body {
 }
 
 .dev-tool .dev-tool-note {
-  color: var(--warning);
+  color: var(--warning-text);
 }
 
 /* Which model Practice runs (DevDashboard.jsx): the theme toggle's look, with
@@ -996,7 +998,7 @@ body {
 }
 
 .dev-letters .dev-letter-low {
-  color: var(--warning);
+  color: var(--warning-text);
 }
 
 /* The extract tool: its buttons share one row, so the quiet ones drop the
@@ -1115,32 +1117,153 @@ body {
   }
 }
 
-/* What Sema sees right now, under the steps. */
-.practice-now p {
-  margin: 8px 0 0;
-  font-size: var(--text-caption);
-  color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
+/* Narrow desktop windows (a small laptop, or a zoomed-in one): with the full
+   side columns the camera was only ~230px wide at 1024px and cut off its own
+   on/off button. Slimmer sides and padding leave it room for its controls. */
+@media (min-width: 900px) and (max-width: 1199px) {
+  .practice.learn {
+    grid-template-columns: 240px minmax(0, 1fr) 260px;
+    gap: 16px;
+    padding: 20px 24px 28px;
+  }
 }
 
-.practice-now {
-  margin-top: 4px;
-  padding: 10px 4px 0;
+/* The letter model's second opinion, under the checklist (LearnPage.jsx): the
+   letter it reads in a tile, like the guide's, then a sentence and a thin bar
+   for how sure it is. Quieter than the checklist above it. */
+.model-opinion {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  margin-top: 6px;
+  padding: 14px 4px 0;
   border-top: 1px solid var(--border);
 }
 
-.practice-now p:first-child {
-  margin-top: 0;
+.model-opinion p {
+  margin: 0;
+  font-size: var(--text-small);
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text);
 }
 
-p.practice-now {
+/* The letter tile, also used small in the note after a pass. */
+.model-tile {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--text);
+  background: var(--surface);
+  border: 1.5px solid var(--border-strong);
+  border-radius: 10px;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s,
+    color 0.2s;
+}
+
+/* Nothing to read yet (no hand, or not all of it): an empty, dashed tile. */
+.model-tile.empty {
+  background: transparent;
+  border-style: dashed;
+}
+
+/* It reads the letter being made: the tile fills with the accent, as a met
+   condition's tick does in the checklist above. */
+.model-opinion.agrees .model-tile {
+  color: var(--on-accent);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+/* How sure it is: a thin bar and the percentage (a count, so the mono face).
+   Hidden but still taking its space when there's nothing to show. */
+.model-meter {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 4ch;
+  gap: 10px;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.model-meter.is-empty {
+  visibility: hidden;
+}
+
+.model-meter-track {
+  height: 6px;
+  overflow: hidden;
+  background: var(--segment-track);
+  border-radius: var(--radius-pill);
+}
+
+.model-meter-fill {
+  display: block;
+  height: 100%;
+  background: var(--text-muted);
+  border-radius: inherit;
+  transition: width 0.15s linear;
+}
+
+.model-opinion.agrees .model-meter-fill {
+  background: var(--accent);
+}
+
+.model-meter-value {
+  font-family: var(--font-mono);
   font-size: var(--text-caption);
   color: var(--text-muted);
-  margin-bottom: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
-/* Held for 3 seconds (or J or Z traced): a dark film over the picture with the
-   result, Try again, and a reminder that the guide picks the next letter. */
+/* After a pass, under "That's B!": what the letter model made of the hold, as
+   a pill holding a small round tile. It sits on the dark camera frame, so the
+   roles are the on-dark ones; agreement is green, like the pass itself. */
+.practice-done-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 5px 18px 5px 5px;
+  font-size: var(--text-small);
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface-soft);
+  border-radius: var(--radius-pill);
+}
+
+.practice-done-note .model-tile {
+  width: 30px;
+  height: 30px;
+  font-size: 15px;
+  background: transparent;
+  border-radius: 50%;
+}
+
+.practice-done-note.agrees .model-tile {
+  color: var(--green-night);
+  background: var(--success);
+  border-color: var(--success);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .model-tile,
+  .model-meter-fill {
+    transition: none;
+  }
+}
+
+/* A pass (the hold, or J or Z traced): a dark film over the picture, a green check, the result large, and the next step. It sits
+   on the camera frame, so the colour roles are the on-dark ones (--success is
+   the light green). */
 .practice-done {
   position: absolute;
   inset: 0;
@@ -1148,17 +1271,80 @@ p.practice-now {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 14px;
+  gap: 16px;
   padding: 0 24px;
   color: var(--cloud-white);
   text-align: center;
   background: var(--scrim);
 }
 
+/* The check badge is drawn before the title (it pops in once). The empty
+   alternative text keeps screen readers from reading the ✓ out. */
 .practice-done-title {
   margin: 0;
-  font-size: 2.5rem;
+  font-size: 4.5rem;
+  line-height: 1.05;
   font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--success-ink);
+}
+
+.practice-done-title::before {
+  content: '✓';
+  content: '✓' / '';
+  display: grid;
+  place-items: center;
+  width: 88px;
+  height: 88px;
+  margin: 0 auto 20px;
+  font-size: 3rem;
+  line-height: 1;
+  color: var(--green-night);
+  background: var(--success);
+  border-radius: 50%;
+  animation: practice-done-pop 400ms cubic-bezier(0.3, 1.5, 0.5, 1) both;
+}
+
+@keyframes practice-done-pop {
+  from {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .practice-done-title::before {
+    animation: none;
+  }
+}
+
+/* Next letter: the one obvious action, green. Try again is quieter. */
+.practice-done .button {
+  padding: 14px 32px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--green-night);
+  background: var(--success);
+}
+
+.practice-done .button:hover {
+  background: var(--green-pale);
+}
+
+.practice-done .button-quiet {
+  margin-top: 0;
+  padding: 8px 18px;
+  color: var(--cloud-white);
+  background: transparent;
+  border-color: rgb(255 255 255 / 0.4);
+}
+
+.practice-done .button-quiet:hover {
+  border-color: var(--cloud-white);
 }
 
 /* The quiz (/quiz). The results: one centred column, like the Learn placeholder. */
@@ -1578,11 +1764,14 @@ p.practice-now {
   font-weight: 500;
 }
 
+/* The word's letters not reached yet: quieter than the current one, but still
+   readable, since the person needs the whole word (0.75: 3.3:1 on light and
+   5.5:1 on dark; 0.45 was 1.9:1 and 2.8:1). */
 .quiz-prompt-word span {
   padding: 0 4px;
   color: var(--text-muted);
   border-bottom: 4px solid transparent;
-  opacity: 0.45;
+  opacity: 0.75;
 }
 
 .quiz-prompt-word .quiz-current,
@@ -1780,18 +1969,308 @@ p.practice-now {
   align-items: center;
 }
 
-.quiz-actions {
+/* The results page, bigger than the other quiz pages: a score ring, the tiles
+   on a card, and a short fade-in. */
+.quiz-results section {
+  max-width: 680px;
+  gap: 28px;
+}
+
+.quiz-results h1 {
+  font-size: 2.5rem;
+}
+
+.quiz-results p {
+  font-size: 1.125rem;
+}
+
+.quiz-score {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
+  flex-wrap: wrap;
+  gap: 24px 32px;
+}
+
+.quiz-key {
+  display: flex;
+  flex-direction: column;
   gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 1.125rem;
+  color: var(--text-muted);
+  text-align: left;
+}
+
+.quiz-key li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.quiz-key strong {
+  margin-left: auto;
+  padding-left: 16px;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.quiz-key-swatch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+}
+
+.quiz-key-swatch.quiz-passed {
+  color: var(--on-accent);
+  background: var(--success);
+}
+
+/* With a clue: the outlined tile the results use for a passed letter after a
+   peek (.quiz-clue below). */
+.quiz-key-swatch.quiz-clue {
+  color: var(--success-ink);
+  background: var(--success-bg);
+  border: 2px solid var(--success);
+}
+
+.quiz-key-swatch.quiz-skipped {
+  background: var(--warning);
+}
+
+.quiz-ring {
+  position: relative;
+  width: 160px;
+  height: 160px;
+}
+
+.quiz-ring svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.quiz-ring circle {
+  fill: none;
+  stroke-width: 12;
+}
+
+.quiz-ring-track {
+  stroke: var(--warning);
+}
+
+.quiz-ring-arc {
+  stroke: var(--success);
+  stroke-dashoffset: var(--ring-offset);
+  animation: quiz-ring-fill 900ms ease-out;
+}
+
+.quiz-ring-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.quiz-score-count {
+  display: flex;
+  align-items: baseline;
+  line-height: 1;
+}
+
+.quiz-score-count strong {
+  font-size: 5rem;
+  font-weight: 800;
+  color: var(--success);
+  font-variant-numeric: tabular-nums;
+}
+
+.quiz-score-count span {
+  font-size: 4rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.quiz-results-card {
+  width: 100%;
+  padding: 28px 20px;
+}
+
+.quiz-results .quiz-rows {
+  gap: 12px;
+}
+
+.quiz-results .quiz-rows li,
+.quiz-results .quiz-rows-letters {
+  gap: 10px;
+}
+
+.quiz-results .quiz-tile {
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1;
+  width: clamp(40px, 11vw, 64px);
+  height: clamp(40px, 11vw, 64px);
+  font-size: clamp(18px, 5vw, 28px);
+  background: transparent;
+  border-radius: 12px;
+  animation: quiz-tile-in 400ms ease-out backwards;
+}
+
+.quiz-results .quiz-tile.quiz-passed {
+  color: var(--on-accent);
+  background: var(--success);
+  border-color: var(--success);
+}
+
+/* Passed after a peek at the drawing: the same green, but a pale tile with a
+   green outline instead of a solid one, so it stands apart from a letter
+   signed from memory even without its small eye (and in greyscale). */
+.quiz-results .quiz-tile.quiz-clue {
+  color: var(--success-ink);
+  background: var(--success-bg);
+  border: 2px solid var(--success);
+}
+
+/* The letters quiz is one row of ten, so its tiles are narrower and taller. */
+.quiz-results .quiz-rows-letters {
+  grid-template-columns: repeat(10, max-content);
+  gap: clamp(3px, 1vw, 8px);
+}
+
+.quiz-results .quiz-rows-letters .quiz-tile {
+  width: clamp(24px, 6.5vw, 54px);
+  height: clamp(44px, 9vw, 64px);
+  font-size: clamp(14px, 3.5vw, 26px);
+}
+
+/* A skipped letter shows its letter on solid amber, without a mark. */
+.quiz-results .quiz-tile.quiz-skipped {
+  color: var(--on-accent);
+  background: var(--warning);
+  border-color: var(--warning);
+}
+
+.quiz-results .quiz-rows li:nth-child(2) .quiz-tile { animation-delay: 80ms; }
+.quiz-results .quiz-rows li:nth-child(3) .quiz-tile { animation-delay: 160ms; }
+.quiz-results .quiz-rows li:nth-child(4) .quiz-tile { animation-delay: 240ms; }
+.quiz-results .quiz-rows li:nth-child(5) .quiz-tile { animation-delay: 320ms; }
+
+.quiz-results .quiz-actions .button {
+  padding: 16px 40px;
+  font-size: 1.25rem;
+}
+
+/* The letters quiz's results, zoomed in on wide windows: a wider page so the
+   one row of ten tiles can be big, and everything else scaled up with it. */
+@media (min-width: 900px) {
+  .quiz-results-letters section {
+    max-width: 1000px;
+    gap: 40px;
+  }
+
+  .quiz-results-letters .quiz-score {
+    gap: 28px 48px;
+  }
+
+  .quiz-results-letters .quiz-ring {
+    width: 230px;
+    height: 230px;
+  }
+
+  .quiz-results-letters .quiz-ring-text {
+    font-size: 2.75rem;
+  }
+
+  .quiz-results-letters .quiz-score-count strong {
+    font-size: 7rem;
+  }
+
+  .quiz-results-letters .quiz-score-count span {
+    font-size: 5.5rem;
+  }
+
+  .quiz-results-letters .quiz-key {
+    gap: 18px;
+    font-size: 1.5rem;
+  }
+
+  .quiz-results-letters .quiz-key li {
+    gap: 16px;
+  }
+
+  .quiz-results-letters .quiz-key-swatch {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+  }
+
+  .quiz-results-letters .quiz-key-swatch svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .quiz-results-letters .quiz-rows-letters {
+    gap: 12px;
+  }
+
+  .quiz-results-letters .quiz-rows-letters .quiz-tile {
+    width: clamp(54px, 6.5vw, 82px);
+    height: clamp(72px, 8.7vw, 110px);
+    gap: 6px;
+    font-size: clamp(26px, 3vw, 40px);
+    border-radius: 14px;
+  }
+
+  .quiz-results-letters .quiz-tile svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .quiz-results-letters .quiz-actions .button {
+    padding: 22px 64px;
+    font-size: 1.5rem;
+  }
+}
+
+@keyframes quiz-ring-fill {
+  from {
+    stroke-dashoffset: var(--ring-length);
+  }
+}
+
+@keyframes quiz-tile-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quiz-ring-arc,
+  .quiz-results .quiz-tile {
+    animation: none;
+  }
+}
+
+.quiz-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
   margin-top: 8px;
 }
 
-.quiz-actions .button-quiet {
-  margin-top: 0;
-}
 
 @media (max-width: 599px) {
   .quiz-choose {
@@ -1897,6 +2376,15 @@ p.practice-now {
   padding: 3px 6px 3px 3px;
   overflow-y: auto;
   list-style: none;
+  /* Scrolling to the picked letter (GuidePanel.jsx) glides; the person's own
+     scrolling isn't affected. Reduced motion: it jumps (below). */
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .practice-guide-tiles {
+    scroll-behavior: auto;
+  }
 }
 
 /* The list's scrollbar in Sema's colours: a slim track (the same tint as the
@@ -2250,7 +2738,7 @@ p.practice-now {
 }
 
 .consent-help-error {
-  color: var(--warning);
+  color: var(--warning-text);
 }
 
 /* The consent, after one thin line: the statement in full-strength text,
@@ -2774,6 +3262,7 @@ p.practice-now {
   font-size: var(--text-small);
   font-weight: 600;
   color: var(--muted-on-dark);
+  white-space: nowrap;
 }
 
 .camera-controls-pill .camera-controls-segment button[aria-pressed='true'] {
@@ -2992,7 +3481,7 @@ p.practice-now {
 }
 
 .record-feedback .take-result-warning {
-  color: var(--warning);
+  color: var(--warning-text);
 }
 
 .record-feedback .take-result-dot {
@@ -3879,27 +4368,42 @@ html:has(.about-page) {
   flex-wrap: wrap;
   align-content: center;
   align-items: stretch;
-  gap: var(--space-8);
+  gap: 80px;
   width: 100%;
-  max-width: 1200px;
+  max-width: 1500px;
   margin: 0 auto;
-  padding: 32px 48px;
+  padding: 40px 60px;
 }
 
-/* As tall as the camera column; the bottom padding is the privacy line's
-   height plus its gap, so the steps end level with the panel's bottom edge. */
+/* As tall as the camera column, so the Continue button at the bottom ends
+   level with the panel's bottom edge. */
 .camera-check-text {
   display: flex;
-  flex: 1 1 340px;
+  flex: 1 1 400px;
   flex-direction: column;
-  gap: var(--space-7);
-  max-width: 420px;
-  padding: var(--space-2) 0 32px;
+  gap: 60px;
+  max-width: 525px;
+  padding: var(--space-2) 0 0;
 }
 
+.camera-check .setup-title {
+  font-size: 40px;
+}
+
+.camera-check .setup-lead {
+  margin-top: 14px;
+  font-size: 20px;
+}
+
+/* Continue, under the steps and as wide as their column. Greyed out (the
+   shared .primary-button:disabled look) until the check passes, then it
+   turns on. */
 .camera-check-continue {
-  align-self: flex-start;
-  margin-top: var(--space-6);
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 64px;
+  font-size: 20px;
+  transition: background-color 200ms ease, color 200ms ease;
 }
 
 .camera-check-preview {
@@ -3908,7 +4412,7 @@ html:has(.about-page) {
   flex-direction: column;
   gap: 12px;
   min-width: 0;
-  max-width: 620px;
+  max-width: 775px;
 }
 
 /* The video inside the camera panel. The video keeps its shape inside it
@@ -3922,8 +4426,21 @@ html:has(.about-page) {
      when the height cap applies (aspect-ratio would shrink it). */
   width: 100%;
   aspect-ratio: 4 / 3;
-  max-height: clamp(300px, calc(100dvh - 320px), 600px);
+  max-height: clamp(375px, calc(100dvh - 400px), 750px);
   --stage-radius: 0px;
+}
+
+/* The panel's header, a little larger than on the other camera pages. */
+.camera-check .camera-panel {
+  border-radius: 24px;
+}
+
+.camera-check .camera-panel-head {
+  padding: 25px var(--space-5) 28px;
+}
+
+.camera-check .camera-panel-status {
+  font-size: 30px;
 }
 
 /* "Camera ready" over the video when the check passes: fades in, holds a
@@ -3978,8 +4495,8 @@ html:has(.about-page) {
 .setup-step-item {
   position: relative;
   display: flex;
-  gap: var(--space-5);
-  padding-bottom: 40px;
+  gap: 30px;
+  padding-bottom: 50px;
 }
 
 .setup-step-item:not(:last-child) {
@@ -3994,9 +4511,9 @@ html:has(.about-page) {
 .setup-step-item:not(:last-child)::before {
   content: '';
   position: absolute;
-  top: 38px;
-  bottom: 6px;
-  left: 15px;
+  top: 48px;
+  bottom: 8px;
+  left: 19px;
   border-left: 2px solid var(--border);
 }
 
@@ -4005,10 +4522,10 @@ html:has(.about-page) {
   flex: 0 0 auto;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   font-family: var(--font-mono);
-  font-size: var(--text-body);
+  font-size: 20px;
   font-weight: 500;
   color: var(--text-muted);
   border: 2px solid var(--border-strong);
@@ -4029,8 +4546,8 @@ html:has(.about-page) {
 }
 
 .setup-step-body h2 {
-  margin: 3px 0 var(--space-2);
-  font-size: 19px;
+  margin: 4px 0 10px;
+  font-size: 24px;
   font-weight: 700;
 }
 
@@ -4040,7 +4557,7 @@ html:has(.about-page) {
 
 .setup-step-body p {
   margin: 0;
-  font-size: var(--text-body);
+  font-size: 20px;
   line-height: 1.55;
   color: var(--text-muted);
 }
@@ -4217,6 +4734,55 @@ html:has(.about-page) {
   margin: 0;
   font-size: 16px;
   line-height: 1.6;
+  color: var(--text-muted);
+}
+
+/* Page not found (NotFoundPage.jsx): the word LOST fingerspelled in four tiles
+   above the message. The drawings are black lines, so each sits on white in
+   both themes (see AslDrawing.jsx). */
+.placeholder.not-found section {
+  max-width: 480px;
+  gap: 24px;
+}
+
+.not-found-word {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  width: 100%;
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+}
+
+.not-found-word li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.not-found-tile {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  background: var(--white);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-card);
+}
+
+.not-found-tile .asl-drawing {
+  position: absolute;
+  inset: 6%;
+  width: 88%;
+  height: 88%;
+}
+
+.not-found-letter {
+  font-family: var(--font-mono);
+  font-size: var(--text-lead);
+  font-weight: 500;
   color: var(--text-muted);
 }
 

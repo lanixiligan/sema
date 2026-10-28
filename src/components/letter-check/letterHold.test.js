@@ -1,5 +1,15 @@
 import { describe, expect, it } from 'vitest'
-import { LETTER_HOLD_MS, NO_HOLD, heldLongEnough, holdSecondsLeft, showsLetter, practiceStatus, updateLetterHold } from './letterHold.js'
+import {
+  LETTER_HOLD_MS,
+  NO_HOLD,
+  heldLongEnough,
+  holdSecondsLeft,
+  modelReading,
+  modelVerdict,
+  showsLetter,
+  practiceStatus,
+  updateLetterHold,
+} from './letterHold.js'
 
 const sureA = { hand: 'right', whole: true, letter: 'A', sure: true }
 
@@ -100,5 +110,29 @@ describe('practiceStatus', () => {
     expect(practiceStatus({ ...j, holdingI: true })).toEqual({ status: 'Hold the I…', tone: 'ok' })
     expect(practiceStatus({ ...j, tracing: true })).toEqual({ status: 'Follow the line to point 2…', tone: 'ok' })
     expect(practiceStatus({ ...j, tracing: true, passed: true })).toEqual({ status: "That's J!", tone: 'ok' })
+  })
+})
+
+describe('modelReading', () => {
+  it("is the model's letter when it's sure, '?' when not", () => {
+    expect(modelReading([sureA])).toBe('A')
+    expect(modelReading([{ ...sureA, sure: false }])).toBe('?')
+  })
+
+  it('reads nothing without a whole hand', () => {
+    expect(modelReading([{ hand: 'right', whole: false }])).toBe(null)
+    expect(modelReading([])).toBe(null)
+  })
+})
+
+describe('modelVerdict', () => {
+  it("is the hold's most frequent reading, so a few odd frames don't change it", () => {
+    expect(modelVerdict({ B: 40, U: 3, '?': 2 })).toBe('B')
+    expect(modelVerdict({ B: 5, U: 30 })).toBe('U')
+    expect(modelVerdict({ '?': 20, B: 6 })).toBe('?')
+  })
+
+  it('is null when nothing was read', () => {
+    expect(modelVerdict({})).toBe(null)
   })
 })
