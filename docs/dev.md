@@ -37,8 +37,8 @@ Until a code is set, `/dev` says so and opens nothing. A new code locks every br
 until the new one is entered.
 
 **Open the tools:** go to `/dev`, enter the passphrase and click **Unlock**. This browser
-remembers it (as `devAccess` in `progressStore.js`). **Lock** on the dashboard, or Delete
-Sema's data in the settings menu, forgets it. On someone else's computer, click **Lock**
+remembers it (as `devAccess` in `progressStore.js`). **Lock** on the dashboard, or **Delete
+Sema's data** next to it, forgets it. On someone else's computer, click **Lock**
 when you're done.
 
 **What it protects:** it's a keep-out sign, not a lock. Sema has no server, so the code is
@@ -50,9 +50,12 @@ possibility; that's why `npm run dev-code` asks for at least 12 characters.
 
 ## The dashboard
 
-`/dev` has a card for each tool, then (under `npm run dev` only) a **Letter model** switch,
+Beside the title: **Delete Sema's data** (the only place it is, since 2026-10-29; earlier that
+day a trash icon in the main pages' top bar), which asks first, then removes every `sema.*` key
+in this browser (settings, a recording session, the access code) and starts over at Welcome; and
+**Lock**. Then `/dev` has a card for each tool, then (under `npm run dev` only) a **Letter model** switch,
 Small model or k-NN, which says which classifier Learn and the quiz run (it only gives Learn's
-"Right now" guess: the finger conditions decide). The choice is saved in this browser; the live
+second opinion, the "Letter model" line: the finger conditions decide). The choice is saved in this browser; the live
 site has one model, so it has no switch. Then the latest training results, twice: the small
 model's, the one on Learn and the live site (`training/reports/small.json`, which
 `python3 training/train_small.py …` writes), then the k-NN's for comparison
@@ -145,8 +148,8 @@ letter with each hand, and a session file to download ([data-format.md](data-for
 How to run a session is in [guide.md](guide.md#recording-sessions). Until 2026-10-22 it was
 the app's main page, at `/record`, where setup led; it moved here once the classifier was
 trained, since recordings are now only the test set. It uses the app's shared camera, like
-the camera check, and needs no setup. Its top bar has no gear: Delete Sema's data (the gear
-on Learn, Quiz and About) also removes a session saved in this browser.
+the camera check, and needs no setup. **Delete Sema's data** on the dashboard also removes a
+session saved in this browser.
 
 ## Extract hand points
 
@@ -190,9 +193,10 @@ Learn (`/learn`) is a main page, the one returning visitors start on, not a deve
 the classifier page was `/dev/try` until 2026-10-22, then Try (`/try`), renamed Practice
 (`/practice`) on 2026-10-23 and merged into Learn on 2026-10-27; `/try` and `/practice`
 redirect to `/learn`. The quiz checks each letter the same way (`useLetterCheck` in
-`src/components/letter-check/`). Learn's developer part only shows under `npm run dev`, at the
-bottom of the right column: the "Right now" line, the model's guess for the signing hand (the
-letter and how sure, or "not sure"); which model runs is chosen on the dashboard (see "The
+`src/components/letter-check/`). What was Learn's developer part, the "Right now" line under
+`npm run dev`, became the "Letter model" line for everyone on 2026-10-29: the model's second
+opinion on the signing hand (the letter and how sure, or "not sure"), and after a pass what it
+made of the hold. It never decides. Which model runs is chosen on the dashboard (see "The
 dashboard").
 
 It has Record's three columns. On the left, the letter guide: all 26 letters' drawings (facing
@@ -227,7 +231,7 @@ panel's line fills as it's traced, and a slip over 0.8 s starts it over.
 - **Small model** (the default; step 5 of 2.2): `public/models/asl-letters.json`, which
   `training/train_small.py` writes: the better of logistic regression and a small neural
   network on people it has never seen (`training/reports/small.md`). It holds only weights,
-  14 KB, so it's committed and works on the live site too. Learn's "Right now" line shows the
+  14 KB, so it's committed and works on the live site too. Learn's "Letter model" line shows the
   top letter's percentage. It's trained on ASL-HG and ASLYset (both CC BY 4.0), credited in
   `docs/ATTRIBUTION.md` and the README; keep those credits while the model ships.
 - **k-NN** (step 4): `data/models/knn-asl.json`, which `training/train.py` writes (gitignored:

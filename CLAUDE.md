@@ -96,7 +96,7 @@ src/
     App.jsx         picks the page for the address, holds the settings
     routing/        router, navigation, Link
     layout/         TopBar, MenuBar, PhoneNotice
-    settings/       progressStore, settings context, theme, ThemeToggle, SettingsMenu
+    settings/       progressStore, settings context, theme, ThemeToggle
     shared-camera/  CameraProvider, sharedCamera, useIdleCameraOff
   components/       parts used by more than one page folder
     camera-view/    CameraPanel (the dark frame with the status header), CameraView and
@@ -117,8 +117,10 @@ src/
                     letter guide (GuidePanel), the lesson and its FingerChecklist; hold a letter 1.5 s
     quiz/           Quiz (/quiz, 2026-10-27): letters or words from memory, no hints;
                     its state (quizRounds); words from public/languages/asl/words.json
+    not-found/      Page not found, for an address Sema never had (2026-10-29)
     dev/            the developer tools behind an access code: DevArea (the gate, then
-                    the page), DevGate, DevDashboard (/dev), DevTopBar, devAccess
+                    the page), DevGate, DevDashboard (/dev), DevTopBar, devAccess,
+                    DeleteDataButton (Delete Sema's data, on the dashboard)
       tracking/     the Phase 1 page at /dev/tracking (+ BenchmarkPanel)
       extract/      /dev/extract: dataset photos → hand points
       record/       /dev/record: the recorder (the Record page) and its parts
@@ -145,10 +147,21 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   folders never import from each other: anything two page folders need goes in
   `src/components/`, and logic with no page stays in `src/recorder/`, `src/vision/`
   and `src/camera/`.
-- `src/app/routing/router.js` maps each path to a page (`PATHS`, `resolveRoute`); unknown
-  paths redirect to `/`. `src/app/routing/navigation.js` changes pages with the History API
+- `src/app/routing/router.js` maps each path to a page (`PATHS`, `resolveRoute`). Every
+  address Sema ever had redirects to its page now (`MOVED`); any other path shows Page not found
+  (`src/pages/not-found/`, 2026-10-29; before, unknown paths redirected to `/`), still with
+  status 200 from the server. `public/robots.txt` allows everything. `App.jsx` sets each
+  page's tab title (`TITLES`, page first: "Learn · Sema"; Welcome is just "Sema"; 2026-10-29). `src/app/routing/navigation.js` changes pages with the History API
   (`navigate`, `usePathname`); links between pages use `<Link>` from `src/app/routing/Link.jsx`.
-- `vercel.json` rewrites every path to `index.html`; Vercel serves real files first.
+- `vercel.json` rewrites every path to `index.html`; Vercel serves real files first. It also
+  sends `Content-Security-Policy: connect-src 'self'` on every page (2026-10-29): MediaPipe
+  tasks-vision has a built-in usage logger that POSTs timing stats to `odml.pa.googleapis.com`
+  about a minute into a camera session, and the header makes the browser refuse it, so nothing
+  leaves for another site. Keep it. Only Vercel sends it: `npm run dev` and `npm run preview`
+  don't, so the logger can still reach Google there. Files in `/assets/` (Vite's, with a hash of
+  their content in the name) are sent with `Cache-Control: immutable` for a year (2026-10-29);
+  `/models`, `/mediapipe` and `/fonts` keep Vercel's default (checked on every visit), because
+  their names never change and the wasm must always match its loader script.
 - The developer tools live under `/dev`, on the live site too, behind an access code, and
   aren't in the menu. Everything about them (the code, each tool, the benchmark results) is
   in `docs/dev.md`; keep it up to date when a tool changes (2026-10-22; before, `/dev` was the tracking page, with no code).
@@ -168,8 +181,8 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   switch in its controls, which changes the saved signing hand, Right by default, so the
   drawings face it; since 2026-10-23 only that hand is drawn and judged, and the status says
   "Show B with your right hand") in the middle, and the letter's card on the right: its
-  drawing large, its finger checklist, and, under `npm run dev`, a "Right now" line for the
-  signing hand. It starts at A; pick any letter in the guide, make it, and
+  drawing large, its finger checklist, and a "Letter model" line, the model's second opinion
+  (below). It starts at A; pick any letter in the guide, make it, and
   hold it for 1.5 s (`LETTER_HOLD_MS` in `src/components/letter-check/letterHold.js`). The hold counts while
   the signing hand meets the letter's finger conditions (`src/vision/landmarks/letterShapes.js`,
   2026-10-27): joint bends, thumb place and
@@ -177,8 +190,12 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   other still letter fits clearly better (`matchLetter` in `letterMatch.js`). Learn lists them as a checklist
   (`FingerChecklist.jsx`), finger names with their number, 1 thumb to 5 pinky (`src/vision/landmarks/handPoints.js`,
   the same numbers as on the hand drawing's fingertips), ticked live. The
-  model no longer decides; it only gives the "Right now" line (`showsLetter` in `letterHold.js`
-  says how to make it agree again). A gap over 300 ms restarts it. Then
+  model doesn't decide (since 2026-10-27); since 2026-10-29 it's a second opinion, never a gate
+  (Lanix's choice: a gate would fail correct signs on its weakest letters): under the checklist,
+  "Letter model: B, 96% sure", with a tick when it reads the letter being made (`ModelOpinion` in
+  `LearnPage.jsx`; until then a "Right now" line only under `npm run dev`), and under "That's B!"
+  its most frequent reading over the hold ("The letter model agrees." / "read U." / "wasn't
+  sure.", `modelVerdict` in `letterHold.js`). The quiz doesn't show it. A gap over 300 ms restarts the hold. Then
   "That's B!" with Next letter and Try again (since 2026-10-27). The guide shows all 26
   letters' drawings, as a list or a grid. J and Z move, so they skip the model
   (`TRACED_LETTERS`; before 2026-10-26 J was darkened and couldn't be checked). J: hold I
@@ -198,23 +215,24 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   `forward()` in `training/small.py`. The k-NN (step 4): `data/models/knn-asl.json`
   (gitignored, 11 MB), chosen with a switch on the `/dev` dashboard (2026-10-23; before, on
   Practice itself), only under `npm run dev`: the choice is `devModel` in the settings store
-  (`DEV_MODELS`), Learn and the quiz take it as the `model` prop (only Learn's "Right now"
-  line shows its guess); `knnModel.js` must match `training/knn.py`. The live site always runs
+  (`DEV_MODELS`), Learn and the quiz take it as the `model` prop (only Learn shows its
+  reading, as the second opinion; the k-NN gives no percentage); `knnModel.js` must match `training/knn.py`. The live site always runs
   the small model.
   The small model is trained on ASL-HG and, since 2026-10-23, ASLYset (both CC BY 4.0): keep
   their credits in `docs/ATTRIBUTION.md` and the README, and add one for any dataset added.
 - Quiz (`/quiz`, 2026-10-27, in the menu after Learn) tests what was learned. `/quiz` is the choice;
   Letters and Words each have their own page, `/quiz/letters` and `/quiz/words` (one `QuizFlow` runs
-  both, then the results; Start again asks new items, Choose another quiz goes back to `/quiz`). Choose
+  both, then the results; Start again goes back to `/quiz` to choose Letters or Words). Choose
   Letters (10 random, never the same twice in a row) or Words (5 from
   `public/languages/asl/words.json`, no doubled letters, and none starting with the letter the
   one before ended on), then sign each letter from memory,
   with no steps or hints (none for now: reliability first), only an eye button
-  (2026-10-27) that peeks at the current letter's drawing: a peeked pass still counts, marked with
-  a small eye in the results ("8 of 10 (3 with a peek)"). Each letter is checked
+  (2026-10-27) that peeks at the current letter's drawing: a peeked pass still counts, counted as
+  "With a clue" in the results and shown as a pale, green-outlined tile with an eye (a letter
+  signed from memory is solid green with a tick, since 2026-10-29). Each letter is checked
   exactly as on Learn (`useLetterCheck`); a pass shows "That's B!" for 1 s and moves on,
   Skip counts it as missed. Then the score and every letter marked; End quiz (red) stops early and
-  shows the results too, the letters not reached left blank. Results aren't saved. The
+  shows the results too, the letters not reached marked skipped. Results aren't saved. The
   camera starts on arrival (the person just chose a quiz). While it runs the page is minimal
   (2026-10-27): the camera on the left (its hand switch and camera buttons in a footer under the
   picture), on the right the count and End quiz, the letter large with its eye, the quiz's steps
@@ -234,11 +252,14 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   the store) let the person choose; Lanix had the switch removed and the default cut to 1.5 s.
 - The theme (Light / Dark / System, default System) is saved in the same store and chosen with
   the icon toggle at the right of every page's top bar (`src/app/settings/ThemeToggle.jsx`, in
-  `TopBar`). The settings menu (`src/app/settings/SettingsMenu.jsx`, a gear with no text, last in the
-  bar on the main pages) holds only Delete Sema's data: after a confirm it removes every `sema.*`
-  localStorage key (`clearSavedData` in `progressStore.js`) and App starts over as a new
-  visitor on Welcome, without a reload. The theme and the delete reach the top bar through
-  `SettingsContext` (`src/app/settings/settings.js`). `src/app/settings/theme.js` sets `data-theme` on
+  `TopBar`), the last thing in the bar. Delete Sema's data is only on the `/dev` dashboard, next
+  to Lock (`src/pages/dev/DeleteDataButton.jsx`, red text; 2026-10-29: earlier that day it was a
+  trash icon at the end of the main pages' top bar, which had replaced a gear and its one-item
+  menu; Lanix moved it to `/dev` before launch). Visitors remove Sema's data by clearing the
+  site's data in their browser (the README says so). Clicking it asks first. After a confirm it removes every `sema.*`
+  localStorage key (`clearSavedData` in `progressStore.js`, the access code included) and App
+  starts over as a new visitor on Welcome, without a reload. The theme and the delete reach
+  their buttons through `SettingsContext` (`src/app/settings/settings.js`). `src/app/settings/theme.js` sets `data-theme` on
   `<html>`; a small script in `index.html` sets it before the first paint. In `styles.css`,
   rules use colour roles (`--bg`, `--text`, `--accent`…), with a light set on `:root` and a
   dark set on `[data-theme='dark']` and `.on-dark`. Palette colours are used directly only
@@ -263,10 +284,11 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   show both hands, hold still), a checklist ticked off from the real camera and detection
   state, and a camera panel: a header (a short status, centred, with a line along its
   bottom edge that fills over the 3 s), then the 4:3 video with only the camera controls
-  on it. The steps column (420px) and the panel (620px) are the same height: the steps
-  stretch so the last ends level with the panel's bottom. When the check passes,
-  "✓ Camera ready" flashes over the video for ~2 s, and a Continue button appears under
-  the steps (it stays). There is no Previous / Next. Finishing setup keeps a saved signing hand
+  on it. The steps column (525px) and the panel (775px) are the same height: the steps
+  stretch so the Continue button ends level with the panel's bottom (sizes are 1.25× the
+  first version's since 2026-10-29, so the page fills a wide window). When the check passes,
+  "✓ Camera ready" flashes over the video for ~2 s. The Continue button is always under
+  the steps, greyed out (disabled) until the check passes. There is no Previous / Next. Finishing setup keeps a saved signing hand
   or sets Right; the camera controls' hand toggle switches it. The rules (`seeHands`,
   `steadySeen`, `updateHold`, `holdSecondsLeft`) are in `src/vision/landmarks/handChecks.js`. Its error titles and texts come from the design and
   live in `cameraMessages.js` and `visionMessages.js`; `useCamera` returns an
@@ -377,7 +399,9 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   while a run is recording.
 - Expected console noise: MediaPipe prints `INFO: Created TensorFlow Lite XNNPACK
   delegate for CPU.` via `console.error`, plus some yellow warnings. They are not
-  bugs.
+  bugs. On the live site, two red lines about a minute in say the Content Security Policy
+  refused `odml.pa.googleapis.com`: that's MediaPipe's usage logger being blocked (Routing,
+  `vercel.json`), as intended.
 
 ## Recorder conventions
 

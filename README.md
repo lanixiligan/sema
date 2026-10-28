@@ -37,7 +37,9 @@
 - Learn (`/learn`): start at A, or pick any letter in the guide, make it in front of the webcam, and hold it for 1.5
   seconds while Sema checks the handshape. It covers the 24 letters that don't move, and Z:
   trace the Z drawn on the camera view with your index finger. And J: hold I, then trace
-  the J that appears at your pinky.
+  the J that appears at your pinky. A small letter model, trained on hand points from public
+  photo datasets (see Credits), gives a second opinion on the 24 still letters; the finger
+  rules decide.
 - Quiz (`/quiz`): sign 10 random letters, or 5 short words letter by letter, from memory, then
   see your score.
 - Records labelled hand points for testing, on the Record page (a developer tool, `/dev/record`).
@@ -58,7 +60,7 @@ Then open http://localhost:5173. `npm install` also copies MediaPipe's files int
 
 You need Node.js 22.12 or newer (check with `node -v`). Vite alone runs on 20.19+, but the
 tests (Vitest 5) need 22.12+, so 22.12 is the minimum for everything. Sema is developed on
-Node 22.23.1 with npm 10.9.8.
+Node 24.22.1 with npm 11.19.1.
 
 Other commands:
 
@@ -78,8 +80,8 @@ The badges at the top repeat the main ones, so update them together with this ta
 
 | What | Version | Notes |
 | --- | --- | --- |
-| Node.js | 22.12+ (developed on 22.23.1) | Vite needs 20.19+ or 22.12+; Vitest needs 22.12+ |
-| npm | 10.9.8 | Comes with Node |
+| Node.js | 22.12+ (developed on 24.22.1) | Vite needs 20.19+ or 22.12+; Vitest needs 22.12+ |
+| npm | 11.19.1 | Comes with Node |
 | Vite | 8.3.4 | Dev server and build |
 | @vitejs/plugin-react | 6.1.2 | |
 | React and React DOM | 19.3.1 | |
@@ -104,10 +106,11 @@ Everything runs in your browser: no backend, no accounts, and video never leaves
   hand in view.
 - **Your data stays in this browser.** Sema saves your settings (signing hand, theme, setup
   done) and a recording in progress in this browser's `localStorage`. Nothing is uploaded.
-- **Delete it any time.** Open the settings menu (the gear in the top bar) and choose
-  **Delete Sema's data**. After you confirm, everything Sema saved is removed and Sema starts
-  over at Welcome. Session files you've downloaded are normal files in your Downloads folder,
-  so delete those yourself.
+- **Delete it any time.** To remove what Sema saved, clear this site's data in your browser's
+  settings. On the developer pages, **Delete Sema's data** on the `/dev` dashboard does the
+  same in one click (after you confirm), a recording in progress included, and Sema starts over
+  at Welcome. Session files you've downloaded are normal files in your Downloads folder, so
+  delete those yourself.
 - **Recordings are never committed.** Recorded hand points for training stay private in
   `data/raw/` (gitignored).
 
@@ -148,7 +151,8 @@ React, Vite, plain JavaScript and CSS, with MediaPipe Hand Landmarker running in
   Font License 1.1. The licences are in `public/fonts/`.
 - ASL hand drawings: at this stage, Sema uses the SVG hand drawings (A to Z) from the
   Wikimedia Commons category [ASL letters](https://commons.wikimedia.org/wiki/Category:ASL_letters),
-  by [WPClipart](http://www.wpclipart.com/), in the public domain. They're in
+  by [WPClipart](https://web.archive.org/web/20250721153310/https://www.wpclipart.com/) (an
+  archived copy: the site has been down since October 2026), in the public domain. They're in
   `public/images/asl/`; [docs/ATTRIBUTION.md](docs/ATTRIBUTION.md) lists each file's source
   and licence.
 - Letter model: `public/models/asl-letters.json` is trained on hand points taken from the
