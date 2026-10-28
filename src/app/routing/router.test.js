@@ -40,12 +40,12 @@ describe('resolveRoute', () => {
     expect(resolveRoute('/dev/record', newVisitor)).toEqual({ page: 'devRecord' })
   })
 
-  it('no longer has Try inside the developer tools', () => {
-    expect(resolveRoute('/dev/try', returning)).toEqual({ redirect: '/' })
+  it('sends the old developer Try address to Learn', () => {
+    expect(resolveRoute('/dev/try', returning)).toEqual({ redirect: '/learn' })
   })
 
-  it('no longer has Record outside the developer tools', () => {
-    expect(resolveRoute('/record', returning)).toEqual({ redirect: '/' })
+  it('sends the old Record address to the main page, Learn', () => {
+    expect(resolveRoute('/record', returning)).toEqual({ redirect: '/learn' })
   })
 
   it('serves About to new and returning visitors', () => {
@@ -59,16 +59,19 @@ describe('resolveRoute', () => {
     }
   })
 
-  it('no longer has a signing hand page', () => {
-    expect(resolveRoute('/setup/hand', newVisitor)).toEqual({ redirect: '/' })
+  it('sends the old setup addresses to the camera check and About', () => {
+    expect(resolveRoute('/setup/camera', newVisitor)).toEqual({ redirect: PATHS.cameraCheck })
+    expect(resolveRoute('/setup/hand', newVisitor)).toEqual({ redirect: PATHS.cameraCheck })
+    expect(resolveRoute('/setup/how-it-works', newVisitor)).toEqual({ redirect: '/about' })
   })
 
   it('ignores a trailing slash', () => {
     expect(resolveRoute('/learn/', returning)).toEqual({ page: 'learn' })
   })
 
-  it('sends unknown paths to Welcome', () => {
-    expect(resolveRoute('/nope', newVisitor)).toEqual({ redirect: '/' })
-    expect(resolveRoute('/record.html', returning)).toEqual({ redirect: '/' })
+  it('shows Page not found for an address Sema never had', () => {
+    expect(resolveRoute('/nope', newVisitor)).toEqual({ page: 'notFound' })
+    expect(resolveRoute('/record.html', returning)).toEqual({ page: 'notFound' })
+    expect(resolveRoute('/LEARN', returning)).toEqual({ page: 'notFound' })
   })
 })
