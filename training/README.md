@@ -4,6 +4,8 @@ Python that runs offline to train Sema's letter classifier (milestone 2.2). Noth
 ships in the app. The plan for 2.2 is in `docs/project-plan.md`; the files it reads are
 described in `docs/data-format.md`.
 
+The whole story, from the photos to the result, in plain words: `docs/model-training.md`.
+
 Needs Python 3 with numpy and scikit-learn (versions in `requirements.txt`). Run
 everything from the project root.
 

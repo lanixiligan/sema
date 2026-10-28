@@ -122,6 +122,8 @@ Everything runs in your browser: no backend, no accounts, and video never leaves
 
 **Reference**
 
+- [How the letter model was trained](docs/model-training.md): from the public photos to 94.5% on
+  people it wasn't trained on
 - [Developer pages](docs/dev.md): the access code, the tools at `/dev`, and the benchmark results
 - [Session file format](docs/data-format.md)
 - [Guide](docs/guide.md): deploy, recording sessions, MediaPipe files, webcam, Codespaces
