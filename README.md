@@ -150,7 +150,7 @@ React, Vite, plain JavaScript and CSS, with MediaPipe Hand Landmarker running in
 
 - [MediaPipe Hand Landmarker](https://developers.google.com/edge/mediapipe/solutions/vision/hand_landmarker)
   (`@mediapipe/tasks-vision`, Apache-2.0) finds the hand points.
-- Fonts: Plus Jakarta Sans, JetBrains Mono and a subset of Noto Sans Mono, under the SIL Open
+- Fonts: Plus Jakarta Sans, Gabarito, Caveat Brush, JetBrains Mono and a subset of Noto Sans Mono, under the SIL Open
   Font License 1.1. The licences are in `public/fonts/`.
 - ASL hand drawings: at this stage, Sema uses the SVG hand drawings (A to Z) from the
   Wikimedia Commons category [ASL letters](https://commons.wikimedia.org/wiki/Category:ASL_letters),

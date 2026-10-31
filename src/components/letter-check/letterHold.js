@@ -88,7 +88,7 @@ export function practiceStatus({
     }
     return { status: `Put your ${hand} index finger on point 1`, tone: '' }
   }
-  if (secondsLeft !== null) return { status: `Hold it… ${secondsLeft}`, tone: 'ok' }
-  if (guesses.length > 0 && guesses.every((g) => !g.whole)) return { status: 'Show your whole hand', tone: '' }
+  if (secondsLeft !== null) return { status: `That's it, hold… ${secondsLeft}`, tone: 'ok' }
+  if (guesses.length > 0 && guesses.every((g) => !g.whole)) return { status: 'Show your whole hand, wrist too', tone: '' }
   return { status: `Show ${target} with your ${hand} hand`, tone: '' }
 }

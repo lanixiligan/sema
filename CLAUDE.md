@@ -245,7 +245,7 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   picture), on the right the count and End quiz, the letter large with its eye, the quiz's steps
   (one per item, from the quiz state) and a quiet Skip letter; a words quiz also shows the word under the letter.
 - Setup redirects live in `resolveRoute`: a new visitor opening Learn or Quiz goes
-  to Welcome; a returning visitor opening `/` goes to Learn. Get started (Welcome's, or About's) opens the camera check, and passing it (its Continue button) finishes setup and opens Learn. The developer pages, Record
+  to Welcome; a returning visitor opening `/` goes to Learn. Get started (Welcome's, or About's) opens the camera check, and passing it (its Start learning button) finishes setup and opens Learn. The developer pages, Record
   included, don't need setup.
 
 ## Settings
@@ -264,8 +264,10 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
 - The letter hold time is fixed at 1.5 s (`LETTER_HOLD_MS`). Until 2026-10-27 it was 3 s, and
   for a few hours that day a Hold 2s | 3s | 5s switch in the camera controls (`holdSeconds` in
   the store) let the person choose; Lanix had the switch removed and the default cut to 1.5 s.
-- The theme (Light / Dark / System, default System) is saved in the same store and chosen with
-  the icon toggle at the right of every page's top bar (`src/app/settings/ThemeToggle.jsx`, in
+- The theme (Light / Dark / System, default System) is saved in the same store. Since 2026-10-31
+  it's one day/night button at the right of every page's top bar (a moon by day, a sun by
+  night; before, three icons): a new visitor follows the system's setting, and a click saves
+  the opposite of what's on screen, Light or Dark. The button is `src/app/settings/ThemeToggle.jsx` (in
   `TopBar`), the last thing in the bar. Delete Sema's data is only on the `/dev` dashboard, next
   to Lock (`src/pages/dev/DeleteDataButton.jsx`, red text; 2026-10-29: earlier that day it was a
   trash icon at the end of the main pages' top bar, which had replaced a gear and its one-item
@@ -281,29 +283,30 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   theme; `.on-dark` is only for parts that sit on the dark camera frame (the camera menu).
 - No onboarding page has Previous / Next (`StepNav` was removed 2026-10-27). About scrolls,
   and a new visitor gets a Get started button at its end; the camera check ends with a
-  Continue button.
+  Start learning button (Continue until 2026-10-31).
 - Setup is Welcome's Get started, which opens the camera check (`startSetup` in `App.jsx`);
-  the check's Continue keeps a saved signing hand or sets Right, and opens Learn (`finishSetup`).
+  the check's Start learning keeps a saved signing hand or sets Right, and opens Learn (`finishSetup`).
   The camera check was out of the flow for a few hours on 2026-10-27 and came back the same
   day at Lanix's request. About is optional and Welcome no longer links to it (the "What is Sema?" link was
   removed 2026-10-27); it is in the menu, and its Get started button, for a new visitor, opens the camera check too. Until 2026-10-27 About was three intro pages;
   `/how-it-works` and `/privacy` redirect to `/about`.
 - The camera check doesn't ask for the signing hand. It draws
-  every hand it finds and passes once both hands are up and whole (wrist in view) at the
-  same time for 3 s (`BOTH_HANDS_HOLD_MS`); a gap over 300 ms restarts the count. With two
-  hands, left and right come from position (the person's right hand is on the un-mirrored
-  frame's left), because MediaPipe's label can flip while a hand turns; one hand alone
-  goes by its label, so one hand can never pass. A gap over 300 ms, even with the camera
+  every hand it finds and passes once one hand, left or right, is up and whole (wrist in
+  view) for 3 s (`CHECK_HOLD_MS`; until 2026-10-31 it needed both hands at once); a gap over
+  300 ms restarts the count. Which hand it is doesn't matter, so MediaPipe's label isn't
+  used; with two hands up, the whole one counts. A gap over 300 ms, even with the camera
   off, always starts the 3 s again. The page shows three numbered steps (enable the camera,
-  show both hands, hold still), a checklist ticked off from the real camera and detection
-  state, and a camera panel: a header (a short status, centred, with a line along its
+  show one hand, hold still) as sticker cards, ticked off from the real camera and detection
+  state (a later step is flat and dashed, the current one stuck on with an amber number, a
+  done one gets a green check stamped on), and a camera panel: a header (a short status, centred, with a line along its
   bottom edge that fills over the 3 s), then the 4:3 video with only the camera controls
   on it. The steps column (525px) and the panel (775px) are the same height: the steps
-  stretch so the Continue button ends level with the panel's bottom (sizes are 1.25× the
+  stretch so the Start learning button ends level with the panel's bottom (sizes are 1.25× the
   first version's since 2026-10-29, so the page fills a wide window). When the check passes,
-  "✓ Camera ready" flashes over the video for ~2 s. The Continue button is always under
-  the steps, greyed out (disabled) until the check passes. There is no Previous / Next. Finishing setup keeps a saved signing hand
-  or sets Right; the camera controls' hand toggle switches it. The rules (`seeHands`,
+  a "Camera ready" sticker slaps onto the video for ~2 s. The Start learning button (Welcome's
+  amber `.key-button`) is always under the steps, greyed out (disabled) until the check
+  passes, then pops once. There is no Previous / Next. Finishing setup keeps a saved signing hand
+  or sets Right; the camera controls' hand toggle switches it. The rules (`seeHand`,
   `steadySeen`, `updateHold`, `holdSecondsLeft`) are in `src/vision/landmarks/handChecks.js`. Its error titles and texts come from the design and
   live in `cameraMessages.js` and `visionMessages.js`; `useCamera` returns an
   `errorKind` and `useHandLandmarker` an `errorName` so pages can pick them.
@@ -445,7 +448,14 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
 
 ## Visual design
 
-Minimal and calm: lots of space, one obvious action, no decoration.
+Being redesigned page by page since 2026-10-31 (`PRODUCT.md`, `.impeccable/surfaces/`):
+encouraging and warm, Duolingo's celebratory energy without a mascot, quiet while the
+person holds a letter. Welcome is done (a "HELLO my name is" tag that fingerspells the
+name typed on it, on a Deep Sky page, an amber key button), and so is the camera check
+(the same stickers, Gabarito and key button, but on the theme's own page, light or dark,
+at Lanix's request); the other pages still have
+the old minimal, calm look until their turn. New faces: Gabarito 400–900
+(`--font-display`) and Caveat Brush (`--font-marker`, the name on the tag only).
 Fonts: Plus Jakarta Sans (text, weights 400–800) and JetBrains Mono 500 (codes and
 counts). JetBrains Mono lacks "ῆ", so `--font-mono` starts with a 3 KB subset of Noto
 Sans Mono holding only σ ῆ μ α (loaded only where they appear). Colors are CSS variables in `src/styles.css`, with the designs' exact values:

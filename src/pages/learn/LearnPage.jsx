@@ -3,6 +3,7 @@ import MenuBar from '../../app/layout/MenuBar.jsx'
 import AslDrawing from '../../components/AslDrawing.jsx'
 import CameraPanel from '../../components/camera-view/CameraPanel.jsx'
 import CameraView from '../../components/camera-view/CameraView.jsx'
+import { CheckIcon } from '../../components/icons/icons.jsx'
 import { useLetterCheck } from '../../components/letter-check/useLetterCheck.js'
 import { useLetterPose } from '../../hand-model/letterPoses.js'
 import { LETTERS } from '../../vision/landmarks/letterShapes.js'
@@ -93,7 +94,16 @@ export default function LearnPage({ signingHand, onSigningHandChange, handView =
               underlay={traced && <canvas ref={traceCanvasRef} className="overlay" aria-hidden="true" />}
             >
               {passed && (
-                <div className="practice-done">
+                <div className="practice-done has-drawing">
+                  {/* The letter's drawing settles in, with a tick on its corner,
+                      in place of the quiz's plain tick (2026-10-31): what was
+                      just made, shown back. Decorative: the title says it. */}
+                  <span className="practice-done-drawing" aria-hidden="true">
+                    <AslDrawing letter={target} hand={drawnHand} />
+                    <span className="practice-done-badge">
+                      <CheckIcon size={22} strokeWidth={3} />
+                    </span>
+                  </span>
                   {/* role="status": with the header blank, this is what screen readers hear. */}
                   <p className="practice-done-title" role="status">
                     That&rsquo;s {target}!

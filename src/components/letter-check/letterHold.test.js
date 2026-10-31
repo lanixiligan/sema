@@ -84,12 +84,12 @@ describe('practiceStatus', () => {
   })
 
   it('counts down while holding', () => {
-    expect(practiceStatus({ ...ready, secondsLeft: 2 })).toEqual({ status: 'Hold it… 2', tone: 'ok' })
+    expect(practiceStatus({ ...ready, secondsLeft: 2 })).toEqual({ status: "That's it, hold… 2", tone: 'ok' })
   })
 
   it('says what to do otherwise', () => {
     expect(practiceStatus(ready).status).toBe('Show A with your right hand')
-    expect(practiceStatus({ ...ready, guesses: [{ whole: false }] }).status).toBe('Show your whole hand')
+    expect(practiceStatus({ ...ready, guesses: [{ whole: false }] }).status).toBe('Show your whole hand, wrist too')
     expect(practiceStatus({ ...ready, guesses: [{ ...sureA, letter: 'S' }] }).status).toBe('Show A with your right hand')
   })
 
