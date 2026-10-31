@@ -44,3 +44,6 @@ data/models/
 
 # Brainstorming mockups (superpowers visual companion)
 .superpowers/
+
+# Impeccable design-context files (local design work, not part of the app)
+.impeccable/
