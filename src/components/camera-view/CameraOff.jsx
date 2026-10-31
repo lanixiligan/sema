@@ -9,8 +9,8 @@ import { VideoOffIcon } from '../icons/icons.jsx'
 // hand model has loaded, the button waits and says so: a camera that's on but
 // can't track hands yet would only look broken.
 const REASONS = {
-  hidden: 'It turned off when you switched to another tab.',
-  idle: 'It turned off because no hand was seen for a minute.',
+  hidden: 'It turned off while you were in another tab. Pick up where you left off.',
+  idle: 'It turned off after a minute with no hand in view. Ready when you are.',
 }
 
 export default function CameraOff({ note }) {

@@ -52,6 +52,9 @@ export default function App() {
   // Checked once, when the page opens: a phone doesn't change size, and a
   // computer whose window is made narrow later shouldn't lose its page.
   const [showPhoneNotice, setShowPhoneNotice] = useState(() => window.matchMedia(SMALL_SCREEN).matches)
+  // The theme on screen right now, 'light' or 'dark' (with System, the
+  // system's). index.html already set it on <html> before the first paint.
+  const [shownTheme, setShownTheme] = useState(() => document.documentElement.dataset.theme ?? 'light')
 
   // An address the visitor can't open (or that has no page of its own) is
   // replaced rather than added to the history, so Back doesn't land on it again.
@@ -67,8 +70,14 @@ export default function App() {
   }, [route.page])
 
   // Shows the chosen theme, and with System keeps following the system's
-  // setting while the app is open. Runs again when the choice changes.
-  useEffect(() => followTheme(progress.theme, systemThemeQuery(), applyTheme), [progress.theme])
+  // setting while the app is open. Runs again when the choice changes. It also
+  // remembers what it showed, so the theme button knows which way to switch.
+  useEffect(() => {
+    return followTheme(progress.theme, systemThemeQuery(), (theme) => {
+      applyTheme(theme)
+      setShownTheme(theme)
+    })
+  }, [progress.theme])
 
   // Settings changes are saved straight away. If the browser refuses, the app
   // carries on; the settings just won't survive a reload.
@@ -111,7 +120,7 @@ export default function App() {
   if (showPhoneNotice) return <PhoneNotice onContinue={() => setShowPhoneNotice(false)} />
 
   const settings = {
-    theme: progress.theme,
+    shownTheme,
     setTheme: (theme) => updateProgress({ theme }),
     deleteData,
   }
@@ -127,6 +136,8 @@ export default function App() {
             onStartSetup={startSetup}
             onFinishSetup={finishSetup}
             onSigningHandChange={(signingHand) => updateProgress({ signingHand })}
+            handView={progress.handView}
+            onHandViewChange={(handView) => updateProgress({ handView })}
             devModel={progress.devModel}
             onDevModelChange={(devModel) => updateProgress({ devModel })}
             devAccess={progress.devAccess}
@@ -145,6 +156,8 @@ function Page({
   onStartSetup,
   onFinishSetup,
   onSigningHandChange,
+  handView,
+  onHandViewChange,
   devModel,
   onDevModelChange,
   devAccess,
@@ -172,7 +185,15 @@ function Page({
     case 'cameraCheck':
       return <CameraCheckPage onDone={onFinishSetup} />
     case 'learn':
-      return <LearnPage signingHand={signingHand} onSigningHandChange={onSigningHandChange} model={devModel} />
+      return (
+        <LearnPage
+          signingHand={signingHand}
+          onSigningHandChange={onSigningHandChange}
+          handView={handView}
+          onHandViewChange={onHandViewChange}
+          model={devModel}
+        />
+      )
     case 'quiz':
       return <QuizPage />
     case 'quizLetters':

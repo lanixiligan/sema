@@ -19,6 +19,26 @@
   font-display: swap;
 }
 
+/* The redesign's faces (2026-10-31), used page by page as each is redesigned:
+   Gabarito, heavy and friendly, for display type (one variable file, weights
+   400 to 900), and Caveat Brush, a marker hand, only for a name written on
+   Welcome's name tag. */
+@font-face {
+  font-family: 'Gabarito';
+  src: url('/fonts/Gabarito-Variable.woff2') format('woff2');
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Caveat Brush';
+  src: url('/fonts/CaveatBrush-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* JetBrains Mono has no "ῆ", so the Greek in "σῆμα" would fall back to a
    different font on every system. This tiny subset of Noto Sans Mono (3 KB)
    holds just σ ῆ μ α. unicode-range means the browser only downloads it when a
@@ -122,11 +142,12 @@
   /* Type */
   --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
   --font-mono: 'Noto Sans Mono Greek', 'JetBrains Mono', monospace;
+  --font-display: 'Gabarito', var(--font-sans);
+  --font-marker: 'Caveat Brush', cursive;
   --text-display: clamp(40px, 6vw, 80px); /* the big statements */
   --leading-display: 1.05;
   --tracking-display: -0.03em;
   --text-lead: 20px; /* the line under a display heading */
-  --text-welcome: clamp(36px, 4.7vw, 60px); /* Welcome's headline */
   --leading-lead: 1.5;
   --text-button: 17px;
   --text-body: 16px;
@@ -158,6 +179,7 @@
 
   /* Motion */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1); /* overshoots a little: things that land */
   --duration-in: 400ms;
   --stagger: 150ms;
 
@@ -234,10 +256,12 @@ body {
   gap: var(--space-2);
 }
 
-/* The logo, a link to Welcome. */
+/* The logo, a link to Welcome. Every target in the bar is at least 44px, a
+   fingertip's size. */
 .wordmark {
   display: flex;
   align-items: center;
+  min-height: 44px;
 }
 
 .wordmark-logo {
@@ -281,6 +305,8 @@ body {
 .menu a {
   display: flex;
   align-items: center;
+  justify-content: center;
+  min-width: 44px;
   font-size: 18px;
   font-weight: 500;
   color: var(--text-muted);
@@ -303,62 +329,34 @@ body {
   outline-offset: 2px;
 }
 
-/* The theme toggle (ThemeToggle.jsx): three icons on a track, the chosen
-   one raised. Each radio input covers its icon, transparent: it still takes
-   clicks, focus and arrow keys, and the icon next to it shows its state. */
+/* The theme button (ThemeToggle.jsx): one round icon button, a moon by day
+   and a sun by night. Quiet on purpose, like the three icons it replaced on
+   2026-10-31 (Light, Dark, System): muted until hovered. */
 .theme-toggle {
-  margin: 0;
-  padding: 0;
-  border: none;
-}
-
-.theme-toggle-track {
-  display: flex;
-  gap: 3px;
-  padding: 4px;
-  background: var(--segment-track);
-  border-radius: var(--radius-control);
-}
-
-.theme-toggle label {
-  position: relative;
-}
-
-.theme-toggle input {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.theme-toggle-option {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 30px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
   color: var(--text-muted);
-  border-radius: var(--radius-segment);
+  background: none;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
 }
 
-.theme-toggle-option svg {
+.theme-toggle svg {
   width: 20px;
   height: 20px;
 }
 
-.theme-toggle label:hover .theme-toggle-option {
+.theme-toggle:hover {
   color: var(--text);
+  background: var(--segment-track);
 }
 
-.theme-toggle input:checked + .theme-toggle-option {
-  color: var(--text);
-  background: var(--segment-on);
-}
-
-.theme-toggle input:focus-visible + .theme-toggle-option {
+.theme-toggle:focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 1px;
 }
@@ -417,29 +415,6 @@ body {
   to {
     opacity: 1;
     transform: none;
-  }
-}
-
-/* Welcome's first load: headline, subline and button one after another. */
-.rise-in {
-  animation: reveal-in var(--duration-in) var(--ease-out) both;
-}
-
-.rise-1 {
-  animation-delay: 0ms;
-}
-
-.rise-2 {
-  animation-delay: var(--stagger);
-}
-
-.rise-3 {
-  animation-delay: calc(var(--stagger) * 2);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .rise-in {
-    animation: none;
   }
 }
 
@@ -1088,6 +1063,60 @@ body {
   padding: 20px;
 }
 
+/* Learn's card head: the letter and its count on the left, the 2D | 3D
+   switch on the right. */
+.letter-card-name {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.learn .letter-card-head {
+  align-items: center;
+}
+
+/* The 3D hand (src/hand-model/) in the drawing's white frame, edge to edge:
+   the canvas fills it, and the hand is grey on white in both themes. */
+.practice-side .hand-model-frame {
+  padding: 0;
+}
+
+.hand-model-view {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  /* The fingertip numbers, as on the checklist: Deep Sky, white text. */
+  --hand-badge-bg: var(--deep-sky);
+  --hand-badge-text: var(--white);
+  --hand-badge-border: var(--deep-sky);
+  --hand-badge-glow: rgb(26 117 163 / 0.3);
+}
+
+/* Inside the frame (it clips anything outside), so the ring goes inside. */
+.hand-model-view:focus-visible {
+  outline: 3px solid var(--deep-sky);
+  outline-offset: -3px;
+}
+
+.hand-model-view .hand-tip-label {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+/* The frame's text while the hand loads: on white in both themes. */
+.hand-model-wait {
+  margin: 0;
+  font-size: var(--text-small);
+  color: var(--muted-text);
+}
+
+.hand-model-note {
+  margin: 0;
+  font-size: var(--text-caption);
+  color: var(--text-muted);
+}
+
 .practice-note {
   margin: 0;
   font-size: var(--text-small);
@@ -1316,8 +1345,74 @@ body {
   }
 }
 
+/* Learn's pass (2026-10-31): the letter's drawing on its white card, set down
+   at a slight tilt like a flashcard, with the tick on its corner, in place of
+   the plain tick above (which the quiz keeps). The card settles in once. */
+.practice-done.has-drawing .practice-done-title::before {
+  content: none;
+}
+
+.practice-done-drawing {
+  position: relative;
+  width: clamp(72px, 16vmin, 136px);
+  aspect-ratio: 1;
+  margin-bottom: 4px;
+  background: var(--white);
+  border-radius: var(--radius-card);
+  box-shadow: 0 12px 32px rgb(12 29 48 / 0.45);
+  transform: rotate(-3deg);
+  animation: practice-done-drawing-in 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.practice-done-drawing .asl-drawing {
+  position: absolute;
+  inset: 8%;
+  width: 84%;
+  height: 84%;
+}
+
+/* The white ring joins the tick to the card. */
+.practice-done-badge {
+  position: absolute;
+  right: -12px;
+  bottom: -12px;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  color: var(--green-night);
+  background: var(--success);
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px var(--white);
+  animation: practice-done-badge-in 400ms 250ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes practice-done-drawing-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.85) rotate(-9deg);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(-3deg);
+  }
+}
+
+@keyframes practice-done-badge-in {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .practice-done-title::before {
+  .practice-done-title::before,
+  .practice-done-drawing,
+  .practice-done-badge {
     animation: none;
   }
 }
@@ -2324,7 +2419,8 @@ body {
 }
 
 /* The List | Grid switch: the same look as the theme toggle's track. */
-.practice-guide-layout {
+.practice-guide-layout,
+.view-switch {
   display: flex;
   gap: 2px;
   padding: 3px;
@@ -2332,7 +2428,8 @@ body {
   border-radius: var(--radius-control);
 }
 
-.practice-guide-layout button {
+.practice-guide-layout button,
+.view-switch button {
   padding: 3px 10px;
   font: inherit;
   font-size: var(--text-caption);
@@ -2344,16 +2441,27 @@ body {
   border-radius: var(--radius-segment);
 }
 
-.practice-guide-layout button:hover {
+.practice-guide-layout button:hover,
+.view-switch button:hover {
   color: var(--text);
 }
 
-.practice-guide-layout button[aria-pressed='true'] {
+/* A choice that isn't there for this letter (Learn's 3D, with no pose yet):
+   greyed out, no hover. */
+.view-switch button[aria-disabled='true'] {
+  color: var(--text-muted);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.practice-guide-layout button[aria-pressed='true'],
+.view-switch button[aria-pressed='true'] {
   color: var(--text);
   background: var(--segment-on);
 }
 
-.practice-guide-layout button:focus-visible {
+.practice-guide-layout button:focus-visible,
+.view-switch button:focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 1px;
 }
@@ -3860,59 +3968,333 @@ body {
 
 /* ---------- Welcome (WelcomePage.jsx) ---------- */
 
-/* The shared top bar, then the column. A plain page background from the
-   theme: no decoration. */
+/* Redesigned 2026-10-31: the first page of the new look. Deep Sky fills the
+   whole page in the light theme (night in the dark one), and Welcome sets its
+   own colour roles on that field, so the top bar and theme toggle inside it
+   read on it too. White on Deep Sky is 5.1:1. */
 .welcome {
+  --bg: var(--deep-sky);
+  --surface: transparent;
+  --text: var(--white);
+  --text-muted: var(--white);
+  --border: transparent;
+  --accent: var(--white); /* focus rings */
+  --segment-track: rgb(255 255 255 / 0.2); /* the chosen theme's round */
+  --tag-band: var(--deep-cobalt);
+  --tag-band-label: var(--bright-sky);
+  --sticker-shadow: 0 14px 30px rgb(12 29 48 / 0.32), 0 3px 6px rgb(12 29 48 / 0.2);
+
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
+  color: var(--text);
+  background: var(--bg);
 }
 
-/* One centred column. More padding below than above lifts the group a little
-   above the middle, where the eye lands first. Fits 1280×720 and up. */
-.welcome-hero {
-  display: flex;
+/* The logo made for dark backgrounds (white "sema."), in either theme. */
+.welcome .logo-light {
+  display: none;
+}
+
+.welcome .logo-dark {
+  display: block;
+}
+
+[data-theme='dark'] .welcome {
+  --bg: var(--night);
+  --text-muted: var(--muted-on-dark);
+  --accent: var(--bright-sky);
+  --tag-band: var(--deep-sky);
+  --tag-band-label: var(--white);
+  --sticker-shadow: 0 14px 30px rgb(0 0 0 / 0.45), 0 3px 6px rgb(0 0 0 / 0.3);
+}
+
+.welcome ::selection {
+  color: var(--deep-cobalt);
+  background: var(--amber-on-dark);
+}
+
+/* Two columns: the name tag and its tiles (the stage), then the words and the
+   button. Sized so the whole thing fits 1280×720 without scrolling. */
+.welcome-main {
+  display: grid;
   flex: 1 1 auto;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  gap: clamp(32px, 6vw, 96px);
+  align-items: center;
+  width: 100%;
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--page-gutter) var(--space-8);
+}
+
+.welcome-stage {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(28px, 4vh, 48px);
+  min-width: 0;
+}
+
+/* The name tag: a sticker slapped on slightly crooked. */
+.name-tag {
+  overflow: hidden;
+  color: var(--deep-cobalt);
+  background: var(--white);
+  border-radius: 32px;
+  box-shadow: var(--sticker-shadow);
+  transform: rotate(-3deg);
+}
+
+.name-tag-band {
+  display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  width: 100%;
-  max-width: var(--page-max);
-  margin: 0 auto;
-  padding: var(--space-6) var(--page-gutter) var(--space-9);
+  padding: clamp(14px, 2.4vh, 26px) var(--space-6) clamp(12px, 2vh, 20px);
+  color: var(--white);
+  background: var(--tag-band);
+}
+
+.name-tag-hello {
+  font-family: var(--font-display);
+  font-size: clamp(64px, 8.4vw, 124px);
+  font-weight: 900;
+  line-height: 0.9;
+  letter-spacing: 0.02em;
+}
+
+.name-tag-label {
+  margin-top: var(--space-1);
+  font-family: var(--font-display);
+  font-size: clamp(22px, 2.2vw, 30px);
+  font-weight: 700;
+  color: var(--tag-band-label);
+}
+
+.name-tag-write {
+  padding: clamp(16px, 3vh, 32px) clamp(24px, 4vw, 48px) clamp(18px, 3vh, 30px);
   text-align: center;
 }
 
-/* The logo above the headline. The SVG has its own space around the
-   drawing, so the gap below looks larger than the margin. */
-.welcome-logo {
-  height: 64px;
-  width: auto;
-  margin-bottom: var(--space-6);
-}
-
-/* Smaller and lighter than the intro pages' headlines: it carries the page
-   by being the only large thing on it, not by weight. 14em keeps it to two
-   lines at every width. */
-.welcome-title {
-  max-width: 14em;
-  font-size: var(--text-welcome);
+/* The name, written in marker on the tag's line. The placeholder ("Sema")
+   is the same ink, a little paler, so the tag never looks empty. */
+.name-tag-input {
+  width: 100%;
+  padding: 0 0 var(--space-2);
+  font-family: var(--font-marker);
+  font-size: clamp(56px, 7vw, 104px);
   line-height: 1.1;
-  font-weight: 700;
+  text-align: center;
+  color: var(--deep-cobalt);
+  caret-color: var(--deep-sky);
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  outline: none;
+  box-shadow: inset 0 -4px 0 var(--sky-line); /* the tag's write-on line */
 }
 
-/* Spacing by meaning: the line under the headline belongs to it, so it sits
-   close; the button is the next step, so it gets clear space above it. */
-.welcome-lead {
-  margin-top: var(--space-4);
+.name-tag-input::placeholder {
+  color: var(--deep-cobalt);
+  opacity: 0.55;
 }
 
-.welcome-actions {
+.name-tag-input:focus-visible {
+  box-shadow: inset 0 -4px 0 var(--deep-sky);
+}
+
+.name-tag-hint {
+  margin: var(--space-3) 0 0;
+  font-size: var(--text-body);
+  color: var(--muted-text);
+}
+
+/* The name in ASL: one white tile per letter, alternately tipped left and
+   right (--tilt, set per tile), as if stuck on by hand. They share the row
+   equally, up to 150px each, so a long name shrinks its tiles. */
+.name-tiles {
   display: flex;
+  justify-content: center;
+  gap: clamp(8px, 1.2vw, 16px);
+  margin: 0;
+  padding: 0 var(--space-4);
+  list-style: none;
+}
+
+.name-tile {
+  display: flex;
+  flex: 0 1 150px;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-4);
+  min-width: 0;
+  padding: 10px 8px 8px;
+  color: var(--deep-cobalt);
+  background: var(--white);
+  border-radius: 20px;
+  box-shadow: var(--sticker-shadow);
+  transform: rotate(calc(var(--tilt) * 2deg));
+  animation: tile-pop 520ms var(--ease-spring) both;
+}
+
+.name-tile-drawing {
+  width: 100%;
+  aspect-ratio: 1;
+  max-height: clamp(72px, 13vh, 124px);
+}
+
+.name-tile-letter {
+  margin-top: var(--space-1);
+  font-family: var(--font-display);
+  font-size: clamp(18px, 1.8vw, 24px);
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* A new letter springs onto the row. */
+@keyframes tile-pop {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.6) rotate(calc(var(--tilt) * -8deg));
+  }
+}
+
+/* The words on the right. */
+.welcome-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.welcome-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(44px, 4.6vw, 72px);
+  font-weight: 900;
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.welcome-lead {
+  max-width: 26em;
+  margin: var(--space-5) 0 0;
+  font-size: clamp(18px, 1.5vw, 22px);
+  line-height: 1.45;
+  text-wrap: pretty;
+}
+
+.welcome-note {
+  margin: var(--space-4) 0 0;
+  font-size: var(--text-body);
+  color: var(--text-muted);
+}
+
+/* The key button: amber, with a darker edge under it, so it looks like a key
+   you press; on click it goes down onto its edge. Cobalt on amber is 7.7:1. */
+.key-button {
+  --key-edge: 6px;
+
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 60px;
   margin-top: var(--space-7);
+  margin-bottom: var(--key-edge);
+  padding: var(--space-4) var(--space-6);
+  font-family: var(--font-display);
+  font-size: clamp(20px, 1.7vw, 24px);
+  font-weight: 800;
+  color: var(--deep-cobalt);
+  background: var(--amber-on-dark);
+  border: none;
+  border-radius: 18px;
+  box-shadow: 0 var(--key-edge) 0 var(--amber);
+  cursor: pointer;
+  transition:
+    transform 90ms ease-out,
+    box-shadow 90ms ease-out,
+    background-color 150ms ease-out;
+}
+
+.key-button:hover {
+  background: color-mix(in srgb, var(--amber-on-dark), var(--white) 14%);
+}
+
+.key-button:active {
+  box-shadow: 0 0 0 var(--amber);
+  transform: translateY(var(--key-edge));
+}
+
+.key-button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.key-button-arrow {
+  width: 26px;
+  height: 26px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 150ms ease-out;
+}
+
+.key-button:hover .key-button-arrow {
+  transform: translateX(3px);
+}
+
+/* The first visit's entrance: the tag lands, the tiles follow, then the
+   words. The tiles' own pop (tile-pop) waits for the row to arrive. */
+.enter-tag {
+  animation: tag-land 700ms var(--ease-spring) both;
+}
+
+.enter-tiles .name-tile {
+  animation-delay: calc(350ms + var(--index) * 70ms);
+}
+
+.enter-copy {
+  animation: reveal-in 600ms var(--ease-out) 450ms both;
+}
+
+@keyframes tag-land {
+  from {
+    opacity: 0;
+    transform: translateY(-40px) scale(1.08) rotate(-9deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enter-tag,
+  .enter-copy,
+  .name-tile {
+    animation: none;
+  }
+
+  .key-button,
+  .key-button-arrow {
+    transition: none;
+  }
+}
+
+/* Narrower windows: one column, the tag first, then the words. */
+@media (max-width: 900px) {
+  .welcome-main {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-7);
+    padding-top: var(--space-5);
+  }
+
+  .welcome-copy {
+    align-items: center;
+    text-align: center;
+  }
+
+  .name-tag {
+    border-radius: 24px;
+    transform: rotate(-2deg);
+  }
 }
 
 /* ---------- About (AboutPage.jsx): what Sema is, how it works and how it
@@ -4360,9 +4742,14 @@ html:has(.about-page) {
 
 /* ---------- Camera check (CameraCheckPage.jsx) ---------- */
 
-/* Both columns are the same height (align-items), and the pair sits in the
-   middle of the page as one group (align-content). */
+/* Redesigned 2026-10-31 in Welcome's look: Gabarito headings, white sticker
+   cards with soft shadows, the amber key button. Unlike Welcome, the page
+   keeps the theme's own background (the sky wash, or night). Both columns
+   are the same height (align-items), and the pair sits in the middle of the
+   page as one group (align-content). */
 .camera-check {
+  --sticker-shadow: 0 10px 24px rgb(12 29 48 / 0.12), 0 2px 5px rgb(12 29 48 / 0.08);
+
   display: flex;
   flex: 1 1 auto;
   flex-wrap: wrap;
@@ -4375,35 +4762,171 @@ html:has(.about-page) {
   padding: 40px 60px;
 }
 
-/* As tall as the camera column, so the Continue button at the bottom ends
-   level with the panel's bottom edge. */
+:root[data-theme='dark'] .camera-check {
+  --sticker-shadow: 0 12px 28px rgb(0 0 0 / 0.4), 0 2px 6px rgb(0 0 0 / 0.3);
+}
+
+.camera-check ::selection {
+  color: var(--deep-cobalt);
+  background: var(--amber-on-dark);
+}
+
+/* As tall as the camera column, so the key button at the bottom ends level
+   with the panel's bottom edge. */
 .camera-check-text {
   display: flex;
   flex: 1 1 400px;
   flex-direction: column;
-  gap: 60px;
+  gap: 40px;
   max-width: 525px;
   padding: var(--space-2) 0 0;
 }
 
 .camera-check .setup-title {
-  font-size: 40px;
+  font-family: var(--font-display);
+  font-size: clamp(44px, 3.8vw, 60px);
+  font-weight: 900;
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
 }
 
 .camera-check .setup-lead {
-  margin-top: 14px;
+  margin-top: var(--space-4);
   font-size: 20px;
+  line-height: 1.45;
 }
 
-/* Continue, under the steps and as wide as their column. Greyed out (the
-   shared .primary-button:disabled look) until the check passes, then it
-   turns on. */
+/* The key button (Welcome's), as wide as the steps. It sits at the bottom of
+   the column, so its own top margin goes. */
 .camera-check-continue {
-  gap: var(--space-3);
+  justify-content: center;
   width: 100%;
-  min-height: 64px;
-  font-size: 20px;
-  transition: background-color 200ms ease, color 200ms ease;
+  margin-top: auto;
+}
+
+/* Greyed out, flat on its edge, until the check passes. */
+.camera-check-continue:disabled {
+  color: var(--text-muted);
+  background: var(--fill-off);
+  box-shadow: 0 var(--key-edge) 0 color-mix(in srgb, var(--fill-off), var(--deep-cobalt) 18%);
+  cursor: not-allowed;
+}
+
+.camera-check-continue:disabled .key-button-arrow {
+  transform: none;
+}
+
+/* When it turns on: one springy pop. */
+.camera-check-continue.ready {
+  animation: key-ready 520ms var(--ease-spring) backwards;
+}
+
+@keyframes key-ready {
+  from {
+    transform: scale(0.92);
+  }
+}
+
+/* The three steps: sticker cards stacked in the column's free height. */
+.setup-steps {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  justify-content: center;
+  gap: 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* A later step is flat and see-through, not stuck on yet; the step to do
+   now and the done ones are white stickers, straight. */
+.setup-step-item {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 20px 24px;
+  background: var(--surface-soft);
+  border: 2px dashed var(--border);
+  border-radius: 24px;
+  transition:
+    box-shadow 300ms var(--ease-out),
+    background-color 300ms var(--ease-out),
+    border-color 300ms var(--ease-out);
+}
+
+.setup-step-item.active,
+.setup-step-item.done {
+  background: var(--surface);
+  border: 2px solid transparent;
+  box-shadow: var(--sticker-shadow);
+}
+
+/* The step to do now has an amber edge around it. */
+.setup-step-item.active {
+  border-color: var(--amber-on-dark);
+}
+
+.setup-step-mark {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-muted);
+  border: 2px solid var(--border-strong);
+  border-radius: 50%;
+}
+
+/* Cobalt on amber is 7.7:1, in both themes. */
+.setup-step-item.active .setup-step-mark {
+  color: var(--deep-cobalt);
+  background: var(--amber-on-dark);
+  border-color: var(--amber-on-dark);
+}
+
+/* The green check is stamped on. */
+.setup-step-item.done .setup-step-mark {
+  color: var(--surface);
+  background: var(--success);
+  border-color: var(--success);
+  animation: step-stamp 450ms var(--ease-spring) both;
+}
+
+.setup-step-mark svg {
+  display: block;
+}
+
+@keyframes step-stamp {
+  from {
+    transform: scale(1.6) rotate(-20deg);
+    opacity: 0;
+  }
+}
+
+.setup-step-body h2 {
+  margin: 0 0 4px;
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.setup-step-item.todo .setup-step-body h2 {
+  color: var(--text-muted);
+}
+
+.setup-step-body p {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.45;
+  color: var(--text-muted);
+  text-wrap: pretty;
 }
 
 .camera-check-preview {
@@ -4417,8 +4940,7 @@ html:has(.about-page) {
 
 /* The video inside the camera panel. The video keeps its shape inside it
    (contain), so a whole-hand check never passes on a hand cut off by
-   cropping. Its height leaves room for the panel's bar and for Previous and
-   Next at 1280×720. */
+   cropping. */
 .camera-check-stage {
   /* The camera's 4:3 shape at the panel's width, but never taller than the
      window allows (430px at 720px tall), so there are no empty bands above
@@ -4430,9 +4952,11 @@ html:has(.about-page) {
   --stage-radius: 0px;
 }
 
-/* The panel's header, a little larger than on the other camera pages. */
+/* The panel is a sticker too (not tipped: the video stays straight), with a
+   larger header in Gabarito. */
 .camera-check .camera-panel {
-  border-radius: 24px;
+  border-radius: 28px;
+  box-shadow: var(--sticker-shadow);
 }
 
 .camera-check .camera-panel-head {
@@ -4440,12 +4964,13 @@ html:has(.about-page) {
 }
 
 .camera-check .camera-panel-status {
+  font-family: var(--font-display);
   font-size: 30px;
+  font-weight: 800;
 }
 
-/* "Camera ready" over the video when the check passes: fades in, holds a
-   moment, fades out, and stays out (forwards). Opacity only, so reduced
-   motion needs no change. It never takes a click. */
+/* "Camera ready" over the video when the check passes: a sticker slaps on,
+   holds a moment, fades out, and stays out (both). It never takes a click. */
 .camera-ready-flash {
   position: absolute;
   inset: 0;
@@ -4453,113 +4978,85 @@ html:has(.about-page) {
   align-items: center;
   justify-content: center;
   pointer-events: none;
-  animation: camera-ready-flash 2200ms ease both;
 }
 
-.camera-ready-flash span {
-  padding: var(--space-3) var(--space-5);
-  font-size: 28px;
-  font-weight: 800;
-  color: #fff;
-  background: rgba(20, 44, 72, 0.85);
-  border-radius: var(--radius-pill);
+.camera-ready-sticker {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-6) var(--space-4) var(--space-4);
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 900;
+  color: var(--deep-cobalt);
+  background: var(--white);
+  border-radius: 24px;
+  box-shadow: 0 14px 30px rgb(0 0 0 / 0.45), 0 3px 6px rgb(0 0 0 / 0.3);
+  transform: rotate(-4deg);
+  animation: camera-ready-slap 2200ms both;
 }
 
-@keyframes camera-ready-flash {
+.camera-ready-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  color: var(--white);
+  background: var(--green);
+  border-radius: 50%;
+}
+
+.camera-ready-check svg {
+  display: block;
+}
+
+@keyframes camera-ready-slap {
+  0% {
+    opacity: 0;
+    transform: scale(1.5) rotate(-12deg);
+    animation-timing-function: var(--ease-spring);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1) rotate(-4deg);
+  }
+  75% {
+    opacity: 1;
+    transform: scale(1) rotate(-4deg);
+    animation-timing-function: ease-in;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.96) rotate(-4deg);
+  }
+}
+
+/* Reduced motion: no springs or stamps; the sticker only fades. */
+@media (prefers-reduced-motion: reduce) {
+  .setup-step-item,
+  .setup-step-item.done .setup-step-mark,
+  .camera-check-continue.ready {
+    transition: none;
+    animation: none;
+  }
+
+  .camera-ready-sticker {
+    animation-name: camera-ready-fade;
+  }
+}
+
+@keyframes camera-ready-fade {
   0% {
     opacity: 0;
   }
   15%,
-  70% {
+  75% {
     opacity: 1;
   }
   100% {
     opacity: 0;
   }
-}
-
-/* The three numbered steps (CameraCheckPage.jsx), joined by a thin line
-   down from each mark to the next. The step to do now has an accent ring;
-   done steps a filled ✓; later ones are quiet. */
-/* The list takes the column's free height: steps 1 and 2 stretch (their
-   line stretches with them), so step 3 sits at the bottom. */
-.setup-steps {
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: column;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.setup-step-item {
-  position: relative;
-  display: flex;
-  gap: 30px;
-  padding-bottom: 50px;
-}
-
-.setup-step-item:not(:last-child) {
-  flex: 1 1 auto;
-}
-
-.setup-step-item:last-child {
-  padding-bottom: 0;
-}
-
-/* The line to the next step, from under this step's mark. */
-.setup-step-item:not(:last-child)::before {
-  content: '';
-  position: absolute;
-  top: 48px;
-  bottom: 8px;
-  left: 19px;
-  border-left: 2px solid var(--border);
-}
-
-.setup-step-mark {
-  display: flex;
-  flex: 0 0 auto;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  font-family: var(--font-mono);
-  font-size: 20px;
-  font-weight: 500;
-  color: var(--text-muted);
-  border: 2px solid var(--border-strong);
-  border-radius: 50%;
-}
-
-.setup-step-item.active .setup-step-mark {
-  color: var(--accent);
-  border-color: var(--accent);
-}
-
-.setup-step-item.done .setup-step-mark {
-  font-family: inherit;
-  font-weight: 700;
-  color: var(--on-accent);
-  background: var(--accent);
-  border-color: var(--accent);
-}
-
-.setup-step-body h2 {
-  margin: 4px 0 10px;
-  font-size: 24px;
-  font-weight: 700;
-}
-
-.setup-step-item.todo .setup-step-body h2 {
-  color: var(--text-muted);
-}
-
-.setup-step-body p {
-  margin: 0;
-  font-size: 20px;
-  line-height: 1.55;
-  color: var(--text-muted);
 }
 
 /* The camera panel (CameraPanel.jsx), on every camera page: a header (the

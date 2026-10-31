@@ -88,6 +88,7 @@ The badges at the top repeat the main ones, so update them together with this ta
 | @mediapipe/tasks-vision | 1.1.1 | Its wasm files are copied from this package on install, so they always match |
 | Hand Landmarker model | float16, version 1 | `public/models/hand_landmarker.task`, 7,819,105 bytes |
 | Vitest | 5.0.4 | Unit tests |
+| three.js | 0.186.1 | The 3D hand on Learn (`src/hand-model/`), pinned to Eidos's version; loaded only when 3D is chosen |
 | oxlint | 1.88.0 | Lint |
 | Browser | Chrome (current) | Needs WebGL2 for hand tracking |
 | Python | 3.14.8 | Training only (`training/`), offline; never in the app |
@@ -149,7 +150,7 @@ React, Vite, plain JavaScript and CSS, with MediaPipe Hand Landmarker running in
 
 - [MediaPipe Hand Landmarker](https://developers.google.com/edge/mediapipe/solutions/vision/hand_landmarker)
   (`@mediapipe/tasks-vision`, Apache-2.0) finds the hand points.
-- Fonts: Plus Jakarta Sans, JetBrains Mono and a subset of Noto Sans Mono, under the SIL Open
+- Fonts: Plus Jakarta Sans, Gabarito, Caveat Brush, JetBrains Mono and a subset of Noto Sans Mono, under the SIL Open
   Font License 1.1. The licences are in `public/fonts/`.
 - ASL hand drawings: at this stage, Sema uses the SVG hand drawings (A to Z) from the
   Wikimedia Commons category [ASL letters](https://commons.wikimedia.org/wiki/Category:ASL_letters),
@@ -165,6 +166,9 @@ React, Vite, plain JavaScript and CSS, with MediaPipe Hand Landmarker running in
   [ASLYset](https://data.mendeley.com/datasets/xs6mvhx6rh/1) by Miguel Rivera (Mendeley Data,
   2019, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)). Sema doesn't include the
   photos; [docs/ATTRIBUTION.md](docs/ATTRIBUTION.md) says what was changed.
+- 3D hand: the viewer comes from [Eidos](https://github.com/lanixiligan/eidos) (MIT), and the
+  hand model is the WebXR Input Profiles generic hand (MIT, © 2019 Amazon), with its licence in
+  `src/hand-model/models/`. [three.js](https://threejs.org) (MIT) draws it.
 
 ## License
 

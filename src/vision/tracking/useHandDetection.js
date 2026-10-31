@@ -22,7 +22,7 @@ const NO_STATS = { detectionFps: null, detectionMs: null }
 // is used (pickHand.js); it's the only hand drawn, and the other is reported
 // but not drawn. Without it, the first hand found is used and drawn.
 // drawAllHands (optional): draw every hand found, not just the picked one
-// (the camera check, which looks at both hands).
+// (the camera check, which accepts either hand).
 // The listener gets the picked hand (landmarks, handedness) and, as `hands`,
 // every hand found (pickHand.js's listHands). It gets the raw points: only the
 // drawing is smoothed (smoothHands.js).

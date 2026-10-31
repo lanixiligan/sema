@@ -35,7 +35,7 @@ Every page, one line each: [docs/sema-pages.md](sema-pages.md).
 - Browser only: no backend, database or accounts until Phase 5. Recorded hand points stay private in `data/raw/`.
 - Desktop first. Phone layouts aren't a goal yet.
 - React, Vite, plain JavaScript and plain CSS. No new dependencies without asking Lanix. Python runs only offline, to train the classifier.
-- Setup is Welcome's Get started, which opens the camera check, then Learn (2026-10-27: Get started briefly opened Learn directly, and Lanix put the camera check back the same day; before, the three intro pages came first). The camera check makes sure Sema sees both hands whole, together, for 3 seconds. Setup doesn't ask which hand the user signs with (2026-10-18; before, a Signing hand page asked): the signing hand starts as Right and is switched with the hand toggle in the camera controls. Left hands are flipped to look like right hands before classifying.
+- Setup is Welcome's Get started, which opens the camera check, then Learn (2026-10-27: Get started briefly opened Learn directly, and Lanix put the camera check back the same day; before, the three intro pages came first). The camera check makes sure Sema sees one hand, left or right, whole (wrist in view) for 3 seconds (until 2026-10-31 it needed both hands together). Setup doesn't ask which hand the user signs with (2026-10-18; before, a Signing hand page asked): the signing hand starts as Right and is switched with the hand toggle in the camera controls. Left hands are flipped to look like right hands before classifying.
 - Switching Left/Right lives in the camera controls of each camera view (2026-10-16). On Record it picks the hand for the next take; on Learn and the quiz (since 2026-10-23, first on Practice) it changes the setting.
 - Hosting is Vercel. About explains how Sema handles your data (its third section; a page of its own, `/privacy`, until 2026-10-27), but there's no cookie banner, because there are no analytics or tracking.
 - Record is a developer tool (2026-10-22; before, the main page at `/record`, where setup led and returning visitors started): `/dev/record`, behind the access code, now that the classifier is trained and recording is only for the test set. Lanix gives the code to the people who record. Setup and returning visitors went to Learn, a placeholder then, and from the same day to Try (renamed Practice, then merged into Learn; below).
@@ -55,3 +55,14 @@ Every page, one line each: [docs/sema-pages.md](sema-pages.md).
 - When Practice unlocks (3 mastered letters was a starting guess, for 3.4): moot since 2026-10-27, when Practice was merged into Learn, where every letter is open.
 - What "finalized" means: all 26 letters working, or some marked lower confidence. Leaning toward the second.
 - The rest of 3.2: the top-bar hand pill's menu (Reset progress) and per-letter progress.
+
+## Outside the plan
+
+Ideas Lanix is building alongside the phases, not part of them: no phase waits on them.
+
+- 3D hands (started 2026-10-31): a 2D | 3D switch on Learn's letter card shows the letter's
+  pose on a 3D hand made in Lanix's own [Eidos](https://github.com/lanixiligan/eidos), instead
+  of the drawing. 2D stays the default: 3D is opt-in for those who want it, so people who prefer
+  reduced motion or need to save battery (phones, tablets) keep the drawings. Poses are
+  in Eidos's format in `public/languages/asl/letters/`, all placeholders for now: Lanix fills
+  them in. `docs/hand-poses.md`.

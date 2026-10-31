@@ -27,18 +27,24 @@ describe('progressStore', () => {
     expect(loadProgress()).toEqual(NEW_VISITOR)
   })
 
-  it('saves and loads the signing hand, setup, theme, developer access and model', () => {
+  it('saves and loads the signing hand, setup, theme, hand picture, developer access and model', () => {
     vi.stubGlobal('localStorage', fakeStorage())
     const progress = {
       version: PROGRESS_VERSION,
       signingHand: 'left',
       setupDone: true,
       theme: 'dark',
+      handView: '3d',
       devAccess: 'ab12',
       devModel: 'knn',
     }
     expect(saveProgress(progress)).toBe(true)
     expect(loadProgress()).toEqual(progress)
+  })
+
+  it('gives settings saved before the 3D hand existed the drawing', () => {
+    vi.stubGlobal('localStorage', fakeStorage(saved({ version: PROGRESS_VERSION, signingHand: 'left', setupDone: true, theme: 'dark' })))
+    expect(loadProgress().handView).toBe('2d')
   })
 
   it('gives settings saved before developer access existed none', () => {
