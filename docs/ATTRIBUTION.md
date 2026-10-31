@@ -2,6 +2,17 @@
 
 Where Sema's third-party content comes from, and under which licence.
 
+## The 3D hand
+
+- **Viewer:** `src/hand-model/hand.js` and `pose.js` come from
+  [Eidos](https://github.com/lanixiligan/eidos) (Lanix Iligan, MIT), `hand.js` with changes listed
+  at its top.
+- **Hand model:** `src/hand-model/models/hand-right.glb` is the generic hand of the
+  [WebXR Input Profiles](https://github.com/immersive-web/webxr-input-profiles) assets,
+  © 2019 Amazon, under the MIT License; the licence text is next to it
+  (`LICENSE-webxr-hand-model.md`). Unchanged; Eidos re-chains its joints when it loads.
+- **three.js** (MIT) draws it.
+
 ## The letter model's training data
 
 The small letter model, `public/models/asl-letters.json` (made by `training/train_small.py`), is

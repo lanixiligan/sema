@@ -1,5 +1,6 @@
 // Sema's settings, kept in this browser's localStorage so they survive a
-// reload: the signing hand, whether setup is done, the theme (theme.js), and
+// reload: the signing hand, whether setup is done, the theme (theme.js), the
+// picture on Learn's letter card (the drawing, 2D, or the 3D hand), and
 // the developer pages' access (the fingerprint of the code entered on /dev,
 // src/pages/dev/devAccess.js) and which classifier Practice runs (chosen on
 // /dev).
@@ -12,6 +13,9 @@ const HANDS = ['left', 'right']
 // The classifiers Practice can run: the small model (the default, and the one
 // on the live site) and the k-NN (step 4), which only exists under npm run dev.
 export const DEV_MODELS = ['small', 'knn']
+// Learn's letter card: the drawing ('2d', the default: no download, no
+// motion) or the 3D hand ('3d', src/hand-model/).
+export const HAND_VIEWS = ['2d', '3d']
 
 export const PROGRESS_VERSION = 1
 export const NEW_VISITOR = {
@@ -19,6 +23,7 @@ export const NEW_VISITOR = {
   signingHand: null,
   setupDone: false,
   theme: DEFAULT_THEME,
+  handView: '2d',
   devAccess: null,
   devModel: 'small',
 }
@@ -38,6 +43,7 @@ export function loadProgress() {
       signingHand,
       setupDone: saved.setupDone === true && signingHand !== null,
       theme: THEMES.includes(saved.theme) ? saved.theme : DEFAULT_THEME,
+      handView: HAND_VIEWS.includes(saved.handView) ? saved.handView : '2d',
       devAccess: typeof saved.devAccess === 'string' ? saved.devAccess : null,
       devModel: DEV_MODELS.includes(saved.devModel) ? saved.devModel : 'small',
     }

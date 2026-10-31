@@ -55,3 +55,14 @@ Every page, one line each: [docs/sema-pages.md](sema-pages.md).
 - When Practice unlocks (3 mastered letters was a starting guess, for 3.4): moot since 2026-10-27, when Practice was merged into Learn, where every letter is open.
 - What "finalized" means: all 26 letters working, or some marked lower confidence. Leaning toward the second.
 - The rest of 3.2: the top-bar hand pill's menu (Reset progress) and per-letter progress.
+
+## Outside the plan
+
+Ideas Lanix is building alongside the phases, not part of them: no phase waits on them.
+
+- 3D hands (started 2026-10-31): a 2D | 3D switch on Learn's letter card shows the letter's
+  pose on a 3D hand made in Lanix's own [Eidos](https://github.com/lanixiligan/eidos), instead
+  of the drawing. 2D stays the default: 3D is opt-in for those who want it, so people who prefer
+  reduced motion or need to save battery (phones, tablets) keep the drawings. Poses are
+  in Eidos's format in `public/languages/asl/letters/`, all placeholders for now: Lanix fills
+  them in. `docs/hand-poses.md`.

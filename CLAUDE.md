@@ -53,7 +53,7 @@ The development plan is `docs/project-plan.md`.
 - React + Vite + plain JavaScript (`.jsx` / `.js`). No TypeScript.
 - No UI framework, no CSS framework. Plain CSS in `src/styles.css`.
 - No new dependencies without asking first. Approved so far: `@mediapipe/tasks-vision`,
-  `vitest` (dev only), and for offline training only (Python, `training/requirements.txt`)
+  `vitest` (dev only), `three` (pinned to `0.186.1`, Eidos's version; 2026-10-31, the 3D hand), and for offline training only (Python, `training/requirements.txt`)
   `numpy` and `scikit-learn`.
 - Serve every asset from the app itself, never from a CDN. Fonts are `.woff2` files in
   `public/fonts/` with their OFL licences, declared with `@font-face` in `styles.css`.
@@ -136,6 +136,10 @@ src/
                     hand makes a letter (letterMatch: matchLetter, the checklist's ticks)
     benchmark/      the /dev/tracking benchmark's hook and statistics
   recorder/         recording logic: take rules, useRecording, session file and storage
+  hand-model/       the 3D hand on Learn's card (2026-10-31, outside the plan): Eidos's pose
+                    format (pose.js, unchanged) and viewer (hand.js, changed for Sema), the
+                    hand model, letterPoses (useLetterPose) and HandModelView, loaded with
+                    lazy(); docs/hand-poses.md
 ```
 
 Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.md`).
@@ -250,6 +254,13 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   (`localStorage` key `sema.progress`, with a version number). Pages never touch
   `localStorage` directly; `App.jsx` holds the settings and passes them down. The same
   store keeps `devAccess`, the fingerprint of the developer pages' access code once entered.
+- Learn's letter card has a 2D | 3D switch (2026-10-31): the drawing, or the 3D hand from
+  [Eidos](https://github.com/lanixiligan/eidos) (`src/pages/learn/LetterPicture.jsx`). The
+  choice is `handView` in the store ('2d' by default: 3D is opt-in, for battery and reduced
+  motion). The poses are Eidos's format in `public/languages/asl/letters/` (A–Z, placeholders
+  with `"available": false` until Lanix fills them). A letter whose file is empty, `{}`, a
+  placeholder or broken is unavailable: its 3D button is greyed out (`aria-disabled`) and the
+  drawing shows, but the saved choice stays 3D for the next letter that has a pose. Keep `src/hand-model/pose.js` identical to Eidos's. `docs/hand-poses.md`.
 - The letter hold time is fixed at 1.5 s (`LETTER_HOLD_MS`). Until 2026-10-27 it was 3 s, and
   for a few hours that day a Hold 2s | 3s | 5s switch in the camera controls (`holdSeconds` in
   the store) let the person choose; Lanix had the switch removed and the default cut to 1.5 s.

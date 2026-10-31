@@ -4,9 +4,11 @@ import AslDrawing from '../../components/AslDrawing.jsx'
 import CameraPanel from '../../components/camera-view/CameraPanel.jsx'
 import CameraView from '../../components/camera-view/CameraView.jsx'
 import { useLetterCheck } from '../../components/letter-check/useLetterCheck.js'
+import { useLetterPose } from '../../hand-model/letterPoses.js'
 import { LETTERS } from '../../vision/landmarks/letterShapes.js'
 import FingerChecklist from './FingerChecklist.jsx'
 import GuidePanel from './GuidePanel.jsx'
+import LetterPicture from './LetterPicture.jsx'
 
 // The letters in teaching order, for now plain A to Z. (Which order is best
 // is still an open decision in docs/project-plan.md.)
@@ -27,7 +29,7 @@ const LESSONS = LETTERS
 // switch changes, Right by default); only that hand is drawn and judged. The
 // camera waits for a click: landing on Sema never turns it on. Nothing is
 // saved yet: opening Learn always starts at A.
-export default function LearnPage({ signingHand, onSigningHandChange, model = 'small' }) {
+export default function LearnPage({ signingHand, onSigningHandChange, handView = '2d', onHandViewChange, model = 'small' }) {
   // The letter to make, and each round of it: picking a letter, Try again or
   // Next letter starts a new round, which starts the hold over.
   const [target, setTarget] = useState(LESSONS[0])
@@ -53,6 +55,12 @@ export default function LearnPage({ signingHand, onSigningHandChange, model = 's
   } = useLetterCheck({ target, round, signingHand, model })
   const index = LESSONS.indexOf(target)
   const next = LESSONS[index + 1]
+  // Whether the letter has a 3D hand (a pose in public/languages/asl/letters/).
+  // Without one, 3D is greyed out and the drawing shows, but the saved choice
+  // stays: the next letter that has a pose is shown in 3D again.
+  const pose = useLetterPose(target)
+  const noPose = pose.letter === target && pose.status === 'unavailable'
+  const view = handView === '3d' && !noPose ? '3d' : '2d'
 
   return (
     <>
@@ -117,17 +125,37 @@ export default function LearnPage({ signingHand, onSigningHandChange, model = 's
         <aside className="practice-side" aria-label="Your letter">
           <section className="letter-card letter-card-record" aria-labelledby="learn-letter-title">
             <div className="letter-card-head">
-              <h2 id="learn-letter-title" className="letter-card-title">
-                Letter {target}
-              </h2>
-              <span className="letter-card-count">
-                {index + 1} of {LESSONS.length}
-              </span>
+              <div className="letter-card-name">
+                <h2 id="learn-letter-title" className="letter-card-title">
+                  Letter {target}
+                </h2>
+                <span className="letter-card-count">
+                  {index + 1} of {LESSONS.length}
+                </span>
+              </div>
+              {/* The picture below: the drawing or the 3D hand, a saved setting
+                  (2026-10-31). Like the guide's List | Grid, aria-pressed says
+                  which one is showing. For a letter with no pose, 3D is
+                  unavailable: greyed out, but still focusable (aria-disabled,
+                  not disabled), so its reason can be read. */}
+              <div className="view-switch" role="group" aria-label="Hand picture">
+                <button type="button" aria-pressed={view === '2d'} onClick={() => onHandViewChange('2d')}>
+                  2D
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={view === '3d'}
+                  aria-disabled={noPose}
+                  title={noPose ? `No 3D hand for ${target} yet` : undefined}
+                  onClick={() => noPose || onHandViewChange('3d')}
+                >
+                  3D
+                  {noPose && <span className="visually-hidden"> (no 3D hand for {target} yet)</span>}
+                </button>
+              </div>
             </div>
             {/* Large, on white in both themes (the drawings are black lines). */}
-            <div className="reference-image reference-image-drawing">
-              <AslDrawing letter={target} hand={drawnHand} alt={`Handshape for ${target}`} />
-            </div>
+            <LetterPicture letter={target} hand={drawnHand} view={handView === '3d' ? '3d' : '2d'} pose={pose} />
           </section>
           <FingerChecklist checks={checks} />
           {!traced && loaded.status === 'ready' && isDetecting && (

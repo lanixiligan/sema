@@ -127,6 +127,8 @@ export default function App() {
             onStartSetup={startSetup}
             onFinishSetup={finishSetup}
             onSigningHandChange={(signingHand) => updateProgress({ signingHand })}
+            handView={progress.handView}
+            onHandViewChange={(handView) => updateProgress({ handView })}
             devModel={progress.devModel}
             onDevModelChange={(devModel) => updateProgress({ devModel })}
             devAccess={progress.devAccess}
@@ -145,6 +147,8 @@ function Page({
   onStartSetup,
   onFinishSetup,
   onSigningHandChange,
+  handView,
+  onHandViewChange,
   devModel,
   onDevModelChange,
   devAccess,
@@ -172,7 +176,15 @@ function Page({
     case 'cameraCheck':
       return <CameraCheckPage onDone={onFinishSetup} />
     case 'learn':
-      return <LearnPage signingHand={signingHand} onSigningHandChange={onSigningHandChange} model={devModel} />
+      return (
+        <LearnPage
+          signingHand={signingHand}
+          onSigningHandChange={onSigningHandChange}
+          handView={handView}
+          onHandViewChange={onHandViewChange}
+          model={devModel}
+        />
+      )
     case 'quiz':
       return <QuizPage />
     case 'quizLetters':

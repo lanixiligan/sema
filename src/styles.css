@@ -1088,6 +1088,60 @@ body {
   padding: 20px;
 }
 
+/* Learn's card head: the letter and its count on the left, the 2D | 3D
+   switch on the right. */
+.letter-card-name {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.learn .letter-card-head {
+  align-items: center;
+}
+
+/* The 3D hand (src/hand-model/) in the drawing's white frame, edge to edge:
+   the canvas fills it, and the hand is grey on white in both themes. */
+.practice-side .hand-model-frame {
+  padding: 0;
+}
+
+.hand-model-view {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  /* The fingertip numbers, as on the checklist: Deep Sky, white text. */
+  --hand-badge-bg: var(--deep-sky);
+  --hand-badge-text: var(--white);
+  --hand-badge-border: var(--deep-sky);
+  --hand-badge-glow: rgb(26 117 163 / 0.3);
+}
+
+/* Inside the frame (it clips anything outside), so the ring goes inside. */
+.hand-model-view:focus-visible {
+  outline: 3px solid var(--deep-sky);
+  outline-offset: -3px;
+}
+
+.hand-model-view .hand-tip-label {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+/* The frame's text while the hand loads: on white in both themes. */
+.hand-model-wait {
+  margin: 0;
+  font-size: var(--text-small);
+  color: var(--muted-text);
+}
+
+.hand-model-note {
+  margin: 0;
+  font-size: var(--text-caption);
+  color: var(--text-muted);
+}
+
 .practice-note {
   margin: 0;
   font-size: var(--text-small);
@@ -2324,7 +2378,8 @@ body {
 }
 
 /* The List | Grid switch: the same look as the theme toggle's track. */
-.practice-guide-layout {
+.practice-guide-layout,
+.view-switch {
   display: flex;
   gap: 2px;
   padding: 3px;
@@ -2332,7 +2387,8 @@ body {
   border-radius: var(--radius-control);
 }
 
-.practice-guide-layout button {
+.practice-guide-layout button,
+.view-switch button {
   padding: 3px 10px;
   font: inherit;
   font-size: var(--text-caption);
@@ -2344,16 +2400,27 @@ body {
   border-radius: var(--radius-segment);
 }
 
-.practice-guide-layout button:hover {
+.practice-guide-layout button:hover,
+.view-switch button:hover {
   color: var(--text);
 }
 
-.practice-guide-layout button[aria-pressed='true'] {
+/* A choice that isn't there for this letter (Learn's 3D, with no pose yet):
+   greyed out, no hover. */
+.view-switch button[aria-disabled='true'] {
+  color: var(--text-muted);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.practice-guide-layout button[aria-pressed='true'],
+.view-switch button[aria-pressed='true'] {
   color: var(--text);
   background: var(--segment-on);
 }
 
-.practice-guide-layout button:focus-visible {
+.practice-guide-layout button:focus-visible,
+.view-switch button:focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 1px;
 }
