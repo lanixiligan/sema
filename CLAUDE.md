@@ -241,8 +241,8 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   (`navigate`), Back/Forward (the address is put back on Cancel) and closing or reloading the tab
   (the browser's own question); End quiz and the results don't ask. The
   camera starts on arrival (the person just chose a quiz). While it runs the page is minimal
-  (2026-10-27): the camera on the left (its hand switch and camera buttons in a footer under the
-  picture), on the right the count and End quiz, the letter large with its eye, the quiz's steps
+  (2026-10-27): the camera on the left (whole, as on Learn: its hand switch and camera buttons on the
+  picture; until 2026-11-01 they were in a footer under it), on the right the count and End quiz, the letter large on a sticker with its Peek button, the quiz's steps
   (one per item, from the quiz state) and a quiet Skip letter; a words quiz also shows the word under the letter.
 - Setup redirects live in `resolveRoute`: a new visitor opening Learn or Quiz goes
   to Welcome; a returning visitor opening `/` goes to Learn. Get started (Welcome's, or About's) opens the camera check, and passing it (its Start learning button) finishes setup and opens Learn. The developer pages, Record
@@ -335,10 +335,14 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   shown while the camera is live.
 - Every camera page, `/dev/tracking` included, puts its camera in one panel,
   `CameraPanel` (2026-10-23; before, each page copied the markup and its header looked
-  different): a dark frame in every theme, a header with the page's short status (24px,
-  white, or `tone` 'ok' accent / 'warn' amber), and a line along the header's bottom edge
-  that fills over a hold (`hold`) or to a share (`fill`, Record's take). The look lives
-  only in the shared `.camera-panel*` rules in `styles.css`.
+  different): a dark frame in every theme, and the page's short message on the video itself
+  (2026-11-01; before, in a header above it): a sticker at the top of the picture
+  (`StageMessage`, shown by `CameraView` while the camera is live, or by the tracking page),
+  large and white while Sema waits, compact Bright Sky when `tone` is 'ok', amber on 'warn',
+  with a line along its bottom edge that fills over a hold (`hold`) or to a share (`fill`,
+  Record's take). A blank status shows nothing. The page passes the message to `CameraPanel`
+  (through `PanelMessageContext`). The look lives only in the shared `.camera-message*` and
+  `.camera-panel*` rules in `styles.css`.
   Pages never call
   `useCamera` or `useHandLandmarker` themselves, except `/dev/tracking`, which keeps its own
   camera and its Start camera button.
