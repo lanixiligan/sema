@@ -1,46 +1,37 @@
-import { useEffect, useRef } from 'react'
+import { CheckIcon } from '../../components/icons/icons.jsx'
 import { LETTERS } from '../../vision/landmarks/letterShapes.js'
 
-// The letter guide in the left column: a slim rail of small letter tiles, two
-// per row, A to Z. The drawings that used to be here are on the letter's card
-// on the right, so this is only for picking. Clicking a tile picks the letter
-// to practise (selected). Each tile is a real button, so the keyboard and
-// screen readers can use it; aria-pressed says which one is picked.
-export default function GuidePanel({ selected, onSelect }) {
-  const listRef = useRef(null)
-
-  // When the picked letter changes (a click, or Next letter), scroll the rail
-  // just far enough to show its tile. All 26 usually fit, so this only matters
-  // in a short window. We set the rail's own scroll position instead of calling
-  // scrollIntoView, which could also scroll the page around it.
-  useEffect(() => {
-    const list = listRef.current
-    const tile = list?.querySelector('[aria-pressed="true"]')
-    if (!list || !tile) return
-    const top = tile.offsetTop - list.offsetTop
-    const bottom = top + tile.offsetHeight
-    if (top < list.scrollTop) {
-      list.scrollTo({ top: top - 6 })
-    } else if (bottom > list.scrollTop + list.clientHeight) {
-      list.scrollTo({ top: bottom - list.clientHeight + 6 })
-    }
-  }, [selected])
-
+// The letter guide: one row of 26 tiles, A to Z, above the camera and the
+// lesson (2026-11-02; before, a slim two-column rail on the left). It's only
+// for picking, since the drawing is on the lesson. The tile of the letter
+// being practised is lit; a letter passed during this visit gets a green tick
+// (`done`, a Set held by LearnPage: nothing is saved yet, so it starts empty
+// on every visit). Each tile is a real button, so the keyboard and screen
+// readers can use it; aria-pressed says which one is picked.
+export default function GuidePanel({ selected, done, onSelect }) {
   return (
-    <section className="practice-guide" aria-labelledby="practice-guide-title">
-      <h2 id="practice-guide-title" className="visually-hidden">
+    <section className="learn-strip" aria-labelledby="learn-strip-title">
+      <h2 id="learn-strip-title" className="visually-hidden">
         Letter guide
       </h2>
-      <ul className="practice-guide-tiles" ref={listRef}>
+      <ul>
         {LETTERS.map((letter) => (
           <li key={letter}>
             <button
               type="button"
-              className="practice-guide-tile"
+              className={done.has(letter) ? 'learn-tile done' : 'learn-tile'}
               aria-pressed={letter === selected}
               onClick={() => onSelect(letter)}
             >
               {letter}
+              {done.has(letter) && (
+                <>
+                  <span className="learn-tile-tick" aria-hidden="true">
+                    <CheckIcon size={11} strokeWidth={3.5} />
+                  </span>
+                  <span className="visually-hidden"> (done)</span>
+                </>
+              )}
             </button>
           </li>
         ))}

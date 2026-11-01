@@ -24,6 +24,8 @@ import StageProblem from './StageProblem.jsx'
 // The page brings its own hand detection (`hand` is what useHandDetection
 // returns, drawn on `canvasRef`) and its overlays, shown while the camera is
 // live: over the hand drawing (`children`) or under it (`underlay`).
+// `panel` is for a page's own readout on the picture (Learn's finger checklist):
+// shown while the camera is live only: not while it's off, nor over a problem panel.
 // `autoStart` is CameraStage's.
 export default function CameraView({
   canvasRef,
@@ -33,6 +35,7 @@ export default function CameraView({
   offNote,
   controls = {},
   underlay,
+  panel,
   children,
 }) {
   const camera = useSharedCamera()
@@ -54,6 +57,7 @@ export default function CameraView({
           <IdleNotice secondsLeft={idleSecondsLeft} />
         </>
       )}
+      {live && panel}
       <StageMessage show={live} />
       {controls && <CameraControls {...controls} />}
     </CameraStage>
