@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useLeaveWarning } from '../../app/routing/navigation.js'
 import AslDrawing from '../../components/AslDrawing.jsx'
-import CameraControls from '../../components/camera-view/CameraControls.jsx'
 import CameraPanel from '../../components/camera-view/CameraPanel.jsx'
 import CameraView from '../../components/camera-view/CameraView.jsx'
 import { EyeIcon } from '../../components/icons/icons.jsx'
@@ -11,11 +10,20 @@ import { NEXT_LETTER_MS, currentLetter } from './quizRounds.js'
 
 const LEAVE_QUESTION = 'Leave the quiz? Your answers so far won’t be kept.'
 
+// How a step of the progress bar looks: before the current item it's done, or
+// missed if a letter in it was skipped; the current item is lit.
+function stepClass(quiz, i) {
+  if (i === quiz.at.item) return 'current'
+  if (i > quiz.at.item) return undefined
+  return quiz.marks[i].includes('skipped') ? 'missed' : 'done'
+}
+
 // The quiz itself, kept minimal: the camera on the left (it starts on
-// arrival, since the person just chose a quiz), its controls in a footer, and
-// on the right what to sign: the count and End quiz on top, the big letter
-// with its eye (and under it, in a words quiz, the word with the current letter
-// lit), then the quiz's steps and Skip letter.
+// arrival, since the person just chose a quiz), whole as on Learn, and
+// on the right what to sign: the count and End quiz on top, the big letter on
+// a sticker with its Peek eye (and under it, in a words quiz, the word with the
+// current letter lit), then the quiz's steps and Skip letter. Nothing on this
+// page moves, not even when a letter passes (2026-11-01).
 export default function QuizRun({ quiz, signingHand, onSigningHandChange, model, onMark, onQuit }) {
   const target = currentLetter(quiz)
   // quiz.step changes with every letter asked, so each one is a new check.
@@ -63,35 +71,35 @@ export default function QuizRun({ quiz, signingHand, onSigningHandChange, model,
           </button>
         </div>
 
-        {/* The letter, its eye and the word under it are one group, centred in
-            the space the top row and the steps leave. */}
+        {/* The letter sticker, its eye and the word under it are one group,
+            centred in the space the top row and the steps leave. */}
         <div className="quiz-prompt-main">
-          <div className="quiz-prompt-letter-row">
-            {/* The letter and the drawing share one fixed-size box, so the eye
-                stays where it is when the drawing takes the letter's place. */}
-            <div className="quiz-prompt-visual">
-              {thisPeek.open ? (
-                <div className="reference-image reference-image-drawing quiz-peek-drawing">
-                  <AslDrawing letter={target} hand={drawnHand} alt={`Handshape for ${target}`} />
-                </div>
-              ) : (
-                <p className="quiz-prompt-letter" aria-label={`Sign ${target}`}>
-                  {target}
-                </p>
-              )}
-            </div>
+          {/* The letter and the drawing share one fixed-size sticker, so Peek
+              stays where it is when the drawing takes the letter's place. A new
+              letter just replaces the old one: nothing moves. */}
+          <div className="quiz-sticker">
+            {thisPeek.open ? (
+              <div className="reference-image reference-image-drawing quiz-peek-drawing">
+                <AslDrawing letter={target} hand={drawnHand} alt={`Handshape for ${target}`} />
+              </div>
+            ) : (
+              <p className="quiz-prompt-letter" aria-label={`Sign ${target}`}>
+                {target}
+              </p>
+            )}
             <button
               type="button"
-              className="quiz-peek"
-              aria-pressed={thisPeek.open}
+              className={thisPeek.open ? 'quiz-peek is-open' : 'quiz-peek'}
               aria-label={thisPeek.open ? 'Hide the drawing' : 'Show the drawing'}
-              title={thisPeek.open ? 'Hide the drawing' : 'Show the drawing'}
               disabled={passed}
               onClick={togglePeek}
             >
-              <EyeIcon off={thisPeek.open} />
+              <EyeIcon size={22} off={thisPeek.open} />
+              {thisPeek.open ? 'Hide' : 'Peek'}
             </button>
           </div>
+          {/* A line kept in the layout, so it doesn't push anything when it appears. */}
+          <p className="quiz-peek-note">{thisPeek.used ? 'Peeking counts as a clue.' : ''}</p>
           {isWords && (
             <p className="quiz-prompt-word" aria-label={`${word}, letter ${quiz.at.letter + 1}`}>
               {[...word].map((letter, i) => (
@@ -104,8 +112,8 @@ export default function QuizRun({ quiz, signingHand, onSigningHandChange, model,
         </div>
 
         <div className="quiz-prompt-bottom">
-          {/* The real quiz state: one step per item, done before the current
-              one, the current one lit. */}
+          {/* The real quiz state: one step per item. Done ones are green (amber
+              if a letter in them was skipped), the current one is lit. */}
           <div
             className="quiz-steps"
             role="progressbar"
@@ -116,7 +124,7 @@ export default function QuizRun({ quiz, signingHand, onSigningHandChange, model,
             aria-valuetext={`${itemName} ${itemNumber} of ${quiz.items.length}`}
           >
             {quiz.items.map((_, i) => (
-              <span key={i} className={i < quiz.at.item ? 'done' : i === quiz.at.item ? 'current' : undefined} />
+              <span key={i} className={stepClass(quiz, i)} />
             ))}
           </div>
           <button type="button" className="quiz-skip" disabled={passed} onClick={() => onMark('skipped', thisPeek.used)}>
@@ -132,25 +140,32 @@ export default function QuizRun({ quiz, signingHand, onSigningHandChange, model,
       </section>
 
       <section className="practice-camera" aria-label="Camera">
-        <CameraPanel className="practice-panel" status={panel.status} tone={panel.tone} hold={panel.hold} fill={panel.fill}>
+        {/* As on Learn: one whole frame, the controls on the picture. After a
+            pass the message stays blank: "That's B!" shows once, in the middle
+            of the camera. */}
+        <CameraPanel
+          className="practice-panel"
+          status={passed ? ' ' : panel.status}
+          tone={panel.tone}
+          hold={panel.hold}
+          fill={panel.fill}
+        >
           <CameraView
             canvasRef={canvasRef}
             hand={hand}
             className="practice-stage"
-            controls={false}
+            controls={{ hand: drawnHand, onHandChange: onSigningHandChange, handLabel: 'Signing hand' }}
             underlay={traced && <canvas ref={traceCanvasRef} className="overlay" aria-hidden="true" />}
           >
             {passed && (
               <div className="practice-done">
-                <p className="practice-done-title">That&rsquo;s {target}!</p>
+                {/* role="status": with the header blank, this is what screen readers hear. */}
+                <p className="practice-done-title" role="status">
+                  That&rsquo;s {target}!
+                </p>
               </div>
             )}
           </CameraView>
-          {/* The hand switch and camera buttons in a footer under the picture,
-              the same size whether the camera is on or off. */}
-          <div className="quiz-camera-footer">
-            <CameraControls hand={drawnHand} onHandChange={onSigningHandChange} handLabel="Signing hand" />
-          </div>
         </CameraPanel>
       </section>
     </main>
