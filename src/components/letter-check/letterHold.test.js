@@ -97,6 +97,19 @@ describe('practiceStatus', () => {
     expect(practiceStatus({ ...ready, hand: 'left' }).status).toBe('Show A with your left hand')
   })
 
+  it('says to show the signing hand when only the other one is in view, in amber', () => {
+    expect(practiceStatus({ ...ready, wrongHand: true })).toEqual({
+      status: "That's your left hand. Show your right hand",
+      tone: 'warn',
+    })
+    expect(practiceStatus({ ...ready, hand: 'left', wrongHand: true }).status).toBe(
+      "That's your right hand. Show your left hand",
+    )
+    // Problems and a pass still come first.
+    expect(practiceStatus({ ...ready, wrongHand: true, passed: true }).status).toBe("That's A!")
+    expect(practiceStatus({ ...ready, wrongHand: true, cameraStatus: 'idle' }).status).toBe('Camera off')
+  })
+
   it('guides a traced letter (Z): point 1, then the line to point 2', () => {
     const z = { ...ready, target: 'Z', traced: true }
     expect(practiceStatus(z)).toEqual({ status: 'Put your right index finger on point 1', tone: '' })

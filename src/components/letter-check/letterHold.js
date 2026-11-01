@@ -59,7 +59,9 @@ export function heldLongEnough(hold, now) {
 // model are both loaded (for a traced letter, only the hand model). `hand`: the
 // signing hand, 'left' or 'right'. `traced`: the letter is traced (J, Z), and
 // `tracing` once the fingertip has started on point 1; before J's line
-// appears, `holdingI` while the I is being held.
+// appears, `holdingI` while the I is being held. `wrongHand`: the other hand
+// is in view and the signing hand isn't (2026-11-02), so it says which hand to
+// show instead, in amber.
 export function practiceStatus({
   cameraStatus,
   cameraError,
@@ -73,6 +75,7 @@ export function practiceStatus({
   traced = false,
   tracing = false,
   holdingI = false,
+  wrongHand = false,
 }) {
   if (cameraError) return { status: 'Camera problem', tone: 'warn' }
   if (trackingError) return { status: 'Tracking problem', tone: 'warn' }
@@ -80,6 +83,7 @@ export function practiceStatus({
   if (cameraStatus === 'idle') return { status: 'Camera off', tone: '' }
   if (cameraStatus === 'starting') return { status: 'Starting…', tone: '' }
   if (!ready) return { status: 'Getting ready…', tone: '' }
+  if (wrongHand) return { status: `That's your ${hand === 'left' ? 'right' : 'left'} hand. Show your ${hand} hand`, tone: 'warn' }
   if (traced) {
     if (tracing) return { status: 'Follow the line to point 2…', tone: 'ok' }
     if (target === 'J') {

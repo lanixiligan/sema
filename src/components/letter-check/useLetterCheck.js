@@ -54,6 +54,9 @@ const SHOW_DEV_TOOLS = import.meta.env.DEV
 // page that often isn't needed to read it. The hold itself is checked on
 // every frame.
 const SHOW_EVERY_MS = 100
+// The other hand must be the only one in view this long before the page says
+// to show the signing hand.
+const WRONG_HAND_AFTER_MS = 400
 // The traced letters: the fingertip that traces, and for J, how long its
 // starting handshape (I) is held before the line appears at that fingertip.
 // Z's line is always there, fixed in the frame.
@@ -95,6 +98,7 @@ export function useLetterCheck({ target, round, signingHand, model = 'small' }) 
     isRunning: isDetecting,
     wantedHand: drawnHand,
   })
+  const wrongHand = useWrongHand(isDetecting && hand.handLabel, drawnHand)
   const kind = MODELS[SHOW_DEV_TOOLS ? model : 'small']
   const loaded = useModelFile(kind)
   const traced = TRACED_LETTERS.includes(target)
@@ -261,6 +265,7 @@ export function useLetterCheck({ target, round, signingHand, model = 'small' }) 
     traced,
     tracing: isDetecting && tracing,
     holdingI,
+    wrongHand,
   })
   // The camera panel's line: over a letter's hold, or J's I before its
   // line appears.
@@ -326,6 +331,26 @@ function guess(kind, model, hand, { width, height }, target) {
   // The model's guess is only shown (Learn's second opinion); the conditions decide.
   const result = kind.classify(model, frame.landmarks)
   return { hand: frame.detected, whole: true, ...result, ...matchLetter(target, frame.landmarks) }
+}
+
+// Is the other hand in view instead of the signing hand? `seenLabel` is the
+// hand the detection picked ('Left', 'Right', or a falsy value for none).
+// Detection picks the signing hand whenever it's in view, so a different label
+// means only the other hand is. It has to stay that way for WRONG_HAND_AFTER_MS
+// first, so one frame where MediaPipe misreads a hand's side doesn't flash the
+// warning.
+function useWrongHand(seenLabel, signingHand) {
+  const wrongNow = Boolean(seenLabel) && seenLabel.toLowerCase() !== signingHand
+  const [waited, setWaited] = useState(false)
+  useEffect(() => {
+    if (!wrongNow) return
+    const timer = setTimeout(() => setWaited(true), WRONG_HAND_AFTER_MS)
+    return () => {
+      clearTimeout(timer)
+      setWaited(false)
+    }
+  }, [wrongNow])
+  return wrongNow && waited
 }
 
 // Loads a model's file, again whenever the kind changes.
