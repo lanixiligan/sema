@@ -33,20 +33,21 @@ const UP = new THREE.Vector3(0, 1, 0);
 // ---------------------------------------------------------------------------
 // Hand finish & dark/light mode
 // ---------------------------------------------------------------------------
-// One gray finish for both modes: mid gray stands out on a dark backdrop and
-// a light one alike
+// One finish for both modes; only the color changes (MODES below)
 const FINISH = {
-  shellColor: 0x8a8a8a,
   roughness: 0.3,
   metalness: 0.2,
   clearcoat: 0.6,
   clearcoatRoughness: 0.15,
 };
 
-// Each page mode sets the backdrop; the hand looks the same in both
+// Each page mode sets the backdrop and the hand's color, Sema's blues: Deep Sky
+// (#1A75A3) on a light card (5:1 against white), Bright Sky (#36A7D9) on a dark
+// one. The white lights lift either toward a paler blue where it's lit and let
+// it fall toward Deep Cobalt in the shadows.
 const MODES = {
-  dark: { background: 0x050811 },
-  light: { background: 0xe6eaf0 },
+  dark: { background: 0x050811, shell: 0x36a7d9 },
+  light: { background: 0xe6eaf0, shell: 0x1a75a3 },
 };
 
 // Base styles for the canvas and fingertip badges. Injected first in <head> so
@@ -92,8 +93,8 @@ function createStudioEnvironment(renderer) {
   canvas.height = 512;
   const ctx = canvas.getContext('2d');
 
-  // Deep neutral studio gradient. Every softbox is white too, so the gray
-  // hand reflects no tint.
+  // Deep neutral studio gradient. Every softbox is white too, so the
+  // reflections add no tint to the hand's own color.
   const bgGrad = ctx.createLinearGradient(0, 0, 0, 512);
   bgGrad.addColorStop(0, '#222222');
   bgGrad.addColorStop(0.5, '#111111');
@@ -140,12 +141,12 @@ function createStudioEnvironment(renderer) {
 // ---------------------------------------------------------------------------
 // Materials
 // ---------------------------------------------------------------------------
-function createMaterials() {
+function createMaterials(shellColor) {
   return {
     // Physical shell material with sleek clearcoat lacquer
     shell: new THREE.MeshPhysicalMaterial({
       reflectivity: 0.9,
-      color: FINISH.shellColor,
+      color: shellColor,
       roughness: FINISH.roughness,
       metalness: FINISH.metalness,
       clearcoat: FINISH.clearcoat,
@@ -282,7 +283,7 @@ function poseSculptedHand(chains, state) {
  *
  * @param {HTMLElement} container
  * @param {object} [options]
- * @param {'dark'|'light'} [options.mode='dark'] backdrop (the hand is gray in both)
+ * @param {'dark'|'light'} [options.mode='dark'] backdrop, and the hand's blue (Deep Sky on light, Bright Sky on dark)
  * @param {'right'|'left'} [options.side='right'] drawn as its mirror image
  * @param {boolean} [options.numbers=true] fingertip number badges
  * @param {boolean} [options.background=true] false for a transparent canvas
@@ -356,13 +357,13 @@ export function createHand(container, options = {}) {
   rimLight.position.set(-8, 3, -4);
   scene.add(rimLight);
 
-  // Fill light, neutral so the gray stays gray
+  // Fill light, neutral so the blue stays Sema's blue
   const fillLight = new THREE.DirectionalLight(0xffffff, 1.4);
   fillLight.position.set(6, -4, -3);
   scene.add(fillLight);
 
   // --- Hands ---
-  const mats = createMaterials();
+  const mats = createMaterials((MODES[initialMode] ?? MODES.dark).shell);
   const handRoot = new THREE.Group();
   handRoot.position.y = -0.15;
   handRoot.rotation.set(0, DEFAULT_YAW, 0);
@@ -419,12 +420,62 @@ export function createHand(container, options = {}) {
   let prevX = 0;
   let prevY = 0;
   let spinVelocity = 0;
-  const homeY = handRoot.position.y;
+  // Where the view rests (resetView goes back here). The fit below moves them,
+  // so a pose with fingers stretched out is centred and fully in the frame.
+  let homeY = handRoot.position.y;
+  let homeZ = 0;
   let targetX = 0;
   let targetY = homeY;
   let targetZ = 0;
   // Orientation the hand eases back to after resetView() (null when idle)
   let resetTarget = null;
+
+  // --- Fit the pose to the frame (Sema) ---
+  // The camera is fixed, so a pose with fingers stretched up ran off the top of
+  // the frame. For the pose the hand is moving to, measure how far its joints
+  // reach (up, down, and out from the vertical axis the hand spins about), then
+  // centre it and, when it's bigger than the frame allows, move it back from the
+  // camera. Small poses stay at the usual distance. Measured once per pose; a
+  // resized frame only redoes the sums, with the saved measurements.
+  const FIT_FILL = 0.72; // the share of the frame the hand may fill, leaving room for the buttons around it
+  const FIT_MARGIN = 0.35; // world units added around the joints: the fingers' thickness and the number badges
+  let fit = null; // { top, bottom, reach } relative to the hand's origin
+
+  function measureTarget() {
+    if (!sculpted) return;
+    // Pose the rig as the target pose would, read where its joints are, and
+    // leave it: the next frame poses it from `state` again.
+    poseSculptedHand(sculpted.chains, target);
+    wristPivot.rotation.set(target.wrist.tilt, target.wrist.twist, target.wrist.turn);
+    handRoot.updateMatrixWorld(true);
+    const point = new THREE.Vector3();
+    let top = -Infinity;
+    let bottom = Infinity;
+    let reach = 0;
+    handContent.traverse((object) => {
+      if (!object.isBone) return;
+      handRoot.worldToLocal(object.getWorldPosition(point));
+      top = Math.max(top, point.y);
+      bottom = Math.min(bottom, point.y);
+      reach = Math.max(reach, Math.hypot(point.x, point.z));
+    });
+    if (top > bottom) fit = { top, bottom, reach };
+  }
+
+  function applyFit() {
+    if (!fit) return;
+    const { width: w, height: h } = size();
+    if (!w || !h) return;
+    const tan = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+    const halfHeight = (fit.top - fit.bottom) / 2 + FIT_MARGIN;
+    const halfWidth = fit.reach + FIT_MARGIN;
+    const distance = Math.max(halfHeight / (FIT_FILL * tan), halfWidth / (FIT_FILL * tan * (w / h)));
+    homeY = -(fit.top + fit.bottom) / 2;
+    homeZ = Math.min(0, camera.position.z - distance);
+    if (drag !== 'pan') targetY = homeY;
+    targetZ = homeZ;
+    wake();
+  }
 
   const ready = new Promise((resolve) => {
     new GLTFLoader().load(
@@ -436,6 +487,10 @@ export function createHand(container, options = {}) {
           addTipLabel(chain.at(-1).bone, finger, new THREE.Vector3(0, 0, -0.012));
         });
         handContent.add(sculpted.root);
+        measureTarget();
+        applyFit();
+        // The first fit isn't eased into: the hand appears where it belongs.
+        handRoot.position.set(targetX, targetY, targetZ);
         wake();
         resolve(true);
       },
@@ -451,6 +506,7 @@ export function createHand(container, options = {}) {
     if (!MODES[next]) throw new Error(`unknown mode "${next}"`);
     mode = next;
     const m = MODES[mode];
+    mats.shell.color.setHex(m.shell);
     if (background) {
       scene.background.setHex(m.background);
       scene.fog.color.setHex(m.background);
@@ -543,6 +599,7 @@ export function createHand(container, options = {}) {
     camera.updateProjectionMatrix();
     renderer.setSize(w, h, false);
     labelRenderer.setSize(w, h);
+    applyFit();
     wake();
   });
   resizeObserver.observe(container);
@@ -675,6 +732,8 @@ export function createHand(container, options = {}) {
       tween = null;
       if (instant || reducedMotion) Object.assign(state, clonePose(target));
       else if (duration > 0) tween = { from: clonePose(state), start: performance.now(), duration };
+      measureTarget();
+      applyFit();
       wake();
     },
     /** Turn the hand about the vertical axis by `angle` radians (arrow keys). */
@@ -709,7 +768,7 @@ export function createHand(container, options = {}) {
       spinVelocity = 0;
       targetX = 0;
       targetY = homeY;
-      targetZ = 0;
+      targetZ = homeZ;
       const yaw = side === 'right' ? -DEFAULT_YAW : DEFAULT_YAW;
       resetTarget = new THREE.Quaternion().setFromAxisAngle(UP, yaw);
       if (reducedMotion) {
