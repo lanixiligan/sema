@@ -1419,6 +1419,277 @@ body {
   color: var(--cloud-white);
 }
 
+/* ---------- The quiz (/quiz): choose, run, results ----------
+   Redesigned 2026-11-01 in the camera check's look: Gabarito headings, white
+   sticker cards with soft shadows, the amber key look, The page keeps the theme's own
+   background. While a letter is held nothing moves; only a new letter lands
+   with one pop. */
+.quiz-choose,
+.quiz-run,
+.quiz-results {
+  --sticker-shadow: 0 10px 24px rgb(12 29 48 / 0.12), 0 2px 5px rgb(12 29 48 / 0.08);
+}
+
+:root[data-theme='dark'] .quiz-choose,
+:root[data-theme='dark'] .quiz-run,
+:root[data-theme='dark'] .quiz-results {
+  --sticker-shadow: 0 12px 28px rgb(0 0 0 / 0.4), 0 2px 6px rgb(0 0 0 / 0.3);
+}
+
+.quiz-choose ::selection,
+.quiz-run ::selection,
+.quiz-results ::selection {
+  color: var(--deep-cobalt);
+  background: var(--amber-on-dark);
+}
+
+/* ----- Choosing a quiz: a heading, then two sticker cards side by side,
+   each a button, so the whole card can be clicked. ----- */
+.quiz-choose {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: var(--space-8) var(--page-gutter) var(--space-9);
+}
+
+/* On a wide window the page is drawn larger, as Learn is (CSS zoom, Chrome's
+   page zoom); the menu bar above it isn't zoomed. */
+@media (min-width: 1500px) {
+  .quiz-choose {
+    zoom: 1.25;
+  }
+}
+
+.quiz-choose-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.quiz-choose-head h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(44px, 4.6vw, 64px);
+  font-weight: 900;
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.quiz-choose-head p {
+  max-width: 30em;
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.45;
+  color: var(--text-muted);
+  text-wrap: pretty;
+}
+
+.quiz-choices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-6);
+}
+
+/* A card is pressed down a little while it is tapped or clicked: that works
+   the same with a finger as with a mouse. Nothing here depends on hover. */
+.quiz-choice {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 32px 32px 36px;
+  font: inherit;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  background: var(--surface);
+  border: none;
+  border-radius: 32px;
+  box-shadow: var(--sticker-shadow);
+  transition: transform 160ms var(--ease-out);
+}
+
+.quiz-choice:active:not(:disabled) {
+  transform: scale(0.985);
+}
+
+.quiz-choice:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.quiz-choice:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+/* The small picture: a row of letter tiles, all signed (green). */
+.quiz-choice-art {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: var(--space-5);
+}
+
+.quiz-art-tile {
+  position: relative;
+  display: grid;
+  flex: 0 1 64px;
+  place-items: center;
+  min-width: 0;
+  height: 64px;
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1;
+  /* Signed: the green is the tile's own, and the letter is on it. */
+  color: var(--on-accent);
+  background: var(--surface-soft);
+  border: 2px solid var(--success);
+  border-radius: 16px;
+  isolation: isolate;
+  animation: quiz-art-signed 700ms var(--ease-out) calc(400ms + var(--i) * 240ms) backwards;
+}
+
+/* The green, filling the tile from the bottom. It sits behind the letter
+   (z-index -1 inside the tile's own stacking context, from isolation). */
+.quiz-art-tile::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--success);
+  transform-origin: bottom;
+  animation: quiz-art-fill 500ms var(--ease-out) calc(400ms + var(--i) * 240ms) backwards;
+}
+
+/* When the page opens, the row is signed one tile after another: each fills
+   with green from the bottom (--i is the tile's place in the row), and ends up
+   as the resting look above. Both animations are backwards-filled, so every
+   tile starts muted and nothing flashes before its turn. */
+@keyframes quiz-art-fill {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+@keyframes quiz-art-signed {
+  0%,
+  45% {
+    color: var(--text-muted);
+    border-color: var(--border-strong);
+    transform: none;
+  }
+  75% {
+    transform: translateY(-4px);
+  }
+  100% {
+    color: var(--on-accent);
+    border-color: var(--success);
+    transform: none;
+  }
+}
+
+.quiz-choice-title {
+  font-family: var(--font-display);
+  font-size: 40px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+.quiz-choice-text {
+  margin: var(--space-2) 0 var(--space-6);
+  font-size: 18px;
+  line-height: 1.45;
+  color: var(--text-muted);
+  text-wrap: pretty;
+}
+
+/* Welcome's key button, drawn on the card: amber with a darker edge under it.
+   It goes down onto its edge when the card is pressed. Cobalt on amber is
+   7.7:1. */
+.quiz-choice-start {
+  --key-edge: 6px;
+
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 56px;
+  margin-top: auto;
+  margin-bottom: var(--key-edge);
+  padding: var(--space-3) var(--space-6);
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--deep-cobalt);
+  background: var(--amber-on-dark);
+  border-radius: 18px;
+  box-shadow: 0 var(--key-edge) 0 var(--amber);
+  transition:
+    transform 90ms ease-out,
+    box-shadow 90ms ease-out,
+    background-color 150ms ease-out;
+}
+
+@media (hover: hover) {
+  .quiz-choice:hover:not(:disabled) .quiz-choice-start {
+    background: color-mix(in srgb, var(--amber-on-dark), var(--white) 14%);
+  }
+
+  .quiz-choice:hover:not(:disabled) .key-button-arrow {
+    transform: translateX(3px);
+  }
+}
+
+.quiz-choice:active:not(:disabled) .quiz-choice-start {
+  box-shadow: 0 0 0 var(--amber);
+  transform: translateY(var(--key-edge));
+}
+
+/* Waiting for the word list: flat and grey, like the camera check's button
+   before it passes. */
+.quiz-choice:disabled .quiz-choice-start {
+  color: var(--text-muted);
+  background: var(--fill-off);
+  box-shadow: 0 var(--key-edge) 0 color-mix(in srgb, var(--fill-off), var(--deep-cobalt) 18%);
+}
+
+@media (max-width: 720px) {
+  .quiz-choose {
+    gap: var(--space-6);
+    padding-top: var(--space-6);
+  }
+
+  .quiz-choices {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .quiz-choice {
+    padding: 24px 24px 28px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quiz-choice,
+  .quiz-choice-start {
+    transition: none;
+  }
+
+  .quiz-choice:active:not(:disabled) {
+    transform: none;
+  }
+
+  .quiz-art-tile,
+  .quiz-art-tile::before {
+    animation: none;
+  }
+}
+
 /* The quiz (/quiz). The results: one centred column, like the Learn placeholder. */
 .quiz-start {
   display: flex;
@@ -1457,252 +1728,6 @@ body {
 .quiz-start p a {
   color: var(--accent);
   font-weight: 600;
-}
-
-/* Choosing a quiz: a heading and two big cards in one column, kept to a
-   sensible width and near the top instead of floating in the middle. */
-.quiz-choose {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
-  width: 100%;
-  max-width: 856px;
-  margin: 0 auto;
-  padding: var(--space-8) var(--page-gutter) var(--space-9);
-}
-
-.quiz-choose-head {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-/* On a wide window the page is drawn larger, as Learn is (CSS zoom, Chrome's
-   page zoom); the menu bar above it isn't zoomed. */
-@media (min-width: 1500px) {
-  .quiz-choose {
-    zoom: 1.33;
-  }
-}
-
-.quiz-choose-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  align-self: flex-start;
-  gap: 6px;
-  padding: 4px 12px 4px 10px;
-  font-size: var(--text-small);
-  font-weight: 700;
-  color: var(--accent);
-  background: var(--highlight);
-  border-radius: var(--radius-pill);
-}
-
-.quiz-choose-head h1 {
-  margin: 0;
-  font-size: clamp(28px, 4vw, 36px);
-  line-height: 1.15;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-}
-
-.quiz-choose-head p {
-  margin: 0;
-  font-size: var(--text-lead);
-  line-height: var(--leading-lead);
-  color: var(--text-muted);
-}
-
-/* The two kinds of quiz, side by side, equal in size: each a card that is a
-   button, so the whole card can be clicked. */
-.quiz-choices {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-4);
-}
-
-.quiz-choice {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  padding: 28px;
-  overflow: hidden;
-  font: inherit;
-  color: var(--text);
-  text-align: left;
-  cursor: pointer;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-card);
-  transition:
-    border-color 160ms ease,
-    background-color 160ms ease,
-    transform 160ms ease;
-}
-
-.quiz-choice:hover:not(:disabled) {
-  border-color: var(--accent);
-  transform: translateY(-3px);
-}
-
-.quiz-choice:focus-visible {
-  outline: 3px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.quiz-choice:disabled {
-  cursor: default;
-  opacity: 0.5;
-}
-
-/* The top row: the letter tiles. */
-.quiz-choice-top {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  margin-bottom: var(--space-5);
-}
-
-/* The small picture: letter tiles, the same on both cards' row height. */
-.quiz-choice-art {
-  display: flex;
-  gap: 6px;
-}
-
-.quiz-art-tile {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  font-size: 22px;
-  font-weight: 800;
-  color: var(--text-muted);
-  background: var(--surface-soft);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-control);
-  transition:
-    transform 200ms ease,
-    background-color 160ms ease;
-}
-
-.quiz-choice:hover:not(:disabled) .quiz-art-tile:not(.quiz-art-lit) {
-  background: var(--surface);
-}
-
-/* On hover the tiles hop up one after another, a small wave. */
-.quiz-choice:hover:not(:disabled) .quiz-art-tile {
-  transform: translateY(-4px);
-}
-
-.quiz-choice:hover:not(:disabled) .quiz-art-tile:nth-child(2) {
-  transition-delay: 40ms;
-}
-
-.quiz-choice:hover:not(:disabled) .quiz-art-tile:nth-child(3) {
-  transition-delay: 80ms;
-}
-
-.quiz-choice:hover:not(:disabled) .quiz-art-tile:nth-child(4) {
-  transition-delay: 120ms;
-}
-
-.quiz-art-tile.quiz-art-lit {
-  color: var(--accent);
-  background: var(--highlight);
-  border-color: var(--accent);
-}
-
-.quiz-choice-title {
-  font-size: 22px;
-  line-height: 1.2;
-  font-weight: 800;
-  letter-spacing: -0.01em;
-}
-
-.quiz-choice-text {
-  margin-top: var(--space-2);
-  font-size: var(--text-body);
-  line-height: 1.5;
-  color: var(--text-muted);
-}
-
-/* Under the text: a Start button. The whole card is the button, so this is
-   only drawn like one; it fills with the accent colour on hover. */
-.quiz-choice-foot {
-  display: flex;
-  width: 100%;
-  margin-top: auto;
-  padding-top: var(--space-5);
-}
-
-.quiz-choice-start {
-  padding: 9px 24px;
-  font-size: var(--text-body);
-  font-weight: 700;
-  color: var(--accent);
-  border: 1px solid var(--accent);
-  border-radius: var(--radius-pill);
-  transition:
-    color 160ms ease,
-    background-color 160ms ease;
-}
-
-.quiz-choice:hover:not(:disabled) .quiz-choice-start,
-.quiz-choice:focus-visible .quiz-choice-start {
-  color: var(--on-accent);
-  background: var(--accent);
-}
-
-/* Under the cards: how a quiz goes, three points with an icon each. */
-.quiz-perks {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-4);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.quiz-perks li {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  font-size: var(--text-small);
-  font-weight: 600;
-  line-height: 1.35;
-  color: var(--text-muted);
-}
-
-.quiz-perk-icon {
-  display: grid;
-  flex: none;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  color: var(--accent);
-  background: var(--highlight);
-  border-radius: 50%;
-}
-
-@media (max-width: 720px) {
-  .quiz-choices,
-  .quiz-perks {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .quiz-choice,
-  .quiz-art-tile,
-  .quiz-choice-start {
-    transition: none;
-  }
-
-  .quiz-choice:hover:not(:disabled),
-  .quiz-choice:hover:not(:disabled) .quiz-art-tile {
-    transform: none;
-  }
 }
 
 /* During the quiz (QuizRun): two halves. On the left, what to sign: the count
@@ -2343,21 +2368,6 @@ body {
   margin-top: 8px;
 }
 
-
-@media (max-width: 599px) {
-  .quiz-choose {
-    gap: var(--space-5);
-    padding-top: var(--space-6);
-  }
-
-  .quiz-choices {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .quiz-choice {
-    padding: 22px;
-  }
-}
 
 .asl-drawing {
   display: block;
