@@ -21,9 +21,9 @@ export default function CameraOff({ note }) {
       <span className="camera-off-badge">
         <VideoOffIcon size={32} />
       </span>
-      {/* The panel's header already says "Camera off" in words, so this is
-          only for screen readers. */}
-      <p className="camera-off-title visually-hidden">Camera is off</p>
+      {/* The panel has no header to say it any more (the message sticker only
+          shows while the camera is live), so the page says it itself. */}
+      <p className="camera-off-title">Camera is off</p>
       {(REASONS[camera.stopReason] ?? note) && (
         <p className="camera-off-text">{REASONS[camera.stopReason] ?? note}</p>
       )}

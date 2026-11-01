@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import DevTopBar from '../DevTopBar.jsx'
 import CameraPanel from '../../../components/camera-view/CameraPanel.jsx'
+import StageMessage from '../../../components/camera-view/StageMessage.jsx'
 import { useCamera } from '../../../camera/useCamera.js'
 import { useVideoStats } from '../../../camera/useVideoStats.js'
 import BenchmarkPanel from './BenchmarkPanel.jsx'
@@ -56,6 +57,7 @@ export default function TrackingPage() {
               muted
             />
             <canvas ref={canvasRef} className="overlay" />
+            <StageMessage show={isLive} />
             {isLive ? (
               <span className="mirror-label">Mirrored</span>
             ) : (

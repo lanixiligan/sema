@@ -1049,13 +1049,13 @@ body {
   flex-direction: column;
 }
 
-/* As on Record: the camera fills the height the window leaves (top bar,
-   padding and the panel's header: 120px), so it stays the same size whichever
+/* As on Record: the camera fills the height the window leaves (top bar
+   and padding: 43px; the message is on the picture, not above it), so it stays the same size whichever
    letter is picked. The video keeps its 4:3 shape inside, never cut off. */
 .practice-stage {
   flex: 1 1 auto;
   aspect-ratio: auto;
-  min-height: clamp(320px, calc((100dvh - var(--bar-height)) / var(--practice-zoom) - 120px), 720px);
+  min-height: clamp(320px, calc((100dvh - var(--bar-height)) / var(--practice-zoom) - 43px), 720px);
   --stage-radius: 0px;
 }
 
@@ -2997,7 +2997,7 @@ body {
 }
 
 /* The camera panel fills the height the window leaves (top bar, padding,
-   the panel's header, and the record button and its hint under it: 268px), so it stays the
+   and the record button and its hint under it: 146px; the message is on the picture), so it stays the
    same size whichever letter is chosen, and the letters panel stretches to
    match. If the right column is taller, the panel grows to it. The video
    keeps its 4:3 shape inside (contain): the status bar and the controls sit
@@ -3006,7 +3006,7 @@ body {
 .record-stage {
   flex: 1 1 auto;
   aspect-ratio: auto;
-  min-height: clamp(320px, calc((100dvh - var(--bar-height)) / var(--record-zoom) - 223px), 630px);
+  min-height: clamp(320px, calc((100dvh - var(--bar-height)) / var(--record-zoom) - 146px), 630px);
   --stage-radius: 0px;
 }
 
@@ -3018,14 +3018,12 @@ body {
   flex-direction: column;
 }
 
-/* The frame count keeps to the right, so the status stays centred. */
+/* The frame count, at the right of the message sticker. */
 .record-panel-frames {
-  position: absolute;
-  right: var(--space-5);
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
-  color: var(--text-muted);
+  opacity: 0.85;
 }
 
 .record-side {
@@ -3154,8 +3152,10 @@ body {
 }
 
 .camera-off-title {
-  font-size: var(--text-body);
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.1;
   color: var(--cloud-white);
 }
 
@@ -4922,30 +4922,13 @@ html:has(.about-page) {
    cropping. */
 .camera-check-stage {
   /* The camera's 4:3 shape at the panel's width, but never taller than the
-     window allows (430px at 720px tall), so there are no empty bands above
+     window allows (406px at 720px tall, never under 461px), so there are no empty bands above
      and below the video on a narrower panel. width: 100% keeps the full width
      when the height cap applies (aspect-ratio would shrink it). */
   width: 100%;
   aspect-ratio: 4 / 3;
-  max-height: clamp(375px, calc(100dvh - 400px), 750px);
+  max-height: clamp(461px, calc(100dvh - 314px), 836px);
   --stage-radius: 0px;
-}
-
-/* The panel is a sticker too (not tipped: the video stays straight), with a
-   larger header in Gabarito. */
-.camera-check .camera-panel {
-  border-radius: 28px;
-  box-shadow: var(--sticker-shadow);
-}
-
-.camera-check .camera-panel-head {
-  padding: 25px var(--space-5) 28px;
-}
-
-.camera-check .camera-panel-status {
-  font-family: var(--font-display);
-  font-size: 30px;
-  font-weight: 800;
 }
 
 /* "Camera ready" over the video when the check passes: a sticker slaps on,
@@ -5050,45 +5033,108 @@ html:has(.about-page) {
   box-shadow: var(--sticker-shadow);
 }
 
-.camera-panel-head {
+/* The panel's message (StageMessage.jsx), on the picture: a sticker at the
+   top, inside the viewfinder corners. It never takes a click. Large while Sema
+   waits for something (white on the dark film, amber on a problem), compact and
+   Bright Sky once it's going well, so nothing big competes with a hand being
+   held. Cobalt on Bright Sky is 5.3:1, on amber 7.7:1. */
+.camera-message-region {
+  position: absolute;
+  top: 28px;
+  right: 0;
+  left: 0;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  padding: 0 56px;
+  pointer-events: none;
+}
+
+.camera-message {
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 20px var(--space-5) 22px;
-}
-
-.camera-panel-status {
-  font-size: 24px;
-  font-weight: 600;
+  gap: var(--space-4);
+  max-width: 100%;
+  padding: 14px 28px 20px;
+  overflow: hidden;
   color: var(--white);
+  background: rgb(12 29 48 / 0.88);
+  border-radius: 22px;
+  box-shadow: 0 10px 24px rgb(0 0 0 / 0.35), 0 2px 5px rgb(0 0 0 / 0.25);
 }
 
-.camera-panel-status.ok {
-  color: var(--accent);
+.camera-message.ok {
+  color: var(--deep-cobalt);
+  background: var(--bright-sky);
 }
 
-.camera-panel-status.warn {
-  color: var(--warning);
+.camera-message.warn {
+  color: var(--deep-cobalt);
+  background: var(--amber-on-dark);
 }
 
-/* The line along the header's bottom edge: for a hold, it fills once over
-   the hold's time (set inline) each time a hold starts, so a new hold starts
-   a new line, and is full once it passes; on Record, it follows the take. */
+.camera-message-text {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(26px, 2.8vw, 40px);
+  font-weight: 800;
+  line-height: 1.1;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.camera-message.ok .camera-message-text {
+  font-size: clamp(22px, 2.1vw, 30px);
+}
+
+/* Viewfinder corners on the picture: four short marks inside its edge, in
+   Bright Sky (amber on a problem). Drawn with gradients, over everything but
+   never taking a click. */
+.camera-panel .stage::after {
+  content: '';
+  position: absolute;
+  inset: 16px;
+  pointer-events: none;
+  --corner: var(--bright-sky);
+  --arm: 28px;
+  --weight: 4px;
+  background:
+    linear-gradient(var(--corner), var(--corner)) top left / var(--arm) var(--weight),
+    linear-gradient(var(--corner), var(--corner)) top left / var(--weight) var(--arm),
+    linear-gradient(var(--corner), var(--corner)) top right / var(--arm) var(--weight),
+    linear-gradient(var(--corner), var(--corner)) top right / var(--weight) var(--arm),
+    linear-gradient(var(--corner), var(--corner)) bottom left / var(--arm) var(--weight),
+    linear-gradient(var(--corner), var(--corner)) bottom left / var(--weight) var(--arm),
+    linear-gradient(var(--corner), var(--corner)) bottom right / var(--arm) var(--weight),
+    linear-gradient(var(--corner), var(--corner)) bottom right / var(--weight) var(--arm);
+  background-repeat: no-repeat;
+  opacity: 0.85;
+  border-radius: 4px;
+}
+
+.camera-panel.is-warn .stage::after {
+  --corner: var(--amber-on-dark);
+}
+
+/* The line along the sticker's bottom edge, in the sticker's own text colour:
+   for a hold, it fills once over the hold's time (set inline) each time a hold
+   starts, so a new hold starts a new line, and is full once it passes; on
+   Record, it follows the take. */
 .camera-progress {
   position: absolute;
   right: 0;
   bottom: 0;
   left: 0;
-  height: 4px;
+  height: 6px;
   overflow: hidden;
-  background: var(--progress-track);
+  background: color-mix(in srgb, currentColor 22%, transparent);
 }
 
 .camera-progress span {
   display: block;
   height: 100%;
-  background: var(--accent);
+  background: currentColor;
 }
 
 .camera-progress .filling {
