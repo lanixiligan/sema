@@ -22,19 +22,17 @@ export default function WordsQuizPage({ signingHand, onSigningHandChange, model 
           model={model}
         />
       ) : (
-        <main className="quiz-start">
-          <section>
-            {words.status === 'loading' ? (
-              <p>Loading the words…</p>
-            ) : (
-              <>
-                <h1>The word list didn’t load.</h1>
-                <p>
-                  <Link to={PATHS.quiz}>Choose another quiz</Link>
-                </p>
-              </>
-            )}
-          </section>
+        <main className="quiz-wait">
+          {words.status === 'loading' ? (
+            <p className="quiz-wait-title">Getting the words…</p>
+          ) : (
+            <>
+              <h1 className="quiz-wait-title">The word list didn’t load.</h1>
+              <Link to={PATHS.quiz} className="quiz-results-link">
+                Choose another quiz
+              </Link>
+            </>
+          )}
         </main>
       )}
     </>

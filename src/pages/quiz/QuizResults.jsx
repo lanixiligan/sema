@@ -1,30 +1,34 @@
 import { CheckIcon, EyeIcon } from '../../components/icons/icons.jsx'
 import { letterClass } from './letterClass.js'
-import { peekCount, quizScore } from './quizRounds.js'
+import { peekCount, quizScore, resultsVerdict } from './quizRounds.js'
 
-// The items as rows of tiles (the results show the same rows, all filled in).
+// Every item as a row of tiles, all filled in (a finished quiz has a mark on
+// every letter; End quiz marks the ones not reached as skipped). The tiles
+// spring on one after another (--index).
 function ItemRows({ quiz }) {
-  const shows = (item) => !quiz.at || item < quiz.at.item || (quiz.kind === 'words' && item === quiz.at.item)
+  let index = 0
   return (
     <ul className={`quiz-rows ${quiz.kind === 'letters' ? 'quiz-rows-letters' : ''}`}>
       {quiz.items.map((item, i) => (
         <li key={i}>
           {[...item].map((letter, j) => {
             const mark = quiz.marks[i][j]
-            const current = quiz.at?.item === i && quiz.at.letter === j
             const peeked = quiz.peeked[i][j]
-            // Passed after a peek: an outlined tile instead of a solid one.
+            // Passed after a peek: a pale tile with an outline instead of a solid one.
             const clue = mark === 'passed' && peeked
+            const n = index++
             return (
-              <span key={j} className={`quiz-tile ${letterClass(mark, current)}${clue ? ' quiz-clue' : ''}`}>
-                {mark || current || shows(i) ? letter : ''}
-                {mark === 'passed' && (peeked ? <EyeIcon size={14} /> : <CheckIcon size={14} />)}
-                {mark && (
-                  <span className="visually-hidden">
-                    {mark}
-                    {peeked && ' (looked at the drawing)'}
-                  </span>
-                )}
+              <span
+                key={j}
+                className={`quiz-tile ${letterClass(mark, false)}${clue ? ' quiz-clue' : ''}`}
+                style={{ '--index': n }}
+              >
+                {letter}
+                {mark === 'passed' && (peeked ? <EyeIcon size={16} /> : <CheckIcon size={16} strokeWidth={3} />)}
+                <span className="visually-hidden">
+                  {mark}
+                  {peeked && ' (looked at the drawing)'}
+                </span>
               </span>
             )
           })}
@@ -34,77 +38,60 @@ function ItemRows({ quiz }) {
   )
 }
 
-// The score as a ring (green for the share passed, amber for the rest, the
-// percentage in the middle) with the count beside it, in the same colours as
-// the key and the tiles. Screen readers get the score from its label.
-const RING_RADIUS = 70
-const RING_LENGTH = 2 * Math.PI * RING_RADIUS
-
-function ScoreRing({ passed, total, clues, skipped }) {
-  const share = total > 0 ? passed / total : 0
-  return (
-    <div className="quiz-score" role="img"
-      aria-label={`You signed ${passed} of ${total}: ${passed - clues} answered, ${clues} with a clue, ${skipped} skipped`}
-    >
-      <div className="quiz-ring">
-        <svg viewBox="0 0 160 160">
-          <circle className="quiz-ring-track" cx="80" cy="80" r={RING_RADIUS} />
-          <circle
-            className="quiz-ring-arc"
-            cx="80"
-            cy="80"
-            r={RING_RADIUS}
-            strokeDasharray={RING_LENGTH}
-            style={{ '--ring-length': RING_LENGTH, '--ring-offset': RING_LENGTH * (1 - share) }}
-          />
-        </svg>
-        <div className="quiz-ring-text">{Math.round(share * 100)}%</div>
-      </div>
-      <div className="quiz-score-count">
-        <strong>{passed}</strong>
-        <span>/{total}</span>
-      </div>
-      <ul className="quiz-key">
-        <li>
-          <span className="quiz-key-swatch quiz-passed">
-            <CheckIcon size={12} />
-          </span>
-          Answered <strong>{passed - clues}</strong>
-        </li>
-        <li>
-          <span className="quiz-key-swatch quiz-clue">
-            <EyeIcon size={12} />
-          </span>
-          With a clue <strong>{clues}</strong>
-        </li>
-        <li>
-          <span className="quiz-key-swatch quiz-skipped" />
-          Skipped <strong>{skipped}</strong>
-        </li>
-      </ul>
-    </div>
-  )
-}
-
-// The end: the score, every item with its marks, and Start again.
+// The end, laid out like Welcome: the score on a tag with every letter
+// stuck below it, and on the right a headline, what the score is made of, and
+// Start again.
 export default function QuizResults({ quiz, onAgain }) {
   const { passed, total } = quizScore(quiz)
+  const clues = peekCount(quiz)
   const skipped = quiz.marks.flat().filter((mark) => mark === 'skipped').length
+  const verdict = resultsVerdict(passed, total)
   return (
-    <main className={`quiz-start quiz-results quiz-results-${quiz.kind}`}>
-      <section>
-        {/* For screen readers: the page's name, which the score ring shows
-            without words. */}
-        <h1 className="visually-hidden">Quiz results</h1>
-        <ScoreRing passed={passed} total={total} clues={peekCount(quiz)} skipped={skipped} />
-        <div className="quiz-results-card">
+    <main className={`quiz-results quiz-results-${quiz.kind}`}>
+      <section className="quiz-results-tag" aria-label="Score">
+        <div className="quiz-results-band">
+          <p className="quiz-results-number" aria-label={`You signed ${passed} of ${total}`}>
+            <span aria-hidden="true">
+              {passed}
+              <small>/{total}</small>
+            </span>
+          </p>
+          <p className="quiz-results-label" aria-hidden="true">
+            letters signed
+          </p>
+        </div>
+        <div className="quiz-results-body">
           <ItemRows quiz={quiz} />
         </div>
-        <div className="quiz-actions">
-          <button type="button" className="button" onClick={onAgain}>
-            Start again
-          </button>
-        </div>
+      </section>
+
+      <section className="quiz-results-copy">
+        <h1 className="quiz-results-title">{verdict.title}</h1>
+        <p className="quiz-results-lead">{verdict.text}</p>
+        <ul className="quiz-key">
+          <li>
+            <span className="quiz-key-swatch quiz-passed">
+              <CheckIcon size={14} strokeWidth={3} />
+            </span>
+            From memory <strong>{passed - clues}</strong>
+          </li>
+          <li>
+            <span className="quiz-key-swatch quiz-clue">
+              <EyeIcon size={14} />
+            </span>
+            With a clue <strong>{clues}</strong>
+          </li>
+          <li>
+            <span className="quiz-key-swatch quiz-skipped" />
+            Skipped <strong>{skipped}</strong>
+          </li>
+        </ul>
+        <button type="button" className="key-button quiz-again" onClick={onAgain}>
+          Start again
+          <svg className="key-button-arrow" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M5 12h13M13 6l6 6-6 6" />
+          </svg>
+        </button>
       </section>
     </main>
   )

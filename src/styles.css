@@ -1690,44 +1690,26 @@ body {
   }
 }
 
-/* The quiz (/quiz). The results: one centred column, like the Learn placeholder. */
-.quiz-start {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: calc(100dvh - var(--bar-height));
-  padding: 48px 24px 96px;
-}
-
-.quiz-start section {
+/* The Words page while the word list loads, or if it can't. */
+.quiz-wait {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
-  width: 100%;
-  max-width: 520px;
+  justify-content: center;
+  gap: var(--space-3);
+  min-height: calc(100dvh - var(--bar-height));
+  padding: var(--space-7) var(--page-gutter);
   text-align: center;
 }
 
-.quiz-start h1 {
+.quiz-wait-title {
   margin: 0;
-  font-size: 28px;
-  line-height: 1.25;
-  font-weight: 800;
-  letter-spacing: -0.01em;
-}
-
-.quiz-start p {
-  margin: 0;
-  font-size: var(--text-body);
-  line-height: 1.6;
-  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: clamp(32px, 3.4vw, 48px);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.02em;
   text-wrap: balance;
-}
-
-.quiz-start p a {
-  color: var(--accent);
-  font-weight: 600;
 }
 
 /* ----- During the quiz (QuizRun): two halves. The camera is on the left, in
@@ -1994,12 +1976,102 @@ body {
   outline-offset: 3px;
 }
 
-/* Every item as a row of tiles: blank until asked, then passed (accent) or
-   skipped (amber). A letters quiz puts its one-letter items in a grid. */
+/* ----- The results, laid out like Welcome: the score on a tag with
+   every letter stuck below it, and on the right a headline, what the score is
+   made of, and Start again. ----- */
+.quiz-results {
+  --quiz-band: var(--deep-cobalt);
+  --quiz-band-label: var(--bright-sky);
+
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  align-items: stretch;
+  justify-content: center;
+  gap: var(--space-7) clamp(32px, 6vw, 96px);
+  width: 100%;
+  max-width: 1360px;
+  min-height: calc(100dvh - var(--bar-height));
+  margin: 0 auto;
+  padding: var(--space-7) var(--page-gutter) var(--space-8);
+}
+
+:root[data-theme='dark'] .quiz-results {
+  --quiz-band: var(--deep-sky);
+  --quiz-band-label: var(--white);
+}
+
+/* The tag drops in, then its tiles spring on one by one. */
+.quiz-results-tag {
+  display: flex;
+  flex: 1 1 480px;
+  flex-direction: column;
+  max-width: 660px;
+  overflow: hidden;
+  background: var(--surface);
+  border-radius: 32px;
+  box-shadow: var(--sticker-shadow);
+  animation: quiz-tag-drop 600ms var(--ease-spring) both;
+}
+
+@keyframes quiz-tag-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-32px) scale(1.04);
+  }
+}
+
+.quiz-results-band {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: clamp(14px, 2.4vh, 26px) var(--space-6) clamp(12px, 2vh, 20px);
+  color: var(--white);
+  background: var(--quiz-band);
+}
+
+.quiz-results-number {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(76px, min(10vw, 14vh), 140px);
+  font-weight: 900;
+  line-height: 0.9;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.quiz-results-number small {
+  font-size: 0.5em;
+  font-weight: 700;
+  color: var(--quiz-band-label);
+}
+
+.quiz-results-label {
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(20px, 2vw, 28px);
+  font-weight: 700;
+  color: var(--quiz-band-label);
+}
+
+.quiz-results-body {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(18px, 3vh, 30px) clamp(20px, 3vw, 36px);
+}
+
+.quiz-results-body .quiz-rows {
+  width: 100%;
+}
+
+/* Every item as a row of tiles. A letters quiz puts its one-letter items in
+   a grid of five. */
 .quiz-rows {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -2007,118 +2079,148 @@ body {
 
 .quiz-rows li {
   display: flex;
-  gap: 6px;
+  justify-content: center;
+  gap: 10px;
 }
 
 .quiz-rows-letters {
   display: grid;
-  grid-template-columns: repeat(5, max-content);
-  justify-content: center;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
 }
 
+/* A tile: its letter, and under it a check or an eye. Sprung on after the
+   tag has landed (--index). */
 .quiz-tile {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
-  font-size: 20px;
-  font-weight: 700;
+  gap: 2px;
+  width: clamp(46px, 5vw, 64px);
+  height: clamp(52px, 8vh, 68px);
+  font-family: var(--font-display);
+  font-size: clamp(24px, 2.4vw, 34px);
+  font-weight: 900;
+  line-height: 1;
   color: var(--text);
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  animation: quiz-tile-pop 520ms var(--ease-spring) calc(450ms + var(--index) * 45ms) backwards;
 }
 
-/* A small eye in a tile's corner: that letter was passed after a peek. */
-.quiz-tile {
-  position: relative;
-}
-
-.quiz-tile-peek {
-  position: absolute;
-  top: 2px;
-  right: 3px;
-  display: inline-flex;
-  color: var(--text-muted);
-}
-
-.quiz-tile.quiz-current {
-  border-color: var(--accent);
-  box-shadow: inset 0 0 0 1px var(--accent);
+/* Each tile fills its grid cell (the list item around it), up to a square. */
+.quiz-rows-letters .quiz-tile {
+  width: 100%;
+  max-width: 92px;
+  height: clamp(64px, 10vh, 92px);
 }
 
 .quiz-tile.quiz-passed {
-  color: var(--accent);
-  background: var(--highlight);
-  border-color: var(--accent);
+  color: var(--on-accent);
+  background: var(--success);
+  border-color: var(--success);
 }
 
+/* Passed after a peek at the drawing: the same green, but a pale tile with a
+   green outline instead of a solid one, so it stands apart from a letter
+   signed from memory even without its small eye (and in greyscale). */
+.quiz-tile.quiz-clue {
+  color: var(--success-ink);
+  background: var(--success-bg);
+  border-color: var(--success);
+}
+
+/* A skipped letter shows its letter on solid amber, without a mark. */
 .quiz-tile.quiz-skipped {
-  color: var(--warning-ink);
-  background: var(--warning-bg);
+  color: var(--on-accent);
+  background: var(--warning);
   border-color: var(--warning);
 }
 
-.quiz-results .quiz-rows {
-  align-items: center;
+@keyframes quiz-tile-pop {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.6);
+  }
 }
 
-/* The results page, bigger than the other quiz pages: a score ring, the tiles
-   on a card, and a short fade-in. */
-.quiz-results section {
-  max-width: 680px;
-  gap: 28px;
-}
-
-.quiz-results h1 {
-  font-size: 2.5rem;
-}
-
-.quiz-results p {
-  font-size: 1.125rem;
-}
-
-.quiz-score {
+/* The words on the right, as tall as the tag, so Start again ends level with
+   the tag's bottom edge (as on the camera check). */
+.quiz-results-copy {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 24px 32px;
+  flex: 1 1 340px;
+  flex-direction: column;
+  align-items: stretch;
+  max-width: 480px;
+  animation: reveal-in 600ms var(--ease-out) 450ms both;
 }
 
+.quiz-results-title {
+  margin: 0;
+  font-family: var(--font-display);
+  /* One line: the longest headline ("Perfect round!", "Great signing!") is
+     about 6.9em wide in Gabarito 900, so 64px fits the 480px column. */
+  font-size: clamp(40px, 4.2vw, 64px);
+  font-weight: 900;
+  line-height: 0.96;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.quiz-results-lead {
+  max-width: 24em;
+  margin: var(--space-4) 0 0;
+  font-size: 20px;
+  line-height: 1.45;
+  color: var(--text-muted);
+  text-wrap: pretty;
+}
+
+/* What the score is made of: one sticker with a row per kind, the count big
+   and right beside its name, so the eye doesn't travel across a gap. */
 .quiz-key {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin: 0;
-  padding: 0;
+  margin: var(--space-6) 0 var(--space-6);
+  padding: var(--space-2) var(--space-5);
   list-style: none;
-  font-size: 1.125rem;
-  color: var(--text-muted);
-  text-align: left;
+  font-size: 20px;
+  color: var(--text);
+  background: var(--surface);
+  border-radius: 24px;
+  box-shadow: var(--sticker-shadow);
 }
 
 .quiz-key li {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
+  padding: 14px 0;
+}
+
+.quiz-key li + li {
+  border-top: 1px solid var(--border);
 }
 
 .quiz-key strong {
   margin-left: auto;
-  padding-left: 16px;
-  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 34px;
+  font-weight: 900;
+  line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 
 .quiz-key-swatch {
   display: flex;
+  flex: none;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
 }
 
 .quiz-key-swatch.quiz-passed {
@@ -2126,8 +2228,7 @@ body {
   background: var(--success);
 }
 
-/* With a clue: the outlined tile the results use for a passed letter after a
-   peek (.quiz-clue below). */
+/* With a clue: the pale tile the results use for a passed letter after a peek. */
 .quiz-key-swatch.quiz-clue {
   color: var(--success-ink);
   background: var(--success-bg);
@@ -2138,234 +2239,52 @@ body {
   background: var(--warning);
 }
 
-.quiz-ring {
-  position: relative;
-  width: 160px;
-  height: 160px;
-}
-
-.quiz-ring svg {
-  width: 100%;
-  height: 100%;
-  transform: rotate(-90deg);
-}
-
-.quiz-ring circle {
-  fill: none;
-  stroke-width: 12;
-}
-
-.quiz-ring-track {
-  stroke: var(--warning);
-}
-
-.quiz-ring-arc {
-  stroke: var(--success);
-  stroke-dashoffset: var(--ring-offset);
-  animation: quiz-ring-fill 900ms ease-out;
-}
-
-.quiz-ring-text {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
+/* The key button, as wide as the column, at its bottom. */
+.quiz-again {
   justify-content: center;
-  font-size: 2rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-
-.quiz-score-count {
-  display: flex;
-  align-items: baseline;
-  line-height: 1;
-}
-
-.quiz-score-count strong {
-  font-size: 5rem;
-  font-weight: 800;
-  color: var(--success);
-  font-variant-numeric: tabular-nums;
-}
-
-.quiz-score-count span {
-  font-size: 4rem;
-  font-weight: 500;
-  color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
-}
-
-.quiz-results-card {
   width: 100%;
-  padding: 28px 20px;
+  margin-top: auto;
 }
 
-.quiz-results .quiz-rows {
-  gap: 12px;
+.quiz-results-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: var(--space-3);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
+  text-underline-offset: 4px;
 }
 
-.quiz-results .quiz-rows li,
-.quiz-results .quiz-rows-letters {
-  gap: 10px;
+.quiz-results-link:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
 }
 
-.quiz-results .quiz-tile {
-  flex-direction: column;
-  gap: 2px;
-  line-height: 1;
-  width: clamp(40px, 11vw, 64px);
-  height: clamp(40px, 11vw, 64px);
-  font-size: clamp(18px, 5vw, 28px);
-  background: transparent;
-  border-radius: 12px;
-  animation: quiz-tile-in 400ms ease-out backwards;
-}
-
-.quiz-results .quiz-tile.quiz-passed {
-  color: var(--on-accent);
-  background: var(--success);
-  border-color: var(--success);
-}
-
-/* Passed after a peek at the drawing: the same green, but a pale tile with a
-   green outline instead of a solid one, so it stands apart from a letter
-   signed from memory even without its small eye (and in greyscale). */
-.quiz-results .quiz-tile.quiz-clue {
-  color: var(--success-ink);
-  background: var(--success-bg);
-  border: 2px solid var(--success);
-}
-
-/* The letters quiz is one row of ten, so its tiles are narrower and taller. */
-.quiz-results .quiz-rows-letters {
-  grid-template-columns: repeat(10, max-content);
-  gap: clamp(3px, 1vw, 8px);
-}
-
-.quiz-results .quiz-rows-letters .quiz-tile {
-  width: clamp(24px, 6.5vw, 54px);
-  height: clamp(44px, 9vw, 64px);
-  font-size: clamp(14px, 3.5vw, 26px);
-}
-
-/* A skipped letter shows its letter on solid amber, without a mark. */
-.quiz-results .quiz-tile.quiz-skipped {
-  color: var(--on-accent);
-  background: var(--warning);
-  border-color: var(--warning);
-}
-
-.quiz-results .quiz-rows li:nth-child(2) .quiz-tile { animation-delay: 80ms; }
-.quiz-results .quiz-rows li:nth-child(3) .quiz-tile { animation-delay: 160ms; }
-.quiz-results .quiz-rows li:nth-child(4) .quiz-tile { animation-delay: 240ms; }
-.quiz-results .quiz-rows li:nth-child(5) .quiz-tile { animation-delay: 320ms; }
-
-.quiz-results .quiz-actions .button {
-  padding: 16px 40px;
-  font-size: 1.25rem;
-}
-
-/* The letters quiz's results, zoomed in on wide windows: a wider page so the
-   one row of ten tiles can be big, and everything else scaled up with it. */
-@media (min-width: 900px) {
-  .quiz-results-letters section {
-    max-width: 1000px;
-    gap: 40px;
+/* One column on narrow windows: the tag first, then the words. */
+@media (max-width: 899px) {
+  .quiz-results-copy {
+    text-align: center;
   }
 
-  .quiz-results-letters .quiz-score {
-    gap: 28px 48px;
+  .quiz-results-lead {
+    margin-right: auto;
+    margin-left: auto;
   }
 
-  .quiz-results-letters .quiz-ring {
-    width: 230px;
-    height: 230px;
-  }
-
-  .quiz-results-letters .quiz-ring-text {
-    font-size: 2.75rem;
-  }
-
-  .quiz-results-letters .quiz-score-count strong {
-    font-size: 7rem;
-  }
-
-  .quiz-results-letters .quiz-score-count span {
-    font-size: 5.5rem;
-  }
-
-  .quiz-results-letters .quiz-key {
-    gap: 18px;
-    font-size: 1.5rem;
-  }
-
-  .quiz-results-letters .quiz-key li {
-    gap: 16px;
-  }
-
-  .quiz-results-letters .quiz-key-swatch {
-    width: 34px;
-    height: 34px;
-    border-radius: 8px;
-  }
-
-  .quiz-results-letters .quiz-key-swatch svg {
-    width: 18px;
-    height: 18px;
-  }
-
-  .quiz-results-letters .quiz-rows-letters {
-    gap: 12px;
-  }
-
-  .quiz-results-letters .quiz-rows-letters .quiz-tile {
-    width: clamp(54px, 6.5vw, 82px);
-    height: clamp(72px, 8.7vw, 110px);
-    gap: 6px;
-    font-size: clamp(26px, 3vw, 40px);
-    border-radius: 14px;
-  }
-
-  .quiz-results-letters .quiz-tile svg {
-    width: 20px;
-    height: 20px;
-  }
-
-  .quiz-results-letters .quiz-actions .button {
-    padding: 22px 64px;
-    font-size: 1.5rem;
-  }
-}
-
-@keyframes quiz-ring-fill {
-  from {
-    stroke-dashoffset: var(--ring-length);
-  }
-}
-
-@keyframes quiz-tile-in {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
+  .quiz-results-tag {
+    border-radius: 24px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .quiz-ring-arc,
-  .quiz-results .quiz-tile {
+  .quiz-results-tag,
+  .quiz-results-copy,
+  .quiz-tile {
     animation: none;
   }
 }
-
-.quiz-actions {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  margin-top: 8px;
-}
-
 
 .asl-drawing {
   display: block;
