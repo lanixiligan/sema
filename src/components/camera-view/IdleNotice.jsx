@@ -9,7 +9,10 @@ export default function IdleNotice({ secondsLeft }) {
       <p className="idle-notice-title" role="status">
         Still there?<span className="visually-hidden"> No hand is in view, so the camera will turn off soon.</span>
       </p>
-      <p aria-hidden="true">Show a hand to keep going. The camera turns off in {secondsLeft} s.</p>
+      <p aria-hidden="true">Show a hand, or the camera turns off.</p>
+      <p className="idle-notice-count" aria-hidden="true">
+        {secondsLeft} s
+      </p>
     </div>
   )
 }

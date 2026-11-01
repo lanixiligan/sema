@@ -1,9 +1,7 @@
 import { useState } from 'react'
 import MenuBar from '../../app/layout/MenuBar.jsx'
-import AslDrawing from '../../components/AslDrawing.jsx'
 import CameraPanel from '../../components/camera-view/CameraPanel.jsx'
 import CameraView from '../../components/camera-view/CameraView.jsx'
-import { CheckIcon } from '../../components/icons/icons.jsx'
 import { useLetterCheck } from '../../components/letter-check/useLetterCheck.js'
 import { useLetterPose } from '../../hand-model/letterPoses.js'
 import { LETTERS } from '../../vision/landmarks/letterShapes.js'
@@ -70,14 +68,13 @@ export default function LearnPage({ signingHand, onSigningHandChange, handView =
       {/* Three columns that start and end on the same lines (grid areas in
           styles.css, shared with the quiz). */}
       <main className="practice learn">
-        <GuidePanel hand={drawnHand} selected={target} onSelect={startRound} />
+        <GuidePanel selected={target} onSelect={startRound} />
 
         <section className="practice-camera" aria-label="Camera">
           <CameraPanel
             className="practice-panel"
-            // After a pass the header stays blank (a non-breaking space keeps
-            // its height, so nothing jumps): "That's A!" shows once, in the
-            // middle of the camera.
+            // After a pass the message stays blank: "That's A!" shows once, in
+            // the middle of the camera.
             status={passed ? ' ' : panel.status}
             tone={panel.tone}
             hold={panel.hold}
@@ -94,16 +91,7 @@ export default function LearnPage({ signingHand, onSigningHandChange, handView =
               underlay={traced && <canvas ref={traceCanvasRef} className="overlay" aria-hidden="true" />}
             >
               {passed && (
-                <div className="practice-done has-drawing">
-                  {/* The letter's drawing settles in, with a tick on its corner,
-                      in place of the quiz's plain tick (2026-10-31): what was
-                      just made, shown back. Decorative: the title says it. */}
-                  <span className="practice-done-drawing" aria-hidden="true">
-                    <AslDrawing letter={target} hand={drawnHand} />
-                    <span className="practice-done-badge">
-                      <CheckIcon size={22} strokeWidth={3} />
-                    </span>
-                  </span>
+                <div className="practice-done">
                   {/* role="status": with the header blank, this is what screen readers hear. */}
                   <p className="practice-done-title" role="status">
                     That&rsquo;s {target}!
@@ -144,7 +132,7 @@ export default function LearnPage({ signingHand, onSigningHandChange, handView =
                 </span>
               </div>
               {/* The picture below: the drawing or the 3D hand, a saved setting
-                  (2026-10-31). Like the guide's List | Grid, aria-pressed says
+                  (2026-10-31). Like the guide's tiles, aria-pressed says
                   which one is showing. For a letter with no pose, 3D is
                   unavailable: greyed out, but still focusable (aria-disabled,
                   not disabled), so its reason can be read. */}

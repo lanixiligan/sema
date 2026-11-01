@@ -545,6 +545,15 @@ body {
   transform: scaleX(-1);
 }
 
+/* In a camera panel the picture fills the whole frame, whatever its shape:
+   cover crops the video's edges instead of leaving bars. The hand drawing's
+   canvas has the video's shape, so it is cropped the same way and stays
+   exactly on the hand. */
+.camera-panel .video,
+.camera-panel .overlay {
+  object-fit: cover;
+}
+
 .overlay {
   pointer-events: none;
 }
@@ -1015,13 +1024,13 @@ body {
 .practice {
   display: grid;
   grid-template-areas: 'guide camera side';
-  grid-template-columns: 330px minmax(0, 1fr) 320px;
+  grid-template-columns: 164px minmax(0, 1fr) minmax(0, 1fr);
   gap: 24px;
   align-items: start;
   width: 100%;
-  max-width: 1440px;
+  max-width: 1600px;
   margin: 0 auto;
-  padding: 20px 48px 28px;
+  padding: 20px 32px 28px 16px;
 }
 
 .practice-camera {
@@ -1056,6 +1065,14 @@ body {
   flex-direction: column;
   align-self: stretch;
   gap: 10px;
+}
+
+/* The picture is as wide as the card but not taller than about a third of the
+   window, so the finger checklist under it stays in view (a 4:3 picture in a
+   card this wide pushed it off the page). */
+.practice.learn .practice-side .reference-image {
+  aspect-ratio: auto;
+  height: clamp(200px, calc((100dvh - var(--bar-height)) / var(--practice-zoom) * 0.38), 360px);
 }
 
 /* The drawing fills the card's width (Record's reference picture). */
@@ -1151,9 +1168,9 @@ body {
    on/off button. Slimmer sides and padding leave it room for its controls. */
 @media (min-width: 900px) and (max-width: 1199px) {
   .practice.learn {
-    grid-template-columns: 240px minmax(0, 1fr) 260px;
+    grid-template-columns: 148px minmax(0, 1fr) 260px;
     gap: 16px;
-    padding: 20px 24px 28px;
+    padding: 20px 20px 28px 12px;
   }
 }
 
@@ -1264,8 +1281,9 @@ body {
   padding: 5px 18px 5px 5px;
   font-size: var(--text-small);
   font-weight: 600;
-  color: var(--text);
-  background: var(--surface-soft);
+  color: var(--cloud-white);
+  background: rgb(12 29 48 / 0.6);
+  border: 1px solid var(--progress-track);
   border-radius: var(--radius-pill);
 }
 
@@ -1290,9 +1308,10 @@ body {
   }
 }
 
-/* A pass (the hold, or J or Z traced): a dark film over the picture, a green check, the result large, and the next step. It sits
+/* A pass (the hold, or J or Z traced): a dark film over the picture with a
+   green glow behind a big check, the result large, and the next step. It sits
    on the camera frame, so the colour roles are the on-dark ones (--success is
-   the light green). */
+   the light green). The bottom padding keeps it clear of the camera controls. */
 .practice-done {
   position: absolute;
   inset: 0;
@@ -1300,20 +1319,23 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  padding: 0 24px;
+  gap: 14px;
+  padding: 24px 24px 96px;
   color: var(--cloud-white);
   text-align: center;
-  background: var(--scrim);
+  background:
+    radial-gradient(circle at 50% 38%, rgb(76 194 138 / 0.28), transparent 55%),
+    rgb(12 29 48 / 0.82);
 }
 
 /* The check badge is drawn before the title (it pops in once). The empty
    alternative text keeps screen readers from reading the ✓ out. */
 .practice-done-title {
   margin: 0;
-  font-size: 4.5rem;
-  line-height: 1.05;
-  font-weight: 800;
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 9vmin, 5.25rem);
+  line-height: 1;
+  font-weight: 900;
   letter-spacing: -0.02em;
   color: var(--success-ink);
 }
@@ -1323,15 +1345,17 @@ body {
   content: '✓' / '';
   display: grid;
   place-items: center;
-  width: 88px;
-  height: 88px;
-  margin: 0 auto 20px;
-  font-size: 3rem;
+  width: 96px;
+  height: 96px;
+  margin: 0 auto 22px;
+  font-size: 3.4rem;
+  font-weight: 900;
   line-height: 1;
   color: var(--green-night);
   background: var(--success);
   border-radius: 50%;
-  animation: practice-done-pop 400ms cubic-bezier(0.3, 1.5, 0.5, 1) both;
+  box-shadow: 0 0 0 10px rgb(76 194 138 / 0.25);
+  animation: practice-done-pop 450ms cubic-bezier(0.3, 1.5, 0.5, 1) both;
 }
 
 @keyframes practice-done-pop {
@@ -1345,101 +1369,54 @@ body {
   }
 }
 
-/* Learn's pass (2026-10-31): the letter's drawing on its white card, set down
-   at a slight tilt like a flashcard, with the tick on its corner, in place of
-   the plain tick above (which the quiz keeps). The card settles in once. */
-.practice-done.has-drawing .practice-done-title::before {
-  content: none;
-}
-
-.practice-done-drawing {
-  position: relative;
-  width: clamp(72px, 16vmin, 136px);
-  aspect-ratio: 1;
-  margin-bottom: 4px;
-  background: var(--white);
-  border-radius: var(--radius-card);
-  box-shadow: 0 12px 32px rgb(12 29 48 / 0.45);
-  transform: rotate(-3deg);
-  animation: practice-done-drawing-in 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.practice-done-drawing .asl-drawing {
-  position: absolute;
-  inset: 8%;
-  width: 84%;
-  height: 84%;
-}
-
-/* The white ring joins the tick to the card. */
-.practice-done-badge {
-  position: absolute;
-  right: -12px;
-  bottom: -12px;
-  display: grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  color: var(--green-night);
-  background: var(--success);
-  border-radius: 50%;
-  box-shadow: 0 0 0 3px var(--white);
-  animation: practice-done-badge-in 400ms 250ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-@keyframes practice-done-drawing-in {
-  from {
-    opacity: 0;
-    transform: translateY(16px) scale(0.85) rotate(-9deg);
-  }
-  to {
-    opacity: 1;
-    transform: rotate(-3deg);
-  }
-}
-
-@keyframes practice-done-badge-in {
-  from {
-    opacity: 0;
-    transform: scale(0.4);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .practice-done-title::before,
-  .practice-done-drawing,
-  .practice-done-badge {
+  .practice-done-title::before {
     animation: none;
   }
 }
 
-/* Next letter: the one obvious action, green. Try again is quieter. */
+/* Next letter: the one obvious action, a green key with a raised edge that
+   goes down on press (like Welcome's amber one). Try again is quiet. */
 .practice-done .button {
-  padding: 14px 32px;
-  font-size: 1.25rem;
-  font-weight: 700;
+  --key-edge: 5px;
+
+  margin-bottom: var(--key-edge);
+  padding: 14px 34px;
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 800;
   color: var(--green-night);
   background: var(--success);
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 var(--key-edge) 0 var(--green);
+  transition:
+    transform 90ms ease-out,
+    box-shadow 90ms ease-out;
 }
 
 .practice-done .button:hover {
   background: var(--green-pale);
 }
 
+.practice-done .button:active {
+  box-shadow: 0 0 0 var(--green);
+  transform: translateY(var(--key-edge));
+}
+
 .practice-done .button-quiet {
   margin-top: 0;
-  padding: 8px 18px;
-  color: var(--cloud-white);
+  padding: 6px 10px;
+  font-weight: 600;
+  color: var(--muted-on-dark);
+  text-decoration: underline;
+  text-underline-offset: 4px;
   background: transparent;
-  border-color: rgb(255 255 255 / 0.4);
+  border: none;
 }
 
 .practice-done .button-quiet:hover {
-  border-color: var(--cloud-white);
+  color: var(--cloud-white);
 }
 
 /* The quiz (/quiz). The results: one centred column, like the Learn placeholder. */
@@ -2393,33 +2370,26 @@ body {
   transform: scaleX(-1);
 }
 
-/* The letter guide, in the left column: as tall as the camera beside it. One
-   column of large cards (the letter's drawing, then the letter), scrolling
-   inside the panel: min-height 0 lets the panel shrink to the row's height
-   instead of growing with its 26 cards, and the list takes the rest and
-   scrolls. Each card is a button that picks the letter; the picked one has a
-   blue ring. */
+/* The letter guide, in the left column: a slim rail as tall as the camera
+   beside it. Small letter tiles, two per row, A to Z (the drawings are on the
+   letter's card on the right). min-height 0 lets the panel shrink to the row's
+   height, and the list scrolls inside it if the window is too short for all 13
+   rows. Each tile is a button that picks the letter; the picked one has a blue
+   ring. */
 .practice-guide {
   display: flex;
   grid-area: guide;
   flex-direction: column;
   align-self: stretch;
   min-height: 0;
-  padding: 12px 6px 12px 12px;
+  padding: 10px 4px 10px 10px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-card);
 }
 
-.practice-guide-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: 0 6px 12px 0;
-}
-
-/* The List | Grid switch: the same look as the theme toggle's track. */
-.practice-guide-layout,
+/* A two-option switch: the same look as the theme toggle's track (Learn's
+   2D | 3D). */
 .view-switch {
   display: flex;
   gap: 2px;
@@ -2428,7 +2398,6 @@ body {
   border-radius: var(--radius-control);
 }
 
-.practice-guide-layout button,
 .view-switch button {
   padding: 3px 10px;
   font: inherit;
@@ -2441,7 +2410,6 @@ body {
   border-radius: var(--radius-segment);
 }
 
-.practice-guide-layout button:hover,
 .view-switch button:hover {
   color: var(--text);
 }
@@ -2454,30 +2422,25 @@ body {
   opacity: 0.5;
 }
 
-.practice-guide-layout button[aria-pressed='true'],
 .view-switch button[aria-pressed='true'] {
   color: var(--text);
   background: var(--segment-on);
 }
 
-.practice-guide-layout button:focus-visible,
 .view-switch button:focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 1px;
 }
 
-.practice-guide-title {
-  margin: 0;
-  padding: 0 4px;
-  font-size: var(--text-small);
-  font-weight: 700;
-}
-
+/* Two columns of tiles. */
 .practice-guide-tiles {
-  display: flex;
+  display: grid;
   flex: 1 1 auto;
-  flex-direction: column;
-  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  /* 13 rows share the rail's height, so all 26 letters fit without scrolling
+     (they only scroll when the window is shorter than 13 x 36px). */
+  grid-template-rows: repeat(13, minmax(36px, 1fr));
+  gap: 6px;
   min-height: 0;
   margin: 0;
   /* Room on the right for the scrollbar, and for the ring to show unclipped. */
@@ -2495,14 +2458,14 @@ body {
   }
 }
 
-/* The list's scrollbar in Sema's colours: a slim track (the same tint as the
-   switch above), a rounded thumb that turns the accent blue on hover or drag.
-   The thumb's transparent border insets it from the track's edges.
-   Chrome and Safari use the -webkit- rules; Firefox gets the plain
-   properties (Chrome ignores the -webkit- rules once scrollbar-color is set,
-   so those are only given to browsers without them). */
+/* The list's scrollbar in Sema's colours (only seen in a short window): a slim
+   track, a rounded thumb that turns the accent blue on hover or drag. The
+   thumb's transparent border insets it from the track's edges. Chrome and
+   Safari use the -webkit- rules; Firefox gets the plain properties (Chrome
+   ignores the -webkit- rules once scrollbar-color is set, so those are only
+   given to browsers without them). */
 .practice-guide-tiles::-webkit-scrollbar {
-  width: 12px;
+  width: 10px;
 }
 
 .practice-guide-tiles::-webkit-scrollbar-track {
@@ -2532,40 +2495,21 @@ body {
   }
 }
 
-.practice-guide-tiles.is-grid {
-  display: grid;
-  flex: 1 1 auto;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  align-content: start;
-}
-
-.is-grid .practice-guide-tile {
-  padding: 5px 5px 4px;
-  font-size: 20px;
-  border-radius: 10px;
-}
-
-.is-grid .practice-guide-drawing {
-  height: 64px;
-  padding: 4px;
-}
-
 .practice-guide-tile {
-  position: relative;
   display: block;
   width: 100%;
-  padding: 8px 8px 6px;
+  height: 100%;
+  padding: 0;
   font: inherit;
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 700;
-  line-height: 1.3;
+  line-height: 1;
   color: var(--text);
   text-align: center;
   cursor: pointer;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 10px;
 }
 
 .practice-guide-tile:hover {
@@ -2584,27 +2528,14 @@ body {
   box-shadow: 0 0 0 2px var(--accent);
 }
 
-.practice-guide-drawing {
-  display: block;
-  height: 150px;
-  margin-bottom: 4px;
-  padding: 8px;
-  background: var(--white);
-  border-radius: 8px;
-}
-
-/* Short windows (a 1280×720 laptop): smaller drawings. */
-@media (max-height: 800px) {
-  .practice-guide-drawing {
-    height: 120px;
-  }
-}
-
-/* Stacked under the camera there's no row height to fill, so the list gets
-   its own height and scrolls inside it. */
+/* Stacked under the camera there's no row height to fill, so the tiles go in
+   a row of five and the list gets its own height. */
 @media (max-width: 899px) {
   .practice-guide-tiles {
     flex: none;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-rows: none;
+    grid-auto-rows: 46px;
     max-height: 420px;
   }
 }
@@ -3223,44 +3154,74 @@ body {
 }
 
 .camera-off-title {
-  margin-top: var(--space-2);
   font-size: var(--text-body);
   font-weight: 700;
   color: var(--cloud-white);
 }
 
+/* A big round badge for the icon: the first thing to see on an empty frame. */
+.camera-off-badge {
+  display: grid;
+  place-items: center;
+  width: 84px;
+  height: 84px;
+  margin-bottom: var(--space-2);
+  color: var(--cloud-white);
+  background: var(--progress-track);
+  border-radius: 999px;
+  box-shadow: 0 0 0 8px rgb(42 74 112 / 0.4);
+}
+
 /* Why it's off (another tab, no hand), or what to do (not turned on yet). */
 .camera-off-text {
-  max-width: 28em;
-  font-size: var(--text-small);
+  max-width: 24em;
+  font-size: var(--text-body);
   text-wrap: balance;
 }
 
-/* Turning it back on is always the person's choice: the same button as
-   "Try again" on a camera problem. */
+/* Turning it back on is always the person's choice. The same amber key as
+   Welcome's and the camera check's: a raised edge that goes down on press. */
 .camera-off button {
-  margin-top: var(--space-3);
-  padding: 12px 22px;
-  font: inherit;
-  font-size: 15px;
-  font-weight: 700;
+  --key-edge: 5px;
+
+  margin-top: var(--space-4);
+  margin-bottom: var(--key-edge);
+  padding: 14px 30px;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 800;
   color: var(--deep-cobalt);
-  background: var(--bright-sky);
+  background: var(--amber-on-dark);
   border: none;
-  border-radius: var(--radius-pill);
+  border-radius: 16px;
+  box-shadow: 0 var(--key-edge) 0 var(--amber);
   cursor: pointer;
+  transition:
+    transform 90ms ease-out,
+    box-shadow 90ms ease-out;
 }
 
-/* While the hand model loads: quiet, and not clickable yet. */
+.camera-off button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--amber-on-dark), var(--white) 14%);
+}
+
+.camera-off button:active:not(:disabled) {
+  box-shadow: 0 0 0 var(--amber);
+  transform: translateY(var(--key-edge));
+}
+
+/* While the hand model loads: quiet, flat, and not clickable yet. */
 .camera-off button:disabled {
   color: var(--muted-on-dark);
   background: var(--progress-track);
+  box-shadow: none;
+  transform: translateY(var(--key-edge));
   cursor: progress;
 }
 
 .camera-off button:focus-visible {
   outline: 3px solid var(--bright-sky);
-  outline-offset: 2px;
+  outline-offset: 4px;
 }
 
 /* The idle notice (IdleNotice.jsx): in the middle of the camera view, which
@@ -3270,12 +3231,13 @@ body {
   top: 50%;
   left: 50%;
   translate: -50% -50%;
-  padding: var(--space-4) var(--space-5);
-  font-size: var(--text-small);
+  padding: var(--space-4) var(--space-6);
+  font-size: var(--text-body);
   text-align: center;
   color: var(--muted-on-dark);
   background: var(--scrim);
-  border-radius: var(--radius-card);
+  border: 1px solid var(--progress-track);
+  border-radius: 20px;
   pointer-events: none;
 }
 
@@ -3285,9 +3247,23 @@ body {
 
 .idle-notice-title {
   margin-bottom: var(--space-1);
-  font-size: var(--text-body);
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 800;
   color: var(--cloud-white);
+}
+
+/* The seconds left, on a line of their own at the bottom: big, in amber, with
+   equal-width digits so the number doesn't jiggle as it counts down. */
+.idle-notice .idle-notice-count {
+  margin-top: var(--space-3);
+  font-family: var(--font-display);
+  font-size: 44px;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--amber-on-dark);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 /* The camera controls at the bottom of the video (CameraControls.jsx): a dark
@@ -3304,15 +3280,17 @@ body {
   display: flex;
   align-items: center;
   gap: var(--space-1);
-  padding: var(--space-1);
-  background: var(--scrim);
+  padding: 6px;
+  background: rgb(12 29 48 / 0.88);
+  border: 1px solid var(--progress-track);
   border-radius: var(--radius-pill);
+  box-shadow: 0 8px 20px rgb(0 0 0 / 0.35);
 }
 
 .camera-controls-pill button {
   display: grid;
   place-items: center;
-  height: 44px;
+  height: 48px;
   padding: 0;
   color: var(--cloud-white);
   background: none;
@@ -3326,7 +3304,7 @@ body {
 }
 
 .camera-controls-toggle {
-  width: 44px;
+  width: 48px;
 }
 
 .camera-controls-pill button:hover,
@@ -3374,8 +3352,9 @@ body {
 }
 
 .camera-controls-pill .camera-controls-segment button[aria-pressed='true'] {
-  color: var(--cloud-white);
-  background: var(--progress-track);
+  font-weight: 800;
+  color: var(--deep-cobalt);
+  background: var(--bright-sky);
 }
 
 .camera-controls-pill button:focus-visible,
@@ -5066,8 +5045,9 @@ html:has(.about-page) {
   overflow: hidden;
   color: var(--text);
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 20px;
+  border: 1px solid var(--progress-track);
+  border-radius: 28px;
+  box-shadow: var(--sticker-shadow);
 }
 
 .camera-panel-head {
@@ -5150,39 +5130,45 @@ html:has(.about-page) {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 52px;
-  height: 52px;
-  font-size: 26px;
-  font-weight: 800;
-  color: var(--amber-on-dark);
-  border: 2px solid var(--amber-on-dark);
+  width: 72px;
+  height: 72px;
+  font-family: var(--font-display);
+  font-size: 40px;
+  font-weight: 900;
+  color: var(--deep-cobalt);
+  background: var(--amber-on-dark);
   border-radius: 999px;
+  box-shadow: 0 0 0 8px rgb(232 162 58 / 0.25);
 }
 
 .stage-problem-title {
-  font-size: 20px;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.15;
   color: var(--cloud-white);
+  text-wrap: balance;
 }
 
 .stage-problem-body {
-  max-width: 400px;
-  font-size: 15px;
-  line-height: 1.6;
+  max-width: 360px;
+  font-size: 16px;
+  line-height: 1.5;
   color: var(--muted-on-dark);
+  text-wrap: balance;
 }
 
 /* On the dark frame, the button is Bright Sky with dark text. */
 .stage-problem button {
   margin-top: 6px;
-  padding: 12px 22px;
-  font: inherit;
-  font-size: 15px;
-  font-weight: 700;
+  padding: 12px 26px;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 800;
   color: var(--deep-cobalt);
   background: var(--bright-sky);
   border: none;
-  border-radius: var(--radius-pill);
+  border-radius: 14px;
   cursor: pointer;
 }
 
