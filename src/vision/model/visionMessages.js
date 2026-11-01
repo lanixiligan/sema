@@ -32,7 +32,7 @@ export function getDetectionErrorMessage(error) {
 // from getVisionErrorMessage.
 export const CAMERA_VIEW_NO_WEBGL = {
   title: "Hand tracking can't run in this browser",
-  body: "It needs WebGL, which this browser isn't giving to pages. Turn on hardware acceleration in your browser's settings. If you can't, use a browser that supports WebGL.",
+  body: "It needs WebGL. Turn on hardware acceleration in your browser's settings, or try another browser.",
 }
 
 export const CAMERA_VIEW_TRACKING_FAILED_TITLE = "Hand tracking couldn't start"

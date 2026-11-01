@@ -41,19 +41,19 @@ export function cameraErrorKind(error) {
 export const CAMERA_VIEW_ERRORS = {
   blocked: {
     title: 'Camera access is blocked',
-    body: 'Allow it from the camera icon in the address bar, then try again.',
+    body: 'Allow it from the camera icon in the address bar.',
   },
   busy: {
     title: 'Your camera is busy',
-    body: 'Another app may be using it, like a video call. Close it and try again.',
+    body: 'Close any app using it, like a video call, then try again.',
   },
   noCamera: {
     title: 'No camera found',
-    body: 'Check that a webcam is plugged in, then try again.',
+    body: 'Plug in a webcam, then try again.',
   },
   stopped: {
     title: 'The camera stopped',
-    body: "It may have been unplugged or taken by another app. Try again when it's back.",
+    body: "Unplugged, or taken by another app. Try again when it's back.",
   },
 }
 

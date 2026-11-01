@@ -35,6 +35,8 @@ describe('progressStore', () => {
       setupDone: true,
       theme: 'dark',
       handView: '3d',
+      turnTipClosed: true,
+      handNumbers: false,
       devAccess: 'ab12',
       devModel: 'knn',
     }
@@ -45,6 +47,16 @@ describe('progressStore', () => {
   it('gives settings saved before the 3D hand existed the drawing', () => {
     vi.stubGlobal('localStorage', fakeStorage(saved({ version: PROGRESS_VERSION, signingHand: 'left', setupDone: true, theme: 'dark' })))
     expect(loadProgress().handView).toBe('2d')
+  })
+
+  it('shows the 3D hand\'s tip again to settings saved before it could be closed', () => {
+    vi.stubGlobal('localStorage', fakeStorage(saved({ version: PROGRESS_VERSION, signingHand: 'left', setupDone: true, theme: 'dark' })))
+    expect(loadProgress().turnTipClosed).toBe(false)
+  })
+
+  it('shows the 3D hand\'s fingertip numbers to settings saved before they could be hidden', () => {
+    vi.stubGlobal('localStorage', fakeStorage(saved({ version: PROGRESS_VERSION, signingHand: 'left', setupDone: true, theme: 'dark' })))
+    expect(loadProgress().handNumbers).toBe(true)
   })
 
   it('gives settings saved before developer access existed none', () => {

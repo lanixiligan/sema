@@ -9,8 +9,8 @@ import { VideoOffIcon } from '../icons/icons.jsx'
 // hand model has loaded, the button waits and says so: a camera that's on but
 // can't track hands yet would only look broken.
 const REASONS = {
-  hidden: 'It turned off while you were in another tab. Pick up where you left off.',
-  idle: 'It turned off after a minute with no hand in view. Ready when you are.',
+  hidden: 'Paused while you were in another tab.',
+  idle: 'Paused after a minute with no hand in view.',
 }
 
 export default function CameraOff({ note }) {
@@ -18,7 +18,11 @@ export default function CameraOff({ note }) {
   const modelLoading = camera.handModel.status !== 'ready'
   return (
     <div className="camera-off" role="status">
-      <VideoOffIcon size={28} />
+      <span className="camera-off-badge">
+        <VideoOffIcon size={32} />
+      </span>
+      {/* The panel has no header to say it any more (the message sticker only
+          shows while the camera is live), so the page says it itself. */}
       <p className="camera-off-title">Camera is off</p>
       {(REASONS[camera.stopReason] ?? note) && (
         <p className="camera-off-text">{REASONS[camera.stopReason] ?? note}</p>

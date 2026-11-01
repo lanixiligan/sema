@@ -6,11 +6,14 @@ import CameraControls from './CameraControls.jsx'
 import CameraOff from './CameraOff.jsx'
 import CameraStage from './CameraStage.jsx'
 import IdleNotice from './IdleNotice.jsx'
+import StageMessage from './StageMessage.jsx'
 import StageProblem from './StageProblem.jsx'
 
 // The camera view every camera page uses (the camera check, Record): the
 // shared camera's picture with its hand drawing, and everything around it that
 // works the same on every page:
+// - the camera panel's message, as a sticker at the top of the picture
+//   while it's live (StageMessage);
 // - a problem panel when the camera or hand tracking fails;
 // - "Camera is off" with a Turn camera on button while it's off (`offNote`
 //   says what to do before it's first turned on);
@@ -21,6 +24,8 @@ import StageProblem from './StageProblem.jsx'
 // The page brings its own hand detection (`hand` is what useHandDetection
 // returns, drawn on `canvasRef`) and its overlays, shown while the camera is
 // live: over the hand drawing (`children`) or under it (`underlay`).
+// `panel` is for a page's own readout on the picture (Learn's finger checklist):
+// shown while the camera is live only: not while it's off, nor over a problem panel.
 // `autoStart` is CameraStage's.
 export default function CameraView({
   canvasRef,
@@ -30,6 +35,7 @@ export default function CameraView({
   offNote,
   controls = {},
   underlay,
+  panel,
   children,
 }) {
   const camera = useSharedCamera()
@@ -51,6 +57,8 @@ export default function CameraView({
           <IdleNotice secondsLeft={idleSecondsLeft} />
         </>
       )}
+      {live && panel}
+      <StageMessage show={live} />
       {controls && <CameraControls {...controls} />}
     </CameraStage>
   )

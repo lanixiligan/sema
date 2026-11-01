@@ -122,6 +122,12 @@ export default function App() {
   const settings = {
     shownTheme,
     setTheme: (theme) => updateProgress({ theme }),
+    handView: progress.handView,
+    setHandView: (handView) => updateProgress({ handView }),
+    turnTipClosed: progress.turnTipClosed,
+    closeTurnTip: () => updateProgress({ turnTipClosed: true }),
+    handNumbers: progress.handNumbers,
+    setHandNumbers: (handNumbers) => updateProgress({ handNumbers }),
     deleteData,
   }
 
@@ -136,8 +142,6 @@ export default function App() {
             onStartSetup={startSetup}
             onFinishSetup={finishSetup}
             onSigningHandChange={(signingHand) => updateProgress({ signingHand })}
-            handView={progress.handView}
-            onHandViewChange={(handView) => updateProgress({ handView })}
             devModel={progress.devModel}
             onDevModelChange={(devModel) => updateProgress({ devModel })}
             devAccess={progress.devAccess}
@@ -156,8 +160,6 @@ function Page({
   onStartSetup,
   onFinishSetup,
   onSigningHandChange,
-  handView,
-  onHandViewChange,
   devModel,
   onDevModelChange,
   devAccess,
@@ -189,8 +191,6 @@ function Page({
         <LearnPage
           signingHand={signingHand}
           onSigningHandChange={onSigningHandChange}
-          handView={handView}
-          onHandViewChange={onHandViewChange}
           model={devModel}
         />
       )

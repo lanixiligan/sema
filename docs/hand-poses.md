@@ -1,6 +1,6 @@
 # The 3D hand's letter poses
 
-Learn's letter card has a **2D | 3D** switch (2026-10-31). 2D is the drawing; 3D is a hand you
+Every picture of a hand has a **2D | 3D** switch in its upper left corner: Learn's letter card (2026-10-31) and the quiz's Peek (2026-11-02). It's one saved setting, so a click changes both. 2D is the drawing; 3D is a hand you
 can turn, drawn by Sema's copy of [Eidos](https://github.com/lanixiligan/eidos)'s viewer, in the
 pose of the letter. The poses are made in Eidos and saved in Eidos's format, so a file from
 there works here unchanged.
@@ -37,9 +37,10 @@ in place. A full pose with `"available": false` added by hand stays hidden (a dr
 file, or one with pose values that don't make a valid pose, is unavailable too, with the reason
 in the browser console (`readLetterPose` in `letterPoses.js`, tested in `letterPoses.test.js`).
 
-On Learn, an unavailable letter's 3D button is greyed out ("No 3D hand for A yet" on hover and for
-screen readers) and the drawing shows. The 3D choice is kept: the next letter that has a pose is
-shown in 3D again, and with 3D chosen a line under the drawing says why it isn't 3D.
+With 3D chosen, an unavailable letter's picture says "No 3D hand for A yet" and "Switch to 2D to see
+its drawing" instead of showing the drawing (2026-11-02; before, it fell back to the drawing with a
+line). The switch stays, so one click goes to 2D. The 3D choice is kept: the next letter that has a
+pose is shown in 3D again.
 
 ## The format
 
@@ -54,7 +55,10 @@ hand mirrors it), `version` 1. Sema's copy of `pose.js` must stay identical to E
 - `hand.js`: Eidos's 3D viewer (`createHand`), changed for Sema: it draws only while something
   moves (a drag, a new letter, a resize) and stops once the hand has settled, so a still hand
   costs no battery and leaves the graphics card to hand tracking; with reduced motion, poses jump
-  into place and a flick doesn't spin on; no scroll-to-zoom; `spinBy` for the arrow keys.
+  into place and a flick doesn't spin on; no scroll-to-zoom; `spinBy` for the arrow keys; and a fit
+  (2026-11-02): for the pose the hand is moving to it measures how far the joints reach, then centres the
+  hand in the frame and moves it back from the camera when it's too big (`FIT_FILL`, `FIT_MARGIN`,
+  `measureTarget`, `applyFit`), so a hand with fingers stretched up isn't cut off; small poses keep the usual distance.
 - `models/hand-right.glb`: the WebXR generic hand (MIT, © Amazon), with its licence.
 - `letterPoses.js`: fetches a letter's file once per visit, in 2D too (it's tiny), and decides
   whether it's available (`readLetterPose`, `useLetterPose`), so Learn can grey out 3D. It doesn't

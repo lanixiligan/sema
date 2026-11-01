@@ -100,3 +100,17 @@ export function quizScore(quiz) {
   const all = quiz.marks.flat()
   return { passed: all.filter((m) => m === 'passed').length, total: all.length }
 }
+
+// The headline on the results, from how much was signed: a title and one
+// line under it. Warm at every score, and honest: a letter skipped is a
+// letter to review, not a failure.
+export function resultsVerdict(passed, total) {
+  const share = total > 0 ? passed / total : 0
+  if (passed === 0) {
+    return { title: 'Let’s warm up', text: 'Nothing signed this time. Learn goes one letter at a time, with hints. Then come back.' }
+  }
+  if (share === 1) return { title: 'Perfect round!', text: 'Every letter signed. Well done.' }
+  if (share >= 0.8) return { title: 'Great signing!', text: 'Almost every letter. The few you missed are quick to review in Learn.' }
+  if (share >= 0.5) return { title: 'Nice work!', text: 'More than half signed. Review the rest in Learn, then try again.' }
+  return { title: 'Good start!', text: 'Every round makes the letters stick. Review the rest in Learn, then try again.' }
+}

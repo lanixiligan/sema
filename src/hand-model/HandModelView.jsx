@@ -1,19 +1,20 @@
 import { useEffect, useRef, useState } from 'react'
 import { createHand } from './hand.js'
 
-// How far one arrow key turns the hand: 15°.
-const KEY_TURN = Math.PI / 12
-
 // The 3D hand (Eidos's viewer, hand.js) making a letter's pose, facing the
-// signing hand. Drag it, or focus it and press ← →, to turn it. Learn loads
+// signing hand. Grab it to turn it (the mouse or a finger; it has no keyboard
+// controls, 2026-11-02, so it isn't a stop for the Tab key). Learn loads
 // this file with lazy(), so three.js is only downloaded by someone who
 // chooses 3D, for a letter that has a pose.
 // The viewer is made once per mount and disposed on unmount, which frees its
 // WebGL context (StrictMode's double mount in development makes one, throws
 // it away, and makes another). A new pose or hand goes to the same viewer,
-// which eases into it. If the hand can't be drawn (no WebGL, or the model
+// which eases into it, `numbers` shows or hides the fingertip numbers, and a new letter also eases the hand back to its
+// starting angle. If the hand can't be drawn (no WebGL, or the model
 // didn't load), `fallback` (the drawing) shows instead.
-export default function HandModelView({ letter, pose, hand, fallback }) {
+// `theme` ('light' or 'dark', the theme on screen) picks the hand's blue to
+// suit its frame: Deep Sky on a light one, Bright Sky on a dark one.
+export default function HandModelView({ letter, pose, hand, theme = 'light', numbers = true, fallback }) {
   const containerRef = useRef(null)
   const viewerRef = useRef(null)
   const [failed, setFailed] = useState(false)
@@ -41,6 +42,12 @@ export default function HandModelView({ letter, pose, hand, fallback }) {
     }
   }, [])
 
+  // Runs after the effect that makes the viewer, so a first mount gets its
+  // color too; a theme change later recolors the same viewer.
+  useEffect(() => {
+    viewerRef.current?.setMode(theme)
+  }, [theme])
+
   useEffect(() => {
     viewerRef.current?.setSide(hand)
   }, [hand])
@@ -49,12 +56,21 @@ export default function HandModelView({ letter, pose, hand, fallback }) {
     viewerRef.current?.setPose(pose)
   }, [pose])
 
-  function turn(event) {
-    const direction = { ArrowLeft: -1, ArrowRight: 1 }[event.key]
-    if (!direction) return
-    event.preventDefault() // the page doesn't scroll sideways
-    viewerRef.current?.spinBy(direction * KEY_TURN)
-  }
+  // The fingertip numbers, shown or hidden by the Numbers button.
+  useEffect(() => {
+    viewerRef.current?.setNumbersVisible(numbers)
+  }, [numbers])
+
+  // A different letter starts from the starting angle: the hand eases back from
+  // wherever it was turned to (resetView). The viewer is kept between letters,
+  // so without this it would stay turned. The first letter of a mount is
+  // already there, so only a change counts.
+  const shownLetter = useRef(letter)
+  useEffect(() => {
+    if (shownLetter.current === letter) return
+    shownLetter.current = letter
+    viewerRef.current?.resetView()
+  }, [letter])
 
   if (failed) return fallback
   return (
@@ -62,9 +78,7 @@ export default function HandModelView({ letter, pose, hand, fallback }) {
       ref={containerRef}
       className="hand-model-view"
       role="img"
-      aria-label={`3D hand making ${letter}. Drag, or use the left and right arrow keys, to turn it.`}
-      tabIndex={0}
-      onKeyDown={turn}
+      aria-label={`3D hand making ${letter}. Grab it to turn it.`}
     />
   )
 }

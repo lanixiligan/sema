@@ -1,8 +1,6 @@
 import MenuBar from '../../app/layout/MenuBar.jsx'
 import { navigate } from '../../app/routing/navigation.js'
 import { PATHS } from '../../app/routing/router.js'
-import { EyeIcon } from '../../components/icons/icons.jsx'
-import { CameraIcon, TrophyIcon } from '../../components/icons/LineIcons.jsx'
 import { LETTERS } from '../../vision/landmarks/letterShapes.js'
 import { LETTER_COUNT, WORD_COUNT } from './quizRounds.js'
 import { useWords } from './useWords.js'
@@ -15,6 +13,9 @@ import { useWords } from './useWords.js'
 // and its results; QuizRun checks each letter exactly as on Learn
 // (useLetterCheck: the finger conditions decide, held 1.5 s; J and
 // Z traced). quizRounds.js holds the quiz's state.
+// Redesigned 2026-11-01 in the camera check's look: sticker cards with a
+// small letter tile row each, and the amber key look for Start.
+
 // Four random letters for the Letters card's picture. Chosen once when the site
 // loads (module level, not inside the component), so they change on every
 // refresh but stay put while the person moves between pages.
@@ -35,36 +36,57 @@ function pickSampleWord(list) {
   return sampleWord ?? 'HAND'
 }
 
+// A row of small tiles, one letter each, drawn like the quiz's own tiles. When
+// the page opens they fill with green one after another, as if signed
+// (styles.css). Decoration: the card's title says what it is.
+function ArtTiles({ letters }) {
+  return (
+    <span className="quiz-choice-art" aria-hidden="true">
+      {letters.map((letter, i) => (
+        <span key={i} className="quiz-art-tile" style={{ '--i': i }}>
+          {letter}
+        </span>
+      ))}
+    </span>
+  )
+}
+
+// Looks like Welcome's key button, but the whole card is the button (a button
+// can't hold another), so this is only drawn like one.
+function StartKey() {
+  return (
+    <span className="quiz-choice-start">
+      Start
+      <svg className="key-button-arrow" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M5 12h13M13 6l6 6-6 6" />
+      </svg>
+    </span>
+  )
+}
+
 export default function QuizPage() {
   const words = useWords()
   const wordLetters = [...pickSampleWord(words.list)]
+  const wordsText =
+    words.status === 'error'
+      ? 'The word list didn’t load.'
+      : words.status === 'loading'
+        ? 'Getting the word list…'
+        : `Spell ${WORD_COUNT} short words, one letter at a time.`
   return (
     <>
       <MenuBar active="quiz" />
       <main className="quiz-choose">
         <header className="quiz-choose-head">
-          <h1>
-            <TrophyIcon/> Choose your quiz mode
-          </h1>
+          <h1>Ready to test yourself?</h1>
+          <p>Sign each letter from memory, with only your camera watching. Stuck? Peek at the drawing. It counts as a clue.</p>
         </header>
         <div className="quiz-choices">
           <button type="button" className="quiz-choice" onClick={() => navigate(PATHS.quizLetters)}>
-            <span className="quiz-choice-top" aria-hidden="true">
-              {/* Four random letters, the first lit like the Words card's. */}
-              <span className="quiz-choice-art">
-                {SAMPLE_LETTERS.map((letter, i) => (
-                  <span key={letter} className={i === 0 ? 'quiz-art-tile quiz-art-lit' : 'quiz-art-tile'}>
-                    {letter}
-                  </span>
-                ))}
-              </span>
-            </span>
+            <ArtTiles letters={SAMPLE_LETTERS} />
             <span className="quiz-choice-title">Letters</span>
-            <span className="quiz-choice-text">Practice {LETTER_COUNT} random letters, one at a time.</span>
-            {/* Looks like a button, but the whole card is the button (a button can't hold another). */}
-            <span className="quiz-choice-foot">
-              <span className="quiz-choice-start">Start</span>
-            </span>
+            <span className="quiz-choice-text">{LETTER_COUNT} random letters, one at a time. How many can you sign?</span>
+            <StartKey />
           </button>
           {/* Words waits for words.json. */}
           <button
@@ -73,49 +95,12 @@ export default function QuizPage() {
             disabled={words.list.length === 0}
             onClick={() => navigate(PATHS.quizWords)}
           >
-            <span className="quiz-choice-top" aria-hidden="true">
-              {/* A short word in tiles, the first letter lit like the quiz's own word line. */}
-              <span className="quiz-choice-art">
-                {wordLetters.map((letter, i) => (
-                  <span key={i} className={i === 0 ? 'quiz-art-tile quiz-art-lit' : 'quiz-art-tile'}>
-                    {letter}
-                  </span>
-                ))}
-              </span>
-            </span>
+            <ArtTiles letters={wordLetters} />
             <span className="quiz-choice-title">Words</span>
-            <span className="quiz-choice-text">
-              {words.status === 'error'
-                ? 'The word list didn’t load.'
-                : `Spell ${WORD_COUNT} short words, one letter at a time.`}
-            </span>
-            {/* Looks like a button, but the whole card is the button (a button can't hold another). */}
-            <span className="quiz-choice-foot">
-              <span className="quiz-choice-start">Start</span>
-            </span>
+            <span className="quiz-choice-text">{wordsText}</span>
+            <StartKey />
           </button>
         </div>
-        {/* How a quiz goes, in three short points. */}
-        <ul className="quiz-perks">
-          <li>
-            <span className="quiz-perk-icon">
-              <CameraIcon size={20} />
-            </span>
-            Sign each letter to your camera
-          </li>
-          <li>
-            <span className="quiz-perk-icon">
-              <EyeIcon size={20} />
-            </span>
-            Stuck? Peek at the drawing
-          </li>
-          <li>
-            <span className="quiz-perk-icon">
-              <TrophyIcon size={20} />
-            </span>
-            See your score at the end
-          </li>
-        </ul>
       </main>
     </>
   )

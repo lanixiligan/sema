@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest'
-import { currentLetter, markLetter, newQuiz, pickLetters, pickWords, quizScore, usableWords } from './quizRounds.js'
+import {
+  currentLetter,
+  markLetter,
+  newQuiz,
+  pickLetters,
+  pickWords,
+  quizScore,
+  resultsVerdict,
+  usableWords,
+} from './quizRounds.js'
 
 // Gives the same numbers every time, from a list, round and round.
 function fixedRandom(values) {
@@ -45,5 +54,16 @@ describe('markLetter', () => {
   it('does nothing once the quiz is finished', () => {
     const done = markLetter(newQuiz('letters', ['A']), 'passed')
     expect(markLetter(done, 'skipped')).toBe(done)
+  })
+})
+
+describe('resultsVerdict', () => {
+  it('has a different title for nothing, some, most and all signed', () => {
+    const titles = [0, 3, 6, 9, 10].map((passed) => resultsVerdict(passed, 10).title)
+    expect(new Set(titles).size).toBe(5)
+  })
+
+  it('does not divide by zero for an empty quiz', () => {
+    expect(resultsVerdict(0, 0).title).toBe('Let’s warm up')
   })
 })

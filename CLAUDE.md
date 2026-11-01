@@ -39,7 +39,7 @@ The development plan is `docs/project-plan.md`.
 - **Phase 3.1 (done early, with the recorder):** the app shell, Welcome and setup,
   because the recorder was the app's main page after setup (since 2026-10-22 it's a
   developer tool, `/dev/record`, and setup leads to Learn, `/learn`, the classifier
-  live: the main page). Learn (3.3, started 2026-10-27, `phase-3-preview`) teaches the letters one at a time, A to Z, and absorbed Practice (the free sandbox, Try renamed on 2026-10-23) the same day, because the two had become nearly the same page: the letter guide of all 26 on the left, the camera, and the letter's drawing and finger checklist on the right; a 1.5 s hold to pass, then Next letter (nothing saved yet). Phase 3 is done for now
+  live: the main page). Learn (3.3, started 2026-10-27, `phase-3-preview`) teaches the letters one at a time, A to Z, and absorbed Practice (the free sandbox, Try renamed on 2026-10-23) the same day, because the two had become nearly the same page: the letter guide of all 26 (a row across the top since 2026-11-02; before, a rail on the left), the camera, and the letter's drawing and finger checklist on the right; a 1.5 s hold to pass, then Next letter (nothing saved yet). Phase 3 is done for now
   (2026-10-27): what's left, saving progress first, is added along the way (the plan's
   Phase 3 line). Every page, one line each:
   `docs/sema-pages.md` (update it when a page is added, renamed or moved).
@@ -106,13 +106,17 @@ src/
     letter-check/   the letter check Learn and Quiz share (2026-10-27; before, in
                     pages/practice/): useLetterCheck (model, hold, J and Z traces),
                     letterHold, drawTrace, and the models' JS copies (networkModel, knnModel)
+    letter-picture/ LetterPicture: a letter's drawing or its 3D hand, with its own 2D | 3D
+                    switch in the frame's upper left and an expand button in its lower right that shows it
+                    large in a native <dialog> (PictureDialog, in a portal; 2026-11-02; Learn's card
+                    and the quiz's Peek)
     Logo.jsx
     AslDrawing.jsx  a letter's drawing (public/images/asl/, a left hand), facing a given
                     hand; DRAWN_HAND (Record's reference picture, Learn's card and guide)
   pages/
     onboarding/     Welcome; Camera check
     about/          About (/about, 2026-10-27, in the menu): what Sema is, how it works and how
-                    it handles your data, three sections in one scrolling page; AboutPreview, HandSketch
+                    it handles your data, three sections in one scrolling page; HandSketch
     learn/          Learn (/learn; Practice, /practice, until 2026-10-27), the main page: the
                     letter guide (GuidePanel), the lesson and its FingerChecklist; hold a letter 1.5 s
     quiz/           Quiz (/quiz, 2026-10-27): letters or words from memory, no hints;
@@ -181,12 +185,15 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   `DevArea.jsx` with `lazy()`, so visitors who never open `/dev` never download the tools.
 - Learn (`/learn`, the main page) was Practice (`/practice`, which now redirects to
   `/learn`) until 2026-10-27, and before that Try (`/try`, also redirected) until 2026-10-23, and before 2026-10-22 the developer tool `/dev/try`.
-  Record's three columns: the letter guide on the left, the camera (with the Left | Right
+  Since 2026-11-02 laid out like the quiz: the letter guide as one row of 26 tiles across the
+  top (the letter being practised lit; one passed during the visit gets a green tick, kept in
+  page state only, nothing is saved), then the camera on the left (with the Left | Right
   switch in its controls, which changes the saved signing hand, Right by default, so the
   drawings face it; since 2026-10-23 only that hand is drawn and judged, and the status says
-  "Show B with your right hand") in the middle, and the letter's card on the right: its
-  drawing large, its finger checklist, and a "Letter model" line, the model's second opinion
-  (below). It starts at A; pick any letter in the guide, make it, and
+  "Show B with your right hand"; if only the other hand is in view for 0.4 s, an amber sticker says
+  "That's your left hand. Show your right hand", 2026-11-02, Quiz too) and the lesson on the right: "Letter B" large, its drawing
+  on a white sticker, its finger checklist as chips that turn green, and a "Letter model" line, the model's second opinion
+  (below). Until 2026-11-02 it was Record's three columns, the guide as a rail on the left. It starts at A; pick any letter in the guide, make it, and
   hold it for 1.5 s (`LETTER_HOLD_MS` in `src/components/letter-check/letterHold.js`). The hold counts while
   the signing hand meets the letter's finger conditions (`src/vision/landmarks/letterShapes.js`,
   2026-10-27): joint bends, thumb place and
@@ -195,8 +202,8 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   (`FingerChecklist.jsx`), finger names with their number, 1 thumb to 5 pinky (`src/vision/landmarks/handPoints.js`,
   the same numbers as on the hand drawing's fingertips), ticked live. The
   model doesn't decide (since 2026-10-27); since 2026-10-29 it's a second opinion, never a gate
-  (Lanix's choice: a gate would fail correct signs on its weakest letters): under the checklist,
-  "Letter model: B, 96% sure", with a tick when it reads the letter being made (`ModelOpinion` in
+  (Lanix's choice: a gate would fail correct signs on its weakest letters): as a small "Model" pill over the picture's upper right (2026-11-02; before, a row under the
+  checklist: "Letter model: B, 96% sure"): the letter it reads in a tile, filled when it reads the letter being made, dim and empty with no reading, and the percentage; the sentence is its tooltip (`ModelOpinion` in
   `LearnPage.jsx`; until then a "Right now" line only under `npm run dev`), and under "That's B!"
   its most frequent reading over the hold ("The letter model agrees." / "read U." / "wasn't
   sure.", `modelVerdict` in `letterHold.js`). The quiz doesn't show it. A gap over 300 ms restarts the hold. Then
@@ -241,8 +248,8 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   (`navigate`), Back/Forward (the address is put back on Cancel) and closing or reloading the tab
   (the browser's own question); End quiz and the results don't ask. The
   camera starts on arrival (the person just chose a quiz). While it runs the page is minimal
-  (2026-10-27): the camera on the left (its hand switch and camera buttons in a footer under the
-  picture), on the right the count and End quiz, the letter large with its eye, the quiz's steps
+  (2026-10-27): the camera on the left (whole, as on Learn: its hand switch and camera buttons on the
+  picture; until 2026-11-01 they were in a footer under it), on the right the count and End quiz, the letter large on a sticker with its Peek button, the quiz's steps
   (one per item, from the quiz state) and a quiet Skip letter; a words quiz also shows the word under the letter.
 - Setup redirects live in `resolveRoute`: a new visitor opening Learn or Quiz goes
   to Welcome; a returning visitor opening `/` goes to Learn. Get started (Welcome's, or About's) opens the camera check, and passing it (its Start learning button) finishes setup and opens Learn. The developer pages, Record
@@ -254,13 +261,29 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   (`localStorage` key `sema.progress`, with a version number). Pages never touch
   `localStorage` directly; `App.jsx` holds the settings and passes them down. The same
   store keeps `devAccess`, the fingerprint of the developer pages' access code once entered.
-- Learn's letter card has a 2D | 3D switch (2026-10-31): the drawing, or the 3D hand from
-  [Eidos](https://github.com/lanixiligan/eidos) (`src/pages/learn/LetterPicture.jsx`). The
-  choice is `handView` in the store ('2d' by default: 3D is opt-in, for battery and reduced
+- A 2D | 3D switch (2026-10-31, on Learn's letter card; since 2026-11-02 on every picture of a
+  hand, in the frame's upper left: `src/app/settings/HandViewToggle.jsx`, inside `LetterPicture`;
+  it was in the top bar for a few hours that day) picks the
+  letter's picture: the drawing, or the 3D hand from
+  [Eidos](https://github.com/lanixiligan/eidos). One setting changes every picture: Learn's card
+  and the quiz's Peek (`src/components/letter-picture/LetterPicture.jsx`; the quiz leaves the
+  "Grab the hand…" hint out of the fixed sticker). The letter guide's
+  tiles stay drawings. On Learn the picture is one card filling the right column, white in the light theme and
+  Deep Cobalt in the dark one (2026-11-02; the 3D hand is Deep Sky on white and Bright Sky on dark,
+  the black-line drawing sits on a white sticker in the dark one; `.learn-card`: the picture fills it from the top, with the letter model's pill over its upper right and the letter's name at the bottom, in the middle, no shadow on the card; the
+  finger checklist is on the camera instead (a translucent dark panel at the video's left edge, `panel` on
+  `CameraView`, `StageChecklist`, 2026-11-02, with a button that minimizes it to a "Checklist 2/5" pill); the 3D hand has a tip, "Grab the hand to rotate it." (no keyboard controls, 2026-11-02), a
+  dark pill in the middle of its lower edge, above the letter's name on Learn, with a close button; once closed it stays closed, `turnTipClosed` in the store), and a Numbers button beside the 2D | 3D switch
+  shows or hides its fingertip numbers (`handNumbers` in the store; not in the quiz's sticker). The
+  choice is `handView` in the store, read with `useSettings()` ('2d' by default: 3D is opt-in, for battery and reduced
   motion). The poses are Eidos's format in `public/languages/asl/letters/` (A–Z, placeholders
   with `"available": false` until Lanix fills them). A letter whose file is empty, `{}`, a
-  placeholder or broken is unavailable: its 3D button is greyed out (`aria-disabled`) and the
-  drawing shows, but the saved choice stays 3D for the next letter that has a pose. Keep `src/hand-model/pose.js` identical to Eidos's. `docs/hand-poses.md`.
+  placeholder or broken is unavailable: with 3D chosen, its picture says "No 3D hand for X yet" and to switch to 2D
+  (2026-11-02; before, the drawing showed, with a line), but the saved choice stays 3D for the next letter that has a pose. Keep `src/hand-model/pose.js` identical to Eidos's. `docs/hand-poses.md`.
+- Light theme (2026-11-02): the page is `--sky-page` (richer than the old pale wash) and the
+  top bar is always dark (a step lighter than Deep Cobalt in the light theme, `--cobalt-lift`, as is the
+  camera frame while the camera is off, 2026-11-02): `TopBar` carries `.on-dark`, so it uses the dark colour set in
+  both themes, like the camera frame. Pages needn't style their own bar.
 - The letter hold time is fixed at 1.5 s (`LETTER_HOLD_MS`). Until 2026-10-27 it was 3 s, and
   for a few hours that day a Hold 2s | 3s | 5s switch in the camera controls (`holdSeconds` in
   the store) let the person choose; Lanix had the switch removed and the default cut to 1.5 s.
@@ -268,7 +291,11 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   it's one day/night button at the right of every page's top bar (a moon by day, a sun by
   night; before, three icons): a new visitor follows the system's setting, and a click saves
   the opposite of what's on screen, Light or Dark. The button is `src/app/settings/ThemeToggle.jsx` (in
-  `TopBar`), the last thing in the bar. Delete Sema's data is only on the `/dev` dashboard, next
+  `TopBar`), the last thing in the bar. A click plays a reveal (2026-11-02,
+  `themeTransition.js`): the new theme grows out of the button as a circle, using the View
+  Transitions API (`document.startViewTransition`, the CSS on `::view-transition-new(root)`
+  in `styles.css`); with reduced motion it's the browser's short crossfade, and without the
+  API an instant switch. Only a click plays it, not a system change or a page opening. Delete Sema's data is only on the `/dev` dashboard, next
   to Lock (`src/pages/dev/DeleteDataButton.jsx`, red text; 2026-10-29: earlier that day it was a
   trash icon at the end of the main pages' top bar, which had replaced a gear and its one-item
   menu; Lanix moved it to `/dev` before launch). Visitors remove Sema's data by clearing the
@@ -335,10 +362,14 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   shown while the camera is live.
 - Every camera page, `/dev/tracking` included, puts its camera in one panel,
   `CameraPanel` (2026-10-23; before, each page copied the markup and its header looked
-  different): a dark frame in every theme, a header with the page's short status (24px,
-  white, or `tone` 'ok' accent / 'warn' amber), and a line along the header's bottom edge
-  that fills over a hold (`hold`) or to a share (`fill`, Record's take). The look lives
-  only in the shared `.camera-panel*` rules in `styles.css`.
+  different): a dark frame in every theme, and the page's short message on the video itself
+  (2026-11-01; before, in a header above it): a sticker at the top of the picture
+  (`StageMessage`, shown by `CameraView` while the camera is live, or by the tracking page),
+  large and white while Sema waits, compact Bright Sky when `tone` is 'ok', amber on 'warn',
+  with a line along its bottom edge that fills over a hold (`hold`) or to a share (`fill`,
+  Record's take). A blank status shows nothing. The page passes the message to `CameraPanel`
+  (through `PanelMessageContext`). The look lives only in the shared `.camera-message*` and
+  `.camera-panel*` rules in `styles.css`.
   Pages never call
   `useCamera` or `useHandLandmarker` themselves, except `/dev/tracking`, which keeps its own
   camera and its Start camera button.
@@ -450,10 +481,10 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
 
 Being redesigned page by page since 2026-10-31 (`PRODUCT.md`, `.impeccable/surfaces/`):
 encouraging and warm, Duolingo's celebratory energy without a mascot, quiet while the
-person holds a letter. Welcome is done (a "HELLO my name is" tag that fingerspells the
-name typed on it, on a Deep Sky page, an amber key button), and so is the camera check
+person holds a letter. Welcome is done (Duolingo's layout, 2026-11-02: a bare header with only the theme button, the logo on the left and "Learn ASL fingerspelling with your webcam" with an amber key button on the right, on the theme's own page; before, centred on a Deep Sky page with a paragraph; until 2026-11-02 a name tag that fingerspelled a typed name in hand drawings), and so is the camera check
 (the same stickers, Gabarito and key button, but on the theme's own page, light or dark,
-at Lanix's request); the other pages still have
+at Lanix's request), and so are Quiz (2026-11-01) and About (2026-11-02: Sema's name in hands,
+three steps each beside a picture of it, and a Deep Cobalt band for the data section); the other pages still have
 the old minimal, calm look until their turn. New faces: Gabarito 400–900
 (`--font-display`) and Caveat Brush (`--font-marker`, the name on the tag only).
 Fonts: Plus Jakarta Sans (text, weights 400–800) and JetBrains Mono 500 (codes and
@@ -466,12 +497,16 @@ Sans Mono holding only σ ῆ μ α (loaded only where they appear). Colors are 
 | `--bright-sky`     | `#36A7D9` | Accents on dark surfaces only                    |
 | `--deep-sky`       | `#1A75A3` | Buttons and links on light surfaces, white text  |
 | `--cloud-white`    | `#F5F7F8` | Hand joints; no longer the page                  |
-| `--sky-wash`       | `#E3F4FA` | Light theme's page background (2026-10-27)       |
+| `--sky-wash`       | `#E3F4FA` | Light theme's page until 2026-11-02; now unused as a role |
+| `--sky-page`       | `#CDE9F5` | Light theme's page background (2026-11-02): a step richer, so white cards stand out; `--muted-text` is 4.8:1 on it, so it can't go much darker |
+| `--sky-edge`       | `#9FC9DF` | Borders and dividers on the sky page             |
+| `--sky-edge-strong`| `#6FA9C8` | Input and letter-tile borders on the sky page    |
+| `--sky-track`      | `#B0D9EC` | Highlights and toggle tracks on the sky page     |
 | `--sky-mist`       | `#F3F9FC` | Quiet panels and About's band on the wash        |
 | `--sky-soft`       | `#C9E6F3` | Highlights and toggle tracks on the wash         |
 | `--sky-line`       | `#C9DDE9` | Borders and dividers on the wash                 |
 | `--sky-line-strong`| `#A9C6D8` | Input and letter-tile borders on the wash        |
-| `--white`          | `#FFFFFF` | Cards and the menu bar                           |
+| `--white`          | `#FFFFFF` | Cards                                            |
 | `--ice-tint`       | `#E3F4FA` | Unused now (was the Preview pill)                |
 | `--line`           | `#E1E7ED` | Borders and dividers on light surfaces           |
 | `--line-strong`    | `#C3CED9` | Input and letter-tile borders                    |
