@@ -11,7 +11,7 @@ const MENU = [
 // The top bar on the main pages, with the menu, and on the right whatever the
 // page passes in, then the theme toggle.
 // The current page's link gets aria-current="page": screen readers announce
-// it as the current page, and the CSS underlines it.
+// it as the current page, and the CSS fills its pill.
 export default function MenuBar({ active, children }) {
   return (
     <TopBar
