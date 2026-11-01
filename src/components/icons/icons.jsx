@@ -92,3 +92,13 @@ export function EyeIcon({ size = 20, off = false }) {
     </svg>
   )
 }
+
+// Two corner arrows pointing outwards, for showing something larger (a hand's
+// picture, in LetterPicture).
+export function ExpandIcon({ size = 18 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 3h5v5M8 17H3v-5M17 3l-5.5 5.5M3 17l5.5-5.5" />
+    </svg>
+  )
+}

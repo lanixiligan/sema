@@ -1,6 +1,7 @@
 // Sema's settings, kept in this browser's localStorage so they survive a
 // reload: the signing hand, whether setup is done, the theme (theme.js), the
-// picture on Learn's letter card (the drawing, 2D, or the 3D hand), and
+// picture on Learn's letter card (the drawing, 2D, or the 3D hand), whether the
+// 3D hand's "drag to turn it" tip was closed, whether its fingertip numbers show, and
 // the developer pages' access (the fingerprint of the code entered on /dev,
 // src/pages/dev/devAccess.js) and which classifier Practice runs (chosen on
 // /dev).
@@ -24,6 +25,8 @@ export const NEW_VISITOR = {
   setupDone: false,
   theme: DEFAULT_THEME,
   handView: '2d',
+  turnTipClosed: false,
+  handNumbers: true,
   devAccess: null,
   devModel: 'small',
 }
@@ -44,6 +47,8 @@ export function loadProgress() {
       setupDone: saved.setupDone === true && signingHand !== null,
       theme: THEMES.includes(saved.theme) ? saved.theme : DEFAULT_THEME,
       handView: HAND_VIEWS.includes(saved.handView) ? saved.handView : '2d',
+      turnTipClosed: saved.turnTipClosed === true,
+      handNumbers: saved.handNumbers !== false,
       devAccess: typeof saved.devAccess === 'string' ? saved.devAccess : null,
       devModel: DEV_MODELS.includes(saved.devModel) ? saved.devModel : 'small',
     }

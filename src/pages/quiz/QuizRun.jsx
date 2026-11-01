@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useLeaveWarning } from '../../app/routing/navigation.js'
-import AslDrawing from '../../components/AslDrawing.jsx'
+import { useSettings } from '../../app/settings/settings.js'
 import CameraPanel from '../../components/camera-view/CameraPanel.jsx'
 import CameraView from '../../components/camera-view/CameraView.jsx'
 import { EyeIcon } from '../../components/icons/icons.jsx'
 import { useLetterCheck } from '../../components/letter-check/useLetterCheck.js'
+import LetterPicture from '../../components/letter-picture/LetterPicture.jsx'
+import { useLetterPose } from '../../hand-model/letterPoses.js'
 import { letterClass } from './letterClass.js'
 import { NEXT_LETTER_MS, currentLetter } from './quizRounds.js'
 
@@ -44,6 +46,11 @@ export default function QuizRun({ quiz, signingHand, onSigningHandChange, model,
     setPeek({ step: quiz.step, open: !thisPeek.open, used: true })
   }
 
+  // What the peek shows, by the picture's 2D | 3D switch: the drawing, or the
+  // 3D hand when the letter has a pose (the picture says when it doesn't).
+  const { handView } = useSettings()
+  const pose = useLetterPose(target)
+
   // "That's B!" for a moment, then the next letter. A Skip in the meantime
   // asks a new letter, which ends `passed` and clears this timer.
   const peeked = thisPeek.used
@@ -79,9 +86,14 @@ export default function QuizRun({ quiz, signingHand, onSigningHandChange, model,
               letter just replaces the old one: nothing moves. */}
           <div className="quiz-sticker">
             {thisPeek.open ? (
-              <div className="reference-image reference-image-drawing quiz-peek-drawing">
-                <AslDrawing letter={target} hand={drawnHand} alt={`Handshape for ${target}`} />
-              </div>
+              <LetterPicture
+                letter={target}
+                hand={drawnHand}
+                view={handView}
+                pose={pose}
+                className="quiz-peek-drawing"
+                notes={false}
+              />
             ) : (
               <p className="quiz-prompt-letter" aria-label={`Sign ${target}`}>
                 {target}
