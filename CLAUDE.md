@@ -54,7 +54,7 @@ The development plan is `docs/project-plan.md`.
 - No UI framework, no CSS framework. Plain CSS in `src/styles.css`.
 - No new dependencies without asking first. Approved so far: `@mediapipe/tasks-vision`,
   `vitest` (dev only), `three` (pinned to `0.186.1`, Eidos's version; 2026-10-31, the 3D hand), and for offline training only (Python, `training/requirements.txt`)
-  `numpy` and `scikit-learn`.
+  `numpy`, `scikit-learn`, and, for the notebooks in `training/notebooks/` (2026-11-04), `ipykernel` and `matplotlib`.
 - Serve every asset from the app itself, never from a CDN. Fonts are `.woff2` files in
   `public/fonts/` with their OFL licences, declared with `@font-face` in `styles.css`.
 - Logos are SVGs in `public/logos/`: `sema-mark-*` (the mark alone) and `sema-logo-*`
@@ -95,7 +95,7 @@ src/
   app/              the shell
     App.jsx         picks the page for the address, holds the settings
     routing/        router, navigation, Link
-    layout/         TopBar, MenuBar, PhoneNotice
+    layout/         TopBar, MenuBar
     settings/       progressStore, settings context, theme, ThemeToggle
     shared-camera/  CameraProvider, sharedCamera, useIdleCameraOff
   components/       parts used by more than one page folder
@@ -119,7 +119,9 @@ src/
                     it handles your data, three sections in one scrolling page; HandSketch
     learn/          Learn (/learn; Practice, /practice, until 2026-10-27), the main page: the
                     letter guide (GuidePanel), the lesson and its FingerChecklist; hold a letter 1.5 s
-    quiz/           Quiz (/quiz, 2026-10-27): letters or words from memory, no hints;
+    quiz/           Quiz (/quiz, 2026-10-27): the choice between Words (signed from memory
+                    with the camera, QuizFlow and QuizRun) and Guess the letter (name hand
+                    pictures, no camera, GuessQuizPage and GuessRun; Letters until 2026-11-04);
                     its state (quizRounds); words from public/languages/asl/words.json
     not-found/      Page not found, for an address Sema never had (2026-10-29)
     dev/            the developer tools behind an access code: DevArea (the gate, then
@@ -146,7 +148,7 @@ src/
                     lazy(); docs/hand-poses.md
 ```
 
-Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.md`).
+Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.md`) and, since 2026-11-04, Jupyter notebooks for looking at its results (`training/notebooks/`: public photos only, committed with their outputs; clear the outputs of any notebook that reads `data/raw/`).
 
 ## Routing
 
@@ -192,7 +194,7 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   drawings face it; since 2026-10-23 only that hand is drawn and judged, and the status says
   "Show B with your right hand"; if only the other hand is in view for 0.4 s, an amber sticker says
   "That's your left hand. Show your right hand", 2026-11-02, Quiz too) and the lesson on the right: "Letter B" large, its drawing
-  on a white sticker, its finger checklist as chips that turn green, and a "Letter model" line, the model's second opinion
+  on a card (a white sticker only where the card is white in both themes), its finger checklist as chips that turn green, and a "Letter model" line, the model's second opinion
   (below). Until 2026-11-02 it was Record's three columns, the guide as a rail on the left. It starts at A; pick any letter in the guide, make it, and
   hold it for 1.5 s (`LETTER_HOLD_MS` in `src/components/letter-check/letterHold.js`). The hold counts while
   the signing hand meets the letter's finger conditions (`src/vision/landmarks/letterShapes.js`,
@@ -203,7 +205,7 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   the same numbers as on the hand drawing's fingertips), ticked live. The
   model doesn't decide (since 2026-10-27); since 2026-10-29 it's a second opinion, never a gate
   (Lanix's choice: a gate would fail correct signs on its weakest letters): as a small "Model" pill over the picture's upper right (2026-11-02; before, a row under the
-  checklist: "Letter model: B, 96% sure"): the letter it reads in a tile, filled when it reads the letter being made, dim and empty with no reading, and the percentage; the sentence is its tooltip (`ModelOpinion` in
+  checklist: "Letter model: B, 96% sure"): the letter it reads in a tile, green when it reads the letter being made, a plain outline for another letter, and invisible (faded out) with no reading, plus the percentage; on a phone it sits opposite the name at the card's top; the sentence is its tooltip (`ModelOpinion` in
   `LearnPage.jsx`; until then a "Right now" line only under `npm run dev`), and under "That's B!"
   its most frequent reading over the hold ("The letter model agrees." / "read U." / "wasn't
   sure.", `modelVerdict` in `letterHold.js`). The quiz doesn't show it. A gap over 300 ms restarts the hold. Then
@@ -231,10 +233,18 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   the small model.
   The small model is trained on ASL-HG and, since 2026-10-23, ASLYset (both CC BY 4.0): keep
   their credits in `docs/ATTRIBUTION.md` and the README, and add one for any dataset added.
-- Quiz (`/quiz`, 2026-10-27, in the menu after Learn) tests what was learned. `/quiz` is the choice;
-  Letters and Words each have their own page, `/quiz/letters` and `/quiz/words` (one `QuizFlow` runs
-  both, then the results; Start again goes back to `/quiz` to choose Letters or Words). Choose
-  Letters (10 random, never the same twice in a row) or Words (5 from
+- Quiz (`/quiz`, 2026-10-27, in the menu after Learn) tests what was learned. `/quiz` is the choice
+  between two skills (2026-11-04; before, Letters, 10 random letters signed, at `/quiz/letters`, now
+  redirected to `/quiz`, because it felt the same as Words):
+  - Guess the letter (`/quiz/guess`, `GuessQuizPage` and `GuessRun`): 10 random hand pictures
+    (`STILL_LETTERS` in `quizRounds.js`: J and Z move, so they're left out), never the same twice in
+    a row, in `LetterPicture` with `hideLetter` (nothing it says names the letter; the 2D | 3D
+    switch works). The person names each with one of 24 tiles or its key: right shows "Yes, that's
+    B!" for 1.7 s (`GUESS_RIGHT_MS`; 2026-11-04, also as a green sticker on the picture, like the camera check's, because the line above the tiles was missed) and moves on; wrong marks the right tile green and the picked one amber and waits
+    for Next letter (focused, so Enter works). No camera, so it's the quiz for someone without one. A Left hand | Right hand switch (`HandSideToggle`, 2026-11-04) sits in the picture frame's lower left corner (`corner` on `LetterPicture`) and changes the saved signing hand, which sets the hand the pictures show.
+    Marks are 'passed', 'wrong' or 'skipped'; the same results page, counting Right, Wrong and
+    Skipped, and, until the camera check has passed, a "Set up your camera" invitation.
+  - Words (`/quiz/words`, one `QuizFlow`, then the results; Start again goes back to `/quiz`): 5 from
   `public/languages/asl/words.json`, no doubled letters, and none starting with the letter the
   one before ended on), then sign each letter from memory,
   with no steps or hints (none for now: reliability first), only an eye button
@@ -249,11 +259,21 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   (the browser's own question); End quiz and the results don't ask. The
   camera starts on arrival (the person just chose a quiz). While it runs the page is minimal
   (2026-10-27): the camera on the left (whole, as on Learn: its hand switch and camera buttons on the
-  picture; until 2026-11-01 they were in a footer under it), on the right the count and End quiz, the letter large on a sticker with its Peek button, the quiz's steps
-  (one per item, from the quiz state) and a quiet Skip letter; a words quiz also shows the word under the letter.
+  picture; until 2026-11-01 they were in a footer under it), on the right the quiz's steps on top (pills, one per item, from the quiz state; no "Letter 1 of 10" any more, 2026-11-02, the bar still
+  says it to screen readers), the letter large on a card that fills the column between them (the letter follows the card's size, a container query) with its Peek button (and "Peeking counts as a clue." as a pop-up on the sticker's
+  lower edge, so nothing moves), and Skip letter and End quiz side by side at the bottom, on every size; a words quiz also shows the word under the letter.
 - Setup redirects live in `resolveRoute`: a new visitor opening Learn or Quiz goes
   to Welcome; a returning visitor opening `/` goes to Learn. Get started (Welcome's, or About's) opens the camera check, and passing it (its Start learning button) finishes setup and opens Learn. The developer pages, Record
   included, don't need setup.
+- Skipping the camera (2026-11-04): until the check has passed, it has "No camera? Guess letters
+  instead" under its button (`skipCameraCheck` in `App.jsx`): setup is done, but `cameraChecked`
+  (in the store, apart from `setupDone`; settings saved with setup done before then count as
+  checked) stays false, and Guess the letter opens. Then Learn's `CameraView` gets `setupFirst`
+  ("Set up your camera" in the frame, no video, so neither the camera nor the hand model loads),
+  and the Words card and `/quiz/words` lead to the check. The check's address says where it
+  leads after: `/camera-setup?next=/quiz/words` (`cameraCheckPath` / `cameraCheckNext` in
+  `router.js`; the router reads only the path), and its button then says Start the Words quiz.
+  `openCameraCheck(returnTo)` in `SettingsContext` opens it.
 
 ## Settings
 
@@ -270,7 +290,7 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   "Grab the hand…" hint out of the fixed sticker). The letter guide's
   tiles stay drawings. On Learn the picture is one card filling the right column, white in the light theme and
   Deep Cobalt in the dark one (2026-11-02; the 3D hand is Deep Sky on white and Bright Sky on dark,
-  the black-line drawing sits on a white sticker in the dark one; `.learn-card`: the picture fills it from the top, with the letter model's pill over its upper right and the letter's name at the bottom, in the middle, no shadow on the card; the
+  the drawing is Deep Sky lines in the light theme and white in the dark one, straight on the card, 2026-11-04: two files per letter, `public/images/asl/` and `public/images/asl/dark/` (Bright Sky, but a CSS filter, `.asl-drawing.is-white`, makes it white), picked by `AslDrawing` from the theme, with `onWhite` for cards that are white in both themes; `.learn-card`: the picture fills it from the top, with the letter model's pill over its upper right and the letter's name at the bottom, in the middle, no shadow on the card; the
   finger checklist is on the camera instead (a translucent dark panel at the video's left edge, `panel` on
   `CameraView`, `StageChecklist`, 2026-11-02, with a button that minimizes it to a "Checklist 2/5" pill); the 3D hand has a tip, "Grab the hand to rotate it." (no keyboard controls, 2026-11-02), a
   dark pill in the middle of its lower edge, above the letter's name on Learn, with a close button; once closed it stays closed, `turnTipClosed` in the store), and a Numbers button beside the 2D | 3D switch
@@ -476,6 +496,28 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   tweaks.
 - Take screenshots of a page (headless Chrome) and check them before calling a page
   done.
+
+## Small screens
+
+Phones and tablets work since 2026-11-02 (branch `mobile-tablet-layouts`); the "Sema is made for
+computers" notice (`PhoneNotice`) was removed, so no screen size is turned away. The rules are in
+one section at the end of `src/styles.css` ("Small screens"), after each page's own; the page rules
+above it say what a narrow window does. Below 900px the pages stack and the camera is a frame in the
+page's flow, not the window's height: a square on a phone (a phone's own camera is upright, so square
+crops it least), 4:3 from 700px. Learn's guide is one row that scrolls sideways below 700px
+(`GuidePanel` keeps the picked letter in view, and a thin track under the row has a thumb that shows how
+much is off to the side), and its checklist starts as the pill there. On a phone Learn is at least as tall
+as the window under the bar, and the camera takes what the guide and the letter leave (never less than a
+square), so no empty band is left under it. The letter card there has its name top left (the model chip top right), the picture in the
+middle and one row of controls along the bottom (2D | 3D and Numbers on the left, expand on the right). From 700px
+in landscape (a phone on its side) Learn and the quiz put the camera beside the letter again; a
+tablet held upright keeps one column. The running quiz on a phone (under 700px, 2026-11-02) is laid out
+like Learn: the progress pills on top (thicker), the letter on a wide card with Peek in its corner, the camera,
+and Skip letter and End quiz as a row of two buttons under it. It is exactly the window's height and never scrolls (card and camera share what's left), and "Peeking counts as a clue." is a pop-up on the card's lower edge, not a line under it. The camera check puts the camera under its title and the steps
+after it; on a phone the camera frame stretches to fill the window (never under a square). Under 600px the menu is a burger button in the top bar (`MenuBar.jsx`, next to the theme
+button) that opens Learn, Quiz and About as a panel under the bar, and the bar is one row, 64px
+(`--bar-height`); from 600px the menu is inline. The developer pages are desktop only. Check by hand in Chrome's device mode (F12, then the
+phone icon).
 
 ## Visual design
 
