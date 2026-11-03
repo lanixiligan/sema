@@ -87,18 +87,12 @@ export default function CameraCheckPage({ onDone }) {
       <main className="camera-check">
         <section className="camera-check-text">
           <div>
-            <h1 className="setup-title">First, let's check your camera</h1>
+            <h1 className="setup-title">Let's check your camera</h1>
           </div>
           <ol className="setup-steps">
-            <Step n={1} state={steps[0]} title="Enable your camera">
-              Allow camera access when your browser asks, so Sema can see your hand.
-            </Step>
-            <Step n={2} state={steps[1]} title="Show one hand">
-              Hold up your left or right hand with your wrist in view.
-            </Step>
-            <Step n={3} state={steps[2]} title="Hold still">
-              Keep your hand visible for three seconds.
-            </Step>
+            <Step n={1} state={steps[0]} title="Allow camera access for Sema" />
+            <Step n={2} state={steps[1]} title="Hold up one hand in view" />
+            <Step n={3} state={steps[2]} title="Keep your hand still for 3 seconds" />
           </ol>
           {/* Always there, so the person sees where the check leads: greyed out
               and unclickable (disabled) until the check passes, then it pops
@@ -157,7 +151,7 @@ export default function CameraCheckPage({ onDone }) {
 // and quiet. The mark is decoration; screen readers get the state as text.
 const STEP_STATE_TEXT = { done: 'done', active: 'now', todo: 'next' }
 
-function Step({ n, state, title, children }) {
+function Step({ n, state, title }) {
   return (
     <li className={`setup-step-item ${state}`}>
       <span className="setup-step-mark" aria-hidden="true">
@@ -168,7 +162,6 @@ function Step({ n, state, title, children }) {
           {title}
           <span className="visually-hidden"> ({STEP_STATE_TEXT[state]})</span>
         </h2>
-        <p>{children}</p>
       </div>
     </li>
   )
