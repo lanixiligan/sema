@@ -1,6 +1,5 @@
 import { Suspense, lazy, useEffect, useState } from 'react'
 import CameraProvider from './shared-camera/CameraProvider.jsx'
-import PhoneNotice from './layout/PhoneNotice.jsx'
 import { navigate, usePathname } from './routing/navigation.js'
 import { NEW_VISITOR, clearSavedData, loadProgress, saveProgress } from './settings/progressStore.js'
 import { PATHS, resolveRoute } from './routing/router.js'
@@ -38,9 +37,6 @@ const TITLES = {
   devRecord: 'Record · Sema',
 }
 
-// Displays narrower than this get the phone notice (from the design).
-const SMALL_SCREEN = '(max-width: 899px)'
-
 // The app shell: reads the address, picks the page, and wraps every page in
 // the shared camera. Changing pages never reloads the browser tab.
 export default function App() {
@@ -49,9 +45,6 @@ export default function App() {
   // may go: setup first for a new one, straight to Learn for a returning one.
   const [progress, setProgress] = useState(loadProgress)
   const route = resolveRoute(pathname, progress)
-  // Checked once, when the page opens: a phone doesn't change size, and a
-  // computer whose window is made narrow later shouldn't lose its page.
-  const [showPhoneNotice, setShowPhoneNotice] = useState(() => window.matchMedia(SMALL_SCREEN).matches)
   // The theme on screen right now, 'light' or 'dark' (with System, the
   // system's). index.html already set it on <html> before the first paint.
   const [shownTheme, setShownTheme] = useState(() => document.documentElement.dataset.theme ?? 'light')
@@ -114,10 +107,6 @@ export default function App() {
     navigate(PATHS.welcome)
     return cleared
   }
-
-  // The notice replaces the app rather than covering it, so nothing behind it
-  // (such as the camera) starts.
-  if (showPhoneNotice) return <PhoneNotice onContinue={() => setShowPhoneNotice(false)} />
 
   const settings = {
     shownTheme,

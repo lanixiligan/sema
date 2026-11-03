@@ -30,8 +30,8 @@ shapes; it never claims to understand sign language.
 
 ## Operating Context
 
-- Desktop-first, in Chrome or Firefox with WebGL; a webcam is required. Phone layouts aren't
-  a goal yet (a notice says Sema is made for computers).
+- Desktop-first, in Chrome or Firefox with WebGL; a webcam is required. Phones and tablets
+  work too since 2026-11-02 (the pages stack below 900px; the developer pages stay desktop only).
 - Flow: Welcome → Camera check (both hands for 3 s) → Learn (one letter at a time, hold
   1.5 s to pass) → Quiz (10 letters or 5 words from memory, with a peek eye, then results).
   About explains how it works and how data is handled.

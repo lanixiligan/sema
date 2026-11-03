@@ -62,8 +62,10 @@ export default function LearnPage({ signingHand, onSigningHandChange, model = 's
   const [done, setDone] = useState(() => new Set())
   if (passed && !done.has(target)) setDone(new Set(done).add(target))
   // Whether the checklist on the camera is open or minimized to its pill; it's
-  // kept here so a pass, or the next letter, doesn't open it again.
-  const [checklistOpen, setChecklistOpen] = useState(true)
+  // kept here so a pass, or the next letter, doesn't open it again. On a small
+  // screen it starts as the pill: the video is small there, and an open
+  // checklist would cover most of it.
+  const [checklistOpen, setChecklistOpen] = useState(() => !window.matchMedia('(max-width: 899px)').matches)
   const index = LESSONS.indexOf(target)
   const next = LESSONS[index + 1]
   // The letter's 3D hand (a pose in public/languages/asl/letters/), and the
