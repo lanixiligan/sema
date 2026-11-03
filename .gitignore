@@ -39,6 +39,9 @@ data/extracted/
 # Python bytecode (training/)
 __pycache__/
 
+# Jupyter's autosave copies (training/notebooks/)
+.ipynb_checkpoints/
+
 # Trained models (training/train.py): they hold every training hand, so they stay out of git
 data/models/
 
