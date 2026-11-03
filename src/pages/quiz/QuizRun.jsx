@@ -22,10 +22,11 @@ function stepClass(quiz, i) {
 
 // The quiz itself, kept minimal: the camera on the left (it starts on
 // arrival, since the person just chose a quiz), whole as on Learn, and
-// on the right what to sign: the count and End quiz on top, the big letter on
-// a sticker with its Peek eye (and under it, in a words quiz, the word with the
-// current letter lit), then the quiz's steps and Skip letter. Nothing on this
-// page moves, not even when a letter passes (2026-11-01).
+// on the right what to sign: the quiz's steps on top, the big letter on a
+// sticker with its Peek eye (and under it, in a words quiz, the word with the
+// current letter lit), then Skip letter and End quiz side by side at the bottom
+// (2026-11-02; before, the count "Letter 1 of 10" and End quiz were on top).
+// Nothing on this page moves, not even when a letter passes (2026-11-01).
 export default function QuizRun({ quiz, signingHand, onSigningHandChange, model, onMark, onQuit }) {
   const target = currentLetter(quiz)
   // quiz.step changes with every letter asked, so each one is a new check.
@@ -69,17 +70,25 @@ export default function QuizRun({ quiz, signingHand, onSigningHandChange, model,
   return (
     <main className="practice quiz-run">
       <section className="quiz-prompt" aria-label="What to sign">
-        <div className="quiz-prompt-top">
-          <p className="quiz-count">
-            {itemName} {itemNumber} of {quiz.items.length}
-          </p>
-          <button type="button" className="quiz-quit" onClick={onQuit}>
-            End quiz
-          </button>
+        {/* The real quiz state: one step per item. Done ones are green (amber
+            if a letter in them was skipped), the current one is lit. The count
+            ("Letter 1 of 10") is only said to screen readers, by the bar. */}
+        <div
+          className="quiz-steps"
+          role="progressbar"
+          aria-label="Quiz progress"
+          aria-valuemin={1}
+          aria-valuemax={quiz.items.length}
+          aria-valuenow={itemNumber}
+          aria-valuetext={`${itemName} ${itemNumber} of ${quiz.items.length}`}
+        >
+          {quiz.items.map((_, i) => (
+            <span key={i} className={stepClass(quiz, i)} />
+          ))}
         </div>
 
         {/* The letter sticker, its eye and the word under it are one group,
-            centred in the space the top row and the steps leave. */}
+            centred in the space the steps and the buttons leave. */}
         <div className="quiz-prompt-main">
           {/* The letter and the drawing share one fixed-size sticker, so Peek
               stays where it is when the drawing takes the letter's place. A new
@@ -109,9 +118,14 @@ export default function QuizRun({ quiz, signingHand, onSigningHandChange, model,
               <EyeIcon size={22} off={thisPeek.open} />
               {thisPeek.open ? 'Hide' : 'Peek'}
             </button>
+            {/* A pop-up on the card's lower edge, not a line of its own, so
+                nothing on the page moves when it appears. It's always in the
+                page (empty until the first peek) so a screen reader hears it
+                when its text arrives. */}
+            <p className="quiz-peek-popup" role="status">
+              {thisPeek.used ? 'Peeking counts as a clue.' : ''}
+            </p>
           </div>
-          {/* A line kept in the layout, so it doesn't push anything when it appears. */}
-          <p className="quiz-peek-note">{thisPeek.used ? 'Peeking counts as a clue.' : ''}</p>
           {isWords && (
             <p className="quiz-prompt-word" aria-label={`${word}, letter ${quiz.at.letter + 1}`}>
               {[...word].map((letter, i) => (
@@ -123,32 +137,22 @@ export default function QuizRun({ quiz, signingHand, onSigningHandChange, model,
           )}
         </div>
 
-        <div className="quiz-prompt-bottom">
-          {/* The real quiz state: one step per item. Done ones are green (amber
-              if a letter in them was skipped), the current one is lit. */}
-          <div
-            className="quiz-steps"
-            role="progressbar"
-            aria-label="Quiz progress"
-            aria-valuemin={1}
-            aria-valuemax={quiz.items.length}
-            aria-valuenow={itemNumber}
-            aria-valuetext={`${itemName} ${itemNumber} of ${quiz.items.length}`}
-          >
-            {quiz.items.map((_, i) => (
-              <span key={i} className={stepClass(quiz, i)} />
-            ))}
-          </div>
+        {/* Both buttons at the bottom, side by side. End quiz is red, so it isn't
+            taken for Skip. */}
+        <div className="quiz-actions">
           <button type="button" className="quiz-skip" disabled={passed} onClick={() => onMark('skipped', thisPeek.used)}>
             Skip letter
           </button>
-          {loaded.status === 'loading' && <p className="practice-note">Loading the model…</p>}
-          {loaded.status === 'error' && (
-            <p className="error" role="alert">
-              {loaded.error}
-            </p>
-          )}
+          <button type="button" className="quiz-quit" onClick={onQuit}>
+            End quiz
+          </button>
         </div>
+        {loaded.status === 'loading' && <p className="practice-note">Loading the model…</p>}
+        {loaded.status === 'error' && (
+          <p className="error" role="alert">
+            {loaded.error}
+          </p>
+        )}
       </section>
 
       <section className="practice-camera" aria-label="Camera">
