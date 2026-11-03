@@ -22,7 +22,7 @@ export default function NotFoundPage() {
             {WORD.map((letter) => (
               <li key={letter}>
                 <span className="not-found-tile">
-                  <AslDrawing letter={letter} hand={DRAWN_HAND} />
+                  <AslDrawing letter={letter} hand={DRAWN_HAND} onWhite />
                 </span>
                 <span className="not-found-letter" aria-hidden="true">
                   {letter}

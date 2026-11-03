@@ -109,7 +109,8 @@ into `data/raw/` (private, gitignored).
 letter's finger conditions; Record records all but `TRACED_LETTERS` (J and Z, which move).
 Until 2026-10-27 it was `public/languages/asl/letters.json`, with each letter's steps, now
 replaced by the finger checklist. A letter's drawing is `public/images/asl/<letter>.svg`
-(`AslDrawing.jsx`; the drawings' source is in `docs/ATTRIBUTION.md`), shown on white. The
+(`AslDrawing.jsx`; the drawings' source is in `docs/ATTRIBUTION.md`), Deep Sky lines; a Bright Sky copy for
+dark surfaces is in `public/images/asl/dark/`, shown white in the dark theme (a CSS filter, `.asl-drawing.is-white`). The
 drawings show a left hand, so they're mirrored for the right hand.
 
 ## Check your webcam on Fedora

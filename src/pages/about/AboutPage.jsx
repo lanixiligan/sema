@@ -48,7 +48,7 @@ function LetterCardPicture() {
   return (
     <div className="about-picture about-card" aria-hidden="true">
       <span className="about-card-drawing">
-        <AslDrawing letter="B" hand="right" />
+        <AslDrawing letter="B" hand="right" onWhite />
       </span>
       <div className="about-card-title">Letter B</div>
     </div>

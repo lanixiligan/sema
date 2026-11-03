@@ -16,8 +16,8 @@ const HandModelView = lazy(() => import('../../hand-model/HandModelView.jsx'))
 // the frame instead of showing the drawing (2026-11-02; before, it fell back to
 // the drawing with a line), and the switch is still there to go back to 2D. Both face the signing hand and sit in the
 // same frame, so switching never moves what's around it. The frame follows the
-// theme: white in the light one, dark in the dark one, where the black-line
-// drawing sits on a white sticker inside it and the 3D hand turns Bright Sky
+// theme: white in the light one, dark in the dark one, where the drawing
+// is white lines (AslDrawing) and the 3D hand turns Bright Sky
 // (`theme` on the viewer).
 // Shared by Learn's letter card and the quiz's Peek (2026-11-02; before, in
 // pages/learn/). `className` goes on the frame, for the page's own size. With

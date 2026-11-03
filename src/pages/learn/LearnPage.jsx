@@ -139,8 +139,7 @@ export default function LearnPage({ signingHand, onSigningHandChange, model = 's
         <aside className="practice-side" aria-label="Your letter">
           <section className="learn-letter" aria-labelledby="learn-letter-title">
             {/* One card, white in the light theme and dark in the dark one (the
-                drawings are black lines, so in the dark one they sit on a white
-                sticker): the letter and the letter model's second opinion (not for J and
+                drawing is Deep Sky lines in the light one, white in the dark one): the letter and the letter model's second opinion (not for J and
                 Z, which it doesn't know) in a row on top, then the picture, the
                 drawing or the 3D hand by the 2D | 3D switch in its corner. The
                 finger checklist is on the camera. */}
