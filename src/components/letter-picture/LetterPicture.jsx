@@ -36,6 +36,9 @@ const HandModelView = lazy(() => import('../../hand-model/HandModelView.jsx'))
 // the switch keeps its focus while the picture changes under it.
 export default function LetterPicture({ letter, hand, view, pose, className = '', notes = true, large = false }) {
   const [expanded, setExpanded] = useState(false)
+  // True once the 3D hand in this frame has loaded (or failed and been replaced
+  // by the drawing); reset below whenever the hand leaves the frame.
+  const [modelSettled, setModelSettled] = useState(false)
   const { shownTheme, turnTipClosed, closeTurnTip, handNumbers, setHandNumbers } = useSettings()
   const drawing = <AslDrawing letter={letter} hand={hand} alt={`Handshape for ${letter}`} />
   let picture = drawing
@@ -69,6 +72,7 @@ export default function LetterPicture({ letter, hand, view, pose, className = ''
             theme={shownTheme}
             numbers={handNumbers}
             fallback={drawing}
+            onSettled={() => setModelSettled(true)}
           />
         </Suspense>
       )
@@ -77,12 +81,20 @@ export default function LetterPicture({ letter, hand, view, pose, className = ''
   }
 
   const showsModel = view === '3d' && pose.status === 'ready'
+  // Reset when the hand is taken out of the frame (2D chosen, or the next
+  // letter's pose still arriving), so the next one starts as "loading" again.
+  // (State set while rendering, which React allows for exactly this: it renders again at once.)
+  if (!showsModel && modelSettled) setModelSettled(false)
+  // The switch spins while 3D is chosen but its hand isn't up yet: the pose is
+  // being fetched, or three.js and the hand model are still loading. A letter
+  // with no 3D hand isn't loading anything.
+  const loading3d = view === '3d' && (pose.status === 'loading' || (showsModel && !modelSettled))
   const frame = ['reference-image', 'reference-image-drawing', 'letter-picture', showsModel && 'hand-model-frame', className]
   return (
     <>
       <div className={frame.filter(Boolean).join(' ')}>
         <div className="picture-controls">
-          <HandViewToggle />
+          <HandViewToggle loading={loading3d} />
           {showsModel && notes && (
             <button
               type="button"

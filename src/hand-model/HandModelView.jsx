@@ -14,10 +14,19 @@ import { createHand } from './hand.js'
 // didn't load), `fallback` (the drawing) shows instead.
 // `theme` ('light' or 'dark', the theme on screen) picks the hand's blue to
 // suit its frame: Deep Sky on a light one, Bright Sky on a dark one.
-export default function HandModelView({ letter, pose, hand, theme = 'light', numbers = true, fallback }) {
+// `onSettled` (2026-11-04, for the 2D | 3D switch's loading state) is called
+// once the wait is over either way: the hand is ready, or it failed and
+// `fallback` took its place.
+export default function HandModelView({ letter, pose, hand, theme = 'light', numbers = true, fallback, onSettled }) {
   const containerRef = useRef(null)
   const viewerRef = useRef(null)
   const [failed, setFailed] = useState(false)
+  // The latest onSettled, read when the model has loaded, so a new function
+  // each render doesn't remake the viewer.
+  const onSettledRef = useRef(onSettled)
+  useEffect(() => {
+    onSettledRef.current = onSettled
+  })
 
   useEffect(() => {
     // Not starting (no WebGL) and a model that didn't load end the same way:
@@ -33,7 +42,9 @@ export default function HandModelView({ letter, pose, hand, theme = 'light', num
     let cancelled = false
     const ready = viewer ? viewer.ready : Promise.resolve(false)
     ready.then((loaded) => {
-      if (!loaded && !cancelled) setFailed(true)
+      if (cancelled) return
+      if (!loaded) setFailed(true)
+      onSettledRef.current?.()
     })
     return () => {
       cancelled = true
