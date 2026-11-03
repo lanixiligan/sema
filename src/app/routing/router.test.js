@@ -16,9 +16,13 @@ describe('resolveRoute', () => {
   })
 
   it('sends a new visitor from Learn and the quiz pages to Welcome', () => {
-    for (const path of ['/learn', '/quiz', '/quiz/letters', '/quiz/words']) {
+    for (const path of ['/learn', '/quiz', '/quiz/words', '/quiz/guess']) {
       expect(resolveRoute(path, newVisitor)).toEqual({ redirect: '/' })
     }
+  })
+
+  it('sends the old Letters quiz address to the quiz choice', () => {
+    expect(resolveRoute('/quiz/letters', returning)).toEqual({ redirect: '/quiz' })
   })
 
   it('sends the old Try and Practice addresses to Learn', () => {

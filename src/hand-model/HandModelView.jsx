@@ -14,17 +14,23 @@ import { createHand } from './hand.js'
 // didn't load), `fallback` (the drawing) shows instead.
 // `theme` ('light' or 'dark', the theme on screen) picks the hand's blue to
 // suit its frame: Deep Sky on a light one, Bright Sky on a dark one.
-// `onSettled` (2026-11-04, for the 2D | 3D switch's loading state) is called
-// once the wait is over either way: the hand is ready, or it failed and
-// `fallback` took its place.
-export default function HandModelView({ letter, pose, hand, theme = 'light', numbers = true, fallback, onSettled }) {
+// `label` replaces the screen-reader text, which otherwise names the letter.
+// `instant` (2026-11-04, the Guess quiz's small hands) puts the hand straight
+// into its pose instead of easing there from the relaxed one, so a hand that
+// has only just appeared doesn't visibly curl into place; `onReady` is called
+// once the model has loaded and the hand is in the frame. `onSettled`
+// (2026-11-04, for the 2D | 3D switch's loading state) is called once the wait is over
+// either way: the hand is ready, or it failed and `fallback` took its place.
+export default function HandModelView({ letter, pose, hand, theme = 'light', numbers = true, fallback, label, instant = false, onReady, onSettled }) {
   const containerRef = useRef(null)
   const viewerRef = useRef(null)
   const [failed, setFailed] = useState(false)
-  // The latest onSettled, read when the model has loaded, so a new function
-  // each render doesn't remake the viewer.
+  // The latest onReady, read when the model has loaded, so a new function each
+  // render doesn't remake the viewer.
+  const onReadyRef = useRef(onReady)
   const onSettledRef = useRef(onSettled)
   useEffect(() => {
+    onReadyRef.current = onReady
     onSettledRef.current = onSettled
   })
 
@@ -43,7 +49,8 @@ export default function HandModelView({ letter, pose, hand, theme = 'light', num
     const ready = viewer ? viewer.ready : Promise.resolve(false)
     ready.then((loaded) => {
       if (cancelled) return
-      if (!loaded) setFailed(true)
+      if (loaded) onReadyRef.current?.()
+      else setFailed(true)
       onSettledRef.current?.()
     })
     return () => {
@@ -64,8 +71,8 @@ export default function HandModelView({ letter, pose, hand, theme = 'light', num
   }, [hand])
 
   useEffect(() => {
-    viewerRef.current?.setPose(pose)
-  }, [pose])
+    viewerRef.current?.setPose(pose, { instant })
+  }, [pose, instant])
 
   // The fingertip numbers, shown or hidden by the Numbers button.
   useEffect(() => {
@@ -89,7 +96,7 @@ export default function HandModelView({ letter, pose, hand, theme = 'light', num
       ref={containerRef}
       className="hand-model-view"
       role="img"
-      aria-label={`3D hand making ${letter}. Grab it to turn it.`}
+      aria-label={label ?? `3D hand making ${letter}. Grab it to turn it.`}
     />
   )
 }

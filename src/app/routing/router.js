@@ -11,11 +11,12 @@ export const PATHS = {
   // The letters one at a time, with the guide of all 26 (Practice's page
   // was merged into it on 2026-10-27): the main page.
   learn: '/learn',
-  // Sign letters or words from memory, to test what was learned.
+  // Test what was learned: the choice between the two kinds of quiz.
   quiz: '/quiz',
-  // The two kinds of quiz, one page each.
-  quizLetters: '/quiz/letters',
+  // The two kinds, one page each (2026-11-04): Words, signed with the camera,
+  // and Guess the letter, which shows hand signs to name and needs no camera.
   quizWords: '/quiz/words',
+  quizGuess: '/quiz/guess',
   // The developer tools, behind an access code (src/pages/dev/DevArea.jsx):
   // the dashboard, then each tool. Not in the menu.
   dev: '/dev',
@@ -31,8 +32,11 @@ export const PATHS = {
 // leads to the main page); setup had its own pages under /setup/ (the signing
 // hand and how Sema works, gone since 2026-10-27), and the camera check was at
 // /setup/camera until 2026-10-29; About was three intro pages until 2026-10-27,
-// the other two at /how-it-works and /privacy.
+// the other two at /how-it-works and /privacy. The Letters quiz (/quiz/letters,
+// 10 random letters signed) was replaced by Guess the letter on 2026-11-04, so
+// its address leads to the choice.
 const MOVED = {
+  '/quiz/letters': PATHS.quiz,
   '/try': PATHS.learn,
   '/practice': PATHS.learn,
   '/dev/try': PATHS.learn,
@@ -45,7 +49,7 @@ const MOVED = {
 }
 
 // Pages that need setup finished first.
-const NEEDS_SETUP = ['learn', 'quiz', 'quizLetters', 'quizWords']
+const NEEDS_SETUP = ['learn', 'quiz', 'quizWords', 'quizGuess']
 
 // Which page a path shows, as { page: 'learn' }, or { redirect: '/' } to
 // send the person somewhere else. `progress` is the saved settings

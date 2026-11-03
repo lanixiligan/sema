@@ -10,7 +10,7 @@ import CameraCheckPage from '../pages/onboarding/CameraCheckPage.jsx'
 import LearnPage from '../pages/learn/LearnPage.jsx'
 import NotFoundPage from '../pages/not-found/NotFoundPage.jsx'
 import WelcomePage from '../pages/onboarding/WelcomePage.jsx'
-import LettersQuizPage from '../pages/quiz/LettersQuizPage.jsx'
+import GuessQuizPage from '../pages/quiz/GuessQuizPage.jsx'
 import QuizPage from '../pages/quiz/QuizPage.jsx'
 import WordsQuizPage from '../pages/quiz/WordsQuizPage.jsx'
 
@@ -28,8 +28,8 @@ const TITLES = {
   cameraCheck: 'Camera setup · Sema',
   learn: 'Learn · Sema',
   quiz: 'Quiz · Sema',
-  quizLetters: 'Letters quiz · Sema',
   quizWords: 'Words quiz · Sema',
+  quizGuess: 'Guess the letter · Sema',
   notFound: 'Page not found · Sema',
   dev: 'Developer tools · Sema',
   devTracking: 'Tracking and benchmark · Sema',
@@ -185,8 +185,8 @@ function Page({
       )
     case 'quiz':
       return <QuizPage />
-    case 'quizLetters':
-      return <LettersQuizPage signingHand={signingHand} onSigningHandChange={onSigningHandChange} model={devModel} />
+    case 'quizGuess':
+      return <GuessQuizPage signingHand={signingHand} onSigningHandChange={onSigningHandChange} />
     case 'quizWords':
       return <WordsQuizPage signingHand={signingHand} onSigningHandChange={onSigningHandChange} model={devModel} />
     case 'notFound':

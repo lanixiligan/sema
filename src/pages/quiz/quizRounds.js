@@ -1,24 +1,33 @@
-import { LETTERS } from '../../vision/landmarks/letterShapes.js'
+import { LETTERS, TRACED_LETTERS } from '../../vision/landmarks/letterShapes.js'
 
-// The quiz (2026-10-27): Sema asks for letters and the person signs them from
-// memory, with no drawing and no hints. Two kinds:
-// - 'letters': LETTER_COUNT random letters, one at a time;
+// The quiz (2026-10-27) tests what was learned. Two kinds (since 2026-11-04;
+// before, 'letters' asked 10 random letters to sign, which felt the same as
+// words):
 // - 'words': WORD_COUNT short words (public/languages/asl/words.json), signed
-//   letter by letter.
-// Both are a list of items, each a string of letters: a letters quiz is a list
-// of one-letter items. Each letter is checked as on Practice
-// (useLetterCheck), and either passes or is skipped.
-export const LETTER_COUNT = 10
+//   letter by letter from memory with the camera. Each letter is checked as on
+//   Learn (useLetterCheck), and either passes or is skipped.
+// - 'guess': GUESS_COUNT random hand signs, shown as pictures; the person
+//   names the letter, with no camera. Each is 'passed' (named right), 'wrong'
+//   or 'skipped'.
+// Both are a list of items, each a string of letters: a guess quiz is a list
+// of one-letter items.
 export const WORD_COUNT = 5
+export const GUESS_COUNT = 10
+// The letters Guess the letter shows: J and Z move, and a still picture can't
+// show the movement.
+export const STILL_LETTERS = LETTERS.filter((letter) => !TRACED_LETTERS.includes(letter))
 // How long "That's B!" stays before the next letter.
 export const NEXT_LETTER_MS = 1000
+// The same wait in Guess the letter (2026-11-04), longer: the person's eyes are on
+// the tiles they just clicked, so the green sticker on the picture needs time to be seen.
+export const GUESS_RIGHT_MS = 1700
 
-// `count` random letters, never the same one twice in a row (the second would
-// pass as soon as it's asked, with the hand already making it).
-export function pickLetters(count, random = Math.random) {
+// `count` random letters from `from`, never the same one twice in a row (the
+// same picture twice would look like the quiz got stuck).
+export function pickLetters(count, random = Math.random, from = LETTERS) {
   const letters = []
   while (letters.length < count) {
-    const letter = LETTERS[Math.floor(random() * LETTERS.length)]
+    const letter = from[Math.floor(random() * from.length)]
     if (letter !== letters.at(-1)) letters.push(letter)
   }
   return letters
@@ -101,6 +110,11 @@ export function quizScore(quiz) {
   return { passed: all.filter((m) => m === 'passed').length, total: all.length }
 }
 
+// How many letters have `mark` ('skipped', 'wrong').
+export function markCount(quiz, mark) {
+  return quiz.marks.flat().filter((m) => m === mark).length
+}
+
 // The headline on the results, from how much was signed: a title and one
 // line under it. Warm at every score, and honest: a letter skipped is a
 // letter to review, not a failure.
@@ -113,4 +127,16 @@ export function resultsVerdict(passed, total) {
   if (share >= 0.8) return { title: 'Great signing!', text: 'Almost every letter. The few you missed are quick to review in Learn.' }
   if (share >= 0.5) return { title: 'Nice work!', text: 'More than half signed. Review the rest in Learn, then try again.' }
   return { title: 'Good start!', text: 'Every round makes the letters stick. Review the rest in Learn, then try again.' }
+}
+
+// The same for Guess the letter, where letters are named, not signed.
+export function guessVerdict(named, total) {
+  const share = total > 0 ? named / total : 0
+  if (named === 0) {
+    return { title: 'Let’s warm up', text: 'None named this time. The letter guide on Learn shows every handshape. Then come back.' }
+  }
+  if (share === 1) return { title: 'Perfect round!', text: 'You read every hand. Well done.' }
+  if (share >= 0.8) return { title: 'Sharp eyes!', text: 'Almost every letter. The few you missed are quick to look up in Learn.' }
+  if (share >= 0.5) return { title: 'Nice work!', text: 'More than half named. Look over the rest in Learn, then try again.' }
+  return { title: 'Good start!', text: 'Every round makes the shapes stick. Look over the rest in Learn, then try again.' }
 }

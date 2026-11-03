@@ -7,6 +7,7 @@ import {
   pickWords,
   quizScore,
   resultsVerdict,
+  STILL_LETTERS,
   usableWords,
 } from './quizRounds.js'
 
@@ -21,6 +22,18 @@ describe('pickLetters', () => {
     // 0 is A each time, then 0.04 (B): the repeated A is skipped.
     const letters = pickLetters(3, fixedRandom([0, 0, 0.04]))
     expect(letters).toEqual(['A', 'B', 'A'])
+  })
+
+  it('picks from the list given', () => {
+    expect(pickLetters(2, fixedRandom([0, 0.99]), ['K', 'L'])).toEqual(['K', 'L'])
+  })
+})
+
+describe('STILL_LETTERS', () => {
+  it('leaves out J and Z, which move', () => {
+    expect(STILL_LETTERS).toHaveLength(24)
+    expect(STILL_LETTERS).not.toContain('J')
+    expect(STILL_LETTERS).not.toContain('Z')
   })
 })
 

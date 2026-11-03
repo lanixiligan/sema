@@ -34,13 +34,31 @@ const HandModelView = lazy(() => import('../../hand-model/HandModelView.jsx'))
 //
 // The frame and the switch are the same elements in every state, so a click on
 // the switch keeps its focus while the picture changes under it.
-export default function LetterPicture({ letter, hand, view, pose, className = '', notes = true, large = false }) {
+//
+// `corner` (2026-11-04, Guess the letter's Left hand | Right hand switch): anything
+// the page wants in the frame's lower left corner, left out of the larger window.
+//
+// `hideLetter` (Guess the letter, 2026-11-04): the picture is the question, so
+// nothing it says names the letter: not the alt text, the larger window's
+// title, the expand button nor the "No 3D hand" note.
+export default function LetterPicture({
+  letter,
+  hand,
+  view,
+  pose,
+  className = '',
+  notes = true,
+  large = false,
+  hideLetter = false,
+  corner = null,
+}) {
   const [expanded, setExpanded] = useState(false)
   // True once the 3D hand in this frame has loaded (or failed and been replaced
   // by the drawing); reset below whenever the hand leaves the frame.
   const [modelSettled, setModelSettled] = useState(false)
   const { shownTheme, turnTipClosed, closeTurnTip, handNumbers, setHandNumbers } = useSettings()
-  const drawing = <AslDrawing letter={letter} hand={hand} alt={`Handshape for ${letter}`} />
+  const alt = hideLetter ? 'The handshape to name' : `Handshape for ${letter}`
+  const drawing = <AslDrawing letter={letter} hand={hand} alt={alt} />
   let picture = drawing
   let tip = false
 
@@ -55,7 +73,9 @@ export default function LetterPicture({ letter, hand, view, pose, className = ''
       if (pose.letter === letter) {
         picture = (
           <div className="hand-model-missing">
-            <p className="hand-model-missing-title">No 3D hand for {letter} yet</p>
+            <p className="hand-model-missing-title">
+              {hideLetter ? 'No 3D hand for this letter yet' : `No 3D hand for ${letter} yet`}
+            </p>
             <p>Switch to 2D to see its drawing.</p>
           </div>
         )
@@ -73,6 +93,7 @@ export default function LetterPicture({ letter, hand, view, pose, className = ''
             numbers={handNumbers}
             fallback={drawing}
             onSettled={() => setModelSettled(true)}
+            label={hideLetter ? 'A 3D hand making the letter to name. Grab it to turn it.' : undefined}
           />
         </Suspense>
       )
@@ -116,11 +137,12 @@ export default function LetterPicture({ letter, hand, view, pose, className = ''
             </button>
           </div>
         )}
+        {corner && !large && <div className="picture-corner">{corner}</div>}
         {!large && (
           <button
             type="button"
             className="picture-expand"
-            aria-label={`Show the ${letter} picture larger`}
+            aria-label={hideLetter ? 'Show the picture larger' : `Show the ${letter} picture larger`}
             title="Show larger"
             onClick={() => setExpanded(true)}
           >
@@ -129,8 +151,16 @@ export default function LetterPicture({ letter, hand, view, pose, className = ''
         )}
       </div>
       {expanded && (
-        <PictureDialog title={`Letter ${letter}, larger`} onClose={() => setExpanded(false)}>
-          <LetterPicture letter={letter} hand={hand} view={view} pose={pose} className="picture-dialog-frame" large />
+        <PictureDialog title={hideLetter ? 'The handshape, larger' : `Letter ${letter}, larger`} onClose={() => setExpanded(false)}>
+          <LetterPicture
+            letter={letter}
+            hand={hand}
+            view={view}
+            pose={pose}
+            className="picture-dialog-frame"
+            large
+            hideLetter={hideLetter}
+          />
         </PictureDialog>
       )}
     </>
