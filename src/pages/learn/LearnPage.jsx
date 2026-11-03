@@ -191,15 +191,19 @@ function ModelOpinion({ guesses, hand, target }) {
   const reading = g?.whole ? (g.sure ? g.letter : '?') : null
   const agrees = reading === target
   const sure = g?.whole && 'confidence' in g ? percent(g.confidence) : null
-  // The words are for the tooltip and screen readers; the pill shows only the
-  // tile and the percentage.
+  // The words are for the tooltip and screen readers; the chip shows only the
+  // tile and the percentage. With no reading (no hand, or not a whole one) the
+  // chip is `idle`: invisible, and out of the way of screen readers, so the
+  // card stays quiet until the model has something to say. It stays in the
+  // page, so it fades in and out instead of popping.
   const sentence = `${opinionText(g, reading, hand)}${sure ? `, ${sure} sure` : ''}`
+  const state = !reading ? ' idle' : agrees ? ' agrees' : reading === '?' ? ' unsure' : ''
   return (
-    <section className={`model-opinion${agrees ? ' agrees' : ''}`} aria-label="Letter model" title={sentence}>
+    <section className={`model-opinion${state}`} aria-label="Letter model" title={sentence} aria-hidden={!reading || undefined}>
       <span className="model-opinion-label" aria-hidden="true">
         Model
       </span>
-      <span className={`model-tile${reading ? '' : ' empty'}`} aria-hidden="true">
+      <span className="model-tile" aria-hidden="true">
         {reading}
       </span>
       <span className="model-opinion-value" aria-hidden="true">
