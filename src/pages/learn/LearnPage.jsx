@@ -73,7 +73,10 @@ export default function LearnPage({ signingHand, onSigningHandChange, model = 's
   // no pose shows its drawing, but the saved choice stays: the next letter that
   // has a pose is shown in 3D again.
   const pose = useLetterPose(target)
-  const { handView } = useSettings()
+  // `cameraChecked` is false for someone who skipped the camera check: the
+  // camera's frame then asks them to set it up first; the rest of Learn (the
+  // guide, the letter's picture) works without it.
+  const { handView, cameraChecked } = useSettings()
 
   return (
     <>
@@ -97,6 +100,7 @@ export default function LearnPage({ signingHand, onSigningHandChange, model = 's
             {/* The hand switch changes the signing hand, so the drawings face
                 the hand being used. J's and Z's line is drawn under the hand. */}
             <CameraView
+              setupFirst={!cameraChecked}
               canvasRef={canvasRef}
               hand={hand}
               className="practice-stage"

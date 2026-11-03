@@ -1,3 +1,5 @@
+import { PATHS } from '../../app/routing/router.js'
+import { useSettings } from '../../app/settings/settings.js'
 import { CheckIcon, CloseIcon, EyeIcon } from '../../components/icons/icons.jsx'
 import { letterClass } from './letterClass.js'
 import { guessVerdict, markCount, peekCount, quizScore, resultsVerdict } from './quizRounds.js'
@@ -42,8 +44,10 @@ function ItemRows({ quiz }) {
 // The end, laid out like Welcome: the score on a tag with every letter
 // stuck below it, and on the right a headline, what the score is made of, and
 // Start again. Guess the letter (2026-11-04) counts letters named, right or
-// wrong.
+// wrong, and for someone who hasn't set up the camera ends with an invitation
+// to sign them too.
 export default function QuizResults({ quiz, onAgain }) {
+  const { cameraChecked, openCameraCheck } = useSettings()
   const isGuess = quiz.kind === 'guess'
   const { passed, total } = quizScore(quiz)
   const clues = peekCount(quiz)
@@ -109,6 +113,16 @@ export default function QuizResults({ quiz, onAgain }) {
             Skipped <strong>{skipped}</strong>
           </li>
         </ul>
+        {/* Named them? Now sign them: for someone who skipped the camera check. */}
+        {isGuess && !cameraChecked && (
+          <div className="quiz-camera-invite">
+            <p className="quiz-camera-invite-title">Ready to sign them yourself?</p>
+            <p>Set up your camera, and Sema checks your own hand as you make each letter.</p>
+            <button type="button" className="button" onClick={() => openCameraCheck(PATHS.learn)}>
+              Set up your camera
+            </button>
+          </div>
+        )}
         <button type="button" className="key-button quiz-again" onClick={onAgain}>
           Start again
           <svg className="key-button-arrow" viewBox="0 0 24 24" aria-hidden="true">

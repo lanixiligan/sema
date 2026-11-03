@@ -50,19 +50,43 @@ const MOVED = {
 
 // Pages that need setup finished first.
 const NEEDS_SETUP = ['learn', 'quiz', 'quizWords', 'quizGuess']
+// Where the camera check may lead once it passes, besides Learn.
+const CHECK_NEXT = [PATHS.learn, PATHS.quizWords]
+
+// The camera check's address, saying where to go once it passes (`next`, a
+// path): /camera-setup?next=/quiz/words. The part after "?" is the query; the
+// router only reads the path, so it never changes which page shows.
+export function cameraCheckPath(next) {
+  return CHECK_NEXT.includes(next) && next !== PATHS.learn ? `${PATHS.cameraCheck}?next=${next}` : PATHS.cameraCheck
+}
+
+// Where the camera check leads, from its address's query (`search`, like
+// "?next=/quiz/words"): one of CHECK_NEXT, or Learn.
+export function cameraCheckNext(search) {
+  const next = new URLSearchParams(search).get('next')
+  return CHECK_NEXT.includes(next) ? next : PATHS.learn
+}
+
+// Pages that start the camera as they open, so they need the camera check
+// passed. (Learn needs it too, but its camera waits for a click, so it opens
+// and says "Set up your camera" in its frame instead.)
+const NEEDS_CAMERA_CHECK = ['quizWords']
 
 // Which page a path shows, as { page: 'learn' }, or { redirect: '/' } to
 // send the person somewhere else. `progress` is the saved settings
 // (progressStore): a new visitor goes through setup first, and a returning one
-// skips Welcome. A trailing slash is ignored. An address Sema never had shows
-// the "Page not found" page ('notFound', which has no address of its own);
-// until 2026-10-29 it quietly sent the person to Welcome.
-export function resolveRoute(pathname, { setupDone }) {
+// skips Welcome. Someone who finished setup without the camera check
+// (`cameraChecked` false) is sent to it from the Words quiz. A trailing slash
+// is ignored. An address Sema never had shows the "Page not found" page
+// ('notFound', which has no address of its own); until 2026-10-29 it quietly
+// sent the person to Welcome.
+export function resolveRoute(pathname, { setupDone, cameraChecked }) {
   const path = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname
   if (MOVED[path]) return { redirect: MOVED[path] }
   const page = Object.keys(PATHS).find((name) => PATHS[name] === path)
   if (!page) return { page: 'notFound' }
   if (page === 'welcome' && setupDone) return { redirect: PATHS.learn }
   if (NEEDS_SETUP.includes(page) && !setupDone) return { redirect: PATHS.welcome }
+  if (NEEDS_CAMERA_CHECK.includes(page) && !cameraChecked) return { redirect: cameraCheckPath(PATHS[page]) }
   return { page }
 }

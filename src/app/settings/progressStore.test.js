@@ -33,6 +33,7 @@ describe('progressStore', () => {
       version: PROGRESS_VERSION,
       signingHand: 'left',
       setupDone: true,
+      cameraChecked: false,
       theme: 'dark',
       handView: '3d',
       turnTipClosed: true,
@@ -42,6 +43,16 @@ describe('progressStore', () => {
     }
     expect(saveProgress(progress)).toBe(true)
     expect(loadProgress()).toEqual(progress)
+  })
+
+  it('counts settings saved with setup done, before the camera could be skipped, as checked', () => {
+    vi.stubGlobal('localStorage', fakeStorage(saved({ version: PROGRESS_VERSION, signingHand: 'left', setupDone: true })))
+    expect(loadProgress().cameraChecked).toBe(true)
+  })
+
+  it('never counts the camera as checked without setup', () => {
+    vi.stubGlobal('localStorage', fakeStorage(saved({ version: PROGRESS_VERSION, setupDone: false, cameraChecked: true })))
+    expect(loadProgress().cameraChecked).toBe(false)
   })
 
   it('gives settings saved before the 3D hand existed the drawing', () => {

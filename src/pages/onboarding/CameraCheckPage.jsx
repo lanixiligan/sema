@@ -19,7 +19,11 @@ import { useHandDetection } from '../../vision/tracking/useHandDetection.js'
 // and finishes setup.
 // Redesigned 2026-10-31 in Welcome's look (stickers, Gabarito, the amber key
 // button), but the page follows the theme: light or dark, not Welcome's blue.
-export default function CameraCheckPage({ onDone }) {
+// `doneLabel` is the key button's text (where passing leads). `onSkip`, until
+// the check has passed once (2026-11-04), adds "No camera? Guess letters
+// instead" under it: setup ends without the camera and opens the quiz that
+// needs none.
+export default function CameraCheckPage({ onDone, doneLabel = 'Start learning', onSkip }) {
   const camera = useSharedCamera()
   const { handModel } = camera
   const isLive = camera.status === 'live'
@@ -103,11 +107,18 @@ export default function CameraCheckPage({ onDone }) {
             disabled={!passed}
             onClick={onDone}
           >
-            Start learning
+            {doneLabel}
             <svg className="key-button-arrow" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M5 12h13M13 6l6 6-6 6" />
             </svg>
           </button>
+          {/* Quiet, so the check stays the way forward. Hidden once it passes
+              (visibility, so its space stays and the key button doesn't move). */}
+          {onSkip && (
+            <button type="button" className={`camera-check-skip${passed ? ' is-gone' : ''}`} onClick={onSkip}>
+              No camera? Guess letters instead
+            </button>
+          )}
         </section>
 
         <section className="camera-check-preview">

@@ -23,6 +23,10 @@ export const NEW_VISITOR = {
   version: PROGRESS_VERSION,
   signingHand: null,
   setupDone: false,
+  // Whether the camera check passed (2026-11-04). Setup can also be finished
+  // without it ("No camera? Guess letters instead"); then the camera pages ask
+  // for the check first.
+  cameraChecked: false,
   theme: DEFAULT_THEME,
   handView: '2d',
   turnTipClosed: false,
@@ -41,10 +45,14 @@ export function loadProgress() {
     const signingHand = HANDS.includes(saved.signingHand) ? saved.signingHand : null
     // Setup can't be done without a signing hand. Settings saved before the
     // theme existed have none, so they get the default.
+    const setupDone = saved.setupDone === true && signingHand !== null
     return {
       version: PROGRESS_VERSION,
       signingHand,
-      setupDone: saved.setupDone === true && signingHand !== null,
+      setupDone,
+      // Before 2026-11-04 setup could only be finished by passing the camera
+      // check, so settings saved then with setup done count as checked.
+      cameraChecked: setupDone && saved.cameraChecked !== false,
       theme: THEMES.includes(saved.theme) ? saved.theme : DEFAULT_THEME,
       handView: HAND_VIEWS.includes(saved.handView) ? saved.handView : '2d',
       turnTipClosed: saved.turnTipClosed === true,

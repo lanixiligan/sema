@@ -1,6 +1,7 @@
 import MenuBar from '../../app/layout/MenuBar.jsx'
 import { navigate } from '../../app/routing/navigation.js'
 import { PATHS } from '../../app/routing/router.js'
+import { useSettings } from '../../app/settings/settings.js'
 import { GUESS_COUNT, STILL_LETTERS, WORD_COUNT } from './quizRounds.js'
 import { useWords } from './useWords.js'
 
@@ -13,7 +14,8 @@ import { useWords } from './useWords.js'
 //   QuizRun checks each letter exactly as on Learn (useLetterCheck).
 // - Guess the letter (/quiz/guess, GuessQuizPage): Sema shows a hand sign and
 //   the person names its letter. No camera, so it's also the quiz for someone
-//   who can't or won't use one.
+//   who can't or won't use one. Until the camera check has passed, the Words
+//   card leads to the check first.
 // quizRounds.js holds the quiz's state.
 // Redesigned 2026-11-01 in the camera check's look: sticker cards with a
 // small letter tile row each, and the amber key look for Start. Until
@@ -58,10 +60,10 @@ function ArtTiles({ letters }) {
 
 // Looks like Welcome's key button, but the whole card is the button (a button
 // can't hold another), so this is only drawn like one.
-function StartKey() {
+function StartKey({ label = 'Start' }) {
   return (
     <span className="quiz-choice-start">
-      Start
+      {label}
       <svg className="key-button-arrow" viewBox="0 0 24 24" aria-hidden="true">
         <path d="M5 12h13M13 6l6 6-6 6" />
       </svg>
@@ -71,6 +73,9 @@ function StartKey() {
 
 export default function QuizPage() {
   const words = useWords()
+  // Without the camera check, Words opens the check first, and comes back.
+  const { cameraChecked, openCameraCheck } = useSettings()
+  const openWords = () => (cameraChecked ? navigate(PATHS.quizWords) : openCameraCheck(PATHS.quizWords))
   const wordLetters = [...pickSampleWord(words.list)]
   const wordsText =
     words.status === 'error'
@@ -87,16 +92,16 @@ export default function QuizPage() {
         </header>
         <div className="quiz-choices">
           {/* Words waits for words.json. */}
-          <button type="button" className="quiz-choice" disabled={words.list.length === 0} onClick={() => navigate(PATHS.quizWords)}>
+          <button type="button" className="quiz-choice" disabled={words.list.length === 0} onClick={openWords}>
             <ArtTiles letters={wordLetters} />
             <span className="quiz-choice-title">Words</span>
             <span className="quiz-choice-count">{wordsText}</span>
             <span className="quiz-choice-text">Fingerspell whole words to the camera, from memory.</span>
             <span className="quiz-choice-points">
               <span>Hold each letter for 1.5 seconds to pass it.</span>
-              <span>Uses your camera.</span>
+              <span>{cameraChecked ? 'Uses your camera.' : 'Set up your camera first.'}</span>
             </span>
-            <StartKey />
+            <StartKey label={cameraChecked ? 'Start' : 'Set up camera'} />
           </button>
           <button type="button" className="quiz-choice" onClick={() => navigate(PATHS.quizGuess)}>
             <ArtTiles letters={SAMPLE_LETTERS} />

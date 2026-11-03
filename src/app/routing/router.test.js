@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { PATHS, resolveRoute } from './router.js'
+import { PATHS, cameraCheckNext, cameraCheckPath, resolveRoute } from './router.js'
 
 const newVisitor = { signingHand: null, setupDone: false }
-const returning = { signingHand: 'right', setupDone: true }
+const returning = { signingHand: 'right', setupDone: true, cameraChecked: true }
+// Finished setup with "No camera? Guess letters instead".
+const noCamera = { signingHand: 'right', setupDone: true, cameraChecked: false }
 
 describe('resolveRoute', () => {
   it('opens every page but Welcome for a returning visitor', () => {
@@ -19,6 +21,21 @@ describe('resolveRoute', () => {
     for (const path of ['/learn', '/quiz', '/quiz/words', '/quiz/guess']) {
       expect(resolveRoute(path, newVisitor)).toEqual({ redirect: '/' })
     }
+  })
+
+  it('sends someone who skipped the camera check from the Words quiz to it, and opens the rest', () => {
+    expect(resolveRoute('/quiz/words', noCamera)).toEqual({ redirect: '/camera-setup?next=/quiz/words' })
+    for (const page of ['learn', 'quiz', 'quizGuess', 'cameraCheck']) {
+      expect(resolveRoute(PATHS[page], noCamera)).toEqual({ page })
+    }
+  })
+
+  it('says in the camera check address where it leads, only for a known page', () => {
+    expect(cameraCheckPath('/quiz/words')).toBe('/camera-setup?next=/quiz/words')
+    expect(cameraCheckPath('/learn')).toBe('/camera-setup')
+    expect(cameraCheckNext('?next=/quiz/words')).toBe('/quiz/words')
+    expect(cameraCheckNext('')).toBe('/learn')
+    expect(cameraCheckNext('?next=https://example.com')).toBe('/learn')
   })
 
   it('sends the old Letters quiz address to the quiz choice', () => {
