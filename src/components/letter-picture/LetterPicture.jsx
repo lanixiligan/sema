@@ -128,6 +128,13 @@ export default function LetterPicture({
             </button>
           </div>
         )}
+        {/* In the larger window the letter is named at the bottom, as on Learn's card
+            (2026-11-04). Guess the letter's question never names it (hideLetter). */}
+        {large && !hideLetter && (
+          <p className="picture-name">
+            Letter <span className="picture-name-letter">{letter}</span>
+          </p>
+        )}
         {corner && !large && <div className="picture-corner">{corner}</div>}
         {!large && (
           <button
