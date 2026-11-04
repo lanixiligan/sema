@@ -237,7 +237,7 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   between two skills (2026-11-04; before, Letters, 10 random letters signed, at `/quiz/letters`, now
   redirected to `/quiz`, because it felt the same as Words):
   - Guess the letter (`/quiz/guess`, `GuessQuizPage` and `GuessRun`): 10 random hand pictures
-    (`GUESS_LETTERS` in `quizRounds.js`: all 26 since 2026-11-04; J and Z are shown as their drawings, the handshape they start from, and have no 3D hand yet, so with 3D chosen their picture says so), never the same twice in
+    (`GUESS_LETTERS` in `quizRounds.js`: all 26 since 2026-11-04; J and Z are shown in 2D as their drawings, the handshape they start from, and in 3D their hands move, like every 3D J and Z, `docs/hand-poses.md`), never the same twice in
     a row, in `LetterPicture` with `hideLetter` (nothing it says names the letter; the 2D | 3D
     switch works). The person names each with one of 26 tiles (seven to a row, A to Z; or three rows like a keyboard's, QWERTY, chosen with an A to Z | Keyboard switch above them, the saved `keyLayout` setting, `KeyLayoutToggle`, 2026-11-04) or its key: right shows "Yes, that's
     B!" for 1.7 s (`GUESS_RIGHT_MS`; 2026-11-04, also as a green sticker on the picture, like the camera check's, because the line above the tiles was missed) and moves on; wrong marks the right tile green and the picked one amber and waits
@@ -297,7 +297,10 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   shows or hides its fingertip numbers (`handNumbers` in the store; not in the quiz's sticker). The
   choice is `handView` in the store, read with `useSettings()` ('2d' by default: 3D is opt-in, for battery and reduced
   motion). The poses are Eidos's format in `public/languages/asl/letters/` (A–Z, placeholders
-  with `"available": false` until Lanix fills them). A letter whose file is empty, `{}`, a
+  with `"available": false` until Lanix fills them). J and Z (2026-11-04) move: Eidos's `move` and
+  `motion` fields, played on a loop by `HandModelView` (rest on the first step, play, hold the last,
+  ease back; once with reduced motion), the fit covering the whole movement, with a progress bar along the picture's
+  bottom edge, like a video's (`.hand-motion-bar`; no Replay button, removed at Lanix's request). A letter whose file is empty, `{}`, a
   placeholder or broken is unavailable: with 3D chosen, its picture says "No 3D hand for X yet" and to switch to 2D
   (2026-11-02; before, the drawing showed, with a line), but the saved choice stays 3D for the next letter that has a pose. Keep `src/hand-model/pose.js` identical to Eidos's. `docs/hand-poses.md`.
 - Light theme (2026-11-02): the page is `--sky-page` (richer than the old pale wash) and the

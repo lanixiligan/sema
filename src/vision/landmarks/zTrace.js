@@ -9,10 +9,10 @@ import { TIPS } from './handPoints.js'
 // (aspect), so a distance means the same sideways as up and down. On the
 // video, a point is at (x × videoHeight, y × videoHeight) pixels.
 
-// The Z's corners as fractions of the un-mirrored frame, for a left hand.
+// The Z's corners as fractions of the un-mirrored frame, for a right hand.
 // The video is shown mirrored, so the frame's right is the screen's left:
 // this reads as a normal Z on screen, drawn top left → top right → bottom
-// left → bottom right. High in the frame, so the wrist stays in view on the
+// left → bottom right, the way a right hand draws it as the signer sees it. High in the frame, so the wrist stays in view on the
 // bottom stroke. Tuned by eye (2026-10-24: made smaller twice, from
 // 0.35–0.65 by 0.2–0.55 to 0.40–0.60 by 0.26–0.50).
 const Z_CORNERS = [
@@ -41,10 +41,11 @@ const GAP_MS = 800
 // `done` once it reached the end dot following the line.
 export const NO_TRACE = { along: null, lastOnAt: null, done: false }
 
-// The Z for the signing hand ('left' or 'right'), in frame heights. A right
-// hand gets the Z mirrored on screen (2026-10-24: swapped, at Lanix's request).
+// The Z for the signing hand ('left' or 'right'), in frame heights. A left
+// hand gets the Z mirrored on screen (2026-11-04: swapped back, at Lanix's
+// request; on 2026-10-24 it was the other way round).
 export function zPath(hand, aspect) {
-  return Z_CORNERS.map((p) => ({ x: (hand === 'right' ? 1 - p.x : p.x) * aspect, y: p.y }))
+  return Z_CORNERS.map((p) => ({ x: (hand === 'left' ? 1 - p.x : p.x) * aspect, y: p.y }))
 }
 
 // A fingertip of MediaPipe's 21 raw points (the index's, unless another point

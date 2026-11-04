@@ -14,9 +14,9 @@ import { LETTERS } from '../../vision/landmarks/letterShapes.js'
 export const WORD_COUNT = 5
 export const GUESS_COUNT = 10
 // The letters Guess the letter asks and offers as keys: all 26 (since 2026-11-04;
-// before, 24, because J and Z move and a still picture can't show that). J and Z
-// are shown as their drawings (the handshape they start from) and have no 3D hand
-// yet, so with 3D chosen their picture says so (LetterPicture).
+// before, 24, because J and Z move and a still picture can't show that). In 2D J
+// and Z are shown as their drawings (the handshape they start from); in 3D their
+// hands play the movement on a loop (HandModelView, 2026-11-04).
 export const GUESS_LETTERS = LETTERS
 // The keys' order when the person chooses the keyboard's (2026-11-04): QWERTY's three
 // rows, ten, nine and seven keys. The keys are drawn in this one list order, and the
