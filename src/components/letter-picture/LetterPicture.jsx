@@ -1,4 +1,5 @@
 import { Suspense, lazy, useState } from 'react'
+import HandNumbersToggle from '../../app/settings/HandNumbersToggle.jsx'
 import HandViewToggle from '../../app/settings/HandViewToggle.jsx'
 import { useSettings } from '../../app/settings/settings.js'
 import AslDrawing from '../AslDrawing.jsx'
@@ -56,7 +57,7 @@ export default function LetterPicture({
   // True once the 3D hand in this frame has loaded (or failed and been replaced
   // by the drawing); reset below whenever the hand leaves the frame.
   const [modelSettled, setModelSettled] = useState(false)
-  const { shownTheme, turnTipClosed, closeTurnTip, handNumbers, setHandNumbers } = useSettings()
+  const { shownTheme, turnTipClosed, closeTurnTip, handNumbers } = useSettings()
   const alt = hideLetter ? 'The handshape to name' : `Handshape for ${letter}`
   const drawing = <AslDrawing letter={letter} hand={hand} alt={alt} />
   let picture = drawing
@@ -116,17 +117,7 @@ export default function LetterPicture({
       <div className={frame.filter(Boolean).join(' ')}>
         <div className="picture-controls">
           <HandViewToggle loading={loading3d} />
-          {showsModel && notes && (
-            <button
-              type="button"
-              className="hand-numbers-toggle"
-              aria-pressed={handNumbers}
-              title="Show or hide the finger numbers"
-              onClick={() => setHandNumbers(!handNumbers)}
-            >
-              Numbers
-            </button>
-          )}
+          {showsModel && notes && <HandNumbersToggle />}
         </div>
         {picture}
         {tip && notes && !turnTipClosed && (

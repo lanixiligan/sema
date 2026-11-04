@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useLeaveWarning } from '../../app/routing/navigation.js'
 import { useSettings } from '../../app/settings/settings.js'
 import HandSideToggle from '../../app/settings/HandSideToggle.jsx'
+import HandNumbersToggle from '../../app/settings/HandNumbersToggle.jsx'
 import HandViewToggle from '../../app/settings/HandViewToggle.jsx'
 import AnswerHand from './AnswerHand.jsx'
 import KeyLayoutToggle from './KeyLayoutToggle.jsx'
@@ -123,9 +124,10 @@ export default function GuessRun({ quiz, hand, onHandChange, onMark, onQuit }) {
           // Named wrong: the sign steps aside for the two hands to compare, the
           // right letter's on the left and the picked one's on the right, in
           // a frame like the Peek's (dark in the dark theme), with the same 2D | 3D switch.
-          <div className="letter-picture guess-compare-frame">
+          <div className={`letter-picture guess-compare-frame${handView === '3d' ? ' has-numbers' : ''}`}>
             <div className="picture-controls">
               <HandViewToggle />
+              {handView === '3d' && <HandNumbersToggle />}
             </div>
             <div className="picture-corner">{handSwitch}</div>
             {/* The answer, in the frame with the two hands (2026-11-04): the line above
