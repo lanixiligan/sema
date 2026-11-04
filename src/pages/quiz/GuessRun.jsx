@@ -25,7 +25,7 @@ function stepClass(quiz, i) {
 // picture was on the left): a tile per letter (A to Z, or a keyboard's rows, chosen with a switch above them) on the left, where the camera is
 // there, and on the right the steps on top, the picture in the middle (the 2D | 3D
 // switch works as everywhere, so the 3D hand can be turned to tell M, N and T
-// apart) and Skip letter and End quiz at the bottom. A letter is picked with a
+// apart) and Show answer and End quiz at the bottom. A letter is picked with a
 // tile or its key on a keyboard.
 // - Right: "Yes, that's B!" for a moment, then the next sign (as when a
 //   letter passes in the Words quiz). The line above the tiles is easy to miss
@@ -54,10 +54,16 @@ export default function GuessRun({ quiz, hand, onHandChange, onMark, onQuit }) {
 
   // The letter picked for this sign. `step` says which sign it was for, so a
   // new sign starts unanswered without an effect to reset it.
-  const [answer, setAnswer] = useState({ step: -1, guess: null })
-  const guess = answer.step === quiz.step ? answer.guess : null
+  // `gaveUp` (2026-11-04): Show answer was pressed, so the right letter is shown, with no pick.
+  const [answer, setAnswer] = useState({ step: -1, guess: null, gaveUp: false })
+  const here = answer.step === quiz.step
+  const guess = here ? answer.guess : null
+  const gaveUp = here && answer.gaveUp
   const isRight = guess !== null && guess === target
   const isWrong = guess !== null && guess !== target
+  // After a wrong answer or Show answer the right letter is shown and waits for Next letter.
+  const isRevealed = isWrong || gaveUp
+  const answered = guess !== null || gaveUp
 
   // Named right: the next sign after a moment.
   useEffect(() => {
@@ -70,28 +76,28 @@ export default function GuessRun({ quiz, hand, onHandChange, onMark, onQuit }) {
   // the keyboard as well.
   const nextRef = useRef(null)
   useEffect(() => {
-    if (isWrong) nextRef.current?.focus()
-  }, [isWrong])
+    if (isRevealed) nextRef.current?.focus()
+  }, [isRevealed])
 
   // A letter's key picks it, once per sign. Not with Ctrl, Alt or Cmd held
   // (the browser's own shortcuts), nor while the larger picture's window is
   // open (its own keys, like Escape, belong to it).
   useEffect(() => {
-    if (guess !== null) return
+    if (answered) return
     function onKeyDown(event) {
       if (event.ctrlKey || event.metaKey || event.altKey || event.repeat) return
       if (event.target instanceof Element && event.target.closest('dialog')) return
       const letter = event.key.toUpperCase()
       if (!GUESS_LETTERS.includes(letter)) return
       event.preventDefault()
-      setAnswer({ step: quiz.step, guess: letter })
+      setAnswer({ step: quiz.step, guess: letter, gaveUp: false })
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [guess, quiz.step])
+  }, [answered, quiz.step])
 
   function tileClass(letter) {
-    if (guess === null) return 'guess-tile'
+    if (!answered) return 'guess-tile'
     if (letter === target) return 'guess-tile is-right'
     if (letter === guess) return 'guess-tile is-wrong'
     return 'guess-tile'
@@ -120,7 +126,7 @@ export default function GuessRun({ quiz, hand, onHandChange, onMark, onQuit }) {
       </div>
 
       <section className="guess-picture-side" aria-label="The hand sign">
-        {isWrong ? (
+        {isRevealed ? (
           // Named wrong: the sign steps aside for the two hands to compare, the
           // right letter's on the left and the picked one's on the right, in
           // a frame like the Peek's (dark in the dark theme), with the same 2D | 3D switch.
@@ -133,11 +139,12 @@ export default function GuessRun({ quiz, hand, onHandChange, onMark, onQuit }) {
             {/* The answer, in the frame with the two hands (2026-11-04): the line above
                 the tiles is far from them. That line is still what a screen reader hears. */}
             <p className="guess-compare-message" aria-hidden="true">
-              <span className="is-answer">It&rsquo;s {target}.</span> <span className="is-pick">You picked {guess}.</span>
+              <span className="is-answer">It&rsquo;s {target}.</span>
+              {isWrong && <> <span className="is-pick">You picked {guess}.</span></>}
             </p>
             <div className="guess-compare-row">
               <AnswerHand letter={target} kind="right" hand={hand} view={handView} />
-              <AnswerHand letter={guess} kind="wrong" hand={hand} view={handView} />
+              {isWrong && <AnswerHand letter={guess} kind="wrong" hand={hand} view={handView} />}
             </div>
           </div>
         ) : (
@@ -168,6 +175,7 @@ export default function GuessRun({ quiz, hand, onHandChange, onMark, onQuit }) {
             It&rsquo;s {target}. You picked {guess}.
           </>
         )}
+        {gaveUp && <>It&rsquo;s {target}.</>}
       </p>
 
       {/* The question isn't written on the page (the tiles say it), so the
@@ -181,8 +189,8 @@ export default function GuessRun({ quiz, hand, onHandChange, onMark, onQuit }) {
                 key={letter}
                 type="button"
                 className={tileClass(letter)}
-                disabled={guess !== null}
-                onClick={() => setAnswer({ step: quiz.step, guess: letter })}
+                disabled={answered}
+                onClick={() => setAnswer({ step: quiz.step, guess: letter, gaveUp: false })}
               >
                 {letter}
               </button>
@@ -192,16 +200,22 @@ export default function GuessRun({ quiz, hand, onHandChange, onMark, onQuit }) {
       </section>
 
       <div className="quiz-actions guess-actions">
-        {isWrong ? (
-          <button ref={nextRef} type="button" className="key-button guess-next" onClick={() => onMark('wrong')}>
+        {isRevealed ? (
+          // A wrong answer counts as wrong; Show answer counts as skipped.
+          <button ref={nextRef} type="button" className="key-button guess-next" onClick={() => onMark(isWrong ? 'wrong' : 'skipped')}>
             Next letter
             <svg className="key-button-arrow" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M5 12h13M13 6l6 6-6 6" />
             </svg>
           </button>
         ) : (
-          <button type="button" className="quiz-skip" disabled={guess !== null} onClick={() => onMark('skipped')}>
-            Skip letter
+          <button
+            type="button"
+            className="quiz-skip"
+            disabled={answered}
+            onClick={() => setAnswer({ step: quiz.step, guess: null, gaveUp: true })}
+          >
+            Show answer
           </button>
         )}
         {/* A sign already answered keeps its answer; the rest count as skipped. */}
