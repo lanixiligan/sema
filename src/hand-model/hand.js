@@ -65,7 +65,6 @@ const BASE_CSS = `
 .hand-view { position: relative; overflow: hidden; }
 .hand-view > canvas { display: block; width: 100%; height: 100%; cursor: grab; touch-action: none; }
 .hand-view.is-dragging > canvas { cursor: grabbing; }
-.hand-view.is-panning > canvas { cursor: move; }
 .hand-labels { position: absolute; top: 0; left: 0; pointer-events: none; }
 .hand-tip-label {
   min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px;
@@ -345,7 +344,7 @@ function unwrapWrists(poses) {
  * @param {'right'|'left'} [options.side='right'] drawn as its mirror image
  * @param {boolean} [options.numbers=true] fingertip number badges
  * @param {boolean} [options.background=true] false for a transparent canvas
- * @param {boolean} [options.controls=true] drag to spin, middle-drag to move, scroll to zoom
+ * @param {boolean} [options.controls=true] drag to spin, scroll to zoom
  * @param {boolean} [options.zoom=true] scroll to zoom (with controls)
  * @param {boolean} [options.reducedMotion=false] poses jump, flicks don't spin on
  * @param {object} [options.pose] initial pose (defaults to relaxed)
@@ -479,12 +478,12 @@ export function createHand(container, options = {}) {
   let lastFrame = 0;
   let running = false; // whether the animation loop is on (wake, sleep)
 
-  // Spin, pan & zoom: dragging spins the hand about the vertical axis (so it
-  // stays in the transverse plane and keeps whatever angle it is left at),
-  // middle-drag slides it across the screen, and scroll changes depth.
-  let drag = null; // 'spin' | 'pan' while a button is held
+  // Spin & zoom: dragging spins the hand about the vertical axis (so it
+  // stays in the transverse plane and keeps whatever angle it is left at), and
+  // scroll changes depth. The middle button does nothing (2026-11-04: it used
+  // to slide the hand across the screen, which Lanix had removed).
+  let drag = false; // whether the main button is held
   let prevX = 0;
-  let prevY = 0;
   let spinVelocity = 0;
   // Where the view rests (resetView goes back here). The fit below moves them,
   // so a pose with fingers stretched out is centred and fully in the frame.
@@ -554,7 +553,7 @@ export function createHand(container, options = {}) {
     const distance = Math.max(halfHeight / (FIT_FILL * tan), halfWidth / (FIT_FILL * tan * (w / h)));
     homeY = -(fit.top + fit.bottom) / 2;
     homeZ = Math.min(0, camera.position.z - distance);
-    if (drag !== 'pan') targetY = homeY;
+    targetY = homeY;
     targetZ = homeZ;
     wake();
   }
@@ -627,13 +626,12 @@ export function createHand(container, options = {}) {
   const canvas = renderer.domElement;
 
   function onPointerDown(e) {
-    if (drag || (e.button !== 0 && e.button !== 1)) return;
-    if (e.button === 1) e.preventDefault(); // no browser autoscroll
-    drag = e.button === 1 ? 'pan' : 'spin';
-    container.classList.add(drag === 'pan' ? 'is-panning' : 'is-dragging');
+    if (e.button === 1) e.preventDefault(); // no browser autoscroll either
+    if (drag || e.button !== 0) return;
+    drag = true;
+    container.classList.add('is-dragging');
     canvas.setPointerCapture(e.pointerId);
     prevX = e.clientX;
-    prevY = e.clientY;
     spinVelocity = 0;
     resetTarget = null; // grabbing the hand cancels an in-progress reset
     wake();
@@ -641,25 +639,16 @@ export function createHand(container, options = {}) {
 
   function onPointerMove(e) {
     if (!drag) return;
-    if (drag === 'pan') {
-      // World units per screen pixel at the hand's depth, so it tracks the cursor
-      const dist = camera.position.z - handRoot.position.z;
-      const perPixel = (2 * dist * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))) / size().height;
-      targetX = handRoot.position.x += (e.clientX - prevX) * perPixel;
-      targetY = handRoot.position.y -= (e.clientY - prevY) * perPixel;
-    } else {
-      spinVelocity = (e.clientX - prevX) * 0.007;
-      spinHand(spinVelocity);
-    }
+    spinVelocity = (e.clientX - prevX) * 0.007;
+    spinHand(spinVelocity);
     prevX = e.clientX;
-    prevY = e.clientY;
     wake();
   }
 
   function onPointerUp() {
-    drag = null;
+    drag = false;
     if (reducedMotion) spinVelocity = 0;
-    container.classList.remove('is-dragging', 'is-panning');
+    container.classList.remove('is-dragging');
   }
 
   function onWheel(e) {
@@ -738,7 +727,7 @@ export function createHand(container, options = {}) {
 
   function render(now) {
     // Reset easing, else flick momentum
-    if (drag !== 'spin') {
+    if (!drag) {
       if (resetTarget) {
         handRoot.quaternion.slerp(resetTarget, 0.12);
         if (handRoot.quaternion.angleTo(resetTarget) < 0.001) {
@@ -753,10 +742,8 @@ export function createHand(container, options = {}) {
 
     // Smooth depth (zoom) and, after resetView(), position interpolation
     handRoot.position.z += (targetZ - handRoot.position.z) * 0.08;
-    if (drag !== 'pan') {
-      handRoot.position.x += (targetX - handRoot.position.x) * 0.12;
-      handRoot.position.y += (targetY - handRoot.position.y) * 0.12;
-    }
+    handRoot.position.x += (targetX - handRoot.position.x) * 0.12;
+    handRoot.position.y += (targetY - handRoot.position.y) * 0.12;
 
     stepPose(now);
     placeHand(state);
