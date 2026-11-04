@@ -237,11 +237,11 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   between two skills (2026-11-04; before, Letters, 10 random letters signed, at `/quiz/letters`, now
   redirected to `/quiz`, because it felt the same as Words):
   - Guess the letter (`/quiz/guess`, `GuessQuizPage` and `GuessRun`): 10 random hand pictures
-    (`STILL_LETTERS` in `quizRounds.js`: J and Z move, so they're left out), never the same twice in
+    (`GUESS_LETTERS` in `quizRounds.js`: all 26 since 2026-11-04; J and Z are shown as their drawings, the handshape they start from, and have no 3D hand yet, so with 3D chosen their picture says so), never the same twice in
     a row, in `LetterPicture` with `hideLetter` (nothing it says names the letter; the 2D | 3D
-    switch works). The person names each with one of 24 tiles or its key: right shows "Yes, that's
+    switch works). The person names each with one of 26 tiles (seven to a row, A to Z; or three rows like a keyboard's, QWERTY, chosen with an A to Z | Keyboard switch above them, the saved `keyLayout` setting, `KeyLayoutToggle`, 2026-11-04) or its key: right shows "Yes, that's
     B!" for 1.7 s (`GUESS_RIGHT_MS`; 2026-11-04, also as a green sticker on the picture, like the camera check's, because the line above the tiles was missed) and moves on; wrong marks the right tile green and the picked one amber and waits
-    for Next letter (focused, so Enter works). No camera, so it's the quiz for someone without one. A Left hand | Right hand switch (`HandSideToggle`, 2026-11-04) sits in the picture frame's lower left corner (`corner` on `LetterPicture`) and changes the saved signing hand, which sets the hand the pictures show.
+    for Next letter (focused, so Enter works). No camera, so it's the quiz for someone without one. On a desktop it's laid out like Words (2026-11-04): the 26 tiles on the left, where Words has its camera, and on the right the steps, the picture and Show answer / End quiz. Show answer (2026-11-04; it was Skip letter, for a few hours Give up) shows the right letter as a wrong answer does, with only the correct card, and waits for Next letter; the letter counts as skipped. A Left hand | Right hand switch (`HandSideToggle`, 2026-11-04) sits in the picture frame's lower left corner (`corner` on `LetterPicture`) and changes the saved signing hand, which sets the hand the pictures show.
     Marks are 'passed', 'wrong' or 'skipped'; the same results page, counting Right, Wrong and
     Skipped, and, until the camera check has passed, a "Set up your camera" invitation.
   - Words (`/quiz/words`, one `QuizFlow`, then the results; Start again goes back to `/quiz`): 5 from
@@ -256,12 +256,12 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   shows the results too, the letters not reached marked skipped. Results aren't saved, so leaving a
   running quiz asks first (2026-10-29, `useLeaveWarning` in `navigation.js`): a link or the menu
   (`navigate`), Back/Forward (the address is put back on Cancel) and closing or reloading the tab
-  (the browser's own question); End quiz and the results don't ask. The
+  (the browser's own question); the results don't ask. End quiz asks its own question first (2026-11-04, `END_QUESTION` in `quizRounds.js`, the browser's confirm box; both quizzes). The
   camera starts on arrival (the person just chose a quiz). While it runs the page is minimal
   (2026-10-27): the camera on the left (whole, as on Learn: its hand switch and camera buttons on the
   picture; until 2026-11-01 they were in a footer under it), on the right the quiz's steps on top (pills, one per item, from the quiz state; no "Letter 1 of 10" any more, 2026-11-02, the bar still
-  says it to screen readers), the letter large on a card that fills the column between them (the letter follows the card's size, a container query) with its Peek button (and "Peeking counts as a clue." as a pop-up on the sticker's
-  lower edge, so nothing moves), and Skip letter and End quiz side by side at the bottom, on every size; a words quiz also shows the word under the letter.
+  says it to screen readers), the letter large on a card that fills the column between them (the letter follows the card's size, a container query) with its Peek button (and "Peeking counts as a clue." as a pop-up on the letter's or picture's
+  lower edge, so nothing moves), and Skip letter and End quiz side by side at the bottom, on every size; a words quiz also shows the word, inside the card under the letter or picture (2026-11-04; the picture there sits straight on the card, with no frame of its own).
 - Setup redirects live in `resolveRoute`: a new visitor opening Learn or Quiz goes
   to Welcome; a returning visitor opening `/` goes to Learn. Get started (Welcome's, or About's) opens the camera check, and passing it (its Start learning button) finishes setup and opens Learn. The developer pages, Record
   included, don't need setup.
@@ -511,9 +511,8 @@ as the window under the bar, and the camera takes what the guide and the letter 
 square), so no empty band is left under it. The letter card there has its name top left (the model chip top right), the picture in the
 middle and one row of controls along the bottom (2D | 3D and Numbers on the left, expand on the right). From 700px
 in landscape (a phone on its side) Learn and the quiz put the camera beside the letter again; a
-tablet held upright keeps one column. The running quiz on a phone (under 700px, 2026-11-02) is laid out
-like Learn: the progress pills on top (thicker), the letter on a wide card with Peek in its corner, the camera,
-and Skip letter and End quiz as a row of two buttons under it. It is exactly the window's height and never scrolls (card and camera share what's left), and "Peeking counts as a clue." is a pop-up on the card's lower edge, not a line under it. The camera check puts the camera under its title and the steps
+tablet held upright keeps one column. The running quiz on a phone (under 700px, 2026-11-02) and Guess the letter share one layout (2026-11-04):
+the card on top (Peek in its corner, the word inside it in Words, the picture and its Left hand | Right hand switch in Guess), the thick progress pills in the middle of the page, the bottom box (the camera in Words, the 26 letter keys in Guess), and Skip letter (Show answer in Guess) / Next letter and End quiz as a row of two buttons. The page is exactly the window's height and never scrolls: the card and the bottom box are two boxes of equal height, the pills between them. Guess the letter after a wrong answer swaps the card for the two hands to compare, each with an expand button. "Peeking counts as a clue." is a pop-up on the card's picture, not a line under it. The camera check puts the camera under its title and the steps
 after it; on a phone the camera frame stretches to fill the window (never under a square). Under 600px the menu is a burger button in the top bar (`MenuBar.jsx`, next to the theme
 button) that opens Learn, Quiz and About as a panel under the bar, and the bar is one row, 64px
 (`--bar-height`); from 600px the menu is inline. The developer pages are desktop only. Check by hand in Chrome's device mode (F12, then the
