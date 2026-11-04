@@ -15,10 +15,17 @@
 // - options.zoom: false turns off scroll-to-zoom, so the page scrolls.
 // - spinBy(angle), for the arrow keys.
 // - The model sits next to this file (./models/).
+// - The fit (2026-11-02, measureSteps, applyFit): see "Fit the pose to the frame".
+// Eidos's movements (2026-11-04, from its working copy after 9d73763): a
+// pose's `move` (handMove) and `motion` (playMotion, stepMotion, mixPoses,
+// unwrapWrists), copied as they are there; Sema keeps the loop awake while a
+// movement plays and fits the whole movement in the frame. Sema's own change
+// (2026-11-04): the curve between steps is smoothBetween, which can't overshoot
+// a step (Eidos's catmullRom did, and the hand bounced).
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
-import { FINGER_NUMBERS, LONG_FINGERS, RELAXED_POSE, WRIST_KEYS, clonePose, normalizePose } from './pose.js';
+import { FINGER_NUMBERS, LONG_FINGERS, RELAXED_POSE, WRIST_KEYS, clonePose, motionSteps, normalizePose, stillPose } from './pose.js';
 
 const DEFAULT_MODEL_URL = new URL('./models/hand-right.glb', import.meta.url).href;
 
@@ -28,6 +35,8 @@ const BLEND = 0.12; // easing toward the target pose per 60 Hz frame, when no du
 // A pose's wrist rotation pivots about the middle of the hand (wrist to
 // fingertips), so a hand pointing down stays in the same spot on screen
 const PIVOT_Y = 0.9;
+// Wrist to middle fingertip, in scene units: a pose's `move` is in hand lengths
+const HAND_LENGTH = 3.4;
 const UP = new THREE.Vector3(0, 1, 0);
 
 // ---------------------------------------------------------------------------
@@ -220,8 +229,8 @@ function buildSculptedHand(gltf, material) {
   const align = dst.multiply(src.transpose());
   root.quaternion.setFromRotationMatrix(align);
 
-  // Scale to the stage (wrist to middle fingertip ~3.4 units)
-  const scale = 3.4 / tipPos.distanceTo(wristPos);
+  // Scale to the stage
+  const scale = HAND_LENGTH / tipPos.distanceTo(wristPos);
   root.scale.setScalar(scale);
 
   // Seat the wrist at the base of the stage
@@ -273,6 +282,55 @@ function poseSculptedHand(chains, state) {
   setJoint(t[0], t0 * 0.35, -t0 * 0.35 - state.spread.thumb, ROLL_SIGN * state.rotate.thumb);
   setJoint(t[1], t0 * 0.6);
   setJoint(t[2], t1);
+}
+
+// ---------------------------------------------------------------------------
+// Blending poses
+// ---------------------------------------------------------------------------
+// Write fn(the same number in each source) into every number of `out`. The
+// sources have the shape of `out` (a still pose: nested objects and arrays).
+function mixPoses(out, sources, fn) {
+  Object.keys(out).forEach((key) => {
+    if (typeof out[key] === 'number') out[key] = fn(sources.map((source) => source[key]));
+    else mixPoses(out[key], sources.map((source) => source[key]), fn);
+  });
+}
+
+const easeInOut = (t) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2);
+
+// How fast the curve is going at b, given the steps around it (a, b, c): the
+// average of the two slopes, but 0 when the angle turns round at b (it peaks or
+// dips there) and never more than the smaller slope doubled. That keeps the
+// curve between its steps: a plain Catmull-Rom curve swung past them and back,
+// which looked like a bounce (Sema, 2026-11-04).
+function slopeAt(a, b, c) {
+  const before = b - a;
+  const after = c - b;
+  if (before * after <= 0) return 0;
+  return (2 * before * after) / (before + after);
+}
+
+// The point `s` (0 to 1) of the way from b to c on a smooth curve through a, b,
+// c, d that stays between b and c
+function smoothBetween(a, b, c, d, s) {
+  const slopeB = slopeAt(a, b, c);
+  const slopeC = slopeAt(b, c, d);
+  const s2 = s * s;
+  const s3 = s2 * s;
+  return (2 * s3 - 3 * s2 + 1) * b + (s3 - 2 * s2 + s) * slopeB + (-2 * s3 + 3 * s2) * c + (s3 - s2) * slopeC;
+}
+
+// The wrist angles are full turns, so turn each step's the short way round
+// from the step before (170° to -170° is 20°, not 340°)
+function unwrapWrists(poses) {
+  const turn = 2 * Math.PI;
+  for (let i = 1; i < poses.length; i++) {
+    WRIST_KEYS.forEach((key) => {
+      const prev = poses[i - 1].wrist[key];
+      const delta = poses[i].wrist[key] - prev;
+      poses[i].wrist[key] = prev + delta - turn * Math.round(delta / turn);
+    });
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -369,11 +427,14 @@ export function createHand(container, options = {}) {
   handRoot.rotation.set(0, DEFAULT_YAW, 0);
   scene.add(handRoot);
 
-  // handRoot (view spin, zoom, mirroring) > wristPivot (pose rotation) > hand
+  // handRoot (view spin, zoom, mirroring) > handMove (pose position) >
+  // wristPivot (pose rotation) > hand
+  const handMove = new THREE.Group();
+  handRoot.add(handMove);
   const wristPivot = new THREE.Group();
   wristPivot.position.y = PIVOT_Y;
   wristPivot.rotation.order = 'ZXY'; // twist about the forearm, then tilt, then turn
-  handRoot.add(wristPivot);
+  handMove.add(wristPivot);
   const handContent = new THREE.Group();
   handContent.position.y = -PIVOT_Y;
   wristPivot.add(handContent);
@@ -406,10 +467,15 @@ export function createHand(container, options = {}) {
   // --- State ---
   let mode = MODES[initialMode] ? initialMode : 'dark';
   let side = 'left'; // the rig as built; setSide(initialSide) below mirrors it for 'right'
-  let target = normalizePose(initialPose);
+  // The hand shows one still pose at a time; a movement plays its steps
+  let target = stillPose(normalizePose(initialPose));
   const state = clonePose(target);
+  // Every step of the pose last given (one for a still pose): the fit measures them all
+  let fitPoses = [target];
   // A timed move to the target: { from, start, duration } while it runs
   let tween = null;
+  // A movement playing: { poses, times, last, start, resolve } while it runs
+  let playing = null;
   let lastFrame = 0;
   let running = false; // whether the animation loop is on (wake, sleep)
 
@@ -430,34 +496,50 @@ export function createHand(container, options = {}) {
   // Orientation the hand eases back to after resetView() (null when idle)
   let resetTarget = null;
 
+  // Put the rig in a still pose: the fingers, the wrist's rotation and the
+  // hand's position
+  function placeHand(pose) {
+    // turn: about Z (+ fingers toward the pinky side), tilt: about X (+ toward
+    // the palm, which faces +Z), twist: about Y (+ palm toward the thumb, +X)
+    wristPivot.rotation.set(pose.wrist.tilt, pose.wrist.twist, pose.wrist.turn);
+    // side: + out, away from the body's middle, which for the rig (a right
+    // hand facing the viewer) is its pinky side, -X; forward: toward the
+    // viewer, +Z. Mirroring handRoot mirrors this with the hand.
+    handMove.position.set(-pose.move.side, pose.move.up, pose.move.forward).multiplyScalar(HAND_LENGTH);
+    if (sculpted) poseSculptedHand(sculpted.chains, pose);
+  }
+
   // --- Fit the pose to the frame (Sema) ---
   // The camera is fixed, so a pose with fingers stretched up ran off the top of
   // the frame. For the pose the hand is moving to, measure how far its joints
   // reach (up, down, and out from the vertical axis the hand spins about), then
   // centre it and, when it's bigger than the frame allows, move it back from the
-  // camera. Small poses stay at the usual distance. Measured once per pose; a
-  // resized frame only redoes the sums, with the saved measurements.
+  // camera. Small poses stay at the usual distance. A movement (J, Z) is
+  // measured at every step, so the whole of it stays in the frame and the
+  // camera doesn't move while it plays. Measured once per pose; a resized
+  // frame only redoes the sums, with the saved measurements.
   const FIT_FILL = 0.72; // the share of the frame the hand may fill, leaving room for the buttons around it
   const FIT_MARGIN = 0.35; // world units added around the joints: the fingers' thickness and the number badges
   let fit = null; // { top, bottom, reach } relative to the hand's origin
 
-  function measureTarget() {
+  function measureSteps() {
     if (!sculpted) return;
-    // Pose the rig as the target pose would, read where its joints are, and
-    // leave it: the next frame poses it from `state` again.
-    poseSculptedHand(sculpted.chains, target);
-    wristPivot.rotation.set(target.wrist.tilt, target.wrist.twist, target.wrist.turn);
-    handRoot.updateMatrixWorld(true);
+    // Pose the rig as each step would, read where its joints are, and leave
+    // it: the next frame poses it from `state` again.
     const point = new THREE.Vector3();
     let top = -Infinity;
     let bottom = Infinity;
     let reach = 0;
-    handContent.traverse((object) => {
-      if (!object.isBone) return;
-      handRoot.worldToLocal(object.getWorldPosition(point));
-      top = Math.max(top, point.y);
-      bottom = Math.min(bottom, point.y);
-      reach = Math.max(reach, Math.hypot(point.x, point.z));
+    fitPoses.forEach((pose) => {
+      placeHand(pose);
+      handRoot.updateMatrixWorld(true);
+      handContent.traverse((object) => {
+        if (!object.isBone) return;
+        handRoot.worldToLocal(object.getWorldPosition(point));
+        top = Math.max(top, point.y);
+        bottom = Math.min(bottom, point.y);
+        reach = Math.max(reach, Math.hypot(point.x, point.z));
+      });
     });
     if (top > bottom) fit = { top, bottom, reach };
   }
@@ -487,7 +569,7 @@ export function createHand(container, options = {}) {
           addTipLabel(chain.at(-1).bone, finger, new THREE.Vector3(0, 0, -0.012));
         });
         handContent.add(sculpted.root);
-        measureTarget();
+        measureSteps();
         applyFit();
         // The first fit isn't eased into: the hand appears where it belongs.
         handRoot.position.set(targetX, targetY, targetZ);
@@ -607,30 +689,44 @@ export function createHand(container, options = {}) {
   // --- Animation loop ---
   // Set every angle `amount` of the way from `from` to the target
   function blendPose(from, amount) {
-    const mix = (a, b) => a + (b - a) * amount;
-    LONG_FINGERS.forEach((key) => {
-      for (let i = 0; i < 3; i++) state[key][i] = mix(from[key][i], target[key][i]);
-    });
-    for (let i = 0; i < 2; i++) state.thumb[i] = mix(from.thumb[i], target.thumb[i]);
-    Object.keys(state.spread).forEach((key) => {
-      state.spread[key] = mix(from.spread[key], target.spread[key]);
-    });
-    Object.keys(state.rotate).forEach((key) => {
-      state.rotate[key] = mix(from.rotate[key], target.rotate[key]);
-    });
-    WRIST_KEYS.forEach((key) => {
-      state.wrist[key] = mix(from.wrist[key], target.wrist[key]);
-    });
+    mixPoses(state, [from, target], ([a, b]) => a + (b - a) * amount);
   }
 
-  const easeInOut = (t) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2);
+  // End the movement playing, if any: `finished` is false when cut short
+  function stopPlaying(finished) {
+    if (!playing) return;
+    playing.resolve(finished);
+    playing = null;
+  }
+
+  // A movement eases in at its start and out at its end, and runs through
+  // every step on a smooth curve that doesn't overshoot (smoothBetween)
+  // instead of stopping at each
+  function stepMotion(now) {
+    const { poses, times, last, start } = playing;
+    const total = times.at(-1);
+    const elapsed = now - start;
+    if (elapsed >= total || total === 0) {
+      Object.assign(state, clonePose(last));
+      stopPlaying(true);
+      return;
+    }
+    const at = easeInOut(Math.max(0, elapsed) / total) * total;
+    let k = 0;
+    while (k < times.length - 2 && times[k + 1] <= at) k++;
+    const s = (at - times[k]) / (times[k + 1] - times[k]);
+    const near = [k - 1, k, k + 1, k + 2].map((i) => poses[Math.min(poses.length - 1, Math.max(0, i))]);
+    mixPoses(state, near, ([a, b, c, d]) => smoothBetween(a, b, c, d, s));
+  }
 
   // A timed move follows an ease-in-out curve and lands exactly on time;
   // otherwise the hand closes in on the target at the same speed at any frame rate
   function stepPose(now) {
     const dt = Math.min(100, lastFrame ? now - lastFrame : 1000 / 60);
     lastFrame = now;
-    if (tween) {
+    if (playing) {
+      stepMotion(now);
+    } else if (tween) {
       // A frame's timestamp can be a little older than the setPose() call
       const t = Math.min(1, Math.max(0, (now - tween.start) / tween.duration));
       blendPose(tween.from, easeInOut(t));
@@ -663,10 +759,7 @@ export function createHand(container, options = {}) {
     }
 
     stepPose(now);
-    // turn: about Z (+ fingers toward the pinky side), tilt: about X (+ toward
-    // the palm, which faces +Z), twist: about Y (+ palm toward the thumb, +X)
-    wristPivot.rotation.set(state.wrist.tilt, state.wrist.twist, state.wrist.turn);
-    if (sculpted) poseSculptedHand(sculpted.chains, state);
+    placeHand(state);
 
     renderer.render(scene, camera);
     labelRenderer.render(scene, camera);
@@ -675,7 +768,8 @@ export function createHand(container, options = {}) {
 
   // --- Drawing only while something moves ---
   // The loop runs from wake() until the hand has settled: no drag, spin,
-  // reset, timed move or easing left. Then it stops until the next change.
+  // reset, timed move, movement or easing left. Then it stops until the next
+  // change.
 
   function wake() {
     if (running) return;
@@ -692,7 +786,7 @@ export function createHand(container, options = {}) {
   // Easing only ever gets close, so whatever is close enough is snapped into
   // place: the last frame drawn is exactly the target.
   function settled() {
-    if (drag || resetTarget || tween || Math.abs(spinVelocity) > 0.0007) return false;
+    if (drag || resetTarget || tween || playing || Math.abs(spinVelocity) > 0.0007) return false;
     const near = (a, b) => Math.abs(a - b) < 0.001;
     const p = handRoot.position;
     if (!near(p.x, targetX) || !near(p.y, targetY) || !near(p.z, targetZ)) return false;
@@ -708,7 +802,7 @@ export function createHand(container, options = {}) {
       if (!state[key].every((v, i) => near(v, target[key][i]))) return false;
     }
     if (!state.thumb.every((v, i) => near(v, target.thumb[i]))) return false;
-    for (const group of ['spread', 'rotate', 'wrist']) {
+    for (const group of ['spread', 'rotate', 'wrist', 'move']) {
       for (const key of Object.keys(target[group])) {
         if (!near(state[group][key], target[group][key])) return false;
       }
@@ -728,20 +822,51 @@ export function createHand(container, options = {}) {
      * a timed move that arrives exactly then; `instant` jumps straight there.
      */
     setPose(pose, { instant = false, duration = 0 } = {}) {
-      target = normalizePose(pose);
+      const full = normalizePose(pose);
+      // A pose that moves shows its first step, fitted for the whole movement
+      target = stillPose(full);
+      fitPoses = motionSteps(full).map((step) => step.pose);
       tween = null;
+      stopPlaying(false);
       if (instant || reducedMotion) Object.assign(state, clonePose(target));
       else if (duration > 0) tween = { from: clonePose(state), start: performance.now(), duration };
-      measureTarget();
+      measureSteps();
       applyFit();
       wake();
+    },
+    /**
+     * Play a pose's movement (its `motion` steps): jump to the first step,
+     * then move through the rest, each in its duration. Resolves true when
+     * it ends on the last step, false if setPose() or another play cuts it
+     * short. A still pose just jumps there. Throws on bad data. It plays with
+     * reduced motion too: for J and Z the movement is the letter.
+     */
+    playMotion(pose) {
+      const steps = motionSteps(normalizePose(pose));
+      stopPlaying(false);
+      tween = null;
+      // The path turns the wrist the short way; it ends on the last step as written
+      const last = steps.at(-1).pose;
+      const poses = clonePose(steps.map((step) => step.pose));
+      unwrapWrists(poses);
+      let time = 0;
+      const times = steps.map((step) => (time += step.duration));
+      target = last;
+      fitPoses = steps.map((step) => step.pose);
+      measureSteps();
+      applyFit();
+      Object.assign(state, clonePose(poses[0]));
+      wake();
+      return new Promise((resolve) => {
+        playing = { poses, times, last, start: performance.now(), resolve };
+      });
     },
     /** Turn the hand about the vertical axis by `angle` radians (arrow keys). */
     spinBy(angle) {
       spinHand(angle);
       wake();
     },
-    /** The pose the hand is moving to. */
+    /** The pose the hand is moving to (during a movement, its last step). */
     getPose: () => clonePose(target),
     setMode,
     getMode: () => mode,
@@ -779,6 +904,7 @@ export function createHand(container, options = {}) {
       wake();
     },
     dispose() {
+      stopPlaying(false);
       sleep();
       resizeObserver.disconnect();
       container.removeEventListener('wheel', onWheel);
