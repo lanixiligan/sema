@@ -30,16 +30,15 @@ function walk(from, to, step = 0.05) {
 }
 
 describe('zPath', () => {
-  it('reads as a Z on the mirrored video for a left hand: it starts on the frame\'s right', () => {
-    const left = zPath('left', ASPECT)
-    expect(left[0].x).toBeGreaterThan(left[1].x)
-    expect(left[0].y).toBe(left[1].y)
+  it('reads as a Z on the mirrored video for a right hand: it starts on the frame\'s right', () => {
+    expect(path[0].x).toBeGreaterThan(path[1].x)
+    expect(path[0].y).toBe(path[1].y)
   })
 
-  it('is the other way round for a right hand', () => {
+  it('is the other way round for a left hand', () => {
     const left = zPath('left', ASPECT)
-    expect(path[0].x).toBeCloseTo(ASPECT - left[0].x)
-    expect(path[3].x).toBeCloseTo(ASPECT - left[3].x)
+    expect(left[0].x).toBeCloseTo(ASPECT - path[0].x)
+    expect(left[3].x).toBeCloseTo(ASPECT - path[3].x)
   })
 })
 
