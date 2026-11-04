@@ -47,6 +47,23 @@ pose is shown in 3D again.
 Eidos's `docs/POSE_FORMAT.md` is the contract: angles in radians, a pose for a right hand (a left
 hand mirrors it), `version` 1. Sema's copy of `pose.js` must stay identical to Eidos's.
 
+## Letters that move (J and Z)
+
+Since 2026-11-04 a pose can say where the whole hand is (`move`: side, up, forward, in hand
+lengths) and how it moves (`motion`: the steps after the first, each `{ duration, pose }`), Eidos's
+additions to the format. J and Z use both. Wherever the 3D hand is shown (Learn's card, the quiz's
+Peek, Guess the letter, its compare hands, the large picture), a pose with `motion` plays on a loop
+(`HandModelView.jsx`): the hand rests on the first step for 0.8 s, plays the movement (Eidos's
+player: a smooth curve through the steps that never overshoots one, so no bounce, easing in at the start and out at the end), holds the last
+step for 1.2 s, eases back to the first in 0.6 s, and starts again. With reduced motion it plays
+once, then goes back to the first step: the movement is the letter, so it isn't left out. A progress
+bar along the picture's bottom edge, like a video's (`.hand-motion-bar`, drawn by `HandModelView`
+on every 3D J and Z), fills while the hand moves, stays full while it holds the last step, and is
+empty again when the next play starts. There's no Replay button (Lanix had one removed the day it
+was added): the loop replays it. The fit
+measures every step, so the whole movement stays in the frame and the camera doesn't move while it
+plays. The viewer keeps drawing only while the hand moves, so between plays it costs nothing.
+
 ## The code
 
 `src/hand-model/`:
@@ -58,7 +75,9 @@ hand mirrors it), `version` 1. Sema's copy of `pose.js` must stay identical to E
   into place and a flick doesn't spin on; no scroll-to-zoom; `spinBy` for the arrow keys; and a fit
   (2026-11-02): for the pose the hand is moving to it measures how far the joints reach, then centres the
   hand in the frame and moves it back from the camera when it's too big (`FIT_FILL`, `FIT_MARGIN`,
-  `measureTarget`, `applyFit`), so a hand with fingers stretched up isn't cut off; small poses keep the usual distance.
+  `measureSteps`, `applyFit`), so a hand with fingers stretched up isn't cut off; small poses keep the usual distance.
+  Since 2026-11-04 it also has Eidos's `move` (`handMove`) and movement player (`playMotion`), with
+  the fit measuring every step.
 - `models/hand-right.glb`: the WebXR generic hand (MIT, © Amazon), with its licence.
 - `letterPoses.js`: fetches a letter's file once per visit, in 2D too (it's tiny), and decides
   whether it's available (`readLetterPose`, `useLetterPose`), so Learn can grey out 3D. It doesn't
