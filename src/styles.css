@@ -2011,14 +2011,28 @@ body {
    the quiz runs, even when a letter passes. */
 .quiz-sticker {
   position: relative;
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
   width: clamp(240px, 26vw, 420px);
   aspect-ratio: 4 / 3;
   padding: 14px;
   background: var(--surface);
   border-radius: 32px;
   box-shadow: var(--sticker-shadow);
+}
+
+/* The letter, or the picture, in the card's upper part; the word's tiles (a words
+   quiz) are under it, inside the card. */
+.quiz-sticker-main {
+  position: relative;
+  display: grid;
+  flex: 1 1 0;
+  place-items: center;
+  width: 100%;
+  min-height: 0;
 }
 
 .quiz-prompt-letter {
@@ -2107,7 +2121,7 @@ body {
   }
 
   .quiz-prompt-letter {
-    font-size: min(62cqh, 50cqw);
+    font-size: min(46cqh, 50cqw);
   }
 
   .quiz-peek {
@@ -2116,29 +2130,46 @@ body {
   }
 }
 
-/* "Peeking counts as a clue.", a dark pill on the sticker's lower edge, in the
-   middle (the picture's expand button is at the right). It takes no space and
-   no clicks, so nothing moves when it appears. Empty until the first peek. */
+/* "Peeking counts as a clue.", a dark pill in the middle of the card that shows
+   for about 2.5 s and fades away (2026-11-04; before, a pill on the card's lower
+   edge that stayed). It takes no space and no clicks, so nothing moves when it
+   appears. It's only in the page from the letter's first peek (QuizRun), so the
+   animation runs once; `both` keeps it invisible after it ends. */
 .quiz-peek-popup {
   position: absolute;
-  bottom: 12px;
+  top: 50%;
   left: 50%;
-  max-width: calc(100% - 100px);
+  z-index: 2;
+  width: max-content;
+  max-width: calc(100% - 48px);
   margin: 0;
-  padding: 6px 14px;
-  font-size: 13px;
-  font-weight: 600;
+  padding: 10px 18px;
+  font-size: 15px;
+  font-weight: 700;
   line-height: 1.3;
   text-align: center;
   color: var(--white);
   pointer-events: none;
-  background: rgb(12 29 48 / 0.88);
+  background: rgb(12 29 48 / 0.92);
   border-radius: var(--radius-pill);
-  transform: translateX(-50%);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.3);
+  transform: translate(-50%, -50%);
+  animation: quiz-peek-popup 2600ms ease-out both;
 }
 
-.quiz-peek-popup:empty {
-  visibility: hidden;
+@keyframes quiz-peek-popup {
+  0% {
+    opacity: 0;
+  }
+
+  8%,
+  72% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
 }
 
 /* The word under the letter, one tile per letter. The one to sign has the
@@ -2146,6 +2177,7 @@ body {
    skipped ones amber, the ones not asked yet flat and dashed. */
 .quiz-prompt-word {
   display: flex;
+  flex: 0 0 auto;
   justify-content: center;
   gap: 10px;
   margin: 0;
@@ -2271,11 +2303,11 @@ body {
   outline-offset: 3px;
 }
 
-/* ----- Guess the letter (GuessRun, 2026-11-04): no camera. On a desktop the
-   hand's picture fills the left half; on the right the steps on top, "Which
-   letter is this?" with a tile per letter, and the buttons at the bottom, the
-   page exactly the window's height. Narrow windows stack them: steps, picture,
-   tiles, buttons. ----- */
+/* ----- Guess the letter (GuessRun, 2026-11-04): no camera. On a desktop the page is
+   laid out like the Words quiz: the tile per letter fill the left half, where
+   the camera is there, and on the right the steps on top, the hand's picture (the
+   Words quiz's card) and the buttons at the bottom, the page exactly the
+   window's height. Narrow windows stack them: steps, picture, tiles, buttons. ----- */
 .quiz-guess {
   display: grid;
   grid-template-areas: 'steps' 'picture' 'answer' 'actions';
@@ -2289,7 +2321,7 @@ body {
 
 @media (min-width: 900px) {
   .quiz-guess {
-    grid-template-areas: 'picture steps' 'picture answer' 'picture actions';
+    grid-template-areas: 'answer steps' 'answer picture' 'answer actions';
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     grid-template-rows: auto minmax(0, 1fr) auto;
     column-gap: clamp(24px, 2.5vw, 48px);
@@ -2357,7 +2389,7 @@ body {
    padding keeps it clear of the 2D | 3D switch. */
 .guess-compare-frame {
   padding-top: 56px;
-  padding-bottom: 24px;
+  padding-bottom: 68px;
 }
 
 .guess-compare-message {
@@ -2465,6 +2497,15 @@ body {
   }
 }
 
+/* The expand button on a card's picture (the shared .picture-expand), smaller to
+   suit the card, and above the 3D hand that fades in over the drawing. */
+.guess-compare-picture .picture-expand {
+  right: 8px;
+  bottom: 8px;
+  width: 32px;
+  height: 32px;
+}
+
 .guess-compare-letter {
   padding: 8px 0 10px;
   font-family: var(--font-display);
@@ -2522,9 +2563,11 @@ body {
   }
 }
 
-/* Positioned, so the frame's size never comes from the drawing's own size;
+/* (`.asl-drawing`, not `img`: `.reference-image img` comes later and would otherwise set the
+   width to the whole frame, pushing the drawing's right edge past it.)
+   Positioned, so the frame's size never comes from the drawing's own size;
    56px above and below clear the switch and the expand button. */
-.guess-picture img {
+.guess-picture .asl-drawing {
   position: absolute;
   inset: 64px 32px;
   width: calc(100% - 64px);
@@ -2537,7 +2580,7 @@ body {
 /* On a phone or a tablet held upright the picture isn't stretched to the
    window, so the drawing keeps a sensible size. */
 @media (max-width: 899px) {
-  .guess-picture img {
+  .guess-picture .asl-drawing {
     max-width: 420px;
     max-height: 360px;
   }
@@ -2555,22 +2598,98 @@ body {
   min-height: 0;
 }
 
-/* The letters, six to a row, each a small key: a raised edge that goes down
+/* The letters, seven to a row (26 of them: four rows, the last with five), each a small key:
+   a raised edge that goes down
    on press, like the amber key buttons but quiet. On a desktop the four rows
    share the height the column has left, so the keys fill it (a cap keeps them
    from growing absurdly tall on a very tall window). */
 .guess-tiles {
+  /* How many rows, and keys in the longest row, the layout has: the keys' height uses them. */
+  --rows: 4;
+  --per-row: 7;
+  --key-ratio: 1.15;
+
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(14, minmax(0, 1fr));
   gap: 10px;
 }
 
+/* The box the switch and the keys sit in, as one group in its middle. The switch takes
+   --switch-space (30px high, 3px padding either side, 12px before the keys) of the box's
+   height, which the keys' height leaves out. */
+.guess-keys {
+  --switch-space: 48px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* The switch above the keys (A to Z | Keyboard): centred, and a little smaller than the
+   picture's, with a gap before the keys. */
+.guess-layout-switch {
+  align-self: center;
+  margin-bottom: 12px;
+}
+
+.guess-layout-switch button {
+  height: 30px;
+  min-width: 0;
+  padding: 0 14px;
+  font-size: 14px;
+}
+
+/* The keyboard's order: three rows of ten, nine and seven keys (QWERTY), on a grid of 20
+   columns so each row can be indented like a keyboard's: every key spans two columns, the
+   second row's first key (the 11th, A) starts one column in, half a key, and the
+   third row's (the 20th, Z) three columns in, one and a half keys. Keys come out a
+   little narrower, so they're taller (1.5) to stay boxes. */
+.guess-tiles.is-keyboard {
+  --rows: 3;
+  --per-row: 10;
+  --key-ratio: 1.5;
+
+  grid-template-columns: repeat(20, minmax(0, 1fr));
+}
+
+/* Seven keys to a row, drawn on a grid of 14 columns so the last row can be centred:
+   every key spans two columns, and the row's first key (the 22nd, V) starts two
+   columns in, one key's width, which leaves the same empty space either side of
+   the five keys (V W X Y Z) of the last row. It's tied to
+   26 keys: with another count, the 22nd would be another key and the offset
+   would change. */
+.guess-tile {
+  grid-column: span 2;
+}
+
+.guess-tiles:not(.is-keyboard) .guess-tile:nth-child(22) {
+  grid-column: 3 / span 2;
+}
+
+.guess-tiles.is-keyboard .guess-tile:nth-child(11) {
+  grid-column: 2 / span 2;
+}
+
+.guess-tiles.is-keyboard .guess-tile:nth-child(20) {
+  grid-column: 4 / span 2;
+}
+
+/* On a desktop the keys' box is the left column. A key's height comes from its width
+   (a little taller than wide, 1.15), but never more than a quarter of the box's
+   height, so they stay boxes instead of stretching into tall strips, and the four
+   rows sit in the middle of the box. It's a size container, so `cqw` and `cqh` (its own
+   width and height) can be used by the keys. */
 @media (min-width: 900px) {
-  .guess-tiles {
+  .guess-keys {
     flex: 1 1 0;
-    grid-template-rows: repeat(4, minmax(0, 1fr));
-    gap: clamp(10px, 1.2vw, 18px);
     min-height: 0;
+    container-type: size;
+  }
+
+  .guess-tiles {
+    --gap: clamp(10px, 1.2vw, 18px);
+
+    gap: var(--gap);
   }
 }
 
@@ -2592,10 +2711,13 @@ body {
     box-shadow 80ms ease-out;
 }
 
-/* The grid's rows set a desktop tile's height; the letter grows with the key. */
+/* The letter grows with the key. (12px: the four keys' 3px edges below them.) */
 @media (min-width: 900px) {
   .guess-tile {
-    height: auto;
+    height: min(
+      calc((100cqh - var(--switch-space) - (var(--rows) - 1) * var(--gap) - var(--rows) * 3px) / var(--rows)),
+      calc((100cqw - (var(--per-row) - 1) * var(--gap)) / var(--per-row) * var(--key-ratio))
+    );
     font-size: clamp(28px, 3vw, 52px);
     border-radius: 18px;
   }
@@ -3204,6 +3326,15 @@ body {
   z-index: 1;
 }
 
+/* Guess the letter's hand switch is centred along the bottom on every size (on a
+   phone too, below), the same place in the question's frame and the compare frame. */
+.guess-picture-side .picture-corner {
+  right: auto;
+  left: 50%;
+  width: max-content;
+  transform: translateX(-50%);
+}
+
 /* The expand button in the frame's lower right corner (LetterPicture): a round
    button, paler than the picture. Lower right, like a video's fullscreen
    button, so the quiz's Peek badge on the sticker's upper right never covers
@@ -3266,6 +3397,35 @@ body {
   padding: 32px;
   aspect-ratio: auto;
   border-radius: 20px;
+}
+
+/* The letter's name at the bottom of the larger window, in the middle, like
+   Learn's card ("Letter B", the letter in the accent). The tip moves up above it. */
+.picture-name {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  z-index: 1;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 44px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.picture-name-letter {
+  color: var(--accent);
+}
+
+.picture-dialog .hand-model-tip {
+  bottom: 80px;
 }
 
 .picture-dialog .picture-dialog-frame.hand-model-frame {
@@ -3347,6 +3507,24 @@ body {
 :root[data-theme='dark'] .letter-picture .picture-expand:focus-visible,
 :root[data-theme='dark'] .picture-dialog-close:focus-visible {
   outline-color: var(--accent);
+}
+
+/* Peek inside the quiz's card (2026-11-04): the picture sits straight on the card,
+   without the frame's own faint background and edge. (After the dark theme's rule
+   for the frame above, which it would otherwise lose to.) */
+:root .quiz-sticker .quiz-peek-drawing {
+  background: none;
+  border: none;
+  box-shadow: none;
+}
+
+/* Guess the letter's card (and the one with the two hands after a wrong answer) is
+   the same plain card as the Words quiz's (`--surface`, with the sticker's shadow),
+   not the picture frame's lighter panel and edge (2026-11-04). */
+:root .guess-picture.letter-picture,
+:root .guess-compare-frame.letter-picture {
+  background: var(--surface);
+  border: none;
 }
 
 /* The letter guide (GuidePanel.jsx): one row of 26 tiles across the top of
@@ -6933,17 +7111,22 @@ html:has(.about-page) {
    group takes no box of its own (display: contents), so each part is a row of
    the page's grid. */
 @media (max-width: 699px) {
+  /* Laid out like Guess the letter (2026-11-04): the card on top (with the word under
+     it), the pills in the middle of the page, the camera, then the buttons. The
+     card and the camera are two boxes of equal height (Guess the letter's picture and
+     letter keys are the same), the pills between them. */
   .practice.quiz-run {
     grid-template-areas:
-      'steps'
       'main'
+      'steps'
       'camera'
       'actions';
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto minmax(0, 3fr) minmax(0, 4fr) auto;
+    grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr) auto;
+    gap: 16px;
     /* Exactly the window under the bar: the page never scrolls. */
     height: calc(100dvh - var(--bar-height));
-    padding-bottom: var(--space-4);
+    padding: 12px var(--page-gutter) var(--space-4);
     overflow: hidden;
   }
 
@@ -7053,5 +7236,268 @@ html:has(.about-page) {
     flex: 1 1 auto;
     aspect-ratio: auto;
     min-height: calc(100vw - 2 * var(--page-gutter));
+  }
+}
+
+/* Guess the letter on a phone (2026-11-04): static, like the running Words quiz.
+   The page is exactly the window under the bar and never scrolls. The tiles and
+   buttons keep a fixed, low height, so the picture takes all that is left, and it
+   is bigger than when the page stacked and scrolled. After a wrong answer the two
+   cards share the frame's height instead of setting it from their width. */
+@media (max-width: 699px) {
+  /* The picture on top, the pills in the middle of the page, the letter keys, then
+     the buttons. The picture and the keys are two boxes of equal height (the Words
+     quiz's card and camera are the same), the pills between them. */
+  .quiz-guess {
+    grid-template-areas: 'picture' 'steps' 'answer' 'actions';
+    grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr) auto;
+    gap: 16px;
+    height: calc(100dvh - var(--bar-height));
+    padding: 12px var(--page-gutter) var(--space-4);
+    overflow: hidden;
+  }
+
+  .guess-picture-side {
+    min-height: 0;
+  }
+
+  /* No 360px cap: the drawing fills the frame between its two rows of controls. */
+  .guess-picture .asl-drawing {
+    inset: 50px 12px;
+    width: calc(100% - 24px);
+    height: calc(100% - 100px);
+    max-width: none;
+    max-height: none;
+  }
+
+  /* The hand switch is centred along the bottom here, so the 3D hand's tip is lifted
+     above it (as on Learn's card, where the letter's name is at the bottom). */
+  .guess-picture .hand-model-tip {
+    bottom: 58px;
+    max-width: calc(100% - 32px);
+  }
+
+  /* The keys sit in the middle of their box, each a little taller than wide (1.15),
+     but never more than a quarter of the box's height. A key's raised edge is its
+     shadow, so it hangs into the gap below. */
+  .guess-keys {
+    flex: 1 1 0;
+    min-height: 0;
+    container-type: size;
+  }
+
+  .guess-tiles {
+    --gap: 8px;
+
+    gap: var(--gap);
+  }
+
+  .guess-tile {
+    height: min(
+      calc((100cqh - var(--switch-space) - (var(--rows) - 1) * var(--gap)) / var(--rows)),
+      calc((100cqw - (var(--per-row) - 1) * var(--gap)) / var(--per-row) * var(--key-ratio))
+    );
+    margin-bottom: 0;
+    font-size: 22px;
+    border-radius: 12px;
+  }
+
+  .quiz-skip,
+  .quiz-quit,
+  .key-button.guess-next {
+    min-height: 48px;
+  }
+
+  /* "Next letter" stays on one line, so the row keeps its height on a narrow phone. */
+  .key-button.guess-next {
+    gap: 8px;
+    padding: 0 12px;
+    font-size: 18px;
+    white-space: nowrap;
+  }
+
+  /* The 2D | 3D switch and what happened ("It's Q. You picked A.") share the top row,
+     and the hand switch has a row of its own along the bottom, so nothing covers a
+     card and the cards get the rest of the height. */
+  .guess-compare-frame {
+    gap: 0;
+    padding-top: 52px;
+    padding-bottom: 54px;
+  }
+
+  /* The hand switch is centred along the bottom, in the question's frame too,
+     so it doesn't jump when an answer comes. */
+  .guess-picture-side .picture-corner {
+    right: auto;
+    left: 50%;
+    width: max-content;
+    transform: translateX(-50%);
+  }
+
+  .guess-compare-message {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    left: 118px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.3em;
+    align-content: center;
+    justify-content: center;
+    height: 34px;
+    font-size: 15px;
+    line-height: 1.15;
+  }
+
+  /* With 3D chosen the Numbers button sits beside 2D | 3D, so the line starts further right. */
+  .guess-compare-frame.has-numbers .guess-compare-message {
+    left: 200px;
+  }
+
+  .guess-compare-row {
+    flex: 1 1 0;
+    align-items: stretch;
+    min-height: 0;
+    padding: 0 12px;
+    gap: 12px;
+  }
+
+  .guess-compare {
+    flex: 1 1 0;
+    max-width: 400px;
+  }
+
+  .guess-compare-picture {
+    flex: 1 1 0;
+    min-height: 0;
+    aspect-ratio: auto;
+  }
+
+  .guess-compare-tag {
+    gap: 6px;
+    padding: 6px 4px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .guess-compare-letter {
+    padding: 2px 0 4px;
+    font-size: 26px;
+  }
+}
+
+/* A phone under 700px tall has no room for the second row: the hand switch moves to
+   the top row, beside 2D | 3D, and the message goes. */
+@media (max-width: 699px) and (max-height: 699px) {
+  .quiz-guess,
+  .practice.quiz-run {
+    gap: 12px;
+  }
+
+  .guess-compare-frame {
+    padding-bottom: 12px;
+  }
+
+  /* No room for the message beside the switches: the cards say it themselves
+     (a screen reader still hears it from the status line). */
+  .guess-compare-message {
+    display: none;
+  }
+
+  .guess-compare-frame .picture-corner {
+    top: 10px;
+    right: 10px;
+    bottom: auto;
+    left: auto;
+    transform: none;
+  }
+}
+
+/* The Words quiz's camera on a phone is only half of what the page leaves, so an
+   empty frame holds less: a smaller badge and title, no sentence, a slimmer button.
+   The room under the content is still the controls'. */
+@media (max-width: 699px) {
+  .practice.quiz-run .camera-off {
+    gap: 4px;
+    padding: 0 16px 64px;
+  }
+
+  .practice.quiz-run .camera-off-badge {
+    width: 44px;
+    height: 44px;
+    margin-bottom: 0;
+    box-shadow: 0 0 0 4px rgb(42 74 112 / 0.4);
+  }
+
+  .practice.quiz-run .camera-off-title {
+    font-size: 20px;
+  }
+
+  .practice.quiz-run .camera-off-text {
+    display: none;
+  }
+
+  .practice.quiz-run .camera-off button {
+    min-height: 44px;
+    margin-top: 8px;
+  }
+
+  /* The message sticker on the live camera: smaller, so it leaves most of the picture. */
+  .practice.quiz-run .camera-message {
+    padding: 8px 18px 12px;
+    border-radius: 16px;
+  }
+
+  .practice.quiz-run .camera-message-text {
+    font-size: 20px;
+  }
+
+  /* A problem (blocked camera, no camera...) in the same short frame: no "!" mark,
+     smaller text, so the title, what to do and Try again still fit. */
+  .practice.quiz-run .stage-problem {
+    gap: 6px;
+    padding: 12px 16px 64px;
+  }
+
+  .practice.quiz-run .stage-problem-mark {
+    display: none;
+  }
+
+  .practice.quiz-run .stage-problem-title {
+    font-size: 20px;
+  }
+
+  .practice.quiz-run .stage-problem-body {
+    font-size: 13px;
+    line-height: 1.35;
+  }
+
+  .practice.quiz-run .stage-problem button {
+    padding: 8px 20px;
+    font-size: 16px;
+  }
+}
+
+/* The Words quiz's camera is only about 186px tall on a phone under 700px tall, so
+   what an empty or failed frame says gets a little smaller still, and the badge
+   goes. (Last in the file, after the general rules above that it adjusts.) */
+@media (max-width: 699px) and (max-height: 699px) {
+  .practice.quiz-run .camera-off-badge {
+    display: none;
+  }
+
+  .practice.quiz-run .camera-off button,
+  .practice.quiz-run .stage-problem button {
+    min-height: 36px;
+    padding: 4px 18px;
+  }
+
+  .practice.quiz-run .stage-problem {
+    gap: 4px;
+    padding: 6px 16px 60px;
+  }
+
+  .practice.quiz-run .stage-problem-body {
+    font-size: 12px;
   }
 }
