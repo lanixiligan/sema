@@ -136,6 +136,8 @@ export default function App() {
     closeTurnTip: () => updateProgress({ turnTipClosed: true }),
     handNumbers: progress.handNumbers,
     setHandNumbers: (handNumbers) => updateProgress({ handNumbers }),
+    keyLayout: progress.keyLayout,
+    setKeyLayout: (keyLayout) => updateProgress({ keyLayout }),
     cameraChecked: progress.cameraChecked,
     openCameraCheck,
     deleteData,

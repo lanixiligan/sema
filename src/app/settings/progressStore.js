@@ -17,6 +17,9 @@ export const DEV_MODELS = ['small', 'knn']
 // Learn's letter card: the drawing ('2d', the default: no download, no
 // motion) or the 3D hand ('3d', src/hand-model/).
 export const HAND_VIEWS = ['2d', '3d']
+// The order of Guess the letter's keys (2026-11-04): A to Z, or laid out like a
+// keyboard (QWERTY), so the person can find a letter where their fingers expect it.
+export const KEY_LAYOUTS = ['alphabet', 'keyboard']
 
 export const PROGRESS_VERSION = 1
 export const NEW_VISITOR = {
@@ -31,6 +34,7 @@ export const NEW_VISITOR = {
   handView: '2d',
   turnTipClosed: false,
   handNumbers: true,
+  keyLayout: 'alphabet',
   devAccess: null,
   devModel: 'small',
 }
@@ -57,6 +61,7 @@ export function loadProgress() {
       handView: HAND_VIEWS.includes(saved.handView) ? saved.handView : '2d',
       turnTipClosed: saved.turnTipClosed === true,
       handNumbers: saved.handNumbers !== false,
+      keyLayout: KEY_LAYOUTS.includes(saved.keyLayout) ? saved.keyLayout : 'alphabet',
       devAccess: typeof saved.devAccess === 'string' ? saved.devAccess : null,
       devModel: DEV_MODELS.includes(saved.devModel) ? saved.devModel : 'small',
     }

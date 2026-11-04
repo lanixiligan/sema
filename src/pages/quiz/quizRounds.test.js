@@ -8,6 +8,7 @@ import {
   quizScore,
   resultsVerdict,
   GUESS_LETTERS,
+  KEYBOARD_LETTERS,
   usableWords,
 } from './quizRounds.js'
 
@@ -26,6 +27,14 @@ describe('pickLetters', () => {
 
   it('picks from the list given', () => {
     expect(pickLetters(2, fixedRandom([0, 0.99]), ['K', 'L'])).toEqual(['K', 'L'])
+  })
+})
+
+describe('KEYBOARD_LETTERS', () => {
+  it('has the same 26 letters as the A to Z keys, in a keyboard\'s order', () => {
+    expect(KEYBOARD_LETTERS).toHaveLength(26)
+    expect([...KEYBOARD_LETTERS].sort()).toEqual([...GUESS_LETTERS].sort())
+    expect(KEYBOARD_LETTERS.slice(0, 6).join('')).toBe('QWERTY')
   })
 })
 

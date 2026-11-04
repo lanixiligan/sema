@@ -18,6 +18,11 @@ export const GUESS_COUNT = 10
 // are shown as their drawings (the handshape they start from) and have no 3D hand
 // yet, so with 3D chosen their picture says so (LetterPicture).
 export const GUESS_LETTERS = LETTERS
+// The keys' order when the person chooses the keyboard's (2026-11-04): QWERTY's three
+// rows, ten, nine and seven keys. The keys are drawn in this one list order, and the
+// styles start the second and third rows half a key and one and a half keys in.
+export const KEYBOARD_ROWS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM']
+export const KEYBOARD_LETTERS = [...KEYBOARD_ROWS.join('')]
 // How long "That's B!" stays before the next letter.
 export const NEXT_LETTER_MS = 1000
 // The same wait in Guess the letter (2026-11-04), longer: the person's eyes are on

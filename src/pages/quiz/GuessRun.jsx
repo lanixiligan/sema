@@ -4,10 +4,11 @@ import { useSettings } from '../../app/settings/settings.js'
 import HandSideToggle from '../../app/settings/HandSideToggle.jsx'
 import HandViewToggle from '../../app/settings/HandViewToggle.jsx'
 import AnswerHand from './AnswerHand.jsx'
+import KeyLayoutToggle from './KeyLayoutToggle.jsx'
 import LetterPicture from '../../components/letter-picture/LetterPicture.jsx'
 import { loadLetterPose, useLetterPose } from '../../hand-model/letterPoses.js'
 import { CheckIcon } from '../../components/icons/icons.jsx'
-import { GUESS_RIGHT_MS, GUESS_LETTERS, currentLetter } from './quizRounds.js'
+import { GUESS_RIGHT_MS, GUESS_LETTERS, KEYBOARD_LETTERS, currentLetter } from './quizRounds.js'
 
 const LEAVE_QUESTION = 'Leave the quiz? Your answers so far won’t be kept.'
 
@@ -19,11 +20,12 @@ function stepClass(quiz, i) {
   return quiz.marks[i][0] === 'passed' ? 'done' : 'missed'
 }
 
-// One hand sign to name: the picture on the left (the 2D | 3D switch works as
-// everywhere, so the 3D hand can be turned to tell M, N and T apart), and on
-// the right, as in the Words quiz, the steps on top, a tile per letter filling
-// the middle, and Skip letter and End quiz at the bottom. A letter is picked
-// with a tile or its key on a keyboard.
+// One hand sign to name, laid out like the Words quiz (2026-11-04; before, the
+// picture was on the left): a tile per letter (A to Z, or a keyboard's rows, chosen with a switch above them) on the left, where the camera is
+// there, and on the right the steps on top, the picture in the middle (the 2D | 3D
+// switch works as everywhere, so the 3D hand can be turned to tell M, N and T
+// apart) and Skip letter and End quiz at the bottom. A letter is picked with a
+// tile or its key on a keyboard.
 // - Right: "Yes, that's B!" for a moment, then the next sign (as when a
 //   letter passes in the Words quiz). The line above the tiles is easy to miss
 //   when the eyes are on the tile just clicked, so the same words also slap onto
@@ -33,7 +35,10 @@ function stepClass(quiz, i) {
 //   time to look at the hand again.
 export default function GuessRun({ quiz, hand, onHandChange, onMark, onQuit }) {
   const target = currentLetter(quiz)
-  const { handView } = useSettings()
+  const { handView, keyLayout, setKeyLayout } = useSettings()
+  // The keys in A to Z order, or a keyboard's. The letters picked by key press are the same.
+  const isKeyboard = keyLayout === 'keyboard'
+  const keys = isKeyboard ? KEYBOARD_LETTERS : GUESS_LETTERS
   const pose = useLetterPose(target)
 
   // With 3D chosen, every letter's pose is fetched up front (26 tiny files, each
@@ -166,18 +171,21 @@ export default function GuessRun({ quiz, hand, onHandChange, onMark, onQuit }) {
       {/* The question isn't written on the page (the tiles say it), so the
           section is named for screen readers only. */}
       <section className="guess-answer" aria-label="Which letter is this?">
-        <div className="guess-tiles">
-          {GUESS_LETTERS.map((letter) => (
-            <button
-              key={letter}
-              type="button"
-              className={tileClass(letter)}
-              disabled={guess !== null}
-              onClick={() => setAnswer({ step: quiz.step, guess: letter })}
-            >
-              {letter}
-            </button>
-          ))}
+        <div className="guess-keys">
+          <KeyLayoutToggle layout={keyLayout} onChange={setKeyLayout} />
+          <div className={isKeyboard ? 'guess-tiles is-keyboard' : 'guess-tiles'}>
+            {keys.map((letter) => (
+              <button
+                key={letter}
+                type="button"
+                className={tileClass(letter)}
+                disabled={guess !== null}
+                onClick={() => setAnswer({ step: quiz.step, guess: letter })}
+              >
+                {letter}
+              </button>
+            ))}
+          </div>
         </div>
       </section>
 
