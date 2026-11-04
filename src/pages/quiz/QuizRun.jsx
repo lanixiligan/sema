@@ -87,25 +87,52 @@ export default function QuizRun({ quiz, signingHand, onSigningHandChange, model,
           ))}
         </div>
 
-        {/* The letter sticker, its eye and the word under it are one group,
-            centred in the space the steps and the buttons leave. */}
+        {/* The card: the letter (or, with Peek open, its picture) with the word under
+            it inside the card, and the eye in its corner. The card is centred in the
+            space the steps and the buttons leave. */}
         <div className="quiz-prompt-main">
           {/* The letter and the drawing share one fixed-size sticker, so Peek
               stays where it is when the drawing takes the letter's place. A new
               letter just replaces the old one: nothing moves. */}
           <div className="quiz-sticker">
-            {thisPeek.open ? (
-              <LetterPicture
-                letter={target}
-                hand={drawnHand}
-                view={handView}
-                pose={pose}
-                className="quiz-peek-drawing"
-                notes={false}
-              />
-            ) : (
-              <p className="quiz-prompt-letter" aria-label={`Sign ${target}`}>
-                {target}
+            <div className="quiz-sticker-main">
+              {thisPeek.open ? (
+                <LetterPicture
+                  letter={target}
+                  hand={drawnHand}
+                  view={handView}
+                  pose={pose}
+                  className="quiz-peek-drawing"
+                  notes={false}
+                />
+              ) : (
+                <p className="quiz-prompt-letter" aria-label={`Sign ${target}`}>
+                  {target}
+                </p>
+              )}
+            </div>
+            {/* "Peeking counts as a clue." as a pop-up in the middle of the card that
+                fades away by itself (CSS animation, ~2.5 s), not a line of its own, so
+                nothing on the page moves. It's put in the page when the first peek of
+                the letter is made, so the animation runs once. A screen reader gets
+                the same words from a live region that is always in the page (empty
+                until then), because a region that arrives already filled isn't
+                reliably announced. */}
+            <p className="visually-hidden" role="status">
+              {thisPeek.used ? 'Peeking counts as a clue.' : ''}
+            </p>
+            {thisPeek.used && (
+              <p className="quiz-peek-popup" aria-hidden="true">
+                Peeking counts as a clue.
+              </p>
+            )}
+            {isWords && (
+              <p className="quiz-prompt-word" aria-label={`${word}, letter ${quiz.at.letter + 1}`}>
+                {[...word].map((letter, i) => (
+                  <span key={i} className={letterClass(quiz.marks[quiz.at.item][i], i === quiz.at.letter)}>
+                    {letter}
+                  </span>
+                ))}
               </p>
             )}
             <button
@@ -118,23 +145,7 @@ export default function QuizRun({ quiz, signingHand, onSigningHandChange, model,
               <EyeIcon size={22} off={thisPeek.open} />
               {thisPeek.open ? 'Hide' : 'Peek'}
             </button>
-            {/* A pop-up on the card's lower edge, not a line of its own, so
-                nothing on the page moves when it appears. It's always in the
-                page (empty until the first peek) so a screen reader hears it
-                when its text arrives. */}
-            <p className="quiz-peek-popup" role="status">
-              {thisPeek.used ? 'Peeking counts as a clue.' : ''}
-            </p>
           </div>
-          {isWords && (
-            <p className="quiz-prompt-word" aria-label={`${word}, letter ${quiz.at.letter + 1}`}>
-              {[...word].map((letter, i) => (
-                <span key={i} className={letterClass(quiz.marks[quiz.at.item][i], i === quiz.at.letter)}>
-                  {letter}
-                </span>
-              ))}
-            </p>
-          )}
         </div>
 
         {/* Both buttons at the bottom, side by side. End quiz is red, so it isn't
