@@ -110,7 +110,7 @@ export default function QuizPage() {
             <span className="quiz-choice-text">Read a hand and pick the letter it shows.</span>
             <span className="quiz-choice-points">
               <span>No camera needed.</span>
-              <span>J and Z show a still drawing.</span>
+              <span>In 3D, J and Z move.</span>
             </span>
             <StartKey />
           </button>
