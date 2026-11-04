@@ -368,7 +368,8 @@ body {
 /* The theme button (ThemeToggle.jsx): one round icon button, a moon by day
    and a sun by night. Quiet on purpose, like the three icons it replaced on
    2026-10-31 (Light, Dark, System): muted until hovered. */
-.theme-toggle {
+.theme-toggle,
+.menu-toggle {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -386,20 +387,30 @@ body {
     border-color 150ms var(--ease-out);
 }
 
-.theme-toggle svg {
+.theme-toggle svg,
+.menu-toggle svg {
   width: 20px;
   height: 20px;
 }
 
-.theme-toggle:hover {
+.theme-toggle:hover,
+.menu-toggle:hover,
+.menu-toggle[aria-expanded='true'] {
   color: var(--text);
   background: var(--segment-track);
   border-color: var(--border-strong);
 }
 
-.theme-toggle:focus-visible {
+.theme-toggle:focus-visible,
+.menu-toggle:focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 1px;
+}
+
+/* The burger: only on a phone (see the 599px rules above), where it opens the
+   menu. Same round button as the theme's. */
+.menu-toggle {
+  display: none;
 }
 
 /* The theme switch's effect (themeTransition.js): the new theme grows from the
@@ -456,27 +467,19 @@ body {
   }
 }
 
-/* Phones: one row was 654px wide at 390px, so the bar wraps onto two. The
-   logo, theme toggle and delete button stay on top; the menu gets its own
-   row under them, so its underline still sits on the bar's bottom edge.
-   display: contents lets the logo and the menu (both inside .app-bar-left)
-   wrap as if they were the bar's own children, and order puts the menu last.
-   --bar-height is the new total, for the pages that subtract it. */
+/* Phones: the menu doesn't fit beside the logo (one row was 654px wide at
+   390px), so it becomes a panel under the bar, opened by the burger button
+   (MenuBar.jsx). The bar stays one row, 64px; --bar-height is that, for the
+   pages that subtract it. The panel is as wide as the bar and the bar's own
+   colour, and sits above the page (z-index) so the camera never covers it. */
 @media (max-width: 599px) {
   :root {
-    --bar-height: 100px;
+    --bar-height: 64px;
   }
 
   .app-bar {
-    flex-wrap: wrap;
-    align-content: space-between;
-    column-gap: var(--space-3);
-    row-gap: 0;
-    padding-top: var(--space-2);
-  }
-
-  .app-bar-left {
-    display: contents;
+    position: relative;
+    z-index: 20;
   }
 
   .wordmark-logo {
@@ -487,16 +490,38 @@ body {
     gap: var(--space-2);
   }
 
+  .menu-toggle {
+    display: flex;
+  }
+
   .menu {
-    order: 1;
-    flex-basis: 100%;
-    gap: var(--space-5);
-    height: 44px;
-    margin-left: 0;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    left: 0;
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-1);
+    margin: 0;
+    padding: var(--space-2) var(--page-gutter) var(--space-4);
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 16px 24px rgb(12 29 48 / 0.3);
+  }
+
+  :root:not([data-theme='dark']) .menu {
+    background: var(--cobalt-lift);
+  }
+
+  .menu.is-open {
+    display: flex;
   }
 
   .menu a {
-    font-size: var(--text-body);
+    justify-content: flex-start;
+    height: 52px;
+    font-size: 20px;
   }
 }
 
@@ -511,91 +536,6 @@ body {
     opacity: 1;
     transform: none;
   }
-}
-
-/* The phone notice (PhoneNotice.jsx), designed for a 390px-wide phone. */
-.phone-notice-bar {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.phone-notice {
-  display: flex;
-  flex-direction: column;
-  min-height: 100dvh;
-  max-width: 480px;
-  margin: 0 auto;
-  padding: 28px 24px 40px;
-}
-
-.phone-notice-main {
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: column;
-  justify-content: center;
-  gap: 28px;
-}
-
-.phone-notice-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 72px;
-  height: 72px;
-  color: var(--bright-sky);
-  background: var(--deep-cobalt);
-  border-radius: 20px;
-}
-
-.phone-notice h1 {
-  margin: 0;
-  font-size: 28px;
-  line-height: 1.25;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-}
-
-.phone-notice-main p {
-  margin: 14px 0 0;
-  font-size: 16px;
-  line-height: 1.6;
-  color: var(--text-muted);
-}
-
-.phone-notice-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.phone-notice-copy {
-  min-height: 52px;
-  font: inherit;
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--button-text);
-  background: var(--button-bg);
-  border: none;
-  border-radius: var(--radius-pill);
-  cursor: pointer;
-}
-
-.phone-notice-continue {
-  min-height: 48px;
-  font: inherit;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--accent);
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-.phone-notice-copy:focus-visible,
-.phone-notice-continue:focus-visible {
-  outline: 3px solid var(--accent);
-  outline-offset: 2px;
 }
 
 .page {
@@ -1463,9 +1403,21 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 4px 14px 4px 14px;
+  padding: 4px 14px 4px 12px;
   background: var(--chip);
   border-radius: var(--radius-pill);
+  transition: opacity 200ms var(--ease-out);
+}
+
+/* The dark theme's card is dark, so the chip is a step lighter than it, not
+   the pale slab of the light theme. */
+:root[data-theme='dark'] .model-opinion {
+  background: var(--night-raised);
+}
+
+/* No reading: the chip is there but not seen, so it fades instead of popping. */
+.model-opinion.idle {
+  opacity: 0;
 }
 
 .model-opinion-label {
@@ -1514,19 +1466,23 @@ body {
     color 0.2s;
 }
 
-/* Nothing to read yet (no hand, or not all of it): a dim, empty, dashed tile. */
-.model-tile.empty {
-  background: transparent;
-  border-style: dashed;
-  opacity: 0.6;
+/* It reads the letter being made: the tile fills green, the same green as the
+   pass itself (white text on the light theme's dark green, dark text on the
+   dark theme's light one). A different letter keeps the plain tile, and "?"
+   (not sure) is dimmed. */
+.model-opinion.agrees .model-tile {
+  color: var(--white);
+  background: var(--success);
+  border-color: var(--success);
 }
 
-/* It reads the letter being made: the tile fills with the accent, as a met
-   condition's tick does in the checklist. */
-.model-opinion.agrees .model-tile {
-  color: var(--on-accent);
-  background: var(--accent);
-  border-color: var(--accent);
+:root[data-theme='dark'] .model-opinion.agrees .model-tile {
+  color: var(--green-night);
+}
+
+.model-opinion.unsure .model-tile {
+  color: var(--text-muted);
+  border-style: dashed;
 }
 
 /* After a pass, under "That's B!": what the letter model made of the hold, as
@@ -1684,18 +1640,21 @@ body {
    with one pop. */
 .quiz-choose,
 .quiz-run,
+.quiz-guess,
 .quiz-results {
   --sticker-shadow: 0 10px 24px rgb(12 29 48 / 0.12), 0 2px 5px rgb(12 29 48 / 0.08);
 }
 
 :root[data-theme='dark'] .quiz-choose,
 :root[data-theme='dark'] .quiz-run,
+:root[data-theme='dark'] .quiz-guess,
 :root[data-theme='dark'] .quiz-results {
   --sticker-shadow: 0 12px 28px rgb(0 0 0 / 0.4), 0 2px 6px rgb(0 0 0 / 0.3);
 }
 
 .quiz-choose ::selection,
 .quiz-run ::selection,
+.quiz-guess ::selection,
 .quiz-results ::selection {
   color: var(--deep-cobalt);
   background: var(--amber-on-dark);
@@ -1738,7 +1697,7 @@ body {
 }
 
 .quiz-choose-head p {
-  max-width: 30em;
+  max-width: 36em;
   margin: 0;
   font-size: 20px;
   line-height: 1.45;
@@ -1860,12 +1819,49 @@ body {
   letter-spacing: -0.01em;
 }
 
+/* How many: a small bold line right under the title. */
+.quiz-choice-count {
+  margin-top: var(--space-2);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--text);
+}
+
 .quiz-choice-text {
-  margin: var(--space-2) 0 var(--space-6);
+  margin: var(--space-4) 0 var(--space-4);
   font-size: 18px;
   line-height: 1.45;
   color: var(--text-muted);
   text-wrap: pretty;
+}
+
+/* Two short facts, each with a small green dot. They are spans because the card
+   is a button; the dot is decoration, the words carry the meaning. */
+.quiz-choice-points {
+  display: grid;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+  font-size: 16px;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+.quiz-choice-points > span {
+  display: flex;
+  gap: var(--space-3);
+  align-items: baseline;
+  text-wrap: pretty;
+}
+
+.quiz-choice-points > span::before {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  content: '';
+  background: var(--success);
+  border-radius: 50%;
+  transform: translateY(-1px);
 }
 
 /* Welcome's key button, drawn on the card: amber with a darker edge under it.
@@ -1975,10 +1971,10 @@ body {
 }
 
 /* ----- During the quiz (QuizRun): two halves. The camera is on the left, in
-   Practice's panel. On the right, what to sign: the count and End quiz at the
-   top, the letter on a sticker in the middle (a words quiz also shows the word,
-   the current letter lit), the steps and Skip letter at the bottom. Narrow
-   windows stack them, the letter first. ----- */
+   Practice's panel. On the right, what to sign: the steps at the top, the letter
+   on a sticker in the middle (a words quiz also shows the word, the current
+   letter lit), Skip letter and End quiz at the bottom. Narrow windows stack
+   them, the letter first. ----- */
 .practice.quiz-run {
   grid-template-areas: 'prompt' 'camera';
   grid-template-columns: minmax(0, 1fr);
@@ -2001,23 +1997,6 @@ body {
   gap: 24px;
 }
 
-.quiz-prompt-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
-  min-height: 44px;
-}
-
-.quiz-count {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: 26px;
-  font-weight: 800;
-  color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
-}
-
 .quiz-prompt-main {
   display: flex;
   flex: 1 1 auto;
@@ -2032,14 +2011,28 @@ body {
    the quiz runs, even when a letter passes. */
 .quiz-sticker {
   position: relative;
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
   width: clamp(240px, 26vw, 420px);
   aspect-ratio: 4 / 3;
   padding: 14px;
   background: var(--surface);
   border-radius: 32px;
   box-shadow: var(--sticker-shadow);
+}
+
+/* The letter, or the picture, in the card's upper part; the word's tiles (a words
+   quiz) are under it, inside the card. */
+.quiz-sticker-main {
+  position: relative;
+  display: grid;
+  flex: 1 1 0;
+  place-items: center;
+  width: 100%;
+  min-height: 0;
 }
 
 .quiz-prompt-letter {
@@ -2106,12 +2099,77 @@ body {
   outline-offset: 3px;
 }
 
-/* A line kept in the layout, so the word below doesn't jump when it appears. */
-.quiz-peek-note {
-  min-height: 1.4em;
+/* On a desktop the card fills the column between the pills and the buttons
+   (2026-11-02; before, a 4:3 sticker 420px wide at most, with a lot of empty
+   space around it). It is a size container, so the letter can follow the card's
+   own width and height (cqw, cqh) whatever the window, the page zoom or a
+   words quiz's tiles leave it. Peek sits inside its corner, as on a phone. */
+@media (min-width: 900px) {
+  .quiz-prompt-main {
+    align-items: stretch;
+    justify-content: flex-start;
+    min-height: 0;
+  }
+
+  .quiz-sticker {
+    flex: 1 1 0;
+    width: 100%;
+    min-height: 0;
+    aspect-ratio: auto;
+    container-type: size;
+    border-radius: 36px;
+  }
+
+  .quiz-prompt-letter {
+    font-size: min(46cqh, 50cqw);
+  }
+
+  .quiz-peek {
+    top: 16px;
+    right: 16px;
+  }
+}
+
+/* "Peeking counts as a clue.", a dark pill in the middle of the card that shows
+   for about 2.5 s and fades away (2026-11-04; before, a pill on the card's lower
+   edge that stayed). It takes no space and no clicks, so nothing moves when it
+   appears. It's only in the page from the letter's first peek (QuizRun), so the
+   animation runs once; `both` keeps it invisible after it ends. */
+.quiz-peek-popup {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 2;
+  width: max-content;
+  max-width: calc(100% - 48px);
   margin: 0;
-  font-size: var(--text-small);
-  color: var(--text-muted);
+  padding: 10px 18px;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+  text-align: center;
+  color: var(--white);
+  pointer-events: none;
+  background: rgb(12 29 48 / 0.92);
+  border-radius: var(--radius-pill);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.3);
+  transform: translate(-50%, -50%);
+  animation: quiz-peek-popup 2600ms ease-out both;
+}
+
+@keyframes quiz-peek-popup {
+  0% {
+    opacity: 0;
+  }
+
+  8%,
+  72% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
 }
 
 /* The word under the letter, one tile per letter. The one to sign has the
@@ -2119,6 +2177,7 @@ body {
    skipped ones amber, the ones not asked yet flat and dashed. */
 .quiz-prompt-word {
   display: flex;
+  flex: 0 0 auto;
   justify-content: center;
   gap: 10px;
   margin: 0;
@@ -2158,11 +2217,10 @@ body {
   border: 2px solid var(--warning);
 }
 
-.quiz-prompt-bottom {
+/* Skip letter and End quiz, side by side along the bottom, equal width. */
+.quiz-actions {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
+  gap: var(--space-3);
 }
 
 /* The quiz's steps, one per item: done ones green (amber when a letter in
@@ -2170,15 +2228,15 @@ body {
    Connected to the quiz state (quiz.at.item), so it's the real progress. */
 .quiz-steps {
   display: flex;
-  width: min(100%, 440px);
-  gap: 6px;
+  width: 100%;
+  gap: 8px;
 }
 
 .quiz-steps span {
   flex: 1 1 0;
-  height: 10px;
+  height: 14px;
   background: var(--fill-off);
-  border-radius: 5px;
+  border-radius: 7px;
 }
 
 .quiz-steps .done {
@@ -2196,16 +2254,17 @@ body {
 
 /* Skip letter: secondary, so it doesn't compete with the letter. */
 .quiz-skip {
-  min-height: 44px;
+  flex: 1 1 0;
+  min-height: 52px;
   padding: 0 22px;
   font-family: var(--font-display);
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--text-muted);
   cursor: pointer;
   background: none;
   border: 2px solid var(--border-strong);
-  border-radius: 14px;
+  border-radius: 16px;
 }
 
 .quiz-skip:hover:not(:disabled) {
@@ -2220,16 +2279,17 @@ body {
 
 /* End quiz is red, so it isn't taken for Skip; it fills in on hover. */
 .quiz-quit {
-  min-height: 44px;
+  flex: 1 1 0;
+  min-height: 52px;
   padding: 0 20px;
   font-family: var(--font-display);
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 800;
   color: var(--danger);
   cursor: pointer;
   background: none;
   border: 2px solid var(--danger);
-  border-radius: 14px;
+  border-radius: 16px;
 }
 
 .quiz-quit:hover {
@@ -2241,6 +2301,492 @@ body {
 .quiz-quit:focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 3px;
+}
+
+/* ----- Guess the letter (GuessRun, 2026-11-04): no camera. On a desktop the page is
+   laid out like the Words quiz: the tile per letter fill the left half, where
+   the camera is there, and on the right the steps on top, the hand's picture (the
+   Words quiz's card) and the buttons at the bottom, the page exactly the
+   window's height. Narrow windows stack them: steps, picture, tiles, buttons. ----- */
+.quiz-guess {
+  display: grid;
+  grid-template-areas: 'steps' 'picture' 'answer' 'actions';
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+  width: 100%;
+  max-width: 2000px;
+  margin: 0 auto;
+  padding: 20px var(--page-gutter) 28px;
+}
+
+@media (min-width: 900px) {
+  .quiz-guess {
+    grid-template-areas: 'answer steps' 'answer picture' 'answer actions';
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    column-gap: clamp(24px, 2.5vw, 48px);
+    row-gap: 24px;
+    height: calc(100dvh - var(--bar-height));
+    padding: 24px clamp(20px, 2.2vw, 40px) 28px;
+  }
+}
+
+.guess-steps {
+  grid-area: steps;
+}
+
+.guess-picture-side {
+  position: relative;
+  display: flex;
+  grid-area: picture;
+  min-height: 0;
+}
+
+/* "Yes, that's B!" over the picture after a right answer (GuessRun): the camera
+   check's "Camera ready" sticker, with its own length (GUESS_RIGHT_MS, so the
+   fade ends as the next sign arrives) and a green outline, so it reads as the
+   answer, not a notice (the double class beats the camera check's rule, which comes later). The same slap, hold and fade; reduced motion fades only. */
+.camera-ready-sticker.guess-right-sticker {
+  font-size: clamp(26px, 3vw, 40px);
+  white-space: nowrap;
+  border: 3px solid var(--green);
+  animation-duration: 1700ms;
+}
+
+/* After a wrong answer the sign gives way to the two hands to compare
+   (AnswerHand): the right letter's on the left, the picked one's on the right,
+   each with its letter underneath in the tiles' green and amber. They fill the
+   picture's frame side by side, centred. */
+/* The cards sit in the same frame as the sign did, as on the quiz's Peek: a
+   panel that follows the theme (white in the light one, dark in the dark one,
+   by `.letter-picture`), the white drawings stuck on it as stickers. */
+.guess-compare-frame {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: clamp(16px, 2.5vh, 28px);
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 0;
+  background: var(--surface);
+  border-radius: 32px;
+  box-shadow: var(--sticker-shadow);
+}
+
+.guess-compare-row {
+  display: flex;
+  gap: clamp(16px, 3vw, 56px);
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0 clamp(12px, 3vw, 48px);
+}
+
+/* What happened, above the two cards: the right letter in the answer's green, the
+   pick in amber (words too, so colour isn't the only signal). The frame's top
+   padding keeps it clear of the 2D | 3D switch. */
+.guess-compare-frame {
+  padding-top: 56px;
+  padding-bottom: 68px;
+}
+
+.guess-compare-message {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(22px, 2.2vw, 34px);
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.guess-compare-message .is-answer {
+  color: var(--success-ink);
+}
+
+.guess-compare-message .is-pick {
+  color: var(--warning-text);
+}
+
+.guess-compare {
+  --card-color: var(--green);
+  --card-tint: var(--green-tint);
+  --card-ink: var(--green-ink);
+
+  display: flex;
+  flex: 0 1 400px;
+  flex-direction: column;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  background: var(--white);
+  border: 3px solid var(--card-color);
+  border-radius: 28px;
+  box-shadow: 0 8px 20px rgb(12 29 48 / 0.16);
+  animation: guess-compare-in 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* The cards' own colours don't change with the theme (white or Deep Cobalt
+   picture, white footer text roles), so they take the light theme's roles: a
+   deep green for the answer, amber for the pick. */
+.guess-compare.is-wrong {
+  --card-color: var(--amber);
+  --card-tint: var(--amber-tint);
+  --card-ink: var(--amber-ink);
+
+  animation-delay: 90ms;
+}
+
+/* What the card is, as a band across its top in the card's solid colour. */
+.guess-compare-tag {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 12px;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(14px, 1.35vw, 22px);
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--white);
+  background: var(--card-color);
+}
+
+.guess-compare-picture {
+  position: relative;
+  aspect-ratio: 1;
+  background: var(--white);
+  transition: background-color 200ms ease-out;
+}
+
+.guess-compare-drawing {
+  position: absolute;
+  inset: 12px;
+  transition: opacity 200ms ease-out;
+}
+
+/* The 3D hand sits over the drawing and fades in once it has loaded; then
+   the drawing under it fades out. */
+.guess-compare-3d {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 200ms ease-out;
+}
+
+.is-3d-ready .guess-compare-3d {
+  opacity: 1;
+}
+
+.is-3d-ready .guess-compare-drawing {
+  opacity: 0;
+}
+
+.guess-compare-picture .hand-model-view {
+  border-radius: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guess-compare-picture,
+  .guess-compare-drawing,
+  .guess-compare-3d {
+    transition: none;
+  }
+}
+
+/* The expand button on a card's picture (the shared .picture-expand), smaller to
+   suit the card, and above the 3D hand that fades in over the drawing. */
+.guess-compare-picture .picture-expand {
+  right: 8px;
+  bottom: 8px;
+  width: 32px;
+  height: 32px;
+}
+
+.guess-compare-letter {
+  padding: 8px 0 10px;
+  font-family: var(--font-display);
+  font-size: clamp(36px, 4.4vw, 80px);
+  font-weight: 900;
+  line-height: 1;
+  color: var(--card-ink);
+  text-align: center;
+  background: var(--card-tint);
+  border-top: 2px solid var(--card-color);
+}
+
+/* Dark theme (2026-11-04): the card is Deep Cobalt all through, drawing or 3D
+   hand (the drawing follows the theme, so it's white lines), and the
+   strip with the letter is the card's solid colour (green for the answer,
+   amber for the pick) with a white letter, instead of a pale tint. */
+:root[data-theme='dark'] .guess-compare,
+:root[data-theme='dark'] .guess-compare-picture {
+  background: var(--deep-cobalt);
+}
+
+:root[data-theme='dark'] .guess-compare-letter {
+  color: var(--white);
+  background: var(--card-color);
+}
+
+@keyframes guess-compare-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guess-compare {
+    animation: none;
+  }
+}
+
+/* The picture's frame is a white sticker (a dark one in the dark theme, .letter-picture),
+   the drawing centred in it under the 2D | 3D switch. */
+.guess-picture {
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 0;
+  background: var(--surface);
+  border: none;
+  border-radius: 32px;
+  box-shadow: var(--sticker-shadow);
+}
+
+@media (min-width: 900px) {
+  .guess-picture {
+    aspect-ratio: auto;
+  }
+}
+
+/* (`.asl-drawing`, not `img`: `.reference-image img` comes later and would otherwise set the
+   width to the whole frame, pushing the drawing's right edge past it.)
+   Positioned, so the frame's size never comes from the drawing's own size;
+   56px above and below clear the switch and the expand button. */
+.guess-picture .asl-drawing {
+  position: absolute;
+  inset: 64px 32px;
+  width: calc(100% - 64px);
+  height: calc(100% - 128px);
+  margin: auto;
+  box-sizing: border-box;
+  object-fit: contain;
+}
+
+/* On a phone or a tablet held upright the picture isn't stretched to the
+   window, so the drawing keeps a sensible size. */
+@media (max-width: 899px) {
+  .guess-picture .asl-drawing {
+    max-width: 420px;
+    max-height: 360px;
+  }
+}
+
+/* The 3D hand fills the frame edge to edge, as on Learn's card. */
+.guess-picture.hand-model-frame {
+  padding: 0;
+}
+
+.guess-answer {
+  display: flex;
+  grid-area: answer;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* The letters, seven to a row (26 of them: four rows, the last with five), each a small key:
+   a raised edge that goes down
+   on press, like the amber key buttons but quiet. On a desktop the four rows
+   share the height the column has left, so the keys fill it (a cap keeps them
+   from growing absurdly tall on a very tall window). */
+.guess-tiles {
+  /* How many rows, and keys in the longest row, the layout has: the keys' height uses them. */
+  --rows: 4;
+  --per-row: 7;
+  --key-ratio: 1.15;
+
+  display: grid;
+  grid-template-columns: repeat(14, minmax(0, 1fr));
+  gap: 10px;
+}
+
+/* The box the switch and the keys sit in, as one group in its middle. The switch takes
+   --switch-space (30px high, 3px padding either side, 12px before the keys) of the box's
+   height, which the keys' height leaves out. */
+.guess-keys {
+  --switch-space: 48px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* The switch above the keys (A to Z | Keyboard): centred, and a little smaller than the
+   picture's, with a gap before the keys. */
+.guess-layout-switch {
+  align-self: center;
+  margin-bottom: 12px;
+}
+
+.guess-layout-switch button {
+  height: 30px;
+  min-width: 0;
+  padding: 0 14px;
+  font-size: 14px;
+}
+
+/* The keyboard's order: three rows of ten, nine and seven keys (QWERTY), on a grid of 20
+   columns so each row can be indented like a keyboard's: every key spans two columns, the
+   second row's first key (the 11th, A) starts one column in, half a key, and the
+   third row's (the 20th, Z) three columns in, one and a half keys. Keys come out a
+   little narrower, so they're taller (1.5) to stay boxes. */
+.guess-tiles.is-keyboard {
+  --rows: 3;
+  --per-row: 10;
+  --key-ratio: 1.5;
+
+  grid-template-columns: repeat(20, minmax(0, 1fr));
+}
+
+/* Seven keys to a row, drawn on a grid of 14 columns so the last row can be centred:
+   every key spans two columns, and the row's first key (the 22nd, V) starts two
+   columns in, one key's width, which leaves the same empty space either side of
+   the five keys (V W X Y Z) of the last row. It's tied to
+   26 keys: with another count, the 22nd would be another key and the offset
+   would change. */
+.guess-tile {
+  grid-column: span 2;
+}
+
+.guess-tiles:not(.is-keyboard) .guess-tile:nth-child(22) {
+  grid-column: 3 / span 2;
+}
+
+.guess-tiles.is-keyboard .guess-tile:nth-child(11) {
+  grid-column: 2 / span 2;
+}
+
+.guess-tiles.is-keyboard .guess-tile:nth-child(20) {
+  grid-column: 4 / span 2;
+}
+
+/* On a desktop the keys' box is the left column. A key's height comes from its width
+   (a little taller than wide, 1.15), but never more than a quarter of the box's
+   height, so they stay boxes instead of stretching into tall strips, and the four
+   rows sit in the middle of the box. It's a size container, so `cqw` and `cqh` (its own
+   width and height) can be used by the keys. */
+@media (min-width: 900px) {
+  .guess-keys {
+    flex: 1 1 0;
+    min-height: 0;
+    container-type: size;
+  }
+
+  .guess-tiles {
+    --gap: clamp(10px, 1.2vw, 18px);
+
+    gap: var(--gap);
+  }
+}
+
+.guess-tile {
+  height: clamp(48px, 8.5vh, 80px);
+  margin-bottom: 3px;
+  font-family: var(--font-display);
+  font-size: clamp(22px, 2.2vw, 32px);
+  font-weight: 900;
+  line-height: 1;
+  color: var(--text);
+  cursor: pointer;
+  background: var(--surface);
+  border: 2px solid var(--border-strong);
+  border-radius: 14px;
+  box-shadow: 0 3px 0 var(--border-strong);
+  transition:
+    transform 80ms ease-out,
+    box-shadow 80ms ease-out;
+}
+
+/* The letter grows with the key. (12px: the four keys' 3px edges below them.) */
+@media (min-width: 900px) {
+  .guess-tile {
+    height: min(
+      calc((100cqh - var(--switch-space) - (var(--rows) - 1) * var(--gap) - var(--rows) * 3px) / var(--rows)),
+      calc((100cqw - (var(--per-row) - 1) * var(--gap)) / var(--per-row) * var(--key-ratio))
+    );
+    font-size: clamp(28px, 3vw, 52px);
+    border-radius: 18px;
+  }
+}
+
+@media (hover: hover) {
+  .guess-tile:hover:not(:disabled) {
+    color: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 3px 0 var(--accent);
+  }
+}
+
+.guess-tile:active:not(:disabled) {
+  box-shadow: 0 0 0 transparent;
+  transform: translateY(3px);
+}
+
+.guess-tile:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Answered: the other letters step back; the right one is green, the one
+   picked wrongly amber. */
+.guess-tile:disabled {
+  cursor: default;
+  opacity: 0.45;
+  box-shadow: none;
+  transform: translateY(3px);
+}
+
+.guess-tile.is-right,
+.guess-tile.is-wrong {
+  opacity: 1;
+}
+
+.guess-tile.is-right {
+  color: var(--on-accent);
+  background: var(--success);
+  border-color: var(--success);
+}
+
+.guess-tile.is-wrong {
+  color: var(--warning-ink);
+  background: var(--warning-bg);
+  border-color: var(--warning);
+}
+
+.guess-actions {
+  grid-area: actions;
+}
+
+
+/* After a wrong answer Next letter takes Skip's place, amber, as the way on. */
+.key-button.guess-next {
+  flex: 1 1 0;
+  justify-content: center;
+  min-height: 52px;
+  /* .key-button has a big top margin and a bottom one for its edge, made for a
+     lone button; in this row they stretched End quiz to match. The edge is a
+     shadow, so it hangs below into the page's padding. */
+  margin: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guess-tile {
+    transition: none;
+  }
 }
 
 /* ----- The results, laid out like Welcome: the score on a tag with
@@ -2511,6 +3057,51 @@ body {
   background: var(--warning);
 }
 
+/* Named wrong (Guess the letter, 2026-11-04): a pale amber tile with an amber
+   outline and a small cross, so it stands apart from a skipped one (solid
+   amber) even in greyscale. */
+.quiz-tile.quiz-wrong,
+.quiz-key-swatch.quiz-wrong {
+  color: var(--warning-ink);
+  background: var(--warning-bg);
+  border: 2px solid var(--warning);
+}
+
+/* Guess the letter's results, for someone who skipped the camera check: an
+   invitation to set it up, a sticker between the key and Start again. */
+.quiz-camera-invite {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+  padding: 20px 24px 24px;
+  text-align: left;
+  background: var(--surface);
+  border-radius: 24px;
+  box-shadow: var(--sticker-shadow);
+}
+
+.quiz-camera-invite p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.45;
+  color: var(--text-muted);
+  text-wrap: pretty;
+}
+
+.quiz-camera-invite .quiz-camera-invite-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.15;
+  color: var(--text);
+}
+
+.quiz-camera-invite .button {
+  margin-top: var(--space-2);
+}
+
 /* The key button, as wide as the column, at its bottom. */
 .quiz-again {
   justify-content: center;
@@ -2569,6 +3160,13 @@ body {
   transform: scaleX(-1);
 }
 
+/* The dark theme's drawings are white (AslDrawing adds `is-white`): the files
+   are <img>s, so a filter turns every line white. A drawing on a card that's
+   white in both themes (`onWhite`) never gets the class. */
+.asl-drawing.is-white {
+  filter: brightness(0) invert(1);
+}
+
 /* A two-option switch: the same look as the theme toggle's track (Learn's
    2D | 3D). */
 .view-switch {
@@ -2616,6 +3214,41 @@ body {
 .view-switch button:focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 1px;
+}
+
+/* The 3D button while its hand loads (HandViewToggle `loading`): the label stays
+   (invisible) so the button keeps its width, and a small ring turns in its
+   middle. With reduced motion the ring holds still. */
+.view-switch button.is-loading {
+  position: relative;
+}
+
+.view-switch button.is-loading .view-switch-label {
+  opacity: 0;
+}
+
+.view-switch-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border: 2px solid var(--on-accent);
+  border-top-color: transparent;
+  border-radius: 50%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .view-switch-spinner {
+    animation: view-switch-spin 0.8s linear infinite;
+  }
+}
+
+@keyframes view-switch-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* The 2D | 3D switch on a hand's picture (HandViewToggle, in LetterPicture's
@@ -2683,6 +3316,25 @@ body {
   background: var(--deep-sky);
 }
 
+/* The page's own control in the frame's lower left corner (LetterPicture `corner`;
+   Guess the letter's Left hand | Right hand switch): the mirror of the expand
+   button, at the same height. */
+.picture-corner {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  z-index: 1;
+}
+
+/* Guess the letter's hand switch is centred along the bottom on every size (on a
+   phone too, below), the same place in the question's frame and the compare frame. */
+.guess-picture-side .picture-corner {
+  right: auto;
+  left: 50%;
+  width: max-content;
+  transform: translateX(-50%);
+}
+
 /* The expand button in the frame's lower right corner (LetterPicture): a round
    button, paler than the picture. Lower right, like a video's fullscreen
    button, so the quiz's Peek badge on the sticker's upper right never covers
@@ -2747,6 +3399,35 @@ body {
   border-radius: 20px;
 }
 
+/* The letter's name at the bottom of the larger window, in the middle, like
+   Learn's card ("Letter B", the letter in the accent). The tip moves up above it. */
+.picture-name {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  z-index: 1;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 44px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.picture-name-letter {
+  color: var(--accent);
+}
+
+.picture-dialog .hand-model-tip {
+  bottom: 80px;
+}
+
 .picture-dialog .picture-dialog-frame.hand-model-frame {
   padding: 0;
 }
@@ -2778,10 +3459,10 @@ body {
 }
 
 /* The picture's frame in the dark theme (2026-11-02; before, white in both,
-   a bright slab on the dark page). The frame is a dark panel, the black-line
-   drawing sits on a white sticker inside it (the drawings must keep a white
-   backing, AslDrawing.jsx), and the 3D hand turns Bright Sky (HandModelView's
-   `theme`). Its controls, which were pale chips for a white frame, take the
+   a bright slab on the dark page). The frame is a dark panel, the drawing is
+   white lines straight on it (2026-11-04; before, black lines on a white
+   sticker inside it; AslDrawing.jsx), and the 3D hand turns Bright Sky
+   (HandModelView's `theme`). Its controls, which were pale chips for a white frame, take the
    dark theme's roles: Bright Sky for the one showing. Learn's card is
    transparent over its own dark surface, so only the quiz's sticker and the
    expand window need the frame's own background. */
@@ -2792,12 +3473,6 @@ body {
 
 :root[data-theme='dark'] .learn-card .letter-picture {
   background: none;
-}
-
-:root[data-theme='dark'] .letter-picture:not(.hand-model-frame) img {
-  padding: 12px;
-  background: var(--white);
-  border-radius: 18px;
 }
 
 :root[data-theme='dark'] .letter-picture .hand-view-switch,
@@ -2834,6 +3509,24 @@ body {
   outline-color: var(--accent);
 }
 
+/* Peek inside the quiz's card (2026-11-04): the picture sits straight on the card,
+   without the frame's own faint background and edge. (After the dark theme's rule
+   for the frame above, which it would otherwise lose to.) */
+:root .quiz-sticker .quiz-peek-drawing {
+  background: none;
+  border: none;
+  box-shadow: none;
+}
+
+/* Guess the letter's card (and the one with the two hands after a wrong answer) is
+   the same plain card as the Words quiz's (`--surface`, with the sticker's shadow),
+   not the picture frame's lighter panel and edge (2026-11-04). */
+:root .guess-picture.letter-picture,
+:root .guess-compare-frame.letter-picture {
+  background: var(--surface);
+  border: none;
+}
+
 /* The letter guide (GuidePanel.jsx): one row of 26 tiles across the top of
    Learn, A to Z. The tile of the letter being practised is lit in the accent
    and lifted a little; one passed during this visit has a green tint and a
@@ -2857,6 +3550,10 @@ body {
   .learn-strip ul {
     grid-template-columns: repeat(13, minmax(0, 1fr));
   }
+}
+
+.learn-scroll {
+  display: none;
 }
 
 .learn-tile {
@@ -3945,7 +4642,7 @@ body {
   transform: scaleX(-1);
 }
 
-/* A drawing (black lines): on white in both themes, with room around it,
+/* A drawing: on white in both themes (`onWhite`, AslDrawing.jsx), with room around it,
    and a thin edge so it still reads as a frame on the white light-mode card. */
 .reference-image-drawing {
   padding: 16px;
@@ -4456,6 +5153,13 @@ body {
 
   .welcome-logo {
     width: min(100%, 320px);
+  }
+
+  /* In the row, `flex: 0 1 520px` is the column's width. In a column the same
+     520px would become its height, leaving the words at the top of an empty
+     box and the whole page looking pushed up. Let the content set the height. */
+  .welcome-actions {
+    flex: 0 0 auto;
   }
 }
 
@@ -5076,6 +5780,8 @@ html:has(.about-page) {
 /* As tall as the camera column, so the key button at the bottom ends level
    with the panel's bottom edge. */
 .camera-check-text {
+  /* Makes `cqw` below mean this column's width, so the title fits it. */
+  container-type: inline-size;
   display: flex;
   flex: 1 1 400px;
   flex-direction: column;
@@ -5085,7 +5791,10 @@ html:has(.about-page) {
 
 .camera-check .setup-title {
   font-family: var(--font-display);
-  font-size: clamp(40px, 3.4vw, 54px);
+  /* One row: the title is about 10.85 times its font size wide, so 9cqw of the
+     column keeps it inside, whatever the window. */
+  font-size: min(54px, 9cqw);
+  white-space: nowrap;
   font-weight: 900;
   line-height: 0.98;
   letter-spacing: -0.02em;
@@ -5116,6 +5825,39 @@ html:has(.about-page) {
 
 .camera-check-continue:disabled .key-button-arrow {
   transform: none;
+}
+
+/* "No camera? Guess letters instead" (2026-11-04): a plain underlined line
+   under the key button, so the check stays the main way forward. The column's
+   28px gap is pulled in a little, so it reads as part of the key. */
+.camera-check-skip {
+  align-self: center;
+  min-height: 44px;
+  margin-top: -12px;
+  padding: 0 var(--space-3);
+  font: inherit;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  border-radius: 8px;
+}
+
+.camera-check-skip:hover {
+  color: var(--text);
+}
+
+.camera-check-skip:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.camera-check-skip.is-gone {
+  visibility: hidden;
 }
 
 /* When it turns on: one springy pop. */
@@ -5211,7 +5953,8 @@ html:has(.about-page) {
 }
 
 .setup-step-body h2 {
-  margin: 0 0 4px;
+  margin: 0;
+  text-wrap: balance;
   font-family: var(--font-display);
   font-size: 24px;
   font-weight: 800;
@@ -5222,13 +5965,6 @@ html:has(.about-page) {
   color: var(--text-muted);
 }
 
-.setup-step-body p {
-  margin: 0;
-  font-size: 18px;
-  line-height: 1.45;
-  color: var(--text-muted);
-  text-wrap: pretty;
-}
 
 .camera-check-preview {
   display: flex;
@@ -5588,8 +6324,8 @@ html:has(.about-page) {
 }
 
 /* Page not found (NotFoundPage.jsx): the word LOST fingerspelled in four tiles
-   above the message. The drawings are black lines, so each sits on white in
-   both themes (see AslDrawing.jsx). */
+   above the message. Each tile is white in both themes, so its drawing keeps
+   the light theme's colour (`onWhite`, AslDrawing.jsx). */
 .placeholder.not-found section {
   max-width: 480px;
   gap: 24px;
@@ -5843,4 +6579,925 @@ html:has(.about-page) {
 
 .learn .stage-checks li.met .finger-badge {
   border-color: var(--success-ink);
+}
+
+/* ---------- Small screens (2026-11-02): phones and tablets ----------
+   Everything above is drawn for a computer, and its page rules say what a
+   narrow window does only where a page needed it. These are the rest, in one
+   place, in the order of the pages. Two steps: below 900px the pages stack and
+   the camera is a square (phone) or 4:3 (tablet) frame instead of filling the
+   window's height; from 700px Learn and the quiz put the camera and the
+   letter side by side again, as on a computer but without the locked height,
+   so the page scrolls. Fingers are the pointer here, so what's tapped is at
+   least 44px. */
+@media (max-width: 899px) {
+  /* The camera: a frame in the page's flow, not the height the window leaves.
+     A phone's own camera is usually upright (3:4), so a square crops it less
+     than 4:3 would; cover keeps the picture and the hand drawing aligned. */
+  .practice-stage {
+    flex: none;
+    aspect-ratio: 1 / 1;
+    min-height: 0;
+  }
+
+  .practice {
+    gap: var(--space-4);
+    padding: var(--space-4) var(--page-gutter) var(--space-6);
+  }
+
+  /* The message on the video, smaller, so it leaves room for the hand. */
+  .camera-message-region {
+    top: 14px;
+    padding: 0 20px;
+  }
+
+  .camera-message {
+    gap: var(--space-3);
+    padding: 10px 18px 14px;
+    border-radius: 18px;
+  }
+
+  .camera-message-text {
+    font-size: 20px;
+  }
+
+  .camera-message.ok .camera-message-text {
+    font-size: 17px;
+  }
+
+  .camera-panel .stage::after {
+    inset: 10px;
+    --arm: 22px;
+  }
+
+  /* The controls: a little closer to the edge, and the camera-list arrow wide
+     enough to tap. */
+  .camera-controls {
+    bottom: var(--space-3);
+    max-width: calc(100% - 24px);
+  }
+
+  .camera-controls-menu {
+    width: 44px;
+  }
+
+  /* An empty frame: the badge is smaller, and the room under the content is
+     the controls', so the Turn camera on button never sits behind them. */
+  .camera-off {
+    padding: 0 20px 76px;
+  }
+
+  .camera-off-badge {
+    width: 60px;
+    height: 60px;
+    box-shadow: 0 0 0 6px rgb(42 74 112 / 0.4);
+  }
+
+  .camera-off-title {
+    font-size: 24px;
+  }
+
+  .camera-controls-pill .camera-controls-segment button {
+    padding: 0 var(--space-3);
+  }
+
+  /* Learn: the guide, the letter, then the camera. */
+  .practice.learn {
+    grid-template-areas: 'guide' 'side' 'camera';
+  }
+
+  .practice.learn .practice-side {
+    align-self: auto;
+  }
+
+  .learn-card .learn-picture {
+    min-height: 250px;
+  }
+
+  /* The checklist: only its pill sits on the video, bottom left above the
+     controls. Opened, it spans the video as two columns, so it covers a band
+     rather than half the picture. */
+  .learn .stage-checks {
+    top: auto;
+    right: 12px;
+    bottom: 76px;
+    left: 12px;
+    width: auto;
+    padding: 8px 14px 12px;
+    transform: none;
+  }
+
+  .learn .stage-checks.is-closed {
+    right: auto;
+  }
+
+  .learn .stage-checks .finger-checks ul {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px 14px;
+    font-size: 13px;
+  }
+
+  /* The quiz: the prompt is compact, so the camera is on the first screen. */
+  .practice.quiz-run {
+    gap: var(--space-4);
+  }
+
+  .quiz-prompt {
+    gap: var(--space-3);
+  }
+
+  .quiz-sticker {
+    width: min(200px, 56vw);
+  }
+
+  .quiz-prompt-main {
+    padding-top: var(--space-3);
+  }
+}
+
+/* The smallest phones (360px wide, or less): a square camera is only 320px
+   tall, so the empty frame's badge shrinks a little more. */
+@media (max-width: 380px) {
+  .camera-off-badge {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 0;
+  }
+}
+
+/* At 340px or less there's no room left for it. */
+@media (max-width: 340px) {
+  .camera-off-badge {
+    display: none;
+  }
+}
+
+/* Wider than a phone held upright (a tablet either way up, a phone on its
+   side): the camera is 4:3, as it is on a computer. Held upright, a tablet is
+   tall enough to keep everything in one column, with a large camera; on its
+   side, the camera sits beside the letter. */
+@media (min-width: 700px) and (max-width: 899px) {
+  .practice-stage {
+    aspect-ratio: 4 / 3;
+  }
+
+  .learn-card .learn-picture {
+    min-height: 300px;
+  }
+
+  .quiz-sticker {
+    width: 240px;
+  }
+}
+
+@media (min-width: 700px) and (max-width: 899px) and (orientation: landscape) {
+  .practice-stage {
+    flex: 1 1 auto;
+  }
+
+  .learn-card .learn-picture {
+    min-height: 250px;
+  }
+
+  .practice.learn {
+    grid-template-areas:
+      'guide guide'
+      'camera side';
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: var(--space-4) var(--space-6);
+  }
+
+  .practice.learn .practice-side {
+    align-self: stretch;
+  }
+
+  .practice.quiz-run {
+    grid-template-areas: 'camera prompt';
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: var(--space-6);
+  }
+}
+
+/* Phones, upright: the guide is one row that scrolls sideways, tiles big
+   enough to tap, fading out at the edges so it's plain there is more. */
+@media (max-width: 699px) {
+  .learn-strip ul {
+    display: flex;
+    gap: 8px;
+    margin: 0 calc(-1 * var(--page-gutter));
+    padding: 6px var(--page-gutter) 8px;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    mask-image: linear-gradient(to right, transparent, #000 var(--page-gutter), #000 calc(100% - var(--page-gutter)), transparent);
+  }
+
+  .learn-strip ul::-webkit-scrollbar {
+    display: none;
+  }
+
+  .learn-strip li {
+    flex: 0 0 48px;
+    scroll-snap-align: center;
+  }
+
+  .learn-tile {
+    height: 54px;
+    font-size: 24px;
+  }
+}
+
+/* The camera check on a phone or a tablet held upright: one column, the
+   camera right under the title (it's what the person has to do), the three
+   steps and the button after it. The text section stops being a box of its own
+   (display: contents) so its parts can be ordered around the camera. */
+@media (max-width: 899px) {
+  .camera-check {
+    flex-wrap: nowrap;
+    flex-direction: column;
+    align-content: stretch;
+    gap: var(--space-4);
+    max-width: 640px;
+    padding: var(--space-5) var(--page-gutter) var(--space-7);
+  }
+
+  .camera-check-text {
+    display: contents;
+  }
+
+  .camera-check-text > div {
+    order: 1;
+  }
+
+  .camera-check-preview {
+    flex: none;
+    order: 2;
+    max-width: none;
+  }
+
+  .setup-steps {
+    flex: none;
+    gap: 10px;
+    order: 3;
+  }
+
+  .camera-check-continue {
+    order: 4;
+    margin-top: var(--space-2);
+  }
+
+  /* One row: the size follows the width, so it fits a 360px phone too. */
+  .camera-check .setup-title {
+    font-size: min(34px, 7.2vw);
+    white-space: nowrap;
+  }
+
+  .camera-check-stage {
+    aspect-ratio: 1 / 1;
+    max-height: none;
+  }
+
+  .setup-step-item {
+    gap: 14px;
+    padding: 12px 16px;
+    border-radius: 20px;
+  }
+
+  .setup-step-mark {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+
+  .setup-step-body h2 {
+    font-size: 19px;
+  }
+
+}
+
+@media (min-width: 700px) and (max-width: 899px) {
+  .camera-check-stage {
+    aspect-ratio: 4 / 3;
+  }
+}
+
+/* Phones: the steps are one short line each, so their cards are slimmer. */
+@media (max-width: 699px) {
+  .setup-steps {
+    gap: 8px;
+  }
+
+  .setup-step-item {
+    padding: 10px 14px;
+  }
+
+  .setup-step-mark {
+    width: 34px;
+    height: 34px;
+    font-size: 17px;
+  }
+
+  .setup-step-body h2 {
+    font-size: 17px;
+  }
+}
+
+/* Learn on a phone, filling the window. The page is at least as tall as what
+   is under the bar, and the camera takes whatever the guide and the letter
+   leave, so there's no empty band under it. It's never shorter than a square;
+   on a tall phone it becomes upright, which is also the shape of the phone's
+   own camera. */
+@media (max-width: 699px) {
+  .practice.learn {
+    grid-template-rows: auto auto minmax(0, 1fr);
+    min-height: calc(100dvh - var(--bar-height));
+  }
+
+  .practice.learn .practice-stage {
+    flex: 1 1 auto;
+    aspect-ratio: auto;
+    min-height: calc((100vw - 2 * var(--page-gutter)) * 0.8);
+  }
+
+  /* The scroll track: a line under the row with a thumb as wide as the part in
+     view (GuidePanel.jsx moves it). The row's own bar is hidden, because a
+     phone hides it too until the moment of scrolling. */
+  .learn-scroll {
+    position: relative;
+    display: block;
+    height: 6px;
+    margin-top: var(--space-1);
+    overflow: hidden;
+    background: var(--border);
+    border-radius: 3px;
+  }
+
+  .learn-scroll-thumb {
+    position: absolute;
+    inset: 0 auto 0 0;
+    min-width: 24px;
+    background: var(--accent);
+    border-radius: 3px;
+  }
+
+  /* "That's A!" in the smaller frame: a smaller check and title, tighter
+     spacing, and room under for the controls. `safe center` centres the
+     content, but if it's ever taller than the frame it starts at the top
+     instead of being cut off there. */
+  .practice-done {
+    gap: 8px;
+    justify-content: safe center;
+    padding: 12px 20px 80px;
+  }
+
+  .practice-done-title {
+    font-size: 40px;
+  }
+
+  .practice-done-title::before {
+    width: 52px;
+    height: 52px;
+    margin-bottom: 10px;
+    font-size: 1.9rem;
+    box-shadow: 0 0 0 6px rgb(76 194 138 / 0.25);
+  }
+
+  .practice-done .button {
+    padding: 12px 28px;
+    font-size: 1.2rem;
+  }
+}
+
+/* The smallest phones: the frame is only 320px tall, so the check is smaller still. */
+@media (max-width: 380px) {
+  .practice-done-title::before {
+    width: 44px;
+    height: 44px;
+    margin-bottom: 6px;
+    font-size: 1.6rem;
+  }
+}
+
+/* Learn's letter card on a phone (2026-11-02). It was cramped: the 2D | 3D
+   switch, Numbers and the model chip in one row on top, the name over the
+   hand, the tip and the expand button all in 190px. Now the name is the card's
+   heading, top left, with the model chip opposite it; the controls are a row
+   along the bottom (the switch and Numbers on the left, expand on the right);
+   and the middle of the card is the hand's. The card is a little taller for
+   it, and the camera gives up what that costs. */
+@media (max-width: 699px) {
+  .learn-card .learn-picture {
+    min-height: 320px;
+  }
+
+  .learn-title {
+    top: 16px;
+    bottom: auto;
+    left: 20px;
+    font-size: 28px;
+    transform: none;
+  }
+
+  .learn-opinion {
+    top: 14px;
+    right: 14px;
+  }
+
+  .learn-card .picture-controls {
+    top: auto;
+    bottom: 12px;
+    left: 12px;
+  }
+
+  .learn-card .picture-expand {
+    right: 12px;
+    bottom: 12px;
+  }
+
+  /* The drawing sits between the name above it and the controls under it. */
+  .learn-card .learn-picture img {
+    inset: 60px 0 68px;
+    height: calc(100% - 128px);
+    max-height: 340px;
+  }
+
+  /* The tip stands on the controls' row, lighter than on a computer. */
+  .learn-card .hand-model-tip {
+    bottom: 64px;
+    padding: 2px 2px 2px 12px;
+    font-size: 13px;
+  }
+
+  .learn-card .hand-model-tip-close {
+    width: 26px;
+    height: 26px;
+  }
+}
+
+/* The quiz chooser on a phone. Until 2026-11-02 both cards fit on the first
+   screen; with the descriptions the page scrolls a little, so each card stays
+   compact (one sentence and two short facts) and Start is the last thing in it. */
+@media (max-width: 699px) {
+  .quiz-choose {
+    gap: var(--space-5);
+    padding-top: var(--space-5);
+    padding-bottom: var(--space-6);
+  }
+
+  .quiz-choose-head h1 {
+    font-size: 38px;
+  }
+
+  .quiz-choose-head p {
+    font-size: 18px;
+  }
+
+  .quiz-choices {
+    gap: var(--space-4);
+  }
+
+  .quiz-choice {
+    padding: 18px 18px 20px;
+    border-radius: 28px;
+  }
+
+  .quiz-choice-art {
+    gap: 8px;
+    margin-bottom: var(--space-3);
+  }
+
+  .quiz-art-tile {
+    flex-basis: 48px;
+    height: 48px;
+    font-size: 24px;
+    border-radius: 13px;
+  }
+
+  .quiz-choice-title {
+    font-size: 30px;
+  }
+
+  .quiz-choice-count {
+    margin-top: var(--space-1);
+    font-size: 15px;
+  }
+
+  .quiz-choice-text {
+    margin: var(--space-3) 0 var(--space-3);
+    font-size: 16px;
+  }
+
+  .quiz-choice-points {
+    gap: 6px;
+    margin-bottom: var(--space-5);
+    font-size: 15px;
+  }
+
+  .quiz-choice-start {
+    --key-edge: 6px;
+
+    min-height: 56px;
+    font-size: 22px;
+  }
+}
+
+/* The quiz run on a phone (2026-11-02), laid out like Learn: the progress
+   pills across the top, the letter on a big card, the camera, and Skip letter
+   and End quiz as a row of two buttons under it (the desktop's right column has
+   the same order). The page is exactly as tall as the window under the bar and
+   never scrolls: the card and the camera share the height that is left, 3 : 4.
+   QuizRun.jsx groups the prompt's parts for the desktop's column. Here the
+   group takes no box of its own (display: contents), so each part is a row of
+   the page's grid. */
+@media (max-width: 699px) {
+  /* Laid out like Guess the letter (2026-11-04): the card on top (with the word under
+     it), the pills in the middle of the page, the camera, then the buttons. The
+     card and the camera are two boxes of equal height (Guess the letter's picture and
+     letter keys are the same), the pills between them. */
+  .practice.quiz-run {
+    grid-template-areas:
+      'main'
+      'steps'
+      'camera'
+      'actions';
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr) auto;
+    gap: 16px;
+    /* Exactly the window under the bar: the page never scrolls. */
+    height: calc(100dvh - var(--bar-height));
+    padding: 12px var(--page-gutter) var(--space-4);
+    overflow: hidden;
+  }
+
+  .quiz-prompt {
+    display: contents;
+  }
+
+  /* The pills: thicker. */
+  .quiz-steps {
+    grid-area: steps;
+  }
+
+  .quiz-steps span {
+    height: 16px;
+    border-radius: 8px;
+  }
+
+  .quiz-actions {
+    grid-area: actions;
+  }
+
+  /* The card, and the word under it in a words quiz. */
+  .quiz-prompt-main {
+    grid-area: main;
+    align-items: stretch;
+    justify-content: flex-start;
+    align-self: stretch;
+    min-height: 0;
+    padding-top: 0;
+  }
+
+  .quiz-sticker {
+    flex: 1 1 auto;
+    width: auto;
+    min-height: 0;
+    aspect-ratio: auto;
+    border-radius: 28px;
+  }
+
+  /* Follows the width, but never taller than the window's share for it, so
+     the letter fits the card on a short phone too. */
+  .quiz-prompt-letter {
+    font-size: clamp(80px, min(40vw, 20dvh), 160px);
+  }
+
+  /* Peek sits inside the card's upper right corner (the badge on the edge
+     would be cut off by the window). */
+  .quiz-peek {
+    top: 12px;
+    right: 12px;
+  }
+
+  .quiz-prompt-word {
+    gap: 8px;
+  }
+
+  .quiz-prompt-word span {
+    flex: 0 1 52px;
+    min-width: 0;
+    height: 52px;
+    font-size: 28px;
+  }
+
+  /* The camera takes its share of the height. It may get shorter than a
+     square on a short phone (the video is cropped to fit), because the page
+     never scrolls. */
+  .practice.quiz-run .practice-camera {
+    grid-area: camera;
+    min-height: 0;
+  }
+
+  .practice.quiz-run .practice-panel {
+    min-height: 0;
+  }
+
+  .practice.quiz-run .practice-stage {
+    flex: 1 1 auto;
+    aspect-ratio: auto;
+    min-height: 0;
+  }
+
+  /* Rare notes (the model is loading, or failed) go under the buttons. */
+  .quiz-prompt > .practice-note,
+  .quiz-prompt > .error {
+    grid-row: 5;
+  }
+}
+
+/* The camera check on a phone, filling the window (2026-11-02). The page is as
+   tall as the window and the camera takes what the title, the three steps and
+   the button leave, so there's no empty band under the button. It's never
+   shorter than a square (what it was); on a tall phone it becomes upright, the
+   shape of the phone's own camera. The panel is a flex column so the video's
+   frame can stretch inside it, as on Learn. */
+@media (max-width: 699px) {
+  .camera-check-preview {
+    flex: 1 1 auto;
+  }
+
+  .camera-check-preview .camera-panel {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+  }
+
+  .camera-check-stage {
+    flex: 1 1 auto;
+    aspect-ratio: auto;
+    min-height: calc(100vw - 2 * var(--page-gutter));
+  }
+}
+
+/* Guess the letter on a phone (2026-11-04): static, like the running Words quiz.
+   The page is exactly the window under the bar and never scrolls. The tiles and
+   buttons keep a fixed, low height, so the picture takes all that is left, and it
+   is bigger than when the page stacked and scrolled. After a wrong answer the two
+   cards share the frame's height instead of setting it from their width. */
+@media (max-width: 699px) {
+  /* The picture on top, the pills in the middle of the page, the letter keys, then
+     the buttons. The picture and the keys are two boxes of equal height (the Words
+     quiz's card and camera are the same), the pills between them. */
+  .quiz-guess {
+    grid-template-areas: 'picture' 'steps' 'answer' 'actions';
+    grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr) auto;
+    gap: 16px;
+    height: calc(100dvh - var(--bar-height));
+    padding: 12px var(--page-gutter) var(--space-4);
+    overflow: hidden;
+  }
+
+  .guess-picture-side {
+    min-height: 0;
+  }
+
+  /* No 360px cap: the drawing fills the frame between its two rows of controls. */
+  .guess-picture .asl-drawing {
+    inset: 50px 12px;
+    width: calc(100% - 24px);
+    height: calc(100% - 100px);
+    max-width: none;
+    max-height: none;
+  }
+
+  /* The hand switch is centred along the bottom here, so the 3D hand's tip is lifted
+     above it (as on Learn's card, where the letter's name is at the bottom). */
+  .guess-picture .hand-model-tip {
+    bottom: 58px;
+    max-width: calc(100% - 32px);
+  }
+
+  /* The keys sit in the middle of their box, each a little taller than wide (1.15),
+     but never more than a quarter of the box's height. A key's raised edge is its
+     shadow, so it hangs into the gap below. */
+  .guess-keys {
+    flex: 1 1 0;
+    min-height: 0;
+    container-type: size;
+  }
+
+  .guess-tiles {
+    --gap: 8px;
+
+    gap: var(--gap);
+  }
+
+  .guess-tile {
+    height: min(
+      calc((100cqh - var(--switch-space) - (var(--rows) - 1) * var(--gap)) / var(--rows)),
+      calc((100cqw - (var(--per-row) - 1) * var(--gap)) / var(--per-row) * var(--key-ratio))
+    );
+    margin-bottom: 0;
+    font-size: 22px;
+    border-radius: 12px;
+  }
+
+  .quiz-skip,
+  .quiz-quit,
+  .key-button.guess-next {
+    min-height: 48px;
+  }
+
+  /* "Next letter" stays on one line, so the row keeps its height on a narrow phone. */
+  .key-button.guess-next {
+    gap: 8px;
+    padding: 0 12px;
+    font-size: 18px;
+    white-space: nowrap;
+  }
+
+  /* The 2D | 3D switch and what happened ("It's Q. You picked A.") share the top row,
+     and the hand switch has a row of its own along the bottom, so nothing covers a
+     card and the cards get the rest of the height. */
+  .guess-compare-frame {
+    gap: 0;
+    padding-top: 52px;
+    padding-bottom: 54px;
+  }
+
+  /* The hand switch is centred along the bottom, in the question's frame too,
+     so it doesn't jump when an answer comes. */
+  .guess-picture-side .picture-corner {
+    right: auto;
+    left: 50%;
+    width: max-content;
+    transform: translateX(-50%);
+  }
+
+  .guess-compare-message {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    left: 118px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.3em;
+    align-content: center;
+    justify-content: center;
+    height: 34px;
+    font-size: 15px;
+    line-height: 1.15;
+  }
+
+  /* With 3D chosen the Numbers button sits beside 2D | 3D, so the line starts further right. */
+  .guess-compare-frame.has-numbers .guess-compare-message {
+    left: 200px;
+  }
+
+  .guess-compare-row {
+    flex: 1 1 0;
+    align-items: stretch;
+    min-height: 0;
+    padding: 0 12px;
+    gap: 12px;
+  }
+
+  .guess-compare {
+    flex: 1 1 0;
+    max-width: 400px;
+  }
+
+  .guess-compare-picture {
+    flex: 1 1 0;
+    min-height: 0;
+    aspect-ratio: auto;
+  }
+
+  .guess-compare-tag {
+    gap: 6px;
+    padding: 6px 4px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .guess-compare-letter {
+    padding: 2px 0 4px;
+    font-size: 26px;
+  }
+}
+
+/* A phone under 700px tall has no room for the second row: the hand switch moves to
+   the top row, beside 2D | 3D, and the message goes. */
+@media (max-width: 699px) and (max-height: 699px) {
+  .quiz-guess,
+  .practice.quiz-run {
+    gap: 12px;
+  }
+
+  .guess-compare-frame {
+    padding-bottom: 12px;
+  }
+
+  /* No room for the message beside the switches: the cards say it themselves
+     (a screen reader still hears it from the status line). */
+  .guess-compare-message {
+    display: none;
+  }
+
+  .guess-compare-frame .picture-corner {
+    top: 10px;
+    right: 10px;
+    bottom: auto;
+    left: auto;
+    transform: none;
+  }
+}
+
+/* The Words quiz's camera on a phone is only half of what the page leaves, so an
+   empty frame holds less: a smaller badge and title, no sentence, a slimmer button.
+   The room under the content is still the controls'. */
+@media (max-width: 699px) {
+  .practice.quiz-run .camera-off {
+    gap: 4px;
+    padding: 0 16px 64px;
+  }
+
+  .practice.quiz-run .camera-off-badge {
+    width: 44px;
+    height: 44px;
+    margin-bottom: 0;
+    box-shadow: 0 0 0 4px rgb(42 74 112 / 0.4);
+  }
+
+  .practice.quiz-run .camera-off-title {
+    font-size: 20px;
+  }
+
+  .practice.quiz-run .camera-off-text {
+    display: none;
+  }
+
+  .practice.quiz-run .camera-off button {
+    min-height: 44px;
+    margin-top: 8px;
+  }
+
+  /* The message sticker on the live camera: smaller, so it leaves most of the picture. */
+  .practice.quiz-run .camera-message {
+    padding: 8px 18px 12px;
+    border-radius: 16px;
+  }
+
+  .practice.quiz-run .camera-message-text {
+    font-size: 20px;
+  }
+
+  /* A problem (blocked camera, no camera...) in the same short frame: no "!" mark,
+     smaller text, so the title, what to do and Try again still fit. */
+  .practice.quiz-run .stage-problem {
+    gap: 6px;
+    padding: 12px 16px 64px;
+  }
+
+  .practice.quiz-run .stage-problem-mark {
+    display: none;
+  }
+
+  .practice.quiz-run .stage-problem-title {
+    font-size: 20px;
+  }
+
+  .practice.quiz-run .stage-problem-body {
+    font-size: 13px;
+    line-height: 1.35;
+  }
+
+  .practice.quiz-run .stage-problem button {
+    padding: 8px 20px;
+    font-size: 16px;
+  }
+}
+
+/* The Words quiz's camera is only about 186px tall on a phone under 700px tall, so
+   what an empty or failed frame says gets a little smaller still, and the badge
+   goes. (Last in the file, after the general rules above that it adjusts.) */
+@media (max-width: 699px) and (max-height: 699px) {
+  .practice.quiz-run .camera-off-badge {
+    display: none;
+  }
+
+  .practice.quiz-run .camera-off button,
+  .practice.quiz-run .stage-problem button {
+    min-height: 36px;
+    padding: 4px 18px;
+  }
+
+  .practice.quiz-run .stage-problem {
+    gap: 4px;
+    padding: 6px 16px 60px;
+  }
+
+  .practice.quiz-run .stage-problem-body {
+    font-size: 12px;
+  }
 }

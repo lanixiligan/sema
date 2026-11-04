@@ -1,9 +1,8 @@
 import { Suspense, lazy, useEffect, useState } from 'react'
 import CameraProvider from './shared-camera/CameraProvider.jsx'
-import PhoneNotice from './layout/PhoneNotice.jsx'
 import { navigate, usePathname } from './routing/navigation.js'
 import { NEW_VISITOR, clearSavedData, loadProgress, saveProgress } from './settings/progressStore.js'
-import { PATHS, resolveRoute } from './routing/router.js'
+import { PATHS, cameraCheckNext, cameraCheckPath, resolveRoute } from './routing/router.js'
 import { applyTheme, followTheme, systemThemeQuery } from './settings/theme.js'
 import { SettingsContext } from './settings/settings.js'
 import AboutPage from '../pages/about/AboutPage.jsx'
@@ -11,7 +10,7 @@ import CameraCheckPage from '../pages/onboarding/CameraCheckPage.jsx'
 import LearnPage from '../pages/learn/LearnPage.jsx'
 import NotFoundPage from '../pages/not-found/NotFoundPage.jsx'
 import WelcomePage from '../pages/onboarding/WelcomePage.jsx'
-import LettersQuizPage from '../pages/quiz/LettersQuizPage.jsx'
+import GuessQuizPage from '../pages/quiz/GuessQuizPage.jsx'
 import QuizPage from '../pages/quiz/QuizPage.jsx'
 import WordsQuizPage from '../pages/quiz/WordsQuizPage.jsx'
 
@@ -29,17 +28,14 @@ const TITLES = {
   cameraCheck: 'Camera setup · Sema',
   learn: 'Learn · Sema',
   quiz: 'Quiz · Sema',
-  quizLetters: 'Letters quiz · Sema',
   quizWords: 'Words quiz · Sema',
+  quizGuess: 'Guess the letter · Sema',
   notFound: 'Page not found · Sema',
   dev: 'Developer tools · Sema',
   devTracking: 'Tracking and benchmark · Sema',
   devExtract: 'Extract hand points · Sema',
   devRecord: 'Record · Sema',
 }
-
-// Displays narrower than this get the phone notice (from the design).
-const SMALL_SCREEN = '(max-width: 899px)'
 
 // The app shell: reads the address, picks the page, and wraps every page in
 // the shared camera. Changing pages never reloads the browser tab.
@@ -49,12 +45,13 @@ export default function App() {
   // may go: setup first for a new one, straight to Learn for a returning one.
   const [progress, setProgress] = useState(loadProgress)
   const route = resolveRoute(pathname, progress)
-  // Checked once, when the page opens: a phone doesn't change size, and a
-  // computer whose window is made narrow later shouldn't lose its page.
-  const [showPhoneNotice, setShowPhoneNotice] = useState(() => window.matchMedia(SMALL_SCREEN).matches)
   // The theme on screen right now, 'light' or 'dark' (with System, the
   // system's). index.html already set it on <html> before the first paint.
   const [shownTheme, setShownTheme] = useState(() => document.documentElement.dataset.theme ?? 'light')
+  // Where the camera check leads once it passes: Learn, or the page named in
+  // its address (?next=, for someone sent there from the Words quiz). Read on
+  // every render; usePathname re-renders on every change of page.
+  const cameraNext = cameraCheckNext(window.location.search)
 
   // An address the visitor can't open (or that has no page of its own) is
   // replaced rather than added to the history, so Back doesn't land on it again.
@@ -87,13 +84,28 @@ export default function App() {
     saveProgress(next)
   }
 
-  // The camera check's Next, which ends setup. Sema doesn't ask for the
+  // The camera check's Start learning, which ends setup. Sema doesn't ask for the
   // signing hand, so it keeps a saved one, or Right. The settings change and the navigation
   // happen in the same click, so React applies them in one render: the
   // router never sees one without the other.
   function finishSetup() {
+    updateProgress({ signingHand: progress.signingHand ?? 'right', setupDone: true, cameraChecked: true })
+    navigate(cameraNext)
+  }
+
+  // The camera check's "No camera? Guess letters instead" (2026-11-04): setup
+  // ends without the check, and the quiz that needs no camera opens. The camera
+  // pages then ask for the check first (cameraChecked stays false).
+  function skipCameraCheck() {
     updateProgress({ signingHand: progress.signingHand ?? 'right', setupDone: true })
-    navigate(PATHS.learn)
+    navigate(PATHS.quizGuess)
+  }
+
+  // "Set up your camera", on a camera page (or the Words card, or Guess the
+  // letter's results) for someone who skipped the check: opens the check, and
+  // passing it leads to `returnTo` (Learn or the Words quiz).
+  function openCameraCheck(returnTo) {
+    navigate(cameraCheckPath(returnTo))
   }
 
   // Welcome's Get started (and About's, for a new visitor) opens the camera
@@ -115,10 +127,6 @@ export default function App() {
     return cleared
   }
 
-  // The notice replaces the app rather than covering it, so nothing behind it
-  // (such as the camera) starts.
-  if (showPhoneNotice) return <PhoneNotice onContinue={() => setShowPhoneNotice(false)} />
-
   const settings = {
     shownTheme,
     setTheme: (theme) => updateProgress({ theme }),
@@ -128,6 +136,10 @@ export default function App() {
     closeTurnTip: () => updateProgress({ turnTipClosed: true }),
     handNumbers: progress.handNumbers,
     setHandNumbers: (handNumbers) => updateProgress({ handNumbers }),
+    keyLayout: progress.keyLayout,
+    setKeyLayout: (keyLayout) => updateProgress({ keyLayout }),
+    cameraChecked: progress.cameraChecked,
+    openCameraCheck,
     deleteData,
   }
 
@@ -141,6 +153,9 @@ export default function App() {
             setupDone={progress.setupDone}
             onStartSetup={startSetup}
             onFinishSetup={finishSetup}
+            onSkipCameraCheck={skipCameraCheck}
+            cameraChecked={progress.cameraChecked}
+            cameraNext={cameraNext}
             onSigningHandChange={(signingHand) => updateProgress({ signingHand })}
             devModel={progress.devModel}
             onDevModelChange={(devModel) => updateProgress({ devModel })}
@@ -159,6 +174,9 @@ function Page({
   setupDone,
   onStartSetup,
   onFinishSetup,
+  onSkipCameraCheck,
+  cameraChecked,
+  cameraNext,
   onSigningHandChange,
   devModel,
   onDevModelChange,
@@ -185,7 +203,13 @@ function Page({
     case 'about':
       return <AboutPage setupDone={setupDone} onStart={onStartSetup} />
     case 'cameraCheck':
-      return <CameraCheckPage onDone={onFinishSetup} />
+      return (
+        <CameraCheckPage
+          onDone={onFinishSetup}
+          doneLabel={cameraNext === PATHS.quizWords ? 'Start the Words quiz' : 'Start learning'}
+          onSkip={cameraChecked ? undefined : onSkipCameraCheck}
+        />
+      )
     case 'learn':
       return (
         <LearnPage
@@ -196,8 +220,8 @@ function Page({
       )
     case 'quiz':
       return <QuizPage />
-    case 'quizLetters':
-      return <LettersQuizPage signingHand={signingHand} onSigningHandChange={onSigningHandChange} model={devModel} />
+    case 'quizGuess':
+      return <GuessQuizPage signingHand={signingHand} onSigningHandChange={onSigningHandChange} />
     case 'quizWords':
       return <WordsQuizPage signingHand={signingHand} onSigningHandChange={onSigningHandChange} model={devModel} />
     case 'notFound':

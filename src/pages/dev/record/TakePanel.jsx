@@ -2,8 +2,8 @@ import AslDrawing from '../../../components/AslDrawing.jsx'
 import { TAKES_TARGET } from '../../../recorder/takeRules.js'
 
 // The letter card: its name and kept takes on top, then the letter's drawing,
-// facing the hand of the take, on a white backing in both themes: the
-// drawings are black lines, which a dark card would swallow.
+// facing the hand of the take, on a white backing in both themes, so
+// it keeps the light theme's colour (`onWhite`).
 export default function TakePanel({ cell, accepted }) {
   return (
     <section className="letter-card letter-card-record" aria-label="Current letter">
@@ -14,7 +14,7 @@ export default function TakePanel({ cell, accepted }) {
         </span>
       </div>
       <div className="reference-image reference-image-drawing">
-        <AslDrawing letter={cell.letter} hand={cell.hand} alt={`Reference handshape for ${cell.letter}`} />
+        <AslDrawing letter={cell.letter} hand={cell.hand} alt={`Reference handshape for ${cell.letter}`} onWhite />
       </div>
     </section>
   )

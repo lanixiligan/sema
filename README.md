@@ -94,6 +94,8 @@ The badges at the top repeat the main ones, so update them together with this ta
 | Python | 3.14.8 | Training only (`training/`), offline; never in the app |
 | numpy | 2.5.3 | Training only |
 | scikit-learn | 1.9.1 | Training only |
+| ipykernel | 7.4.0 | Training only: runs the notebooks in VS Code |
+| matplotlib | 3.11.2 | Training only: the notebooks' charts |
 
 The left/right hand rule was checked by hand with tasks-vision 1.1.1; check it again after
 upgrading MediaPipe (see CLAUDE.md).

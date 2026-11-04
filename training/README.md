@@ -7,7 +7,7 @@ described in `docs/data-format.md`.
 The whole story, from the photos to the result, in plain words: `docs/model-training.md`.
 
 Needs Python 3 with numpy and scikit-learn (versions in `requirements.txt`). Run
-everything from the project root.
+everything from the project root. The notebooks also need ipykernel and matplotlib.
 
 | File | What it does |
 | --- | --- |
@@ -19,6 +19,7 @@ everything from the project root.
 | `clean.py` | Runs the cleaning on one dataset and writes `reports/cleaning-<dataset>.md` |
 | `train.py` | Trains the k-NN, tests it, and writes `reports/knn.md` |
 | `train_small.py` | Trains the small models, tests them next to the k-NN, writes `reports/small.md`, and saves the better one for the browser |
+| `notebooks/` | Jupyter notebooks for looking at results (below); they reuse the files above |
 | `reports/` | Results as counts and public file names only, so they can be committed |
 
 ## Steps
@@ -44,6 +45,25 @@ everything from the project root.
    small model and the k-NN only shows under `npm run dev`), then open
    http://localhost:5173/learn in Chrome: its "Right now" line shows the model's guess. The
    small model also works on the live site.
+
+## Notebooks
+
+`notebooks/` holds Jupyter notebooks: pages of code, text and charts you run cell by cell. They
+are for *looking* at results (which letters get mixed up, and why); the scripts above still make
+every report and the model the app uses. A notebook imports the scripts' code (`from small import
+forward`), so it follows the same rules.
+
+- `confusion-matrix.ipynb`: how often each of the 24 letters is right, and which letter the
+  model says when it's wrong, tested on people it has never seen (the public photos, one signer
+  held out at a time). J and Z aren't there: they're traced, not classified.
+
+To run one in VS Code: install the Python and Jupyter extensions, open the `.ipynb` file, pick
+the Python 3.14 kernel at the top right, then "Run All". It needs `data/extracted/`, and takes
+about two minutes.
+
+Notebooks use the public photos only, never the recordings in `data/raw/`, so their saved
+output (charts and counts, no hand points) is safe to commit and shows on GitHub. If a notebook
+ever reads private data, clear its outputs first ("Clear All Outputs" in the toolbar).
 
 ## Data rules
 

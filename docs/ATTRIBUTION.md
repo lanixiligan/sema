@@ -56,8 +56,11 @@ ASLYset (since 2026-10-23).
 
 The 26 SVGs in `public/images/asl/` (`a.svg` … `z.svg`) are the original files from the Wikimedia
 Commons category [ASL letters](https://commons.wikimedia.org/wiki/Category:ASL_letters),
-downloaded on 2026-10-18 and saved unchanged (byte for byte; each matches the SHA-1 that
-Commons lists for it). Only the filenames were changed, to lowercase letters.
+downloaded on 2026-10-18 (each matched the SHA-1 that Commons lists for it). Changes since:
+the filenames are lowercase letters, and on 2026-11-04 the lines were recoloured from black
+to Deep Sky `#1A75A3` (`public/images/asl/`) and, in a second copy for dark surfaces, Bright
+Sky `#36A7D9` (`public/images/asl/dark/`). Only the colour value was changed; the shapes are
+the originals.
 
 ### Licence (the same for every file, checked on each file's description page)
 

@@ -5,10 +5,11 @@ import QuizResults from './QuizResults.jsx'
 import QuizRun from './QuizRun.jsx'
 import { endQuiz, markLetter, newQuiz } from './quizRounds.js'
 
-// One quiz from start to results, for the Letters and Words pages: the quiz
+// One Words quiz from start to results (Guess the letter has its own,
+// GuessQuizPage): the quiz
 // runs until its `at` is null, then the results show. `pickItems` gives the
 // items to ask (random letters, or words) when the quiz starts. Start again on
-// the results goes back to /quiz to choose Letters or Words. quizRounds.js
+// the results goes back to /quiz to choose again. quizRounds.js
 // holds the quiz's state.
 export default function QuizFlow({ kind, pickItems, signingHand, onSigningHandChange, model }) {
   const [quiz, setQuiz] = useState(() => newQuiz(kind, pickItems()))

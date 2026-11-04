@@ -62,8 +62,10 @@ export default function LearnPage({ signingHand, onSigningHandChange, model = 's
   const [done, setDone] = useState(() => new Set())
   if (passed && !done.has(target)) setDone(new Set(done).add(target))
   // Whether the checklist on the camera is open or minimized to its pill; it's
-  // kept here so a pass, or the next letter, doesn't open it again.
-  const [checklistOpen, setChecklistOpen] = useState(true)
+  // kept here so a pass, or the next letter, doesn't open it again. On a small
+  // screen it starts as the pill: the video is small there, and an open
+  // checklist would cover most of it.
+  const [checklistOpen, setChecklistOpen] = useState(() => !window.matchMedia('(max-width: 899px)').matches)
   const index = LESSONS.indexOf(target)
   const next = LESSONS[index + 1]
   // The letter's 3D hand (a pose in public/languages/asl/letters/), and the
@@ -71,7 +73,10 @@ export default function LearnPage({ signingHand, onSigningHandChange, model = 's
   // no pose shows its drawing, but the saved choice stays: the next letter that
   // has a pose is shown in 3D again.
   const pose = useLetterPose(target)
-  const { handView } = useSettings()
+  // `cameraChecked` is false for someone who skipped the camera check: the
+  // camera's frame then asks them to set it up first; the rest of Learn (the
+  // guide, the letter's picture) works without it.
+  const { handView, cameraChecked } = useSettings()
 
   return (
     <>
@@ -95,6 +100,7 @@ export default function LearnPage({ signingHand, onSigningHandChange, model = 's
             {/* The hand switch changes the signing hand, so the drawings face
                 the hand being used. J's and Z's line is drawn under the hand. */}
             <CameraView
+              setupFirst={!cameraChecked}
               canvasRef={canvasRef}
               hand={hand}
               className="practice-stage"
@@ -139,8 +145,7 @@ export default function LearnPage({ signingHand, onSigningHandChange, model = 's
         <aside className="practice-side" aria-label="Your letter">
           <section className="learn-letter" aria-labelledby="learn-letter-title">
             {/* One card, white in the light theme and dark in the dark one (the
-                drawings are black lines, so in the dark one they sit on a white
-                sticker): the letter and the letter model's second opinion (not for J and
+                drawing is Deep Sky lines in the light one, white in the dark one): the letter and the letter model's second opinion (not for J and
                 Z, which it doesn't know) in a row on top, then the picture, the
                 drawing or the 3D hand by the 2D | 3D switch in its corner. The
                 finger checklist is on the camera. */}
@@ -190,15 +195,19 @@ function ModelOpinion({ guesses, hand, target }) {
   const reading = g?.whole ? (g.sure ? g.letter : '?') : null
   const agrees = reading === target
   const sure = g?.whole && 'confidence' in g ? percent(g.confidence) : null
-  // The words are for the tooltip and screen readers; the pill shows only the
-  // tile and the percentage.
+  // The words are for the tooltip and screen readers; the chip shows only the
+  // tile and the percentage. With no reading (no hand, or not a whole one) the
+  // chip is `idle`: invisible, and out of the way of screen readers, so the
+  // card stays quiet until the model has something to say. It stays in the
+  // page, so it fades in and out instead of popping.
   const sentence = `${opinionText(g, reading, hand)}${sure ? `, ${sure} sure` : ''}`
+  const state = !reading ? ' idle' : agrees ? ' agrees' : reading === '?' ? ' unsure' : ''
   return (
-    <section className={`model-opinion${agrees ? ' agrees' : ''}`} aria-label="Letter model" title={sentence}>
+    <section className={`model-opinion${state}`} aria-label="Letter model" title={sentence} aria-hidden={!reading || undefined}>
       <span className="model-opinion-label" aria-hidden="true">
         Model
       </span>
-      <span className={`model-tile${reading ? '' : ' empty'}`} aria-hidden="true">
+      <span className="model-tile" aria-hidden="true">
         {reading}
       </span>
       <span className="model-opinion-value" aria-hidden="true">

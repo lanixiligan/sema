@@ -6,7 +6,8 @@ import { createContext, useContext } from 'react'
 // of a hand), whether the 3D hand's "drag to turn it" tip was closed and the
 // function that closes it (the tip, in LetterPicture), whether the 3D hand's
 // fingertip numbers show and its setter (the Numbers button, in LetterPicture),
-// and the function
+// the order of Guess the letter's keys, 'alphabet' or 'keyboard', and its setter
+// (KeyLayoutToggle), and the function
 // that deletes everything Sema saved (DeleteDataButton, on the developer
 // dashboard). A context lets them read it without every page passing it along
 // as a prop.

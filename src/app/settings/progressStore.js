@@ -17,16 +17,24 @@ export const DEV_MODELS = ['small', 'knn']
 // Learn's letter card: the drawing ('2d', the default: no download, no
 // motion) or the 3D hand ('3d', src/hand-model/).
 export const HAND_VIEWS = ['2d', '3d']
+// The order of Guess the letter's keys (2026-11-04): A to Z, or laid out like a
+// keyboard (QWERTY), so the person can find a letter where their fingers expect it.
+export const KEY_LAYOUTS = ['alphabet', 'keyboard']
 
 export const PROGRESS_VERSION = 1
 export const NEW_VISITOR = {
   version: PROGRESS_VERSION,
   signingHand: null,
   setupDone: false,
+  // Whether the camera check passed (2026-11-04). Setup can also be finished
+  // without it ("No camera? Guess letters instead"); then the camera pages ask
+  // for the check first.
+  cameraChecked: false,
   theme: DEFAULT_THEME,
   handView: '2d',
   turnTipClosed: false,
   handNumbers: true,
+  keyLayout: 'alphabet',
   devAccess: null,
   devModel: 'small',
 }
@@ -41,14 +49,19 @@ export function loadProgress() {
     const signingHand = HANDS.includes(saved.signingHand) ? saved.signingHand : null
     // Setup can't be done without a signing hand. Settings saved before the
     // theme existed have none, so they get the default.
+    const setupDone = saved.setupDone === true && signingHand !== null
     return {
       version: PROGRESS_VERSION,
       signingHand,
-      setupDone: saved.setupDone === true && signingHand !== null,
+      setupDone,
+      // Before 2026-11-04 setup could only be finished by passing the camera
+      // check, so settings saved then with setup done count as checked.
+      cameraChecked: setupDone && saved.cameraChecked !== false,
       theme: THEMES.includes(saved.theme) ? saved.theme : DEFAULT_THEME,
       handView: HAND_VIEWS.includes(saved.handView) ? saved.handView : '2d',
       turnTipClosed: saved.turnTipClosed === true,
       handNumbers: saved.handNumbers !== false,
+      keyLayout: KEY_LAYOUTS.includes(saved.keyLayout) ? saved.keyLayout : 'alphabet',
       devAccess: typeof saved.devAccess === 'string' ? saved.devAccess : null,
       devModel: DEV_MODELS.includes(saved.devModel) ? saved.devModel : 'small',
     }

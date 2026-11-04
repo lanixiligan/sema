@@ -7,6 +7,8 @@ import {
   pickWords,
   quizScore,
   resultsVerdict,
+  GUESS_LETTERS,
+  KEYBOARD_LETTERS,
   usableWords,
 } from './quizRounds.js'
 
@@ -21,6 +23,26 @@ describe('pickLetters', () => {
     // 0 is A each time, then 0.04 (B): the repeated A is skipped.
     const letters = pickLetters(3, fixedRandom([0, 0, 0.04]))
     expect(letters).toEqual(['A', 'B', 'A'])
+  })
+
+  it('picks from the list given', () => {
+    expect(pickLetters(2, fixedRandom([0, 0.99]), ['K', 'L'])).toEqual(['K', 'L'])
+  })
+})
+
+describe('KEYBOARD_LETTERS', () => {
+  it('has the same 26 letters as the A to Z keys, in a keyboard\'s order', () => {
+    expect(KEYBOARD_LETTERS).toHaveLength(26)
+    expect([...KEYBOARD_LETTERS].sort()).toEqual([...GUESS_LETTERS].sort())
+    expect(KEYBOARD_LETTERS.slice(0, 6).join('')).toBe('QWERTY')
+  })
+})
+
+describe('GUESS_LETTERS', () => {
+  it('is the whole alphabet, J and Z included', () => {
+    expect(GUESS_LETTERS).toHaveLength(26)
+    expect(GUESS_LETTERS).toContain('J')
+    expect(GUESS_LETTERS).toContain('Z')
   })
 })
 
