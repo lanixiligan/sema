@@ -1141,6 +1141,44 @@ body {
   --hand-badge-glow: rgb(54 167 217 / 0.4);
 }
 
+/* A moving letter's progress (J, Z; HandModelView), like a video's: a thin
+   track along the picture's bottom edge, kept clear of the rounded corners, a
+   fill in the accent and a dot at its end. HandModelView sets
+   --motion-progress (0 to 1) on every frame of a play. It sits under the
+   buttons and the name at the bottom, and takes no clicks. */
+.hand-motion-bar {
+  --motion-progress: 0;
+  position: absolute;
+  right: 24px;
+  bottom: 5px;
+  left: 24px;
+  z-index: 1;
+  height: 3px;
+  pointer-events: none;
+  background: var(--segment-track);
+  border-radius: 2px;
+}
+
+.hand-motion-fill {
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  border-radius: inherit;
+  transform: scaleX(var(--motion-progress));
+  transform-origin: left;
+}
+
+.hand-motion-thumb {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--motion-progress) * 100%);
+  width: 9px;
+  height: 9px;
+  background: var(--accent);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
 .hand-model-view .hand-tip-label {
   font-family: var(--font-display);
   font-size: 12px;
@@ -3364,7 +3402,6 @@ body {
   outline: 3px solid var(--deep-sky);
   outline-offset: 2px;
 }
-
 /* The large picture (PictureDialog): a window over the page, as big as fits,
    with the same white frame inside. The browser draws the dim backdrop and
    keeps the window centred. */
