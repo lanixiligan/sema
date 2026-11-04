@@ -7,7 +7,7 @@ import {
   pickWords,
   quizScore,
   resultsVerdict,
-  STILL_LETTERS,
+  GUESS_LETTERS,
   usableWords,
 } from './quizRounds.js'
 
@@ -29,11 +29,11 @@ describe('pickLetters', () => {
   })
 })
 
-describe('STILL_LETTERS', () => {
-  it('leaves out J and Z, which move', () => {
-    expect(STILL_LETTERS).toHaveLength(24)
-    expect(STILL_LETTERS).not.toContain('J')
-    expect(STILL_LETTERS).not.toContain('Z')
+describe('GUESS_LETTERS', () => {
+  it('is the whole alphabet, J and Z included', () => {
+    expect(GUESS_LETTERS).toHaveLength(26)
+    expect(GUESS_LETTERS).toContain('J')
+    expect(GUESS_LETTERS).toContain('Z')
   })
 })
 

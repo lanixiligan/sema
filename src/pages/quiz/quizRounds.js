@@ -1,4 +1,4 @@
-import { LETTERS, TRACED_LETTERS } from '../../vision/landmarks/letterShapes.js'
+import { LETTERS } from '../../vision/landmarks/letterShapes.js'
 
 // The quiz (2026-10-27) tests what was learned. Two kinds (since 2026-11-04;
 // before, 'letters' asked 10 random letters to sign, which felt the same as
@@ -13,9 +13,11 @@ import { LETTERS, TRACED_LETTERS } from '../../vision/landmarks/letterShapes.js'
 // of one-letter items.
 export const WORD_COUNT = 5
 export const GUESS_COUNT = 10
-// The letters Guess the letter shows: J and Z move, and a still picture can't
-// show the movement.
-export const STILL_LETTERS = LETTERS.filter((letter) => !TRACED_LETTERS.includes(letter))
+// The letters Guess the letter asks and offers as keys: all 26 (since 2026-11-04;
+// before, 24, because J and Z move and a still picture can't show that). J and Z
+// are shown as their drawings (the handshape they start from) and have no 3D hand
+// yet, so with 3D chosen their picture says so (LetterPicture).
+export const GUESS_LETTERS = LETTERS
 // How long "That's B!" stays before the next letter.
 export const NEXT_LETTER_MS = 1000
 // The same wait in Guess the letter (2026-11-04), longer: the person's eyes are on

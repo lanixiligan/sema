@@ -7,7 +7,7 @@ import AnswerHand from './AnswerHand.jsx'
 import LetterPicture from '../../components/letter-picture/LetterPicture.jsx'
 import { loadLetterPose, useLetterPose } from '../../hand-model/letterPoses.js'
 import { CheckIcon } from '../../components/icons/icons.jsx'
-import { GUESS_RIGHT_MS, STILL_LETTERS, currentLetter } from './quizRounds.js'
+import { GUESS_RIGHT_MS, GUESS_LETTERS, currentLetter } from './quizRounds.js'
 
 const LEAVE_QUESTION = 'Leave the quiz? Your answers so far won’t be kept.'
 
@@ -36,11 +36,11 @@ export default function GuessRun({ quiz, hand, onHandChange, onMark, onQuit }) {
   const { handView } = useSettings()
   const pose = useLetterPose(target)
 
-  // With 3D chosen, every letter's pose is fetched up front (24 tiny files, each
+  // With 3D chosen, every letter's pose is fetched up front (26 tiny files, each
   // once per visit), so the picked letter's hand has its pose the moment a wrong
   // answer needs it, instead of waiting for the network then.
   useEffect(() => {
-    if (handView === '3d') STILL_LETTERS.forEach(loadLetterPose)
+    if (handView === '3d') GUESS_LETTERS.forEach(loadLetterPose)
   }, [handView])
 
   // Leaving mid-quiz asks first, as in the Words quiz.
@@ -76,7 +76,7 @@ export default function GuessRun({ quiz, hand, onHandChange, onMark, onQuit }) {
       if (event.ctrlKey || event.metaKey || event.altKey || event.repeat) return
       if (event.target instanceof Element && event.target.closest('dialog')) return
       const letter = event.key.toUpperCase()
-      if (!STILL_LETTERS.includes(letter)) return
+      if (!GUESS_LETTERS.includes(letter)) return
       event.preventDefault()
       setAnswer({ step: quiz.step, guess: letter })
     }
@@ -167,7 +167,7 @@ export default function GuessRun({ quiz, hand, onHandChange, onMark, onQuit }) {
           section is named for screen readers only. */}
       <section className="guess-answer" aria-label="Which letter is this?">
         <div className="guess-tiles">
-          {STILL_LETTERS.map((letter) => (
+          {GUESS_LETTERS.map((letter) => (
             <button
               key={letter}
               type="button"

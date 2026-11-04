@@ -2,7 +2,7 @@ import MenuBar from '../../app/layout/MenuBar.jsx'
 import { navigate } from '../../app/routing/navigation.js'
 import { PATHS } from '../../app/routing/router.js'
 import { useSettings } from '../../app/settings/settings.js'
-import { GUESS_COUNT, STILL_LETTERS, WORD_COUNT } from './quizRounds.js'
+import { GUESS_COUNT, GUESS_LETTERS, WORD_COUNT } from './quizRounds.js'
 import { useWords } from './useWords.js'
 
 // The quiz (/quiz, 2026-10-27) tests what someone has learned. This page is
@@ -28,7 +28,7 @@ import { useWords } from './useWords.js'
 // they change on every refresh but stay put while the person moves between
 // pages. Sorting by a random number shuffles a copy of the list; the first
 // three are then three different letters.
-const SAMPLE_LETTERS = [...[...STILL_LETTERS].sort(() => Math.random() - 0.5).slice(0, 3), '?']
+const SAMPLE_LETTERS = [...[...GUESS_LETTERS].sort(() => Math.random() - 0.5).slice(0, 3), '?']
 
 // The Words card does the same with one random word from words.json. The list
 // arrives after the page opens (useWords), so the word is picked the first time
@@ -110,7 +110,7 @@ export default function QuizPage() {
             <span className="quiz-choice-text">Read a hand and pick the letter it shows.</span>
             <span className="quiz-choice-points">
               <span>No camera needed.</span>
-              <span>J and Z move, so they’re left out.</span>
+              <span>J and Z show a still drawing.</span>
             </span>
             <StartKey />
           </button>
