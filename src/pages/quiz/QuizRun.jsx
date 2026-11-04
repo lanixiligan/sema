@@ -8,7 +8,7 @@ import { useLetterCheck } from '../../components/letter-check/useLetterCheck.js'
 import LetterPicture from '../../components/letter-picture/LetterPicture.jsx'
 import { useLetterPose } from '../../hand-model/letterPoses.js'
 import { letterClass } from './letterClass.js'
-import { NEXT_LETTER_MS, currentLetter } from './quizRounds.js'
+import { END_QUESTION, NEXT_LETTER_MS, currentLetter } from './quizRounds.js'
 
 const LEAVE_QUESTION = 'Leave the quiz? Your answers so far won’t be kept.'
 
@@ -143,7 +143,13 @@ export default function QuizRun({ quiz, signingHand, onSigningHandChange, model,
           <button type="button" className="quiz-skip" disabled={passed} onClick={() => onMark('skipped', thisPeek.used)}>
             Skip letter
           </button>
-          <button type="button" className="quiz-quit" onClick={onQuit}>
+          <button
+            type="button"
+            className="quiz-quit"
+            onClick={() => {
+              if (window.confirm(END_QUESTION)) onQuit()
+            }}
+          >
             End quiz
           </button>
         </div>

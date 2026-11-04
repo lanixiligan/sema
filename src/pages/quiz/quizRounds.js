@@ -25,6 +25,10 @@ export const KEYBOARD_ROWS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM']
 export const KEYBOARD_LETTERS = [...KEYBOARD_ROWS.join('')]
 // How long "That's B!" stays before the next letter.
 export const NEXT_LETTER_MS = 1000
+
+// What End quiz asks before it stops a quiz early (2026-11-04), with the browser's
+// own confirm box, as Leave the quiz and Delete Sema's data do. Both quizzes use it.
+export const END_QUESTION = 'End the quiz now?\n\nThe letters you haven’t reached will count as skipped.'
 // The same wait in Guess the letter (2026-11-04), longer: the person's eyes are on
 // the tiles they just clicked, so the green sticker on the picture needs time to be seen.
 export const GUESS_RIGHT_MS = 1700

@@ -8,7 +8,7 @@ import KeyLayoutToggle from './KeyLayoutToggle.jsx'
 import LetterPicture from '../../components/letter-picture/LetterPicture.jsx'
 import { loadLetterPose, useLetterPose } from '../../hand-model/letterPoses.js'
 import { CheckIcon } from '../../components/icons/icons.jsx'
-import { GUESS_RIGHT_MS, GUESS_LETTERS, KEYBOARD_LETTERS, currentLetter } from './quizRounds.js'
+import { END_QUESTION, GUESS_RIGHT_MS, GUESS_LETTERS, KEYBOARD_LETTERS, currentLetter } from './quizRounds.js'
 
 const LEAVE_QUESTION = 'Leave the quiz? Your answers so far won’t be kept.'
 
@@ -207,6 +207,7 @@ export default function GuessRun({ quiz, hand, onHandChange, onMark, onQuit }) {
           type="button"
           className="quiz-quit"
           onClick={() => {
+            if (!window.confirm(END_QUESTION)) return
             if (guess !== null) onMark(isRight ? 'passed' : 'wrong')
             onQuit()
           }}
