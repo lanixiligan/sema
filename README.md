@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  A browser-based ASL fingerspelling coach.<br>
+  A browser-based ASL Fingerspelling Learning Web App.<br>
   It uses your webcam and MediaPipe hand landmarks to teach the ASL alphabet.
 </p>
 
