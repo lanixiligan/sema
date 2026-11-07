@@ -2,7 +2,7 @@
 
 ## What Sema is
 
-Sema is a browser-only ASL fingerspelling coach (English A–Z). It checks a letter's handshape from 21 hand points, found with MediaPipe in the webcam picture; video never leaves the device.
+Sema is a browser-only ASL Fingerspelling Learning Web App (English A–Z). It checks a letter's handshape from 21 hand points, found with MediaPipe in the webcam picture; video never leaves the device.
 It's a portfolio project by Lanix Iligan, a CS student, built in stages: webcam, hand tracking, letter recognition, then the learning app.
 Filipino Sign Language comes only after the American version is finalized.
 

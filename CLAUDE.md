@@ -1,6 +1,6 @@
 # Sema
 
-A browser-based ASL fingerspelling coach. It will use the webcam and MediaPipe hand
+An ASL Fingerspelling Learning Web App that runs in the browser. It will use the webcam and MediaPipe hand
 landmarks to teach the ASL alphabet. Built by a student for their portfolio and to learn.
 
 ## Working with the author
