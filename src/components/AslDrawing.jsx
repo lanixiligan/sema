@@ -20,7 +20,10 @@ export default function AslDrawing({ letter, hand, alt = '', onWhite = false }) 
   const folder = dark ? 'images/asl/dark' : 'images/asl'
   // In the dark theme every drawing is white (2026-11-04; before, Bright Sky,
   // and only on the quiz's compare cards): the `is-white` class turns the lines white in CSS.
-  const classes = ['asl-drawing', hand !== DRAWN_HAND && 'mirrored', dark && 'is-white']
+  // Z's drawing has the Z itself in it, so it is flipped the other way round
+  // (2026-11-07): it must read like the Z the camera asks the person to trace.
+  const mirrored = (hand !== DRAWN_HAND) !== (letter === 'Z')
+  const classes = ['asl-drawing', mirrored && 'mirrored', dark && 'is-white']
   return (
     <img
       className={classes.filter(Boolean).join(' ')}
