@@ -235,7 +235,13 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   their credits in `docs/ATTRIBUTION.md` and the README, and add one for any dataset added.
 - Quiz (`/quiz`, 2026-10-27, in the menu after Learn) tests what was learned. `/quiz` is the choice
   between two skills (2026-11-04; before, Letters, 10 random letters signed, at `/quiz/letters`, now
-  redirected to `/quiz`, because it felt the same as Words):
+  redirected to `/quiz`, because it felt the same as Words). Each choice is a card (2026-11-07):
+  its title on top (the Words card is titled Fingerspell; the quiz is still Words everywhere else),
+  a still preview of the quiz (Fingerspell: the camera frame with a white hand drawing, `AslDrawing`'s
+  `onDark`, beside the letter card with the word's tiles; Guess: keys A to L beside a hand sign
+  from them, its key green), the count with the camera fact ("5 words · Camera on", "10 signs · No
+  camera"), one sentence ("A letter is shown on screen…", "A sign is shown on screen…"; no "We")
+  and Start:
   - Guess the letter (`/quiz/guess`, `GuessQuizPage` and `GuessRun`): 10 random hand pictures
     (`GUESS_LETTERS` in `quizRounds.js`: all 26 since 2026-11-04; J and Z are shown in 2D as their drawings, the handshape they start from, and in 3D their hands move, like every 3D J and Z, `docs/hand-poses.md`), never the same twice in
     a row, in `LetterPicture` with `hideLetter` (nothing it says names the letter; the 2D | 3D
@@ -527,8 +533,10 @@ Being redesigned page by page since 2026-10-31 (`PRODUCT.md`, `.impeccable/surfa
 encouraging and warm, Duolingo's celebratory energy without a mascot, quiet while the
 person holds a letter. Welcome is done (Duolingo's layout, 2026-11-02: a bare header with only the theme button, the logo on the left and "Learn ASL fingerspelling with your webcam" with an amber key button on the right, on the theme's own page; before, centred on a Deep Sky page with a paragraph; until 2026-11-02 a name tag that fingerspelled a typed name in hand drawings), and so is the camera check
 (the same stickers, Gabarito and key button, but on the theme's own page, light or dark,
-at Lanix's request), and so are Quiz (2026-11-01) and About (2026-11-02: Sema's name in hands,
-three steps each beside a picture of it, and a Deep Cobalt band for the data section); the other pages still have
+at Lanix's request), and so are Quiz (2026-11-01) and About (2026-11-02; reworked 2026-11-07: "What is
+[logo]?" centred, How Sema works as four stages down a numbered line, camera, MediaPipe hand
+tracking, the letter model, the finger checklist, each beside a picture, and the data section on the
+page's own background with Go to Learn, or Get started for a new visitor, at the end); the other pages still have
 the old minimal, calm look until their turn. New faces: Gabarito 400–900
 (`--font-display`) and Caveat Brush (`--font-marker`, the name on the tag only).
 Fonts: Plus Jakarta Sans (text, weights 400–800) and JetBrains Mono 500 (codes and
