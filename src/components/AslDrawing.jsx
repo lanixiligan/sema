@@ -13,10 +13,12 @@ export const DRAWN_HAND = 'left'
 // letter: 'A' to 'Z'. hand: 'left' or 'right', the hand the drawing shows.
 // onWhite: the card behind it is white in both themes (About's card, Page not
 // found, Record), so it keeps the light theme's colour even in the dark one.
+// onDark: the opposite, the surface behind it is dark in both themes (the quiz
+// chooser's little camera frame), so it is white even in the light theme.
 // Decorative by default (alt ""): it always sits next to its letter.
-export default function AslDrawing({ letter, hand, alt = '', onWhite = false }) {
+export default function AslDrawing({ letter, hand, alt = '', onWhite = false, onDark = false }) {
   const settings = useSettings()
-  const dark = settings?.shownTheme === 'dark' && !onWhite
+  const dark = onDark || (settings?.shownTheme === 'dark' && !onWhite)
   const folder = dark ? 'images/asl/dark' : 'images/asl'
   // In the dark theme every drawing is white (2026-11-04; before, Bright Sky,
   // and only on the quiz's compare cards): the `is-white` class turns the lines white in CSS.

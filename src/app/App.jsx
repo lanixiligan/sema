@@ -219,7 +219,7 @@ function Page({
         />
       )
     case 'quiz':
-      return <QuizPage />
+      return <QuizPage signingHand={signingHand} />
     case 'quizGuess':
       return <GuessQuizPage signingHand={signingHand} onSigningHandChange={onSigningHandChange} />
     case 'quizWords':
