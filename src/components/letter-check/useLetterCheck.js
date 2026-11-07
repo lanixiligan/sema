@@ -199,14 +199,21 @@ export function useLetterCheck({ target, round, signingHand, model = 'small' }) 
       if (done) return
       const now = detection.time
       const aspect = detection.width / detection.height
-      // The handshape must hold all along (J's is I's).
       const seen = signingHandChecks(detection, drawnHand, target)
-      ticks = seen ? steadyChecks(ticks, seen.checks) : null
+      // Z's handshape must hold all along. J's only has to be made to start it
+      // (the I): once the J is drawn, the checklist stays ticked and only the
+      // pinky is followed, because the hand bends as it draws the hook.
+      const jDrawn = Boolean(startHoldMs) && path !== null
+      if (jDrawn) {
+        ticks = ticks && ticks.map((check) => ({ ...check, met: true }))
+      } else {
+        ticks = seen ? steadyChecks(ticks, seen.checks) : null
+      }
       if (now - shownAt >= SHOW_EVERY_MS) {
         shownAt = now
         setChecks(ticks)
       }
-      const raw = seen?.makes ? seen.raw : null
+      const raw = jDrawn ? seen?.raw ?? null : seen?.makes ? seen.raw : null
       const tip = raw && fingertip(raw, aspect, tipPoint)
       if (!startHoldMs) {
         path = zPath(drawnHand, aspect)
