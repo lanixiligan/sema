@@ -1219,8 +1219,8 @@ body {
   color: var(--text-muted);
 }
 
-/* The tip on the 3D hand (LetterPicture): a small dark pill in the middle of
-   the picture's lower edge, over the canvas, with a button that closes it for
+/* The tip on the 3D hand (LetterPicture): a small dark pill in the exact middle of
+   the picture (2026-11-07, on every page and size), over the canvas, with a button that closes it for
    good. One line, as wide as its words, so it never wraps against the corner
    buttons (the expand button lower right) whatever the frame's width. On
    Learn's card the letter's name sits on that edge, so the pill stands on it
@@ -1228,7 +1228,7 @@ body {
    pill is dark over the frame in both themes. */
 .hand-model-tip {
   position: absolute;
-  bottom: 12px;
+  top: 50%;
   left: 50%;
   z-index: 1;
   display: flex;
@@ -1243,11 +1243,7 @@ body {
   color: var(--text);
   background: rgb(12 29 48 / 0.82);
   border-radius: 18px;
-  transform: translateX(-50%);
-}
-
-.learn-card .hand-model-tip {
-  bottom: 58px;
+  transform: translate(-50%, -50%);
 }
 
 /* On the dark card the pill's near-Cobalt would blend into it: a step lighter. */
@@ -1781,75 +1777,145 @@ body {
   opacity: 0.6;
 }
 
-/* The small picture: a row of letter tiles, all signed (green). */
-.quiz-choice-art {
-  display: flex;
+/* The small, still picture of each quiz (2026-11-07; before, a row of green
+   letter tiles): two boxes side by side, drawn like the real quiz page's. */
+/* The one row is fixed (minmax(0, 1fr) of the set height): without it the row
+   grows to the drawings' own height and the preview spills over the card. */
+.quiz-preview {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: minmax(0, 1fr);
   gap: 10px;
   width: 100%;
+  height: 170px;
   margin-bottom: var(--space-5);
 }
 
-.quiz-art-tile {
+/* Fingerspell's camera: dark in both themes, like the real camera frame,
+   with its Bright Sky corner marks and a white hand drawing. */
+.quiz-preview-camera {
   position: relative;
-  display: grid;
-  flex: 0 1 64px;
-  place-items: center;
-  min-width: 0;
-  height: 64px;
+  display: block;
+  min-height: 0;
   overflow: hidden;
-  font-family: var(--font-display);
-  font-size: 32px;
-  font-weight: 800;
-  line-height: 1;
-  /* Signed: the green is the tile's own, and the letter is on it. */
-  color: var(--on-accent);
-  background: var(--surface-soft);
-  border: 2px solid var(--success);
-  border-radius: 16px;
-  isolation: isolate;
-  animation: quiz-art-signed 700ms var(--ease-out) calc(400ms + var(--i) * 240ms) backwards;
+  padding: 14px;
+  background: var(--cobalt-lift);
+  border-radius: 14px;
 }
 
-/* The green, filling the tile from the bottom. It sits behind the letter
-   (z-index -1 inside the tile's own stacking context, from isolation). */
-.quiz-art-tile::before {
-  content: '';
+/* The four corner marks, each two short Bright Sky lines: eight gradients,
+   placed in the corners, on one span over the frame. */
+.quiz-preview-corners {
+  --mark: linear-gradient(var(--bright-sky), var(--bright-sky));
+
   position: absolute;
-  inset: 0;
-  z-index: -1;
+  inset: 8px;
+  background:
+    var(--mark) top left / 14px 2px,
+    var(--mark) top left / 2px 14px,
+    var(--mark) top right / 14px 2px,
+    var(--mark) top right / 2px 14px,
+    var(--mark) bottom left / 14px 2px,
+    var(--mark) bottom left / 2px 14px,
+    var(--mark) bottom right / 14px 2px,
+    var(--mark) bottom right / 2px 14px;
+  background-repeat: no-repeat;
+}
+
+/* The boxes that sit on the card itself: the letter card and the picture. */
+.quiz-preview-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.quiz-preview-picture {
+  padding: 12px;
+}
+
+/* In a flex column the drawing would keep its own height; this lets it
+   shrink to the box. */
+.quiz-preview-picture .asl-drawing {
+  min-height: 0;
+  flex: 1 1 0;
+}
+
+.quiz-preview-letter {
+  gap: 10px;
+}
+
+/* The letter to sign, large and in the accent colour, as on the real card. */
+.quiz-preview-big {
+  font-family: var(--font-display);
+  font-size: 64px;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--accent);
+}
+
+/* The word's tiles: the current letter outlined in amber, the others dashed. */
+.quiz-preview-word {
+  display: flex;
+  gap: 4px;
+}
+
+.quiz-preview-word > span {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-muted);
+  border: 1.5px dashed var(--border-strong);
+  border-radius: 6px;
+}
+
+.quiz-preview-word > span.is-current {
+  color: var(--text);
+  border: 1.5px solid var(--warning);
+}
+
+/* Guess the letter's keys: a 4 × 3 block of the real page's letter tiles. */
+.quiz-preview-keys {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  min-height: 0;
+}
+
+.quiz-preview-keys > span {
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text);
+  background: var(--surface-soft);
+  border: 1.5px solid var(--border-strong);
+  border-bottom-width: 3px;
+  border-radius: 8px;
+}
+
+/* The key that matches the hand sign: green, like a right answer. */
+.quiz-preview-keys > span.is-right {
+  color: var(--on-accent);
   background: var(--success);
-  transform-origin: bottom;
-  animation: quiz-art-fill 500ms var(--ease-out) calc(400ms + var(--i) * 240ms) backwards;
+  border-color: color-mix(in srgb, var(--success), var(--deep-cobalt) 25%);
 }
 
-/* When the page opens, the row is signed one tile after another: each fills
-   with green from the bottom (--i is the tile's place in the row), and ends up
-   as the resting look above. Both animations are backwards-filled, so every
-   tile starts muted and nothing flashes before its turn. */
-@keyframes quiz-art-fill {
-  from {
-    transform: scaleY(0);
-  }
-}
-
-@keyframes quiz-art-signed {
-  0%,
-  45% {
-    color: var(--text-muted);
-    border-color: var(--border-strong);
-    transform: none;
-  }
-  75% {
-    transform: translateY(-4px);
-  }
-  100% {
-    color: var(--on-accent);
-    border-color: var(--success);
-    transform: none;
-  }
-}
-
+/* The title sits on top, above the tiles. */
 .quiz-choice-title {
+  margin-bottom: var(--space-4);
   font-family: var(--font-display);
   font-size: 40px;
   font-weight: 900;
@@ -1867,39 +1933,11 @@ body {
 }
 
 .quiz-choice-text {
-  margin: var(--space-4) 0 var(--space-4);
+  margin: var(--space-4) 0 var(--space-6);
   font-size: 18px;
   line-height: 1.45;
   color: var(--text-muted);
   text-wrap: pretty;
-}
-
-/* Two short facts, each with a small green dot. They are spans because the card
-   is a button; the dot is decoration, the words carry the meaning. */
-.quiz-choice-points {
-  display: grid;
-  gap: var(--space-2);
-  margin-bottom: var(--space-6);
-  font-size: 16px;
-  line-height: 1.4;
-  color: var(--text-muted);
-}
-
-.quiz-choice-points > span {
-  display: flex;
-  gap: var(--space-3);
-  align-items: baseline;
-  text-wrap: pretty;
-}
-
-.quiz-choice-points > span::before {
-  flex: none;
-  width: 8px;
-  height: 8px;
-  content: '';
-  background: var(--success);
-  border-radius: 50%;
-  transform: translateY(-1px);
 }
 
 /* Welcome's key button, drawn on the card: amber with a darker edge under it.
@@ -1978,11 +2016,6 @@ body {
 
   .quiz-choice:active:not(:disabled) {
     transform: none;
-  }
-
-  .quiz-art-tile,
-  .quiz-art-tile::before {
-    animation: none;
   }
 }
 
@@ -3459,10 +3492,6 @@ body {
 
 .picture-name-letter {
   color: var(--accent);
-}
-
-.picture-dialog .hand-model-tip {
-  bottom: 80px;
 }
 
 .picture-dialog .picture-dialog-frame.hand-model-frame {
@@ -5342,50 +5371,31 @@ html:has(.about-page) {
 
 .about-hero-grid {
   display: grid;
-  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-  gap: var(--space-8);
+  justify-items: center;
+  text-align: center;
+}
+
+/* "What is", the logo and "?" on one row, the logo as tall as the words. */
+.about-hero h1.about-hero-title {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
+  gap: 0 0.22em;
 }
 
 .about-hero-text p {
   max-width: 34em;
-  margin: var(--space-4) 0 0;
-  font-size: 19px;
-  line-height: 1.55;
-  color: var(--text-muted);
+  margin: var(--space-5) auto 0;
+  font-size: clamp(19px, 1.5vw, 23px);
+  line-height: 1.5;
+  color: var(--text);
   text-wrap: pretty;
 }
 
-/* The first paragraph says what Sema is, so it is the largest and darkest. */
-.about-hero-text .about-lead {
-  margin-top: var(--space-5);
-  font-size: clamp(21px, 1.8vw, 26px);
-  line-height: 1.4;
-  color: var(--text);
-}
-
-.about-logo-sticker {
-  display: grid;
-  place-items: center;
-  padding: var(--space-6) var(--space-7);
-  background: var(--surface);
-  border-radius: var(--radius-pill);
-  box-shadow: var(--sticker-shadow);
-  animation: about-pop 520ms var(--ease-spring) 250ms both;
-}
-
 .about-logo {
-  width: 100%;
-  max-width: 400px;
-  height: auto;
-}
-
-/* The logo sticker lands once when the page opens. */
-@keyframes about-pop {
-  from {
-    opacity: 0;
-    transform: translateY(18px) scale(0.9);
-  }
+  width: auto;
+  height: 0.9em;
 }
 
 /* "How it works ↓" at the bottom of the first section. */
@@ -5434,55 +5444,108 @@ html:has(.about-page) {
   }
 }
 
-/* ----- 2. How it works: the three steps side by side on one screen, each a
-   small picture of the step, then its number, title and text. ----- */
+/* ----- 2. How it works: the four stages in the order the data flows, one
+   row each. A numbered line runs down the middle (the spine); each row's
+   picture and words sit on either side of it, swapping sides from row to row,
+   the words always facing the line. ----- */
 .about-how {
+  --flow-gap: var(--space-8);
+
   padding: var(--space-9) var(--page-gutter);
 }
 
 .about-how h2 {
-  max-width: 14em;
-  margin: 0;
+  margin: 0 auto;
   font-family: var(--font-display);
   font-size: clamp(38px, 4.2vw, 58px);
   font-weight: 900;
   line-height: 1;
   letter-spacing: -0.02em;
+  text-align: center;
   text-wrap: balance;
 }
 
-.about-steps {
+.about-how-lead {
+  margin: var(--space-4) 0 0;
+  font-size: clamp(19px, 1.5vw, 23px);
+  line-height: 1.5;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.about-flow {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-7);
-  margin: var(--space-7) 0 0;
+  gap: var(--flow-gap);
+  max-width: 1000px;
+  margin: var(--space-8) auto 0;
   padding: 0;
   list-style: none;
 }
 
-.about-step {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+/* Picture | spine | words; even rows put the words on the left. */
+.about-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 64px minmax(0, 1fr);
+  column-gap: var(--space-6);
+  align-items: center;
 }
 
-/* The pictures sit in a box of the same height, so the three titles line up
-   whatever each picture's shape. */
-.about-step .about-picture {
-  align-self: center;
-  margin-bottom: var(--space-6);
+.about-stage > .about-picture {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: end;
 }
 
-/* The step's number, on a round badge. The sequence is real information, so
-   it is shown; the list itself already announces it to screen readers. */
+.about-stage-text {
+  grid-column: 3;
+  grid-row: 1;
+  max-width: 26em;
+}
+
+.about-stage:nth-child(even) > .about-picture {
+  grid-column: 3;
+  justify-self: start;
+}
+
+.about-stage:nth-child(even) .about-stage-text {
+  grid-column: 1;
+  justify-self: end;
+  text-align: right;
+}
+
+/* The spine: the number in the middle of the row, and a line from it down to
+   the next row's number (none after the last). */
+.about-spine {
+  position: relative;
+  display: grid;
+  grid-column: 2;
+  grid-row: 1;
+  place-items: center;
+  align-self: stretch;
+}
+
+.about-stage:not(:last-child) .about-spine::before {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 3px;
+  height: calc(100% + var(--flow-gap));
+  content: '';
+  background: var(--border-strong);
+  border-radius: 2px;
+  transform: translateX(-50%);
+}
+
+/* The stage's number, on a round badge over the line. The list itself
+   already announces the numbers to screen readers. */
 .about-step-number {
+  position: relative;
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
-  margin-bottom: var(--space-3);
+  width: 52px;
+  height: 52px;
   font-family: var(--font-display);
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 900;
   line-height: 1;
   color: var(--on-accent);
@@ -5490,67 +5553,64 @@ html:has(.about-page) {
   border-radius: 50%;
 }
 
-.about-step h3 {
+/* A small name for the stage above its title. */
+.about-stage-label {
+  display: block;
+  margin-bottom: var(--space-2);
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.about-stage h3 {
   margin: 0;
   font-family: var(--font-display);
   font-size: clamp(26px, 2.2vw, 32px);
   font-weight: 800;
-  line-height: 1.05;
+  line-height: 1.1;
   letter-spacing: -0.01em;
 }
 
-.about-step p {
+.about-stage p {
   margin: var(--space-3) 0 0;
   font-size: 18px;
-  line-height: 1.5;
+  line-height: 1.55;
   color: var(--text-muted);
   text-wrap: pretty;
 }
 
+/* Every picture is the same 4:3 sticker. */
 .about-picture {
-  justify-self: center;
   width: 100%;
-  max-width: 340px;
-  min-height: 255px;
+  max-width: 360px;
+  aspect-ratio: 4 / 3;
   overflow: hidden;
   background: var(--surface);
   border-radius: 28px;
   box-shadow: var(--sticker-shadow);
 }
 
-/* Step 1: a letter's card. The drawing sits on white in both themes. */
-.about-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-3);
-  padding: var(--space-4) var(--space-5);
-  text-align: center;
-}
-
-.about-card-drawing {
-  flex: 0 0 auto;
-  width: 112px;
-  aspect-ratio: 1;
-  padding: 8px;
-  background: var(--white);
-  border-radius: 18px;
-}
-
-.about-card-title {
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 800;
-  line-height: 1.1;
-}
-
-/* Step 2: the camera frame, dark in both themes, with Sema's own hand
-   drawing (HandSketch) and a chip naming what it tracks. */
+/* Stages 1 and 2: the camera frame, dark in both themes, with a chip naming
+   what it shows. */
 .about-frame {
   position: relative;
-  aspect-ratio: 4 / 3;
   background: var(--deep-cobalt);
+}
+
+.about-frame-icon {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--bright-sky);
+}
+
+.about-frame-icon svg {
+  width: 72px;
+  height: 72px;
 }
 
 .about-frame-hand {
@@ -5572,6 +5632,85 @@ html:has(.about-page) {
   color: var(--deep-cobalt);
   background: var(--bright-sky);
   border-radius: var(--radius-pill);
+}
+
+/* Stages 3 and 4: a card with a title and a list, laid out the same way. */
+.about-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-6);
+  text-align: left;
+}
+
+.about-panel-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+/* Stage 3: the model's three likeliest letters, as bars. */
+.about-model ul {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.about-model li {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) 44px;
+  gap: var(--space-3);
+  align-items: center;
+  color: var(--text-muted);
+}
+
+.about-model-letter {
+  display: grid;
+  place-items: center;
+  height: 40px;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 900;
+  border: 2px solid var(--border-strong);
+  border-radius: 10px;
+}
+
+.about-model-bar {
+  height: 10px;
+  overflow: hidden;
+  background: var(--segment-track, var(--border));
+  border-radius: var(--radius-pill);
+}
+
+.about-model-bar span {
+  display: block;
+  height: 100%;
+  background: var(--border-strong);
+  border-radius: inherit;
+}
+
+.about-model-share {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  text-align: right;
+}
+
+.about-model li.is-top {
+  color: var(--text);
+}
+
+.about-model li.is-top .about-model-letter {
+  color: var(--white);
+  background: var(--success);
+  border-color: var(--success);
+}
+
+.about-model li.is-top .about-model-bar span {
+  background: var(--success);
 }
 
 /* The still hand (HandSketch.jsx): drawHand.js's colours, and its widths a
@@ -5598,17 +5737,9 @@ html:has(.about-page) {
   stroke-width: 2;
 }
 
-/* Step 3: Learn's checklist (the .finger-* rules, drawn larger here), the
+/* Stage 4: Learn's checklist (the .finger-* rules, drawn larger here), the
    thumb's circle still empty and outlined in amber. */
-.about-checks {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: var(--space-4) var(--space-5);
-}
-
 .about-checks .finger-checks {
-  margin-top: var(--space-3);
   padding: 0;
 }
 
@@ -5637,8 +5768,8 @@ html:has(.about-page) {
   font-size: 12px;
 }
 
-/* ----- 3. Your hands stay yours: a Deep Cobalt band in both themes (the
-   .on-dark colour roles are on the section). The three points are rows under
+/* ----- 3. Your hands stay yours: on the page's own background, like the
+   sections above it. The three points are rows under
    thin lines, not cards. ----- */
 .about-privacy {
   display: flex;
@@ -5646,7 +5777,6 @@ html:has(.about-page) {
   justify-content: center;
   min-height: 100dvh;
   padding: var(--space-9) var(--page-gutter) var(--space-8);
-  background: var(--deep-cobalt);
 }
 
 .about-privacy-grid {
@@ -5742,6 +5872,7 @@ html:has(.about-page) {
 
 .about-start .key-button {
   margin-top: 0;
+  text-decoration: none; /* Go to Learn is a link */
 }
 
 /* The small print, quieter than everything above it. */
@@ -5757,7 +5888,6 @@ html:has(.about-page) {
     scroll-behavior: auto;
   }
 
-  .about-logo-sticker,
   .about-scroll-arrow {
     animation: none;
   }
@@ -5766,20 +5896,44 @@ html:has(.about-page) {
 /* Narrow windows (past the phone notice): everything one under another, each
    step's picture under its words. */
 @media (max-width: 899px) {
-  .about-hero-grid,
   .about-privacy-grid {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-7);
   }
 
-  .about-steps {
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-8);
+  /* One column: the spine on the left with the number at the top, the words
+     and then the picture beside it. */
+  .about-stage,
+  .about-stage:nth-child(even) {
+    grid-template-columns: 52px minmax(0, 1fr);
+    column-gap: var(--space-4);
+    row-gap: var(--space-5);
+    align-items: start;
   }
 
-
-  .about-picture {
+  .about-stage .about-stage-text,
+  .about-stage:nth-child(even) .about-stage-text {
+    grid-column: 2;
+    grid-row: 1;
     justify-self: start;
+    text-align: left;
+  }
+
+  .about-stage > .about-picture,
+  .about-stage:nth-child(even) > .about-picture {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: start;
+  }
+
+  .about-spine {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    place-items: start center;
+  }
+
+  .about-stage:not(:last-child) .about-spine::before {
+    top: 26px;
   }
 }
 
@@ -7016,59 +7170,13 @@ html:has(.about-page) {
   }
 }
 
-/* Learn's letter card on a phone (2026-11-02). It was cramped: the 2D | 3D
-   switch, Numbers and the model chip in one row on top, the name over the
-   hand, the tip and the expand button all in 190px. Now the name is the card's
-   heading, top left, with the model chip opposite it; the controls are a row
-   along the bottom (the switch and Numbers on the left, expand on the right);
-   and the middle of the card is the hand's. The card is a little taller for
-   it, and the camera gives up what that costs. */
+/* Learn's letter card on a phone (2026-11-07): laid out like the computer's
+   (the 2D | 3D switch and Numbers top left, the model chip top right, the name at
+   the bottom in the middle, the expand button bottom right); only taller, so the
+   hand has room. Until then the name was on top and the controls along the bottom. */
 @media (max-width: 699px) {
   .learn-card .learn-picture {
     min-height: 320px;
-  }
-
-  .learn-title {
-    top: 16px;
-    bottom: auto;
-    left: 20px;
-    font-size: 28px;
-    transform: none;
-  }
-
-  .learn-opinion {
-    top: 14px;
-    right: 14px;
-  }
-
-  .learn-card .picture-controls {
-    top: auto;
-    bottom: 12px;
-    left: 12px;
-  }
-
-  .learn-card .picture-expand {
-    right: 12px;
-    bottom: 12px;
-  }
-
-  /* The drawing sits between the name above it and the controls under it. */
-  .learn-card .learn-picture img {
-    inset: 60px 0 68px;
-    height: calc(100% - 128px);
-    max-height: 340px;
-  }
-
-  /* The tip stands on the controls' row, lighter than on a computer. */
-  .learn-card .hand-model-tip {
-    bottom: 64px;
-    padding: 2px 2px 2px 12px;
-    font-size: 13px;
-  }
-
-  .learn-card .hand-model-tip-close {
-    width: 26px;
-    height: 26px;
   }
 }
 
@@ -7099,19 +7207,44 @@ html:has(.about-page) {
     border-radius: 28px;
   }
 
-  .quiz-choice-art {
+  .quiz-preview {
     gap: 8px;
+    height: 116px;
     margin-bottom: var(--space-3);
   }
 
-  .quiz-art-tile {
-    flex-basis: 48px;
-    height: 48px;
-    font-size: 24px;
-    border-radius: 13px;
+  .quiz-preview-camera {
+    padding: 14px;
+  }
+
+  .quiz-preview-picture {
+    padding: 10px;
+  }
+
+  .quiz-preview-letter {
+    gap: 6px;
+  }
+
+  .quiz-preview-big {
+    font-size: 42px;
+  }
+
+  .quiz-preview-word > span {
+    width: 18px;
+    height: 18px;
+    font-size: 10px;
+  }
+
+  .quiz-preview-keys {
+    gap: 4px;
+  }
+
+  .quiz-preview-keys > span {
+    font-size: 13px;
   }
 
   .quiz-choice-title {
+    margin-bottom: var(--space-3);
     font-size: 30px;
   }
 
@@ -7121,14 +7254,8 @@ html:has(.about-page) {
   }
 
   .quiz-choice-text {
-    margin: var(--space-3) 0 var(--space-3);
+    margin: var(--space-3) 0 var(--space-5);
     font-size: 16px;
-  }
-
-  .quiz-choice-points {
-    gap: 6px;
-    margin-bottom: var(--space-5);
-    font-size: 15px;
   }
 
   .quiz-choice-start {
@@ -7310,7 +7437,6 @@ html:has(.about-page) {
   /* The hand switch is centred along the bottom here, so the 3D hand's tip is lifted
      above it (as on Learn's card, where the letter's name is at the bottom). */
   .guess-picture .hand-model-tip {
-    bottom: 58px;
     max-width: calc(100% - 32px);
   }
 
