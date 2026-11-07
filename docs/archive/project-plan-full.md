@@ -1,6 +1,6 @@
 # Sema: Development Plan
 
-Sema is a browser-only ASL fingerspelling coach (English A–Z). It's built in stages: a page that renders the webcam, then hand tracking, then letter recognition, then the learning app. Filipino Sign Language (FSL) comes only after the American version is finalized.
+Sema is a browser-only ASL Fingerspelling Learning Web App (English A–Z). It's built in stages: a page that renders the webcam, then hand tracking, then letter recognition, then the learning app. Filipino Sign Language (FSL) comes only after the American version is finalized.
 
 Owner: Lanix Iligan (CS student, portfolio project). Lanix is learning as they build: explain concepts as you go and keep code simple and readable rather than clever.
 
@@ -23,14 +23,14 @@ Owner: Lanix Iligan (CS student, portfolio project). Lanix is learning as they b
 
 ## About the name
 
-**Sema** (pronounced "SAY-mah") is from Ancient Greek *sēma*, "sign, mark, token", the root of *semiotics* and *semantics*. On its own the name says nothing about what the app does, so it always appears with the descriptor **"ASL fingerspelling coach"**.
+**Sema** (pronounced "SAY-mah") is from Ancient Greek *sēma*, "sign, mark, token", the root of *semiotics* and *semantics*. On its own the name says nothing about what the app does, so it always appears with the descriptor **"ASL Fingerspelling Learning Web App"**.
 
 The project is built on one distinction: a sign has a form and something it stands for. The software only ever works with form (it checks whether 21 hand points match a letter's shape); the learner brings the meaning. Two framing rules for any user-facing text:
 
 - **Never say the software understands signs.** It matches shapes.
 - **At the alphabet stage, a sign stands for a letter, not a meaning.** Describe the app as teaching representation, not meaning.
 
-**Tagline:** Sema, from the Greek for "sign", is a fingerspelling coach built on one distinction: seeing a hand's shape is not the same as knowing what it signs.
+**Tagline:** Sema, from the Greek for "sign", is an ASL Fingerspelling Learning Web App built on one distinction: seeing a hand's shape is not the same as knowing what it signs.
 
 ## 1. Decisions and constraints
 
