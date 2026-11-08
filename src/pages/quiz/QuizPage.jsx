@@ -1,8 +1,8 @@
 import MenuBar from '../../app/layout/MenuBar.jsx'
 import { navigate } from '../../app/routing/navigation.js'
 import { PATHS } from '../../app/routing/router.js'
-import { useSettings } from '../../app/settings/settings.js'
 import AslDrawing from '../../components/AslDrawing.jsx'
+import { VideoIcon, VideoOffIcon } from '../../components/icons/icons.jsx'
 import { GUESS_COUNT, WORD_COUNT } from './quizRounds.js'
 import { useWords } from './useWords.js'
 
@@ -15,8 +15,8 @@ import { useWords } from './useWords.js'
 //   QuizRun checks each letter exactly as on Learn (useLetterCheck).
 // - Guess the letter (/quiz/guess, GuessQuizPage): Sema shows a hand sign and
 //   the person names its letter. No camera, so it's also the quiz for someone
-//   who can't or won't use one. Until the camera check has passed, the Words
-//   card leads to the check first.
+//   who can't or won't use one. Until the camera check has passed, this page
+//   isn't open (router.js): the person is kept to Guess the letter.
 // quizRounds.js holds the quiz's state.
 // Redesigned 2026-11-01 in the camera check's look: sticker cards (with a
 // small letter tile row each until 2026-11-07), and the amber key look for Start. Until
@@ -24,7 +24,9 @@ import { useWords } from './useWords.js'
 // description (a count, a sentence and two short facts on each card), and on
 // 2026-11-07 it was trimmed so the two cards read as opposites: the title on
 // top (the Words quiz is called Fingerspell here), a preview, the count with
-// the camera fact, and one "A … is shown on screen." sentence. The card is one <button>,
+// the camera fact, and one "A … is shown on screen." sentence. On 2026-11-08
+// the sentence moved under the title, shortened to one line, the facts became
+// chips over Start, and the text is centred. The card is one <button>,
 // so it holds only <span>s.
 
 // The keys the Guess preview shows: the first row and a half of the real
@@ -100,6 +102,20 @@ function GuessPreview({ letter, hand }) {
   )
 }
 
+// The two facts that set the quizzes apart, as small chips over Start
+// (2026-11-08): how many, and whether the camera is used.
+function ChoiceFacts({ count, camera }) {
+  return (
+    <span className="quiz-choice-facts">
+      <span className="quiz-choice-chip">{count}</span>
+      <span className="quiz-choice-chip">
+        {camera ? <VideoIcon size={16} /> : <VideoOffIcon size={16} />}
+        {camera ? 'Camera on' : 'No camera'}
+      </span>
+    </span>
+  )
+}
+
 // Looks like Welcome's key button, but the whole card is the button (a button
 // can't hold another), so this is only drawn like one.
 function StartKey({ label = 'Start' }) {
@@ -115,16 +131,13 @@ function StartKey({ label = 'Start' }) {
 
 export default function QuizPage({ signingHand = 'right' }) {
   const words = useWords()
-  // Without the camera check, Words opens the check first, and comes back.
-  const { cameraChecked, openCameraCheck } = useSettings()
-  const openWords = () => (cameraChecked ? navigate(PATHS.quizWords) : openCameraCheck(PATHS.quizWords))
   const sampleWordText = pickSampleWord(words.list)
-  const wordsText =
+  const wordsCount =
     words.status === 'error'
       ? 'Words didn’t load.'
       : words.status === 'loading'
         ? 'Loading words…'
-        : `${WORD_COUNT} words · ${cameraChecked ? 'Camera on' : 'Camera setup first'}`
+        : `${WORD_COUNT} words`
   return (
     <>
       <MenuBar active="quiz" />
@@ -134,18 +147,18 @@ export default function QuizPage({ signingHand = 'right' }) {
         </header>
         <div className="quiz-choices">
           {/* Words waits for words.json. */}
-          <button type="button" className="quiz-choice" disabled={words.list.length === 0} onClick={openWords}>
+          <button type="button" className="quiz-choice" disabled={words.list.length === 0} onClick={() => navigate(PATHS.quizWords)}>
             <span className="quiz-choice-title">Fingerspell</span>
+            <span className="quiz-choice-text">Sign each letter of a word from memory.</span>
             <SpellPreview word={sampleWordText} hand={signingHand} />
-            <span className="quiz-choice-count">{wordsText}</span>
-            <span className="quiz-choice-text">A letter is shown on screen. Sign it with your hand, from memory.</span>
-            <StartKey label={cameraChecked ? 'Start' : 'Set up camera'} />
+            <ChoiceFacts count={wordsCount} camera />
+            <StartKey />
           </button>
           <button type="button" className="quiz-choice" onClick={() => navigate(PATHS.quizGuess)}>
             <span className="quiz-choice-title">Guess the letter</span>
+            <span className="quiz-choice-text">Name the letter each sign makes.</span>
             <GuessPreview letter={SAMPLE_LETTER} hand={signingHand} />
-            <span className="quiz-choice-count">{GUESS_COUNT} signs · No camera</span>
-            <span className="quiz-choice-text">A sign is shown on screen. Pick the letter it makes.</span>
+            <ChoiceFacts count={`${GUESS_COUNT} signs`} camera={false} />
             <StartKey />
           </button>
         </div>
