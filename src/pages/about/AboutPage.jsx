@@ -1,5 +1,7 @@
 import MenuBar from '../../app/layout/MenuBar.jsx'
-import AslDrawing from '../../components/AslDrawing.jsx'
+import Link from '../../app/routing/Link.jsx'
+import { PATHS } from '../../app/routing/router.js'
+import { useSettings } from '../../app/settings/settings.js'
 import Logo from '../../components/Logo.jsx'
 import { CheckIcon } from '../../components/icons/icons.jsx'
 import { CameraIcon, CameraOffIcon, NoAccountIcon, ShieldCheckIcon } from '../../components/icons/LineIcons.jsx'
@@ -33,7 +35,7 @@ const POINTS = [
 ]
 
 // Letter B's finger conditions as Learn lists them (letterShapes.js), for the
-// third step's picture. The last one is left unticked on purpose: it shows
+// checklist's picture. The last one is left unticked on purpose: it shows
 // what "which finger to fix" looks like.
 const B_CHECKS = [
   { finger: 'index', text: 'straight', met: true },
@@ -43,20 +45,28 @@ const B_CHECKS = [
   { finger: 'thumb', text: 'folded across the palm', met: false },
 ]
 
-// The first step's picture: a letter's card, its drawing and name.
-function LetterCardPicture() {
+// The letter model's picture: its three likeliest letters for a B, made up
+// but typical (the model gives every letter a share; the shares add to 100%).
+const MODEL_GUESSES = [
+  { letter: 'B', share: 96 },
+  { letter: 'U', share: 3 },
+  { letter: 'R', share: 1 },
+]
+
+// 1. The camera: a dark video frame, read in the browser.
+function CameraPicture() {
   return (
-    <div className="about-picture about-card" aria-hidden="true">
-      <span className="about-card-drawing">
-        <AslDrawing letter="B" hand="right" onWhite />
+    <div className="about-picture about-frame" aria-hidden="true">
+      <span className="about-frame-icon">
+        <CameraIcon />
       </span>
-      <div className="about-card-title">Letter B</div>
+      <span className="about-frame-chip">In your browser</span>
     </div>
   )
 }
 
-// The second step's picture: the camera frame with a hand drawn the way Sema
-// draws a tracked one (HandSketch).
+// 2. Hand tracking: the camera frame with a hand drawn the way Sema draws a
+// tracked one (HandSketch).
 function TrackedHandPicture() {
   return (
     <div className="about-picture about-frame" aria-hidden="true">
@@ -66,13 +76,32 @@ function TrackedHandPicture() {
   )
 }
 
-// The third step's picture: the checklist, four fingers ticked and the thumb
-// still to fix. The finger rules and their badges are Learn's (the .finger-*
-// rules in styles.css).
+// 3. The letter model: its likeliest letters as bars, the top one green.
+function ModelPicture() {
+  return (
+    <div className="about-picture about-panel about-model" aria-hidden="true">
+      <div className="about-panel-title">Letter model</div>
+      <ul>
+        {MODEL_GUESSES.map(({ letter, share }, i) => (
+          <li key={letter} className={i === 0 ? 'is-top' : undefined}>
+            <span className="about-model-letter">{letter}</span>
+            <span className="about-model-bar">
+              <span style={{ width: `${share}%` }} />
+            </span>
+            <span className="about-model-share">{share}%</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+// 4. The checklist: four fingers ticked and the thumb still to fix. The
+// finger rules and their badges are Learn's (the .finger-* rules in styles.css).
 function ChecklistPicture() {
   return (
-    <div className="about-picture about-checks" aria-hidden="true">
-      <div className="about-card-title">Letter B</div>
+    <div className="about-picture about-panel about-checks" aria-hidden="true">
+      <div className="about-panel-title">Letter B</div>
       <div className="finger-checks">
         <ul>
           {B_CHECKS.map(({ finger, text, met }) => (
@@ -93,26 +122,45 @@ function ChecklistPicture() {
   )
 }
 
-const STEPS = [
+// How Sema works, stage by stage, in the order the data flows. Checked against
+// the code (2026-11-07): the camera starts only on a click and asks for no
+// audio (useCamera.js); MediaPipe Hand Landmarker runs on each video frame in
+// the browser (src/vision/); normalizeHand.js moves the points to the wrist,
+// scales them by the palm and flips a left hand, with no rotation; the letter
+// model is the logistic regression in training/reports/small.md (27,463
+// samples from 14 signers), a second opinion only; the checklist is
+// letterShapes.js and letterMatch.js, with LETTER_HOLD_MS = 1.5 s. Change the
+// text when any of that changes.
+const STAGES = [
   {
-    title: 'Explore a letter',
-    Picture: LetterCardPicture,
-    text: 'Each letter includes a reference image and a brief guide to its corresponding handshape.',
+    label: 'Your camera',
+    title: 'The video stays with you',
+    Picture: CameraPicture,
+    text: 'Sema asks for your camera only when you press Turn camera on, and never for your microphone. Every frame is read right here in your browser; none is uploaded or saved.',
   },
   {
-    title: 'Form the letter',
+    label: 'Hand tracking',
+    title: '21 points on your hand',
     Picture: TrackedHandPicture,
     text: (
       <>
-        Show your chosen hand to the camera. Sema tracks <span className="intro-key">21 landmarks</span> as you form
-        the handshape.
+        <span className="intro-key">MediaPipe Hand Landmarker</span>, a hand-tracking model by Google, marks 21 points
+        on every frame: your wrist, each knuckle and each fingertip. Sema draws them over the video, so you see what it
+        sees.
       </>
     ),
   },
   {
-    title: 'Understand the handshape',
+    label: 'Letter model',
+    title: 'A second opinion',
+    Picture: ModelPicture,
+    text: 'The points are moved to your wrist, sized to your palm and flipped for a left hand, so only the handshape is left. A model trained on 27,463 photos of 14 signers names the letter it sees, and how sure it is.',
+  },
+  {
+    label: 'Finger checklist',
+    title: 'Each finger, checked',
     Picture: ChecklistPicture,
-    text: 'Sema ticks off each finger rule as you match it. Hold the letter to pass, or trace the line for J and Z. A letter model, trained on thousands of hand photos, gives a second opinion.',
+    text: 'Sema measures each finger: bent or straight, where the thumb sits, how far apart. Each rule turns green as you meet it; hold them all for 1.5 seconds and the letter passes. J and Z move, so you trace them.',
   },
 ]
 
@@ -124,9 +172,12 @@ const STEPS = [
 // gets a Get started button at the end (onStart, which opens the camera
 // check, as Welcome's does); once setup is done there is none.
 // Redesigned 2026-11-02 in Quiz's look: Gabarito, white sticker pictures with
-// soft shadows, the amber key button. The three steps share one screen, each
-// with a small picture; the data section is a Deep Cobalt band.
+// soft shadows, the amber key button. How it works follows the data, stage by
+// stage, each with a small picture (2026-11-07; before, three steps for using
+// Sema); the data section is on the page's background (2026-11-07; before, a
+// Deep Cobalt band).
 export default function AboutPage({ setupDone, onStart }) {
+  const { cameraLocked } = useSettings()
   // The cue at the bottom of the first section: scrolls to the next one.
   // A button (not a link) so the address doesn't change. No behavior option:
   // the CSS decides (scroll-behavior on html), smooth unless the person asked
@@ -140,12 +191,17 @@ export default function AboutPage({ setupDone, onStart }) {
       <MenuBar active="about" />
 
       <main className="about-page">
-        {/* 1. What is Sema? The words on the left, Sema's name in hands on the right. */}
+        {/* 1. What is Sema? Everything centred: the title with the logo beside it, then the words. */}
         <section className="about-hero" aria-labelledby="about-what">
           <div className="about-inner about-hero-grid">
             <div className="about-hero-text">
-              <h1 id="about-what">What is Sema?</h1>
-              <p className="about-lead">
+              {/* The logo stands in for the word "Sema"; its alt text keeps the heading readable. */}
+              <h1 id="about-what" className="about-hero-title">
+                <span>What is</span>
+                <Logo className="about-logo" />
+                <span aria-hidden="true">?</span>
+              </h1>
+              <p>
                 <span className="intro-key">Sema</span> is an interactive learning tool that helps you master the{' '}
                 <span className="intro-key">American Sign Language (ASL) fingerspelling alphabet</span>. Practice
                 forming each letter in front of your webcam and receive feedback on how closely your hand signs match
@@ -160,11 +216,6 @@ export default function AboutPage({ setupDone, onStart }) {
                 letters that move. It&rsquo;s <span className="intro-key">still improving.</span>
               </p>
             </div>
-
-            {/* The logo on a sticker. It has its own alt text. */}
-            <div className="about-logo-sticker">
-              <Logo className="about-logo" />
-            </div>
           </div>
           <button type="button" className="about-scroll" onClick={scrollToHow}>
             How it works
@@ -172,22 +223,27 @@ export default function AboutPage({ setupDone, onStart }) {
           </button>
         </section>
 
-        {/* 2. How Sema works: the three steps side by side on one screen, each
-            with a small picture of what it looks like. */}
+        {/* 2. How Sema works: the four stages in the order the data flows, one row
+            each, on a numbered line down the middle; the pictures and the words
+            change sides from row to row. */}
         <section id="about-how-section" className="about-how" aria-labelledby="about-how">
           <div className="about-inner">
-            <h2 id="about-how">Three steps, one letter at a time.</h2>
-            {/* An ordered list: screen readers announce the steps' numbers, so the
+            <h2 id="about-how">How Sema works</h2>
+            <p className="about-how-lead">Four stages, on every video frame, all inside your browser.</p>
+            {/* An ordered list: screen readers announce the stages' numbers, so the
                 drawn ones are hidden from them. */}
-            <ol className="about-steps">
-              {STEPS.map(({ title, text, Picture }, i) => (
-                <li key={title} className="about-step">
+            <ol className="about-flow">
+              {STAGES.map(({ label, title, text, Picture }, i) => (
+                <li key={label} className="about-stage">
                   <Picture />
-                  <span className="about-step-number" aria-hidden="true">
-                    {i + 1}
+                  <span className="about-spine" aria-hidden="true">
+                    <span className="about-step-number">{i + 1}</span>
                   </span>
-                  <h3>{title}</h3>
-                  <p>{text}</p>
+                  <div className="about-stage-text">
+                    <span className="about-stage-label">{label}</span>
+                    <h3>{title}</h3>
+                    <p>{text}</p>
+                  </div>
                 </li>
               ))}
             </ol>
@@ -195,7 +251,7 @@ export default function AboutPage({ setupDone, onStart }) {
         </section>
 
         {/* 3. How Sema handles your data, and Get started for a new visitor. */}
-        <section className="about-privacy on-dark" aria-labelledby="about-data">
+        <section className="about-privacy" aria-labelledby="about-data">
           <div className="about-inner">
             <div className="about-privacy-grid">
               <div className="about-privacy-head">
@@ -224,16 +280,26 @@ export default function AboutPage({ setupDone, onStart }) {
               </ul>
             </div>
 
-            {!setupDone && (
-              <div className="about-start">
+            {/* The way on, last on the page: Get started for a new visitor (it opens the
+                camera check, then Learn), Go to Learn once setup is done, or, before the
+                camera check has passed, back to Guess the letter, the one quiz open then. */}
+            <div className="about-start">
+              {setupDone ? (
+                <Link to={cameraLocked ? PATHS.quizGuess : PATHS.learn} className="key-button">
+                  {cameraLocked ? 'Back to the quiz' : 'Go to Learn'}
+                  <svg className="key-button-arrow" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M5 12h13M13 6l6 6-6 6" />
+                  </svg>
+                </Link>
+              ) : (
                 <button type="button" className="key-button" onClick={onStart}>
                   Get started
                   <svg className="key-button-arrow" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M5 12h13M13 6l6 6-6 6" />
                   </svg>
                 </button>
-              </div>
-            )}
+              )}
+            </div>
 
             <p className="about-hosting">
               Like every website, Sema's host sees basic visit details, such as your internet address.

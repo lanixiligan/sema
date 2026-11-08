@@ -134,11 +134,19 @@ export default function App() {
     setHandView: (handView) => updateProgress({ handView }),
     turnTipClosed: progress.turnTipClosed,
     closeTurnTip: () => updateProgress({ turnTipClosed: true }),
+    // Learn's tour (2026-11-07). Ending it saves both changes in one call:
+    // two updateProgress calls in one click would each start from the same
+    // `progress`, and the second would undo the first.
+    tourDone: progress.tourDone,
+    finishTour: (handView) => updateProgress({ tourDone: true, handView }),
     handNumbers: progress.handNumbers,
     setHandNumbers: (handNumbers) => updateProgress({ handNumbers }),
     keyLayout: progress.keyLayout,
     setKeyLayout: (keyLayout) => updateProgress({ keyLayout }),
     cameraChecked: progress.cameraChecked,
+    // Setup finished without the camera check: the router keeps the person to
+    // Guess the letter and About, and the menu says so (MenuBar).
+    cameraLocked: progress.setupDone && !progress.cameraChecked,
     openCameraCheck,
     deleteData,
   }
@@ -219,7 +227,7 @@ function Page({
         />
       )
     case 'quiz':
-      return <QuizPage />
+      return <QuizPage signingHand={signingHand} />
     case 'quizGuess':
       return <GuessQuizPage signingHand={signingHand} onSigningHandChange={onSigningHandChange} />
     case 'quizWords':

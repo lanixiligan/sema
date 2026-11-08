@@ -235,7 +235,16 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   their credits in `docs/ATTRIBUTION.md` and the README, and add one for any dataset added.
 - Quiz (`/quiz`, 2026-10-27, in the menu after Learn) tests what was learned. `/quiz` is the choice
   between two skills (2026-11-04; before, Letters, 10 random letters signed, at `/quiz/letters`, now
-  redirected to `/quiz`, because it felt the same as Words):
+  redirected to `/quiz`, because it felt the same as Words). Each choice is a card (2026-11-07):
+  its title on top (the Words card is titled Fingerspell; the quiz is still Words everywhere else),
+  a still preview of the quiz (Fingerspell: the camera frame with a white hand drawing, `AslDrawing`'s
+  `onDark`, beside the letter card with the word's tiles; Guess: keys A to L beside a hand sign
+  from them, its key green), and Start. Since 2026-11-08 the text is centred: one sentence under the
+  title ("Sign each letter of a word from memory.", "Name the letter each sign makes."; no "We"),
+  and over Start two chips, the count and the camera fact with its icon ("5 words" "Camera on",
+  "10 signs" "No camera"). On a desktop window (900px+ wide, 600px+ tall) the choice page is static,
+  like Learn: exactly the height under the bar, centred, never scrolling; on a short window the
+  previews shrink first:
   - Guess the letter (`/quiz/guess`, `GuessQuizPage` and `GuessRun`): 10 random hand pictures
     (`GUESS_LETTERS` in `quizRounds.js`: all 26 since 2026-11-04; J and Z are shown in 2D as their drawings, the handshape they start from, and in 3D their hands move, like every 3D J and Z, `docs/hand-poses.md`), never the same twice in
     a row, in `LetterPicture` with `hideLetter` (nothing it says names the letter; the 2D | 3D
@@ -268,12 +277,16 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
 - Skipping the camera (2026-11-04): until the check has passed, it has "No camera? Guess letters
   instead" under its button (`skipCameraCheck` in `App.jsx`): setup is done, but `cameraChecked`
   (in the store, apart from `setupDone`; settings saved with setup done before then count as
-  checked) stays false, and Guess the letter opens. Then Learn's `CameraView` gets `setupFirst`
-  ("Set up your camera" in the frame, no video, so neither the camera nor the hand model loads),
-  and the Words card and `/quiz/words` lead to the check. The check's address says where it
-  leads after: `/camera-setup?next=/quiz/words` (`cameraCheckPath` / `cameraCheckNext` in
-  `router.js`; the router reads only the path), and its button then says Start the Words quiz.
-  `openCameraCheck(returnTo)` in `SettingsContext` opens it.
+  checked) stays false, and Guess the letter opens. Since 2026-11-08 (Lanix's call) the person is
+  then kept there: `resolveRoute` sends Welcome, Learn, `/quiz` and `/quiz/words`
+  (`NEEDS_CAMERA_CHECK`) to `/quiz/guess`, and only Guess the letter, About and the check stay open.
+  The menu (`MenuBar`, `cameraLocked` in `SettingsContext`) shows only Guess the letter and About,
+  with a Set up camera button (`.bar-button`) that opens the check; About's last button says Back
+  to the quiz. Passing the check opens Learn and the whole menu comes back. (Before 2026-11-08 every
+  page was open: Learn's `CameraView` had `setupFirst`, a "Set up your camera" frame, now removed,
+  and the Words card led to the check.) The check's address can still say where it leads after:
+  `/camera-setup?next=/quiz/words` (`cameraCheckPath` / `cameraCheckNext` in `router.js`; the router
+  reads only the path). `openCameraCheck(returnTo)` in `SettingsContext` opens it.
 
 ## Settings
 
@@ -307,6 +320,16 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   top bar is always dark (a step lighter than Deep Cobalt in the light theme, `--cobalt-lift`, as is the
   camera frame while the camera is off, 2026-11-02): `TopBar` carries `.on-dark`, so it uses the dark colour set in
   both themes, like the camera frame. Pages needn't style their own bar.
+- Learn's tour (2026-11-07, `src/pages/learn/tour/`): on the first visit to Learn a card walks
+  through the page step by step (`tourSteps.js`, one list: welcome, the guide, the hand switch,
+  2D | 3D, turning the 3D hand, Numbers, expand, then the menu's Quiz link, with both quizzes, and
+  its About link), the rest dimmed and a ring around each part, found by CSS selectors (the first
+  one on screen wins, so a step can fall back; on a phone the menu steps ring the burger). Back,
+  Next (Done on the last), Skip tour; arrows and Escape too. Steps marked `view: '3d'` show the 3D
+  hand, and ending the tour puts the person's 2D | 3D choice back. Finishing or skipping saves
+  `tourDone` in the store (`finishTour` in `App.jsx`, one `updateProgress` call for both changes).
+  A Tour button in Learn's top bar opens it again: for development; Lanix will decide if it stays.
+  The Quiz page had a tour of its own for a day (2026-11-08); Lanix folded it into Learn's.
 - The letter hold time is fixed at 1.5 s (`LETTER_HOLD_MS`). Until 2026-10-27 it was 3 s, and
   for a few hours that day a Hold 2s | 3s | 5s switch in the camera controls (`holdSeconds` in
   the store) let the person choose; Lanix had the switch removed and the default cut to 1.5 s.
@@ -527,8 +550,10 @@ Being redesigned page by page since 2026-10-31 (`PRODUCT.md`, `.impeccable/surfa
 encouraging and warm, Duolingo's celebratory energy without a mascot, quiet while the
 person holds a letter. Welcome is done (Duolingo's layout, 2026-11-02: a bare header with only the theme button, the logo on the left and "Learn ASL fingerspelling with your webcam" with an amber key button on the right, on the theme's own page; before, centred on a Deep Sky page with a paragraph; until 2026-11-02 a name tag that fingerspelled a typed name in hand drawings), and so is the camera check
 (the same stickers, Gabarito and key button, but on the theme's own page, light or dark,
-at Lanix's request), and so are Quiz (2026-11-01) and About (2026-11-02: Sema's name in hands,
-three steps each beside a picture of it, and a Deep Cobalt band for the data section); the other pages still have
+at Lanix's request), and so are Quiz (2026-11-01) and About (2026-11-02; reworked 2026-11-07: "What is
+[logo]?" centred, How Sema works as four stages down a numbered line, camera, MediaPipe hand
+tracking, the letter model, the finger checklist, each beside a picture, and the data section on the
+page's own background with Go to Learn, or Get started for a new visitor, at the end); the other pages still have
 the old minimal, calm look until their turn. New faces: Gabarito 400–900
 (`--font-display`) and Caveat Brush (`--font-marker`, the name on the tag only).
 Fonts: Plus Jakarta Sans (text, weights 400–800) and JetBrains Mono 500 (codes and

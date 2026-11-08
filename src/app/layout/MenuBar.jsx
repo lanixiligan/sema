@@ -2,11 +2,19 @@ import { useEffect, useRef, useState } from 'react'
 import { CloseIcon, MenuIcon } from '../../components/icons/icons.jsx'
 import Link from '../routing/Link.jsx'
 import { PATHS } from '../routing/router.js'
+import { useSettings } from '../settings/settings.js'
 import TopBar from './TopBar.jsx'
 
 const MENU = [
   { page: 'learn', label: 'Learn' },
   { page: 'quiz', label: 'Quiz' },
+  { page: 'about', label: 'About' },
+]
+// The menu for someone who finished setup without the camera check (2026-11-08):
+// only the pages open to them (router.js), and a Set up camera button beside it.
+// Guess the letter is lit on its page, which says active="quiz".
+const LOCKED_MENU = [
+  { page: 'quizGuess', label: 'Guess the letter', activeFor: 'quiz' },
   { page: 'about', label: 'About' },
 ]
 
@@ -20,6 +28,8 @@ const MENU = [
 // panel under the bar. `open` is only for that panel: on a wider screen the
 // menu is always shown and the button is hidden, so it changes nothing there.
 export default function MenuBar({ active, children }) {
+  const { cameraLocked, openCameraCheck } = useSettings()
+  const items = cameraLocked ? LOCKED_MENU : MENU
   const [open, setOpen] = useState(false)
   const button = useRef(null)
   const menu = useRef(null)
@@ -58,11 +68,11 @@ export default function MenuBar({ active, children }) {
           className={open ? 'menu is-open' : 'menu'}
           onClick={() => setOpen(false)}
         >
-          {MENU.map((item) => (
+          {items.map((item) => (
             <Link
               key={item.page}
               to={PATHS[item.page]}
-              aria-current={item.page === active ? 'page' : undefined}
+              aria-current={(item.activeFor ?? item.page) === active ? 'page' : undefined}
             >
               {item.label}
             </Link>
@@ -71,6 +81,13 @@ export default function MenuBar({ active, children }) {
       }
     >
       {children}
+      {/* Passing the check opens Learn, and the whole menu comes back. In a
+          running quiz, leaving asks first, as every link does (navigate). */}
+      {cameraLocked && (
+        <button type="button" className="bar-button" onClick={() => openCameraCheck(PATHS.learn)}>
+          Set up camera
+        </button>
+      )}
       <button
         ref={button}
         type="button"
