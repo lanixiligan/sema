@@ -1710,9 +1710,11 @@ body {
    page zoom); the menu bar above it isn't zoomed. */
 @media (min-width: 1500px) {
   .quiz-choose {
-    zoom: 1.25;
+    --choose-zoom: 1.25;
+    zoom: var(--choose-zoom);
   }
 }
+
 
 .quiz-choose-head {
   display: flex;
@@ -1750,11 +1752,11 @@ body {
 .quiz-choice {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   padding: 32px 32px 36px;
   font: inherit;
   color: var(--text);
-  text-align: left;
+  text-align: center;
   cursor: pointer;
   background: var(--surface);
   border: none;
@@ -1913,9 +1915,10 @@ body {
   border-color: color-mix(in srgb, var(--success), var(--deep-cobalt) 25%);
 }
 
-/* The title sits on top, above the tiles. */
+/* The title sits on top, with its one-line sentence under it, then the
+   preview. */
 .quiz-choice-title {
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-2);
   font-family: var(--font-display);
   font-size: 40px;
   font-weight: 900;
@@ -1923,21 +1926,34 @@ body {
   letter-spacing: -0.01em;
 }
 
-/* How many: a small bold line right under the title. */
-.quiz-choice-count {
-  margin-top: var(--space-2);
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 1.3;
-  color: var(--text);
-}
-
 .quiz-choice-text {
-  margin: var(--space-4) 0 var(--space-6);
+  margin: 0 0 var(--space-5);
   font-size: 18px;
   line-height: 1.45;
   color: var(--text-muted);
-  text-wrap: pretty;
+  text-wrap: balance;
+}
+
+/* How many, and camera or not: two small chips over Start. */
+.quiz-choice-facts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+  margin: var(--space-5) 0;
+}
+
+.quiz-choice-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text);
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+  border-radius: 999px;
 }
 
 /* Welcome's key button, drawn on the card: amber with a darker edge under it.
@@ -2005,6 +2021,37 @@ body {
 
   .quiz-choice {
     padding: 24px 24px 28px;
+  }
+}
+
+/* A static page on a desktop window (2026-11-08): exactly the height under
+   the menu bar, so nothing scrolls, with the heading and cards centred in it.
+   Lengths inside a zoomed element are zoomed too, so the height divides the
+   window's by the zoom. If the window is short, the previews shrink (down to
+   96px) before anything is cut. Below 600px tall (a phone on its side) the
+   page scrolls as before. */
+@media (min-width: 900px) and (min-height: 600px) {
+  .quiz-choose {
+    height: calc((100dvh - var(--bar-height)) / var(--choose-zoom, 1));
+    overflow: hidden;
+    justify-content: center;
+    padding-block: var(--space-6);
+  }
+
+  .quiz-choices {
+    flex: 0 1 auto;
+    min-height: 0;
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  .quiz-choice {
+    min-height: 0;
+  }
+
+  .quiz-preview {
+    flex: 0 1 170px;
+    height: auto;
+    min-height: 96px;
   }
 }
 
@@ -6772,6 +6819,148 @@ html:has(.about-page) {
   border-color: var(--success-ink);
 }
 
+/* ---------- Learn's tour (2026-11-07, LearnTour.jsx) ----------
+   Fixed over the whole window, above the top bar. The ring's enormous shadow
+   is what dims the page around it; the blockers are invisible and only catch
+   clicks. The card follows the theme (--surface). */
+.tour-blocker,
+.tour-dim,
+.tour-ring,
+.tour-card {
+  position: fixed;
+  z-index: 100;
+}
+
+.tour-dim {
+  inset: 0;
+  background: rgb(12 29 48 / 0.6);
+}
+
+.tour-ring {
+  border-radius: 14px;
+  box-shadow:
+    0 0 0 3px var(--amber-on-dark),
+    0 0 0 200vmax rgb(12 29 48 / 0.6);
+  pointer-events: none;
+  transition:
+    top 250ms var(--ease-out),
+    left 250ms var(--ease-out),
+    width 250ms var(--ease-out),
+    height 250ms var(--ease-out);
+}
+
+.tour-card {
+  width: min(320px, calc(100vw - 32px));
+  padding: 18px 20px 16px;
+  color: var(--text);
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  box-shadow: 0 16px 40px rgb(12 29 48 / 0.35);
+}
+
+.tour-card.is-centred {
+  top: 50%;
+  left: 50%;
+  width: min(400px, calc(100vw - 32px));
+  transform: translate(-50%, -50%);
+}
+
+.tour-count {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  color: var(--text-muted);
+}
+
+.tour-title {
+  margin: 4px 0 6px;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.tour-text {
+  margin: 0;
+  font-size: var(--text-small);
+  line-height: 1.5;
+}
+
+.tour-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.tour-steps {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.tour-skip,
+.tour-back {
+  padding: 8px 10px;
+  font: inherit;
+  font-size: var(--text-small);
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  border-radius: var(--radius-control);
+  cursor: pointer;
+}
+
+.tour-skip {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.tour-skip:hover,
+.tour-back:hover {
+  color: var(--text);
+}
+
+.tour-skip:focus-visible,
+.tour-back:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* A text button in the top bar: Learn's Tour (for now, while Sema is being
+   built) and Set up camera, before the camera check has passed (MenuBar). */
+.bar-button {
+  height: 44px;
+  padding: 0 16px;
+  font: inherit;
+  font-family: var(--font-display);
+  font-size: var(--text-small);
+  font-weight: 700;
+  color: var(--text-muted);
+  background: none;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+
+.bar-button:hover {
+  color: var(--text);
+  background: var(--segment-track);
+  border-color: var(--border-strong);
+}
+
+.bar-button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tour-ring {
+    transition: none;
+  }
+}
+
 /* ---------- Small screens (2026-11-02): phones and tablets ----------
    Everything above is drawn for a computer, and its page rules say what a
    narrow window does only where a page needed it. These are the rest, in one
@@ -7244,18 +7433,21 @@ html:has(.about-page) {
   }
 
   .quiz-choice-title {
-    margin-bottom: var(--space-3);
+    margin-bottom: var(--space-2);
     font-size: 30px;
   }
 
-  .quiz-choice-count {
-    margin-top: var(--space-1);
-    font-size: 15px;
+  .quiz-choice-text {
+    margin: 0 0 var(--space-4);
+    font-size: 16px;
   }
 
-  .quiz-choice-text {
-    margin: var(--space-3) 0 var(--space-5);
-    font-size: 16px;
+  .quiz-choice-facts {
+    margin: var(--space-4) 0;
+  }
+
+  .quiz-choice-chip {
+    font-size: 14px;
   }
 
   .quiz-choice-start {
@@ -7662,5 +7854,17 @@ html:has(.about-page) {
 
   .practice.quiz-run .stage-problem-body {
     font-size: 12px;
+  }
+}
+
+/* Learn's tour on a phone: the card sits along the bottom of the window,
+   whatever side LearnTour chose, so it never covers the ring above it. */
+@media (max-width: 599px) {
+  .tour-card:not(.is-centred) {
+    top: auto !important;
+    right: 16px;
+    bottom: 16px !important;
+    left: 16px !important;
+    width: auto;
   }
 }
