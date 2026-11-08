@@ -33,6 +33,8 @@ export const NEW_VISITOR = {
   theme: DEFAULT_THEME,
   handView: '2d',
   turnTipClosed: false,
+  // Whether Learn's first-visit tour was finished or skipped (2026-11-07).
+  tourDone: false,
   handNumbers: true,
   keyLayout: 'alphabet',
   devAccess: null,
@@ -60,6 +62,7 @@ export function loadProgress() {
       theme: THEMES.includes(saved.theme) ? saved.theme : DEFAULT_THEME,
       handView: HAND_VIEWS.includes(saved.handView) ? saved.handView : '2d',
       turnTipClosed: saved.turnTipClosed === true,
+      tourDone: saved.tourDone === true,
       handNumbers: saved.handNumbers !== false,
       keyLayout: KEY_LAYOUTS.includes(saved.keyLayout) ? saved.keyLayout : 'alphabet',
       devAccess: typeof saved.devAccess === 'string' ? saved.devAccess : null,

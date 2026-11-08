@@ -9,6 +9,8 @@ import { useLetterPose } from '../../hand-model/letterPoses.js'
 import { LETTERS } from '../../vision/landmarks/letterShapes.js'
 import StageChecklist from './StageChecklist.jsx'
 import GuidePanel from './GuidePanel.jsx'
+import Tour from './tour/Tour.jsx'
+import { TOUR_STEPS } from './tour/tourSteps.js'
 
 // The letters in teaching order, for now plain A to Z. (Which order is best
 // is still an open decision in docs/project-plan.md.)
@@ -73,11 +75,24 @@ export default function LearnPage({ signingHand, onSigningHandChange, model = 's
   // no pose shows its drawing, but the saved choice stays: the next letter that
   // has a pose is shown in 3D again.
   const pose = useLetterPose(target)
-  const { handView } = useSettings()
+  const { handView, tourDone, finishTour } = useSettings()
+  // The first-visit tour (tour/): open on the first visit until it's finished
+  // or skipped, and again with the Tour button in the top bar (there for now,
+  // while Sema is being built; Lanix will decide whether it stays).
+  const [touring, setTouring] = useState(!tourDone)
+  function closeTour(view) {
+    finishTour(view)
+    setTouring(false)
+  }
 
   return (
     <>
-      <MenuBar active="learn" />
+      <MenuBar active="learn">
+        <button type="button" className="bar-button" onClick={() => setTouring(true)}>
+          Tour
+        </button>
+      </MenuBar>
+      {touring && <Tour steps={TOUR_STEPS} onClose={closeTour} />}
 
       {/* The guide's row on top, then two columns that start and end on the
           same lines (grid areas in styles.css, shared with the quiz). */}

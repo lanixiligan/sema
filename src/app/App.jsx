@@ -134,6 +134,11 @@ export default function App() {
     setHandView: (handView) => updateProgress({ handView }),
     turnTipClosed: progress.turnTipClosed,
     closeTurnTip: () => updateProgress({ turnTipClosed: true }),
+    // Learn's tour (2026-11-07). Ending it saves both changes in one call:
+    // two updateProgress calls in one click would each start from the same
+    // `progress`, and the second would undo the first.
+    tourDone: progress.tourDone,
+    finishTour: (handView) => updateProgress({ tourDone: true, handView }),
     handNumbers: progress.handNumbers,
     setHandNumbers: (handNumbers) => updateProgress({ handNumbers }),
     keyLayout: progress.keyLayout,

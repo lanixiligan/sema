@@ -37,6 +37,7 @@ describe('progressStore', () => {
       theme: 'dark',
       handView: '3d',
       turnTipClosed: true,
+      tourDone: true,
       handNumbers: false,
       keyLayout: 'keyboard',
       devAccess: 'ab12',
