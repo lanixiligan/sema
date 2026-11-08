@@ -1,6 +1,7 @@
 import MenuBar from '../../app/layout/MenuBar.jsx'
 import Link from '../../app/routing/Link.jsx'
 import { PATHS } from '../../app/routing/router.js'
+import { useSettings } from '../../app/settings/settings.js'
 import Logo from '../../components/Logo.jsx'
 import { CheckIcon } from '../../components/icons/icons.jsx'
 import { CameraIcon, CameraOffIcon, NoAccountIcon, ShieldCheckIcon } from '../../components/icons/LineIcons.jsx'
@@ -176,6 +177,7 @@ const STAGES = [
 // Sema); the data section is on the page's background (2026-11-07; before, a
 // Deep Cobalt band).
 export default function AboutPage({ setupDone, onStart }) {
+  const { cameraLocked } = useSettings()
   // The cue at the bottom of the first section: scrolls to the next one.
   // A button (not a link) so the address doesn't change. No behavior option:
   // the CSS decides (scroll-behavior on html), smooth unless the person asked
@@ -279,11 +281,12 @@ export default function AboutPage({ setupDone, onStart }) {
             </div>
 
             {/* The way on, last on the page: Get started for a new visitor (it opens the
-                camera check, then Learn), Go to Learn once setup is done. */}
+                camera check, then Learn), Go to Learn once setup is done, or, before the
+                camera check has passed, back to Guess the letter, the one quiz open then. */}
             <div className="about-start">
               {setupDone ? (
-                <Link to={PATHS.learn} className="key-button">
-                  Go to Learn
+                <Link to={cameraLocked ? PATHS.quizGuess : PATHS.learn} className="key-button">
+                  {cameraLocked ? 'Back to the quiz' : 'Go to Learn'}
                   <svg className="key-button-arrow" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M5 12h13M13 6l6 6-6 6" />
                   </svg>

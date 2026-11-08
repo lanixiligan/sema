@@ -23,9 +23,11 @@ describe('resolveRoute', () => {
     }
   })
 
-  it('sends someone who skipped the camera check from the Words quiz to it, and opens the rest', () => {
-    expect(resolveRoute('/quiz/words', noCamera)).toEqual({ redirect: '/camera-setup?next=/quiz/words' })
-    for (const page of ['learn', 'quiz', 'quizGuess', 'cameraCheck']) {
+  it('keeps someone who skipped the camera check to Guess the letter, About and the check', () => {
+    for (const path of ['/', '/learn', '/quiz', '/quiz/words']) {
+      expect(resolveRoute(path, noCamera)).toEqual({ redirect: '/quiz/guess' })
+    }
+    for (const page of ['quizGuess', 'about', 'cameraCheck']) {
       expect(resolveRoute(PATHS[page], noCamera)).toEqual({ page })
     }
   })

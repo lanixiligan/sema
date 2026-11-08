@@ -139,6 +139,9 @@ export default function App() {
     keyLayout: progress.keyLayout,
     setKeyLayout: (keyLayout) => updateProgress({ keyLayout }),
     cameraChecked: progress.cameraChecked,
+    // Setup finished without the camera check: the router keeps the person to
+    // Guess the letter and About, and the menu says so (MenuBar).
+    cameraLocked: progress.setupDone && !progress.cameraChecked,
     openCameraCheck,
     deleteData,
   }

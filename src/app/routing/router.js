@@ -67,16 +67,17 @@ export function cameraCheckNext(search) {
   return CHECK_NEXT.includes(next) ? next : PATHS.learn
 }
 
-// Pages that start the camera as they open, so they need the camera check
-// passed. (Learn needs it too, but its camera waits for a click, so it opens
-// and says "Set up your camera" in its frame instead.)
-const NEEDS_CAMERA_CHECK = ['quizWords']
+// Pages closed to someone who finished setup without the camera check (2026-11-08,
+// Lanix's call: before, they could open them, and Learn's camera frame said "Set up
+// your camera"). Until the check passes, only Guess the letter, About and the
+// check itself are open; the rest lead to Guess the letter.
+const NEEDS_CAMERA_CHECK = ['learn', 'quiz', 'quizWords']
 
 // Which page a path shows, as { page: 'learn' }, or { redirect: '/' } to
 // send the person somewhere else. `progress` is the saved settings
 // (progressStore): a new visitor goes through setup first, and a returning one
 // skips Welcome. Someone who finished setup without the camera check
-// (`cameraChecked` false) is sent to it from the Words quiz. A trailing slash
+// (`cameraChecked` false) is kept to Guess the letter and About. A trailing slash
 // is ignored. An address Sema never had shows the "Page not found" page
 // ('notFound', which has no address of its own); until 2026-10-29 it quietly
 // sent the person to Welcome.
@@ -85,8 +86,8 @@ export function resolveRoute(pathname, { setupDone, cameraChecked }) {
   if (MOVED[path]) return { redirect: MOVED[path] }
   const page = Object.keys(PATHS).find((name) => PATHS[name] === path)
   if (!page) return { page: 'notFound' }
-  if (page === 'welcome' && setupDone) return { redirect: PATHS.learn }
+  if (page === 'welcome' && setupDone) return { redirect: cameraChecked ? PATHS.learn : PATHS.quizGuess }
   if (NEEDS_SETUP.includes(page) && !setupDone) return { redirect: PATHS.welcome }
-  if (NEEDS_CAMERA_CHECK.includes(page) && !cameraChecked) return { redirect: cameraCheckPath(PATHS[page]) }
+  if (NEEDS_CAMERA_CHECK.includes(page) && !cameraChecked) return { redirect: PATHS.quizGuess }
   return { page }
 }

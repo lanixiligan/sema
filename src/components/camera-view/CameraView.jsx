@@ -1,6 +1,4 @@
-import { useSettings } from '../../app/settings/settings.js'
 import { useSharedCamera } from '../../app/shared-camera/sharedCamera.js'
-import { VideoIcon } from '../icons/icons.jsx'
 import { useIdleCameraOff } from '../../app/shared-camera/useIdleCameraOff.js'
 import { CAMERA_VIEW_ERRORS, CAMERA_VIEW_OTHER_TITLE } from '../../camera/cameraMessages.js'
 import { CAMERA_VIEW_NO_WEBGL, CAMERA_VIEW_TRACKING_FAILED_TITLE } from '../../vision/model/visionMessages.js'
@@ -29,42 +27,10 @@ import StageProblem from './StageProblem.jsx'
 // `panel` is for a page's own readout on the picture (Learn's finger checklist):
 // shown while the camera is live only: not while it's off, nor over a problem panel.
 // `autoStart` is CameraStage's.
-// `setupFirst` (2026-11-04): the camera check hasn't passed (the person chose
-// "No camera? Guess letters instead"), so the frame says "Set up your camera"
-// with a button to the check, and nothing else: no video, so neither the camera
-// nor the hand model is loaded.
-export default function CameraView({ setupFirst = false, className = '', ...props }) {
-  if (setupFirst) {
-    return (
-      <div className={`stage ${className}`}>
-        <CameraSetupNeeded />
-      </div>
-    )
-  }
-  return <LiveCameraView className={className} {...props} />
-}
-
-// Drawn like "Camera is off" (CameraOff), with its key button. Passing the
-// check comes back to this page.
-function CameraSetupNeeded() {
-  const { openCameraCheck } = useSettings()
-  return (
-    <div className="camera-off" role="status">
-      <span className="camera-off-badge">
-        <VideoIcon size={32} />
-      </span>
-      <p className="camera-off-title">Set up your camera</p>
-      <p className="camera-off-text">A quick check first, so Sema can see your hand.</p>
-      <button type="button" onClick={() => openCameraCheck(window.location.pathname)}>
-        Set up your camera
-      </button>
-    </div>
-  )
-}
-
-// A hook can't be called after an early return, so the live view is its own
-// component (the hooks are in here).
-function LiveCameraView({ canvasRef, hand, className, autoStart = true, offNote, controls = {}, underlay, panel, children }) {
+// (From 2026-11-04 to 2026-11-08 it also had `setupFirst`, a "Set up your
+// camera" frame for someone who skipped the camera check; since then the
+// router keeps them off the camera pages.)
+export default function CameraView({ canvasRef, hand, className = '', autoStart = true, offNote, controls = {}, underlay, panel, children }) {
   const camera = useSharedCamera()
   const { handModel } = camera
   const isDetecting = camera.status === 'live' && handModel.status === 'ready'
