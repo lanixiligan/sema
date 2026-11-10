@@ -4,7 +4,7 @@ Usage: python3 training/train.py data/extracted/<file>.json [...] data/raw/<sess
 Any number of extracted files (one per public dataset) and session files, in
 any order. Trains on the cleaned public photos, tests it twice, and writes
 training/reports/knn.md (numbers only, no hand points). It also saves the model
-for the /try page in data/models/knn-asl.json (gitignored). The tests:
+for Learn (under npm run dev) in data/models/knn-asl.json (gitignored). The tests:
 1. On people it has never seen: each public signer in turn, trained on the others.
 2. On Lanix's recordings (the session files), trained on all the photos.
 k and the "not sure" threshold are chosen from test 1 alone, so test 2 stays fair.
@@ -25,7 +25,7 @@ from knn import NOT_SURE, Knn, leave_one_signer_out, save_model, with_threshold
 REPORT = Path(__file__).parent / "reports" / "knn.md"
 # The headline numbers, for the developer dashboard (src/pages/dev/DevDashboard.jsx).
 SUMMARY = Path(__file__).parent / "reports" / "knn.json"
-# The model for the /dev/try page (gitignored: it holds every training hand).
+# The model for Learn, under npm run dev (gitignored: it holds every training hand).
 MODEL = Path(__file__).parent.parent / "data" / "models" / "knn-asl.json"
 K_CHOICES = [1, 3, 5, 9, 15, 25]
 # "Not sure" when a hand is further from its neighbours than this share of

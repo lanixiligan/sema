@@ -11,7 +11,7 @@ train.py first, with the same files. The tests:
 The settings and the "not sure" threshold come from test 1 alone, so test 2
 stays fair. Both models are saved in data/models/ (gitignored), and the one that
 does better in test 1 is copied to public/models/asl-letters.json for the
-/try page: it holds weights, not training hands, so it can go on the live site.
+Learn page: it holds weights, not training hands, so it can go on the live site.
 """
 
 import json

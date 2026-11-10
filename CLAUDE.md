@@ -76,7 +76,13 @@ The development plan is `docs/project-plan.md`.
 - `npm run copy-mediapipe`: copy MediaPipe's wasm into `public/mediapipe/wasm/`
   (also runs on `postinstall`)
 - `npm run dev-code -- "a long passphrase"`: set the developer pages' access code
-- `python3 -m unittest discover training`: the training code's tests
+- `npm run check-rules -- data/extracted/<file>.json [...] data/raw/<session>.json [...]`:
+  measure the finger rules on real hands and write `training/reports/rules.md` (run it before
+  and after changing a rule in `letterShapes.js`)
+- `python3 -m unittest discover training`: the training code's tests (CI runs them too)
+- `python3 training/letter_hands.py data/extracted/<asl-hg file>.json`: remake the tests'
+  fixture of real hands (`src/vision/landmarks/fixtures/letter-hands.json`) after training a
+  new model
 - `python3 training/clean.py data/extracted/<file>.json`: clean one dataset's extracted hand
   points and write `training/reports/cleaning-<dataset>.md`
 - `python3 training/train.py data/extracted/<file>.json [...] data/raw/<session>.json [...]`:

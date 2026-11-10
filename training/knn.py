@@ -42,7 +42,7 @@ def with_threshold(letters, distances, threshold):
 
 
 def save_model(path, shapes, letters, k, threshold):
-    """Saves what the browser needs to run the classifier (the /dev/try page):
+    """Saves what the browser needs to run the classifier (Learn, under npm run dev):
     every training hand's 63 numbers in one flat list, each one's letter as an
     index into `letters`, k, and the "not sure" threshold."""
     names = sorted(set(letters))

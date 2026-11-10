@@ -89,7 +89,9 @@ def to_network(pipeline):
 def forward(network, shapes):
     """Runs a network from to_network() (or a saved model) on shapes, and
     returns each shape's percentages, in the order of network["letters"]. The
-    same steps as the browser's copy (src/pages/dev/try/networkModel.js)."""
+    same steps as the browser's copy (src/components/letter-check/networkModel.js).
+    training/test_letter_hands.py and networkModel.test.js check both on the same
+    real hands."""
     values = (np.asarray(shapes, dtype=float) - network["mean"]) / network["scale"]
     layers = network["layers"]
     for i, layer in enumerate(layers):
@@ -103,7 +105,7 @@ def forward(network, shapes):
 
 
 def save_model(path, pipeline, name, threshold):
-    """Saves what the browser needs to run the model (the /dev/try page): its
+    """Saves what the browser needs to run the model (Learn and the quiz): its
     name, the letters, the "not sure" threshold, and the network's numbers."""
     network = to_network(pipeline)
     model = {

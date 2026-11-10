@@ -241,7 +241,23 @@ panel's line fills as it's traced, and a slip over 0.8 s starts it over.
 Each JavaScript copy must give the same answers as its Python: `networkModel.js` as
 `forward()` in `training/small.py`, `knnModel.js` as `training/knn.py`. Checked on 2026-10-22
 on all 1,620 recorded frames, for both: the same letter and the same "sure or not" for every
-one (the small model's percentages within 2e-15). Check again after changing either side.
+one (the small model's percentages within 2e-15). Since 2026-11-10 tests check it too, on one
+typical public hand per still letter (`src/vision/landmarks/fixtures/letter-hands.json`, made by
+`training/letter_hands.py`): `networkModel.test.js` and `training/test_letter_hands.py` read the
+same file, so run `letter_hands.py` again after training a new model. `readModel` also refuses a
+file whose lists don't fit together.
+
+The letter model's file never blocks the check (2026-11-10): while it loads, a still letter
+waits, but if it fails to load the finger rules run alone and Learn only has no "Model" reading
+(`checkReady` in `letterHold.js`; before, Learn and the quiz stayed on "Getting ready…").
+
+**Measuring the finger rules** (2026-11-10): `npm run check-rules -- data/extracted/<file>.json
+[...] data/raw/<session>.json [...]` (`scripts/check-rules.js`) runs every hand through
+`matchLetter`, once per still letter, and writes `training/reports/rules.md`: per letter, the
+share of its hands that pass as that letter, the other letters they would also pass as, and each
+condition's average score. Run it before and after changing a rule. `letterMatch.test.js` lists
+what the typical hands get right and what they don't yet (`it.fails`): when a rule is fixed, its
+line fails, and the letter moves to the passing list.
 
 ## Where the code is
 
