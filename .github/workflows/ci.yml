@@ -29,3 +29,17 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      # The training code's tests (training/). Only the two packages the
+      # scripts need, at the versions training/requirements.txt pins; the
+      # notebooks' packages aren't needed to test.
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      - name: Install training dependencies
+        run: grep -E '^(numpy|scikit-learn)==' training/requirements.txt | pip install -r /dev/stdin
+
+      - name: Test training code
+        run: python3 -m unittest discover training
