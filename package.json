@@ -12,6 +12,7 @@
     "postinstall": "npm run copy-mediapipe",
     "test": "vitest run",
     "check-session": "node scripts/check-session.js",
+    "check-rules": "node scripts/check-rules.js",
     "dev-code": "node scripts/dev-code.js"
   },
   "dependencies": {
