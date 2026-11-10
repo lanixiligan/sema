@@ -13,6 +13,7 @@ import * as knnModel from './knnModel.js'
 import {
   LETTER_HOLD_MS,
   NO_HOLD,
+  checkReady,
   heldLongEnough,
   holdSecondsLeft,
   modelReading,
@@ -127,8 +128,11 @@ export function useLetterCheck({ target, round, signingHand, model = 'small' }) 
   // The detection loop calls the listener on every frame, with every hand.
   // State only changes when a value does, so React skips most of these.
   useEffect(() => {
-    // J and Z move, so they're traced instead (the next effect).
-    if (loaded.status !== 'ready' || traced) return
+    // J and Z move, so they're traced instead (the next effect). The letter
+    // model's file is waited for while it loads, but a file that failed
+    // doesn't stop the check (checkReady in letterHold.js): the finger rules
+    // decide, and the model is only a second opinion.
+    if (loaded.status === 'loading' || traced) return
     let shownAt = 0
     let hold = NO_HOLD
     let done = false
@@ -263,7 +267,7 @@ export function useLetterCheck({ target, round, signingHand, model = 'small' }) 
     cameraStatus: camera.status,
     cameraError: camera.error,
     trackingError: handModel.status === 'error' || Boolean(hand.error),
-    ready: handModel.status === 'ready' && (traced || loaded.status === 'ready'),
+    ready: checkReady({ handModelReady: handModel.status === 'ready', traced, modelStatus: loaded.status }),
     passed,
     secondsLeft: holding ? secondsLeft : null,
     guesses: shown,
@@ -329,14 +333,15 @@ function signingHandChecks({ hands, width, height }, signingHand, letter) {
 }
 
 // One hand's guess, with the target's finger conditions scored for it, or
-// null if its points are unusable.
+// null if its points are unusable. `model` is undefined when the letter
+// model's file failed to load: the guess then has only the conditions.
 function guess(kind, model, hand, { width, height }, target) {
   const frame = frameFromDetection({ ...hand, width, height }, null)
   if (!frame.hasHand) return null
   // Training only used whole hands (training/dataset.py), and so does Record.
   if (!isWholeHand(hand.landmarks)) return { hand: frame.detected, whole: false }
   // The model's guess is only shown (Learn's second opinion); the conditions decide.
-  const result = kind.classify(model, frame.landmarks)
+  const result = model ? kind.classify(model, frame.landmarks) : null
   return { hand: frame.detected, whole: true, ...result, ...matchLetter(target, frame.landmarks) }
 }
 

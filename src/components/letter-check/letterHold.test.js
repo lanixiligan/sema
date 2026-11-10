@@ -4,6 +4,7 @@ import {
   NO_HOLD,
   heldLongEnough,
   holdSecondsLeft,
+  checkReady,
   modelReading,
   modelVerdict,
   showsLetter,
@@ -135,6 +136,32 @@ describe('modelReading', () => {
   it('reads nothing without a whole hand', () => {
     expect(modelReading([{ hand: 'right', whole: false }])).toBe(null)
     expect(modelReading([])).toBe(null)
+  })
+
+  it('reads nothing from a hand judged without the letter model (its file failed to load)', () => {
+    expect(modelReading([{ hand: 'right', whole: true, makes: true }])).toBe(null)
+  })
+})
+
+describe('checkReady', () => {
+  it('waits while the letter model is loading', () => {
+    expect(checkReady({ handModelReady: true, traced: false, modelStatus: 'loading' })).toBe(false)
+  })
+
+  it('goes on once the letter model is ready', () => {
+    expect(checkReady({ handModelReady: true, traced: false, modelStatus: 'ready' })).toBe(true)
+  })
+
+  it('goes on without the letter model when its file failed to load', () => {
+    expect(checkReady({ handModelReady: true, traced: false, modelStatus: 'error' })).toBe(true)
+  })
+
+  it('never waits for the letter model on a traced letter', () => {
+    expect(checkReady({ handModelReady: true, traced: true, modelStatus: 'loading' })).toBe(true)
+  })
+
+  it('always needs the hand model', () => {
+    expect(checkReady({ handModelReady: false, traced: true, modelStatus: 'ready' })).toBe(false)
   })
 })
 
