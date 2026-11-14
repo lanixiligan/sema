@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "pinky": [
+    0,
+    0,
+    0
+  ],
+  "ring": [
+    0,
+    0,
+    0
+  ],
+  "middle": [
+    0,
+    0,
+    0
+  ],
+  "index": [
+    0,
+    0,
+    0
+  ],
+  "thumb": [
+    0.279,
+    0.297
+  ],
+  "spread": {
+    "index": -0.18,
+    "middle": -0.05,
+    "ring": 0,
+    "pinky": 0.157,
+    "thumb": 0.175
+  },
+  "rotate": {
+    "thumb": 0.017,
+    "index": 0,
+    "middle": 0,
+    "ring": 0,
+    "pinky": 0
+  },
+  "wrist": {
+    "turn": -0.175,
+    "tilt": 0.175,
+    "twist": 0.192
+  },
+  "move": {
+    "side": 0,
+    "up": 0
+  },
+  "scale": 1
+}

@@ -1,0 +1,4 @@
+[
+  {"say": "Fold {index}, {middle}, {ring} and {pinky} down into a fist.", "checks": ["{index} folded down", "{middle} folded down", "{ring} folded down", "{pinky} folded down"]},
+  {"say": "Keep {thumb} straight and rest it against the side of your fist, next to {index}.", "checks": ["{thumb} along the side of the fist", "{thumb} straight"]}
+]

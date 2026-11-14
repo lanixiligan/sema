@@ -1,0 +1,4 @@
+[
+  {"say": "Fold {middle}, {ring} and {pinky} down, and rest {thumb} over them.", "checks": ["{middle} folded down", "{ring} folded down", "{pinky} folded down"]},
+  {"say": "Bend {index} into a hook.", "checks": ["{index} bent into a hook"]}
+]
