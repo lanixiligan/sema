@@ -6,14 +6,17 @@ import { useSettings } from '../settings/settings.js'
 import TopBar from './TopBar.jsx'
 
 const MENU = [
+  { page: 'tutorials', label: 'Tutorials' },
   { page: 'learn', label: 'Learn' },
   { page: 'quiz', label: 'Quiz' },
   { page: 'about', label: 'About' },
 ]
 // The menu for someone who finished setup without the camera check (2026-11-08):
-// only the pages open to them (router.js), and a Set up camera button beside it.
+// only the pages open to them (router.js; Tutorials needs no camera), and a Set
+// up camera button beside it.
 // Guess the letter is lit on its page, which says active="quiz".
 const LOCKED_MENU = [
+  { page: 'tutorials', label: 'Tutorials' },
   { page: 'quizGuess', label: 'Guess the letter', activeFor: 'quiz' },
   { page: 'about', label: 'About' },
 ]

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { PATHS, cameraCheckNext, cameraCheckPath, resolveRoute } from './router.js'
+import { PATHS, cameraCheckNext, cameraCheckPath, letterInAddress, letterPath, resolveRoute } from './router.js'
 
 const newVisitor = { signingHand: null, setupDone: false }
 const returning = { signingHand: 'right', setupDone: true, cameraChecked: true }
@@ -18,7 +18,7 @@ describe('resolveRoute', () => {
   })
 
   it('sends a new visitor from Learn and the quiz pages to Welcome', () => {
-    for (const path of ['/learn', '/quiz', '/quiz/words', '/quiz/guess']) {
+    for (const path of ['/learn', '/tutorials', '/quiz', '/quiz/words', '/quiz/guess']) {
       expect(resolveRoute(path, newVisitor)).toEqual({ redirect: '/' })
     }
   })
@@ -27,7 +27,7 @@ describe('resolveRoute', () => {
     for (const path of ['/', '/learn', '/quiz', '/quiz/words']) {
       expect(resolveRoute(path, noCamera)).toEqual({ redirect: '/quiz/guess' })
     }
-    for (const page of ['quizGuess', 'about', 'cameraCheck']) {
+    for (const page of ['quizGuess', 'tutorials', 'about', 'cameraCheck']) {
       expect(resolveRoute(PATHS[page], noCamera)).toEqual({ page })
     }
   })
@@ -38,6 +38,15 @@ describe('resolveRoute', () => {
     expect(cameraCheckNext('?next=/quiz/words')).toBe('/quiz/words')
     expect(cameraCheckNext('')).toBe('/learn')
     expect(cameraCheckNext('?next=https://example.com')).toBe('/learn')
+  })
+
+  it('puts a letter in Learn\'s and Tutorials\' address, and reads it back', () => {
+    expect(letterPath('tutorials', 'B')).toBe('/tutorials?letter=B')
+    expect(letterPath('learn', 'B')).toBe('/learn?letter=B')
+    expect(letterInAddress('?letter=B')).toBe('B')
+    expect(letterInAddress('')).toBeNull()
+    expect(letterInAddress('?letter=b')).toBeNull()
+    expect(letterInAddress('?letter=BB')).toBeNull()
   })
 
   it('sends the old Letters quiz address to the quiz choice', () => {
