@@ -22,7 +22,7 @@
 // movement plays and fits the whole movement in the frame. Sema's own change
 // (2026-11-04): the curve between steps is smoothBetween, which can't overshoot
 // a step (Eidos's catmullRom did, and the hand bounced).
-// Sema's own change (2026-11-14, the Tutorials page): setPose's `fitTo`, a pose
+// Sema's own change (2026-11-14, the Handshapes page): setPose's `fitTo`, a pose
 // whose every step is measured for the fit instead of the pose being set, so
 // the camera stays where it is while a letter's guide goes from step to step.
 import * as THREE from 'three';

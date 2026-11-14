@@ -43,8 +43,8 @@ export const TOUR_STEPS = [
   // menu is folded away) its burger button.
   {
     title: 'New to a letter?',
-    text: 'Tutorials shows how to make a letter step by step, finger by finger, on a large 3D hand. No camera needed.',
-    target: ['#main-menu a[href="/tutorials"]', '.menu-toggle'],
+    text: 'Handshapes shows how to make a letter step by step, finger by finger, on a large 3D hand. No camera needed.',
+    target: ['#main-menu a[href="/handshapes"]', '.menu-toggle'],
   },
   {
     title: 'Two quizzes',

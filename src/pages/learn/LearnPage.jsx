@@ -40,7 +40,7 @@ export default function LearnPage({ signingHand, onSigningHandChange, model = 's
   // The letter to make, and each round of it: picking a letter, Try again or
   // Next letter starts a new round, which starts the hold over.
   // It starts at A, or at the letter in the address (/learn?letter=B, where
-  // the Tutorials page's "Try B with your camera" leads).
+  // the Handshapes page's "Try B with your camera" leads).
   const [target, setTarget] = useState(() => {
     const asked = letterInAddress(window.location.search)
     return LESSONS.includes(asked) ? asked : LESSONS[0]
@@ -84,7 +84,7 @@ export default function LearnPage({ signingHand, onSigningHandChange, model = 's
   // has a pose is shown in 3D again.
   const pose = useLetterPose(target)
   const { handView, tourDone, finishTour } = useSettings()
-  // The letters with a step-by-step guide on the Tutorials page (null while
+  // The letters with a step-by-step guide on the Handshapes page (null while
   // the list loads): those get a link to it under the card.
   const guideLetters = useGuideLetters()
   // The first-visit tour (tour/): open on the first visit until it's finished
@@ -187,7 +187,7 @@ export default function LearnPage({ signingHand, onSigningHandChange, model = 's
               <LetterPicture letter={target} hand={drawnHand} view={handView} pose={pose} className="learn-picture" />
             </div>
             {guideLetters?.includes(target) && (
-              <Link className="learn-how" to={letterPath('tutorials', target)}>
+              <Link className="learn-how" to={letterPath('handshapes', target)}>
                 How to make {target}, step by step
               </Link>
             )}

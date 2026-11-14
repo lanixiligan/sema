@@ -26,7 +26,7 @@ import { FINGERS } from './pose.js'
 // (the effect on `pose` below), with a progress bar along the frame's bottom
 // edge, like a video's: it fills while the hand moves, stays full while it
 // holds the last step, and starts again from empty with the next play.
-// For the Tutorials page (2026-11-14), which shows a letter's guide one step
+// For the Handshapes page (2026-11-14), which shows a letter's guide one step
 // at a time: `duration` (ms) makes the move to a new pose take exactly that
 // long, `fitTo` is the whole guide (a pose with `motion`), so the frame is
 // fitted once for every step and the camera doesn't move between them, and
@@ -157,7 +157,7 @@ export default function HandModelView({
     }
   }, [pose, instant, duration, fitTo])
 
-  // The fingers whose numbers are lit (the Tutorials page: the ones a step
+  // The fingers whose numbers are lit (the Handshapes page: the ones a step
   // moves). The numbers are only made once the model has loaded, so this waits
   // for it. The list is compared as text, so a new array with the same fingers
   // doesn't run it again.

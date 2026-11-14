@@ -13,7 +13,7 @@ export const PATHS = {
   learn: '/learn',
   // How to make each letter, step by step, on a large 3D hand (2026-11-14).
   // No camera: it teaches, Learn practises and checks.
-  tutorials: '/tutorials',
+  handshapes: '/handshapes',
   // Test what was learned: the choice between the two kinds of quiz.
   quiz: '/quiz',
   // The two kinds, one page each (2026-11-04): Words, signed with the camera,
@@ -52,7 +52,7 @@ const MOVED = {
 }
 
 // Pages that need setup finished first.
-const NEEDS_SETUP = ['learn', 'tutorials', 'quiz', 'quizWords', 'quizGuess']
+const NEEDS_SETUP = ['learn', 'handshapes', 'quiz', 'quizWords', 'quizGuess']
 // Where the camera check may lead once it passes, besides Learn.
 const CHECK_NEXT = [PATHS.learn, PATHS.quizWords]
 
@@ -70,9 +70,9 @@ export function cameraCheckNext(search) {
   return CHECK_NEXT.includes(next) ? next : PATHS.learn
 }
 
-// Learn's and Tutorials' address for one letter: /tutorials?letter=B. The
+// Learn's and Handshapes' address for one letter: /handshapes?letter=B. The
 // letter is in the query, like the camera check's `next`, so the router still
-// only reads the path. `page` is 'learn' or 'tutorials'.
+// only reads the path. `page` is 'learn' or 'handshapes'.
 export function letterPath(page, letter) {
   return `${PATHS[page]}?letter=${letter}`
 }
@@ -86,7 +86,7 @@ export function letterInAddress(search) {
 
 // Pages closed to someone who finished setup without the camera check (2026-11-08,
 // Lanix's call: before, they could open them, and Learn's camera frame said "Set up
-// your camera"). Until the check passes, only Guess the letter, Tutorials (it
+// your camera"). Until the check passes, only Guess the letter, Handshapes (it
 // needs no camera), About and the check itself are open; the rest lead to
 // Guess the letter.
 const NEEDS_CAMERA_CHECK = ['learn', 'quiz', 'quizWords']

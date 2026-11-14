@@ -20,7 +20,7 @@ const HandModelView = lazy(() => import('../../hand-model/HandModelView.jsx'))
 // set for it in Eidos.
 const JUMP_MS = 600
 
-// Tutorials (/tutorials, 2026-11-14): how to make a letter, step by step, on a
+// Handshapes (/handshapes, 2026-11-14): how to make a letter, step by step, on a
 // large 3D hand. It teaches; Learn practises and checks, so there's no camera
 // here. Each letter's guide is made in Eidos as a movement, and each step of
 // that movement is one step here, with a sentence from guides/text/B.json
@@ -36,11 +36,11 @@ const JUMP_MS = 600
 // 2D | 3D choice says, and that choice is left alone. If the 3D hand can't be
 // drawn (no WebGL), the letter's drawing shows instead and the steps still
 // read as a list.
-export default function TutorialsPage({ signingHand, onSigningHandChange }) {
+export default function HandshapesPage({ signingHand, onSigningHandChange }) {
   const hand = signingHand ?? 'right'
   const { shownTheme, cameraLocked } = useSettings()
-  // Every letter has a tutorial (a still one until its guide is made in
-  // Eidos). The one picked: the letter in the address (/tutorials?letter=B),
+  // Every letter has a guide (a still one until its guide is made in
+  // Eidos). The one picked: the letter in the address (/handshapes?letter=B),
   // else A.
   const letters = LETTERS
   const [picked, setPicked] = useState(() => letterInAddress(window.location.search))
@@ -65,20 +65,20 @@ export default function TutorialsPage({ signingHand, onSigningHandChange }) {
     setAt({ step: 0, duration: 0 })
     // The address follows the letter, so a reload or a shared link opens it.
     // replace: picking letters doesn't fill the Back button's history.
-    navigate(letterPath('tutorials', next), { replace: true })
+    navigate(letterPath('handshapes', next), { replace: true })
   }
 
   if (guide.status === 'loading' && !guide.guide) {
     return (
       <Shell>
-        <p className="tutorial-note">Loading the tutorials…</p>
+        <p className="handshapes-note">Loading the guides…</p>
       </Shell>
     )
   }
   if (guide.status === 'unavailable') {
     return (
       <Shell>
-        <p className="tutorial-note">The tutorial for {letter} can&rsquo;t be shown right now.</p>
+        <p className="handshapes-note">The guide for {letter} can&rsquo;t be shown right now.</p>
       </Shell>
     )
   }
@@ -97,7 +97,7 @@ export default function TutorialsPage({ signingHand, onSigningHandChange }) {
   }
 
   const drawing = (
-    <div className="tutorial-flat">
+    <div className="handshapes-flat">
       <AslDrawing letter={shown} hand={hand} alt={`Handshape for ${shown}`} />
       <p>The 3D hand can&rsquo;t run in this browser. This drawing is the finished letter.</p>
     </div>
@@ -105,8 +105,8 @@ export default function TutorialsPage({ signingHand, onSigningHandChange }) {
 
   return (
     <Shell>
-      <section className="tutorial-letters" aria-labelledby="tutorial-letters-title">
-        <h2 id="tutorial-letters-title" className="visually-hidden">
+      <section className="handshapes-letters" aria-labelledby="handshapes-letters-title">
+        <h2 id="handshapes-letters-title" className="visually-hidden">
           Letters
         </h2>
         <ul ref={row}>
@@ -120,7 +120,7 @@ export default function TutorialsPage({ signingHand, onSigningHandChange }) {
         </ul>
       </section>
 
-      <section className="tutorial-card" aria-label="The hand">
+      <section className="handshapes-card" aria-label="The hand">
         <Suspense fallback={<p className="hand-model-wait">Loading the 3D hand…</p>}>
           <HandModelView
             letter={shown}
@@ -135,23 +135,23 @@ export default function TutorialsPage({ signingHand, onSigningHandChange }) {
           />
         </Suspense>
         {stepByStep && (
-          <p className="tutorial-count" aria-hidden="true">
+          <p className="handshapes-count" aria-hidden="true">
             Step {step + 1} of {steps.length}
           </p>
         )}
-        <div className="tutorial-corner">
+        <div className="handshapes-corner">
           <HandSideToggle hand={hand} onChange={onSigningHandChange} />
         </div>
       </section>
 
-      <section className="tutorial-steps" aria-labelledby="tutorial-title">
-        <h1 id="tutorial-title" className="tutorial-title">
+      <section className="handshapes-steps" aria-labelledby="handshapes-title">
+        <h1 id="handshapes-title" className="handshapes-title">
           How to make <span>{shown}</span>
         </h1>
         {/* A still guide (no movement made in Eidos yet) is the finished
             letter alone, with a note instead of the steps. */}
         {!stepByStep && (
-          <p className="tutorial-still-note">
+          <p className="handshapes-still-note">
             A step-by-step guide for {shown} is coming soon. For now, here is the finished letter: turn the hand to see
             it from every side.
           </p>
@@ -159,19 +159,19 @@ export default function TutorialsPage({ signingHand, onSigningHandChange }) {
         {/* Every step is a button, so any of them can be gone back to. The
             one on screen says so to screen readers (aria-current). */}
         {stepByStep && (
-          <ol className="tutorial-list">
+          <ol className="handshapes-list">
             {steps.map((each, i) => (
               <li key={i}>
                 <button
                   type="button"
-                  className={i < step ? 'tutorial-step done' : 'tutorial-step'}
+                  className={i < step ? 'handshapes-step done' : 'handshapes-step'}
                   aria-current={i === step ? 'step' : undefined}
                   onClick={() => go(i)}
                 >
-                  <span className="tutorial-step-number" aria-hidden="true">
+                  <span className="handshapes-step-number" aria-hidden="true">
                     {i < step ? <CheckIcon size={14} strokeWidth={3} /> : i + 1}
                   </span>
-                  <span className="tutorial-step-text">
+                  <span className="handshapes-step-text">
                     {/* A step with no sentence yet (its text file is shorter
                         than the movement) shows only its number. */}
                     {each.say ? (
@@ -185,10 +185,10 @@ export default function TutorialsPage({ signingHand, onSigningHandChange }) {
                     {/* What the step gets right: the finger conditions Learn's
                         checklist will tick (letterShapes.js). */}
                     {i === step && each.checks.length > 0 && (
-                      <span className="tutorial-checks">
+                      <span className="handshapes-checks">
                         <span className="visually-hidden">Learn will check: </span>
                         {each.checks.map((check) => (
-                          <span key={check} className="tutorial-check">
+                          <span key={check} className="handshapes-check">
                             <CheckIcon size={11} strokeWidth={3} />
                             <span>
                               <FingerText text={check} />
@@ -204,26 +204,26 @@ export default function TutorialsPage({ signingHand, onSigningHandChange }) {
           </ol>
         )}
 
-        <div className="tutorial-actions">
+        <div className="handshapes-actions">
           {stepByStep && (
-            <button type="button" className="tutorial-back" disabled={step === 0} onClick={() => go(step - 1)}>
+            <button type="button" className="handshapes-back" disabled={step === 0} onClick={() => go(step - 1)}>
               Back
             </button>
           )}
           {!last && (
-            <button type="button" className="button tutorial-next" onClick={() => go(step + 1)}>
+            <button type="button" className="button handshapes-next" onClick={() => go(step + 1)}>
               Next step
             </button>
           )}
           {/* Learn needs the camera check; someone who skipped it gets the
               next letter instead. */}
           {last && !cameraLocked && (
-            <Link className="button tutorial-next" to={letterPath('learn', shown)}>
+            <Link className="button handshapes-next" to={letterPath('learn', shown)}>
               Try {shown} with your camera
             </Link>
           )}
           {last && nextLetter && (
-            <button type="button" className={cameraLocked ? 'button tutorial-next' : 'tutorial-back'} onClick={() => pick(nextLetter)}>
+            <button type="button" className={cameraLocked ? 'button handshapes-next' : 'handshapes-back'} onClick={() => pick(nextLetter)}>
               Next letter: {nextLetter}
             </button>
           )}
@@ -237,8 +237,8 @@ export default function TutorialsPage({ signingHand, onSigningHandChange }) {
 function Shell({ children }) {
   return (
     <>
-      <MenuBar active="tutorials" />
-      <main className="tutorial">{children}</main>
+      <MenuBar active="handshapes" />
+      <main className="handshapes">{children}</main>
     </>
   )
 }

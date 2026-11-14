@@ -18,7 +18,7 @@ describe('resolveRoute', () => {
   })
 
   it('sends a new visitor from Learn and the quiz pages to Welcome', () => {
-    for (const path of ['/learn', '/tutorials', '/quiz', '/quiz/words', '/quiz/guess']) {
+    for (const path of ['/learn', '/handshapes', '/quiz', '/quiz/words', '/quiz/guess']) {
       expect(resolveRoute(path, newVisitor)).toEqual({ redirect: '/' })
     }
   })
@@ -27,7 +27,7 @@ describe('resolveRoute', () => {
     for (const path of ['/', '/learn', '/quiz', '/quiz/words']) {
       expect(resolveRoute(path, noCamera)).toEqual({ redirect: '/quiz/guess' })
     }
-    for (const page of ['quizGuess', 'tutorials', 'about', 'cameraCheck']) {
+    for (const page of ['quizGuess', 'handshapes', 'about', 'cameraCheck']) {
       expect(resolveRoute(PATHS[page], noCamera)).toEqual({ page })
     }
   })
@@ -40,8 +40,8 @@ describe('resolveRoute', () => {
     expect(cameraCheckNext('?next=https://example.com')).toBe('/learn')
   })
 
-  it('puts a letter in Learn\'s and Tutorials\' address, and reads it back', () => {
-    expect(letterPath('tutorials', 'B')).toBe('/tutorials?letter=B')
+  it('puts a letter in Learn\'s and Handshapes\' address, and reads it back', () => {
+    expect(letterPath('handshapes', 'B')).toBe('/handshapes?letter=B')
     expect(letterPath('learn', 'B')).toBe('/learn?letter=B')
     expect(letterInAddress('?letter=B')).toBe('B')
     expect(letterInAddress('')).toBeNull()

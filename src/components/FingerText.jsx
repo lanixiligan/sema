@@ -3,7 +3,7 @@ import { FINGER_NUMBERS } from '../vision/landmarks/handPoints.js'
 // A sentence about fingers, with every {finger} as its number in a badge and
 // its name in bold: "{thumb} tucked in" shows as "(1) thumb tucked in". The
 // numbers are the ones on the fingertips, 1 thumb to 5 pinky (handPoints.js).
-// Used by Learn's finger checklist and the Tutorials page's steps (2026-11-14;
+// Used by Learn's finger checklist and the Handshapes page's steps (2026-11-14;
 // before, inside pages/learn/FingerChecklist.jsx).
 export default function FingerText({ text }) {
   return text.split(/\{(\w+)\}/).map((part, i) =>

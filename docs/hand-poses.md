@@ -64,12 +64,12 @@ was added): the loop replays it. The fit
 measures every step, so the whole movement stays in the frame and the camera doesn't move while it
 plays. The viewer keeps drawing only while the hand moves, so between plays it costs nothing.
 
-## Guides (the Tutorials page)
+## Guides (the Handshapes page)
 
-Since 2026-11-14 a letter can have a step-by-step guide, shown on the Tutorials page
-(`/tutorials`): the hand builds the letter one step at a time.
+Since 2026-11-14 a letter can have a step-by-step guide, shown on the Handshapes page
+(`/handshapes`): the hand builds the letter one step at a time.
 
-**Every tutorial starts the same way**, from the relaxed open hand: step 1's hand is
+**Every guide starts the same way**, from the relaxed open hand: step 1's hand is
 `guides/Relaxed.json` (a still Eidos pose) and its sentence is `guides/text/Relaxed.json` (a list
 of one step: "Start with an open, relaxed hand, your palm facing forward."). Change either file and
 every letter's first step changes.
@@ -77,7 +77,7 @@ every letter's first step changes.
 After that, a letter's guide is two things, both in `public/languages/asl/guides/`:
 
 - **The hand at every later step**, `B.json`: an ordinary Eidos pose with `motion`. **Each Eidos
-  motion step is one tutorial step**, and the last is the finished letter. The file's own pose
+  motion step is one guide step**, and the last is the finished letter. The file's own pose
   (before `motion`) isn't used: `Relaxed.json` takes its place, so make the movement in Eidos
   starting from `Relaxed.json` to see what the page will show. A step's `duration`
   is how long the hand takes to move there when the person presses Next step. The page never plays
@@ -100,7 +100,7 @@ checklist, and that finger's number is lit on the 3D hand during the step. `chec
 conditions the step completes: the exact texts from `src/vision/landmarks/letterShapes.js`, shown
 under the step as green chips.
 
-**Every letter has a tutorial** (2026-11-14): the page shows all 26, and every letter has a guide
+**Every letter has a guide** (2026-11-14): the page shows all 26, and every letter has a guide
 file. A letter whose movement isn't made yet has a **still guide**: a copy of its finished pose
 from `letters/` with no `motion` (J and Z were copied without their movement). The page shows it
 as the finished letter alone, with "A step-by-step guide for D is coming soon", no step list, no
@@ -148,7 +148,7 @@ to `hand.js`), so the camera doesn't move between steps.
 - `letterPoses.js`: fetches a letter's file once per visit, in 2D too (it's tiny), and decides
   whether it's available (`readLetterPose`, `useLetterPose`), so Learn can grey out 3D. It doesn't
   load three.js.
-- `letterGuides.js`: the Tutorials page's guides: fetches `guides/text/index.json` and the shared
+- `letterGuides.js`: the Handshapes page's guides: fetches `guides/text/index.json` and the shared
   start (`Relaxed.json` and `text/Relaxed.json`), then a letter's guide file and its `text/` file, and pairs each motion step with its text (`readGuide`, `useGuideLetters`,
   `useLetterGuide`). It doesn't load three.js either.
 - `HandModelView.jsx`: the React wrapper. Learn loads it with `lazy()`, so three.js is only

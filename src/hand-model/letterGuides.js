@@ -2,15 +2,15 @@ import { useEffect, useState } from 'react'
 import { readLetterPose } from './letterPoses.js'
 import { FINGERS, motionSteps, stillPose } from './pose.js'
 
-// The letters' step-by-step guides, for the Tutorials page (2026-11-14,
+// The letters' step-by-step guides, for the Handshapes page (2026-11-14,
 // docs/hand-poses.md "Guides"). Every guide starts the same way, from the
 // relaxed open hand: its pose is public/languages/asl/guides/Relaxed.json and
 // its sentence guides/text/Relaxed.json (a list of one step). After that, a
 // letter's guide is two things:
 // - the hand at every later step: guides/B.json, an Eidos pose with `motion`.
-//   Each motion step is one tutorial step, and the last is the finished
+//   Each motion step is one guide step, and the last is the finished
 //   letter. The file's own pose (before `motion`) isn't used: Relaxed.json
-//   takes its place, so every tutorial starts from the same hand.
+//   takes its place, so every guide starts from the same hand.
 // - the words for those steps: guides/text/B.json, written by hand, one entry
 //   per motion step, in the same order (for now the counts may differ, see
 //   readGuide):
@@ -105,7 +105,7 @@ export function loadGuideStart() {
         return { pose, texts }
       })
       .catch((error) => {
-        console.warn(`No tutorials: ${error.message}`)
+        console.warn(`No guides: ${error.message}`)
         start = null
         return null
       })
@@ -114,7 +114,7 @@ export function loadGuideStart() {
 }
 
 // text/index.json, fetched once per visit: the letters that have a text file,
-// the ones with written steps (Learn links only those to Tutorials). A
+// the ones with written steps (Learn links only those to Handshapes). A
 // failed request gives no guides and is forgotten, so the next page that asks
 // tries again.
 let letterList = null
@@ -127,7 +127,7 @@ export function loadGuideLetters() {
         return letters
       })
       .catch((error) => {
-        console.warn(`No tutorials: ${error.message}`)
+        console.warn(`No guides: ${error.message}`)
         letterList = null
         return []
       })
@@ -156,7 +156,7 @@ async function fetchGuide(letter) {
     ])
     return readGuide(guideStart, guide, texts)
   } catch (error) {
-    console.warn(`No tutorial for ${letter}: ${error.message}`)
+    console.warn(`No guide for ${letter}: ${error.message}`)
     return null
   }
 }

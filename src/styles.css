@@ -472,7 +472,7 @@ body {
    (MenuBar.jsx). The bar stays one row, 64px; --bar-height is that, for the
    pages that subtract it. The panel is as wide as the bar and the bar's own
    colour, and sits above the page (z-index) so the camera never covers it.
-   Under 760px since 2026-11-14 (before, under 600px): with Tutorials the menu
+   Under 760px since 2026-11-14 (before, under 600px): with Handshapes the menu
    has four links, and they no longer fit beside Learn's Tour button or the
    Set up camera button on a narrow tablet. */
 @media (max-width: 759px) {
@@ -6969,12 +6969,12 @@ html:has(.about-page) {
   }
 }
 
-/* ---------- Tutorials (/tutorials, 2026-11-14) ----------
+/* ---------- Handshapes (/handshapes, 2026-11-14) ----------
    How to make a letter, step by step: the letters with a guide in a row on
    top, the 3D hand in a card on the left, the steps on the right. A static
    page on a desktop window, like Learn: exactly the height under the bar, and
    the steps scroll inside their column if there are many. */
-.tutorial {
+.handshapes {
   --sticker-shadow: 0 10px 24px rgb(12 29 48 / 0.12), 0 2px 5px rgb(12 29 48 / 0.08);
   display: grid;
   grid-template-areas:
@@ -6989,19 +6989,19 @@ html:has(.about-page) {
   padding: 20px 32px 28px;
 }
 
-:root[data-theme='dark'] .tutorial {
+:root[data-theme='dark'] .handshapes {
   --sticker-shadow: 0 12px 28px rgb(0 0 0 / 0.4), 0 2px 6px rgb(0 0 0 / 0.3);
 }
 
 @media (min-width: 900px) {
-  .tutorial {
+  .handshapes {
     height: calc(100dvh - var(--bar-height));
     overflow: hidden;
   }
 }
 
 /* While the guides load, or when there are none. */
-.tutorial-note {
+.handshapes-note {
   grid-column: 1 / -1;
   margin: var(--space-7) 0;
   color: var(--text-muted);
@@ -7009,14 +7009,14 @@ html:has(.about-page) {
 }
 
 /* The letters with a guide: Learn's tiles, as many as there are. */
-.tutorial-letters {
+.handshapes-letters {
   grid-area: letters;
   min-width: 0;
 }
 
 /* All 26 letters, one row like Learn's guide (two rows of 13 below 1100px;
    on a phone, one row that scrolls sideways, in "Small screens"). */
-.tutorial-letters ul {
+.handshapes-letters ul {
   display: grid;
   grid-template-columns: repeat(26, minmax(0, 1fr));
   gap: 6px;
@@ -7027,20 +7027,20 @@ html:has(.about-page) {
 }
 
 @media (max-width: 1099px) {
-  .tutorial-letters ul {
+  .handshapes-letters ul {
     grid-template-columns: repeat(13, minmax(0, 1fr));
   }
 }
 
 /* A still guide's note, where the steps would be. */
-.tutorial-still-note {
+.handshapes-still-note {
   margin: 0;
   color: var(--text-muted);
 }
 
 /* The hand's card, like Learn's: white in the light theme, Deep Cobalt in the
    dark one. The 3D hand fills it (.hand-model-view is pinned to its frame). */
-.tutorial-card {
+.handshapes-card {
   position: relative;
   display: grid;
   grid-area: hand;
@@ -7053,7 +7053,7 @@ html:has(.about-page) {
 
 /* "Step 2 of 4" in the card's upper right, and the Left hand | Right hand
    switch in its lower left: over the hand, out of the way of a drag. */
-.tutorial-count {
+.handshapes-count {
   position: absolute;
   top: 16px;
   right: 20px;
@@ -7066,7 +7066,7 @@ html:has(.about-page) {
   pointer-events: none;
 }
 
-.tutorial-corner {
+.handshapes-corner {
   position: absolute;
   bottom: 12px;
   left: 12px;
@@ -7074,7 +7074,7 @@ html:has(.about-page) {
 }
 
 /* Without WebGL: the finished letter's drawing, and a line that says so. */
-.tutorial-flat {
+.handshapes-flat {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
@@ -7086,18 +7086,18 @@ html:has(.about-page) {
   text-align: center;
 }
 
-.tutorial-flat img {
+.handshapes-flat img {
   width: 100%;
   max-height: 320px;
   object-fit: contain;
 }
 
-.tutorial-flat p {
+.handshapes-flat p {
   margin: 0;
 }
 
 /* The steps' column. */
-.tutorial-steps {
+.handshapes-steps {
   display: flex;
   grid-area: steps;
   flex-direction: column;
@@ -7108,7 +7108,7 @@ html:has(.about-page) {
   overflow-y: auto;
 }
 
-.tutorial-title {
+.handshapes-title {
   margin: 0;
   font-family: var(--font-display);
   font-size: clamp(30px, 3vw, 44px);
@@ -7117,11 +7117,11 @@ html:has(.about-page) {
   letter-spacing: -0.02em;
 }
 
-.tutorial-title span {
+.handshapes-title span {
   color: var(--accent);
 }
 
-.tutorial-list {
+.handshapes-list {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -7133,7 +7133,7 @@ html:has(.about-page) {
 /* One step: its number in a circle, then its sentence. Quiet until it's the
    step on screen, which is a card with the accent's edge and larger words. A
    step already done has a tick for its number. */
-.tutorial-step {
+.handshapes-step {
   display: grid;
   grid-template-columns: 32px minmax(0, 1fr);
   gap: var(--space-3);
@@ -7153,20 +7153,20 @@ html:has(.about-page) {
     border-color 150ms;
 }
 
-.tutorial-step:hover {
+.handshapes-step:hover {
   border-color: var(--border);
 }
 
-.tutorial-step:focus-visible {
+.handshapes-step:focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 2px;
 }
 
-.tutorial-step .finger-name {
+.handshapes-step .finger-name {
   color: inherit;
 }
 
-.tutorial-step-number {
+.handshapes-step-number {
   display: grid;
   place-items: center;
   width: 32px;
@@ -7179,18 +7179,18 @@ html:has(.about-page) {
   border-radius: 50%;
 }
 
-.tutorial-step.done .tutorial-step-number {
+.handshapes-step.done .handshapes-step-number {
   color: var(--on-accent);
   background: var(--success);
   border-color: var(--success);
 }
 
-.tutorial-step-text {
+.handshapes-step-text {
   /* Level with the number's middle on a one-line sentence. */
   padding-top: 4px;
 }
 
-.tutorial-step[aria-current='step'] {
+.handshapes-step[aria-current='step'] {
   padding: 16px;
   font-size: 20px;
   font-weight: 600;
@@ -7200,25 +7200,25 @@ html:has(.about-page) {
   border-color: var(--accent);
 }
 
-.tutorial-step[aria-current='step'] .tutorial-step-number {
+.handshapes-step[aria-current='step'] .handshapes-step-number {
   color: var(--on-accent);
   background: var(--accent);
   border-color: var(--accent);
 }
 
-.tutorial-step[aria-current='step'] .tutorial-step-text {
+.handshapes-step[aria-current='step'] .handshapes-step-text {
   padding-top: 2px;
 }
 
 /* What the step on screen gets right: Learn's finger conditions, as chips. */
-.tutorial-checks {
+.handshapes-checks {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
   margin-top: var(--space-3);
 }
 
-.tutorial-check {
+.handshapes-check {
   display: inline-flex;
   gap: 6px;
   align-items: center;
@@ -7231,28 +7231,28 @@ html:has(.about-page) {
   border-radius: var(--radius-pill);
 }
 
-.tutorial-check svg {
+.handshapes-check svg {
   flex: none;
 }
 
-.tutorial-check .finger-name {
+.handshapes-check .finger-name {
   font-weight: 700;
   white-space: normal;
 }
 
-.tutorial-check .finger-badge {
+.handshapes-check .finger-badge {
   display: none;
 }
 
 /* Back, then the main button: Next step, or on the last step the way to Learn. */
-.tutorial-actions {
+.handshapes-actions {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-3);
   align-items: center;
 }
 
-.tutorial-next {
+.handshapes-next {
   min-height: 48px;
   padding: 10px 24px;
   font-family: var(--font-display);
@@ -7261,12 +7261,12 @@ html:has(.about-page) {
   text-decoration: none;
 }
 
-a.tutorial-next {
+a.handshapes-next {
   display: inline-flex;
   align-items: center;
 }
 
-.tutorial-back {
+.handshapes-back {
   min-height: 48px;
   padding: 10px 20px;
   font-family: var(--font-display);
@@ -7279,22 +7279,22 @@ a.tutorial-next {
   border-radius: var(--radius-pill);
 }
 
-.tutorial-back:hover:not(:disabled) {
+.handshapes-back:hover:not(:disabled) {
   border-color: var(--accent);
 }
 
-.tutorial-back:disabled {
+.handshapes-back:disabled {
   color: var(--text-muted);
   cursor: default;
   opacity: 0.5;
 }
 
-.tutorial-back:focus-visible {
+.handshapes-back:focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 2px;
 }
 
-/* Learn's link to a letter's tutorial, under the letter card. */
+/* Learn's link to a letter's guide, under the letter card. */
 .learn-how {
   flex: none;
   align-self: center;
@@ -8218,12 +8218,12 @@ a.tutorial-next {
   }
 }
 
-/* Tutorials below 900px: one column that scrolls, the hand first. The card is
+/* Handshapes below 900px: one column that scrolls, the hand first. The card is
    a square on a phone and 4:3 from 700px, like the camera frames, and never
    taller than a little over half the window, so the step's sentence and the
    buttons stay in view under it. */
 @media (max-width: 899px) {
-  .tutorial {
+  .handshapes {
     grid-template-areas:
       'letters'
       'hand'
@@ -8234,24 +8234,24 @@ a.tutorial-next {
     padding: 16px;
   }
 
-  .tutorial-card {
+  .handshapes-card {
     aspect-ratio: 1;
     min-height: 0;
     max-height: 56dvh;
     width: 100%;
   }
 
-  .tutorial-steps {
+  .handshapes-steps {
     gap: var(--space-4);
     padding: 0;
     overflow: visible;
   }
 
-  .tutorial-step[aria-current='step'] {
+  .handshapes-step[aria-current='step'] {
     font-size: 18px;
   }
 
-  .tutorial-actions > * {
+  .handshapes-actions > * {
     flex: 1 1 auto;
     justify-content: center;
     text-align: center;
@@ -8259,7 +8259,7 @@ a.tutorial-next {
 }
 
 @media (min-width: 700px) and (max-width: 899px) {
-  .tutorial-card {
+  .handshapes-card {
     aspect-ratio: 4 / 3;
   }
 }
@@ -8267,12 +8267,12 @@ a.tutorial-next {
 /* On a phone only the step on screen is listed (the card says "Step 2 of 4"),
    so the hand, the sentence and the buttons fit in the window together. */
 @media (max-width: 699px) {
-  .tutorial-list li:not(:has([aria-current='step'])) {
+  .handshapes-list li:not(:has([aria-current='step'])) {
     display: none;
   }
 
   /* The 26 letters: one row that scrolls sideways, tiles at full size. */
-  .tutorial-letters ul {
+  .handshapes-letters ul {
     grid-template-columns: none;
     grid-auto-columns: 46px;
     grid-auto-flow: column;
@@ -8281,7 +8281,7 @@ a.tutorial-next {
   }
 }
 
-/* The menu has four links since Tutorials (2026-11-14). Between the burger
+/* The menu has four links since Handshapes (2026-11-14). Between the burger
    (under 760px) and a desktop window they sit closer together and stay on one
    line each, so the bar still fits with Learn's Tour button or the Set up
    camera button beside it. */
