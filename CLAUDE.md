@@ -46,6 +46,9 @@ The development plan is `docs/project-plan.md`.
 - **Phase 4 (started 2026-10-24, on `phase-3-preview`, before Learn 3.3):** the
   remaining letters. Z (2026-10-24) and J (2026-10-26) are done: traced on Learn instead
   of classified (see Routing).
+- **Tutorials (started 2026-11-14, on `hand-tutorials`, outside the plan so far):** a page that
+  teaches how to make a letter, step by step, on a large 3D hand (`/tutorials`, see Routing). The
+  first five letters (A, B, L, V, X) have draft guides; Lanix makes the real ones in Eidos.
 - Later: letter recognition (`src/recognition/`). Don't create that folder early.
 
 ## Stack and constraints
@@ -117,6 +120,8 @@ src/
                     large in a native <dialog> (PictureDialog, in a portal; 2026-11-02; Learn's card
                     and the quiz's Peek)
     Logo.jsx
+    FingerText.jsx  a sentence with every {finger} as its number badge and bold name (Learn's
+                    checklist, the Tutorials page's steps)
     AslDrawing.jsx  a letter's drawing (public/images/asl/, a left hand), facing a given
                     hand; DRAWN_HAND (Record's reference picture, Learn's card and guide)
   pages/
@@ -129,6 +134,8 @@ src/
                     with the camera, QuizFlow and QuizRun) and Guess the letter (name hand
                     pictures, no camera, GuessQuizPage and GuessRun; Letters until 2026-11-04);
                     its state (quizRounds); words from public/languages/asl/words.json
+    tutorials/      Tutorials (/tutorials, 2026-11-14): how to make a letter, step by step, on a
+                    large 3D hand, no camera; the guides come from src/hand-model/letterGuides.js
     not-found/      Page not found, for an address Sema never had (2026-10-29)
     dev/            the developer tools behind an access code: DevArea (the gate, then
                     the page), DevGate, DevDashboard (/dev), DevTopBar, devAccess,
@@ -151,7 +158,8 @@ src/
   hand-model/       the 3D hand on Learn's card (2026-10-31, outside the plan): Eidos's pose
                     format (pose.js, unchanged) and viewer (hand.js, changed for Sema), the
                     hand model, letterPoses (useLetterPose) and HandModelView, loaded with
-                    lazy(); docs/hand-poses.md
+                    lazy(); letterGuides (2026-11-14, the Tutorials page's step-by-step guides);
+                    docs/hand-poses.md
 ```
 
 Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.md`) and, since 2026-11-04, Jupyter notebooks for looking at its results (`training/notebooks/`: public photos only, committed with their outputs; clear the outputs of any notebook that reads `data/raw/`).
@@ -277,6 +285,34 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   picture; until 2026-11-01 they were in a footer under it), on the right the quiz's steps on top (pills, one per item, from the quiz state; no "Letter 1 of 10" any more, 2026-11-02, the bar still
   says it to screen readers), the letter large on a card that fills the column between them (the letter follows the card's size, a container query) with its Peek button (and "Peeking counts as a clue." as a pop-up on the letter's or picture's
   lower edge, so nothing moves), and Skip letter and End quiz side by side at the bottom, on every size; a words quiz also shows the word, inside the card under the letter or picture (2026-11-04; the picture there sits straight on the card, with no frame of its own).
+- Tutorials (`/tutorials`, 2026-11-14, first in the menu, `src/pages/tutorials/TutorialsPage.jsx`)
+  teaches how to make a letter; Learn practises and checks, so Tutorials has no camera. Each letter
+  has its own guide, made in Eidos as a movement: a pose file with `motion` in
+  `public/languages/asl/guides/` (`B.json`), where **each motion step is one tutorial step** (the
+  last is the finished letter), and the words in `guides/text/B.json`, a file per letter, one entry
+  per motion step. Every tutorial's first step is shared: the relaxed open hand,
+  `guides/Relaxed.json`, with its sentence in `guides/text/Relaxed.json` (the guide file's own pose
+  before `motion` isn't used). Each entry has `say` (the sentence, `{finger}` names as in the checklist) and `checks` (the
+  finger conditions from `letterShapes.js` the step completes; the tests in
+  `src/hand-model/letterGuides.test.js` check them against `RULES`, so a guide can't drift from the
+  rules, and that the last step is the letter's own pose). Every letter has a tutorial (all 26 on the page,
+  from `LETTERS`): a letter whose movement isn't made yet has a still guide, a copy of its
+  `letters/` pose with no `motion`, shown as the finished letter alone with a "coming soon" note.
+  `guides/text/index.json` lists the letters with a text file (the browser can't list a folder):
+  A, B, L, V and X, as drafts worked out by a script from the finished poses, to be replaced by
+  Lanix's from Eidos; Learn's "step by step" link is only for those. The page: the 26 letters as tiles on top (like Learn's guide; one sideways-scrolling row on a phone), the 3D hand
+  in a card on the left (always 3D with numbers, whatever `handView` says; the drawing and a line
+  if WebGL is missing; a Left hand | Right hand switch in its corner), and on the right "How to make
+  B" and the steps as a list of buttons. Next step, Back or a click on a step moves the hand there
+  (`HandModelView`'s `duration`: the step's own for Next, 600 ms otherwise; `fitTo`, the whole
+  guide, keeps the camera still; `highlight` lights the numbers of the fingers the sentence names).
+  The last step has "Try B with your camera", which opens Learn on that letter
+  (`/learn?letter=B`; `letterPath` and `letterInAddress` in `router.js`), and Next letter.
+  `/tutorials?letter=B` opens on a letter, and picking one updates the address. Learn shows a
+  "How to make B, step by step" link under its card for a letter with a tutorial, and its tour has
+  a Tutorials step. A new visitor is sent to Welcome first; someone who skipped the camera check
+  can open it (it's in their menu too, and "Try B with your camera" is left out). On a phone only
+  the step on screen is listed. `docs/hand-poses.md` "Guides".
 - Setup redirects live in `resolveRoute`: a new visitor opening Learn or Quiz goes
   to Welcome; a returning visitor opening `/` goes to Learn. Get started (Welcome's, or About's) opens the camera check, and passing it (its Start learning button) finishes setup and opens Learn. The developer pages, Record
   included, don't need setup.
@@ -285,8 +321,8 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   (in the store, apart from `setupDone`; settings saved with setup done before then count as
   checked) stays false, and Guess the letter opens. Since 2026-11-08 (Lanix's call) the person is
   then kept there: `resolveRoute` sends Welcome, Learn, `/quiz` and `/quiz/words`
-  (`NEEDS_CAMERA_CHECK`) to `/quiz/guess`, and only Guess the letter, About and the check stay open.
-  The menu (`MenuBar`, `cameraLocked` in `SettingsContext`) shows only Guess the letter and About,
+  (`NEEDS_CAMERA_CHECK`) to `/quiz/guess`, and only Guess the letter, Tutorials (2026-11-14), About and the check stay open.
+  The menu (`MenuBar`, `cameraLocked` in `SettingsContext`) shows only Tutorials, Guess the letter and About,
   with a Set up camera button (`.bar-button`) that opens the check; About's last button says Back
   to the quiz. Passing the check opens Learn and the whole menu comes back. (Before 2026-11-08 every
   page was open: Learn's `CameraView` had `setupFirst`, a "Set up your camera" frame, now removed,
@@ -545,9 +581,9 @@ middle and one row of controls along the bottom (2D | 3D and Numbers on the left
 in landscape (a phone on its side) Learn and the quiz put the camera beside the letter again; a
 tablet held upright keeps one column. The running quiz on a phone (under 700px, 2026-11-02) and Guess the letter share one layout (2026-11-04):
 the card on top (Peek in its corner, the word inside it in Words, the picture and its Left hand | Right hand switch in Guess), the thick progress pills in the middle of the page, the bottom box (the camera in Words, the 26 letter keys in Guess), and Skip letter (Show answer in Guess) / Next letter and End quiz as a row of two buttons. The page is exactly the window's height and never scrolls: the card and the bottom box are two boxes of equal height, the pills between them. Guess the letter after a wrong answer swaps the card for the two hands to compare, each with an expand button. "Peeking counts as a clue." is a pop-up on the card's picture, not a line under it. The camera check puts the camera under its title and the steps
-after it; on a phone the camera frame stretches to fill the window (never under a square). Under 600px the menu is a burger button in the top bar (`MenuBar.jsx`, next to the theme
-button) that opens Learn, Quiz and About as a panel under the bar, and the bar is one row, 64px
-(`--bar-height`); from 600px the menu is inline. The developer pages are desktop only. Check by hand in Chrome's device mode (F12, then the
+after it; on a phone the camera frame stretches to fill the window (never under a square). Under 760px (600px until 2026-11-14: Tutorials made it four links, which didn't fit a narrow tablet) the menu is a burger button in the top bar (`MenuBar.jsx`, next to the theme
+button) that opens Tutorials, Learn, Quiz and About as a panel under the bar, and the bar is one row, 64px
+(`--bar-height`); from 760px the menu is inline. The developer pages are desktop only. Check by hand in Chrome's device mode (F12, then the
 phone icon).
 
 ## Visual design
