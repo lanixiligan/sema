@@ -1,10 +1,13 @@
 import { useState } from 'react'
 import MenuBar from '../../app/layout/MenuBar.jsx'
+import Link from '../../app/routing/Link.jsx'
+import { letterInAddress, letterPath } from '../../app/routing/router.js'
 import { useSettings } from '../../app/settings/settings.js'
 import CameraPanel from '../../components/camera-view/CameraPanel.jsx'
 import CameraView from '../../components/camera-view/CameraView.jsx'
 import { useLetterCheck } from '../../components/letter-check/useLetterCheck.js'
 import LetterPicture from '../../components/letter-picture/LetterPicture.jsx'
+import { useGuideLetters } from '../../hand-model/letterGuides.js'
 import { useLetterPose } from '../../hand-model/letterPoses.js'
 import { LETTERS } from '../../vision/landmarks/letterShapes.js'
 import StageChecklist from './StageChecklist.jsx'
@@ -31,12 +34,17 @@ const LESSONS = LETTERS
 // the quiz. The drawings face the signing hand (the saved setting the hand
 // switch changes, Right by default); only that hand is drawn and judged. The
 // camera waits for a click: landing on Sema never turns it on. Nothing is
-// saved yet: opening Learn always starts at A, and the ticks on the guide's
+// saved yet: opening Learn starts at A (or the letter in its address), and the ticks on the guide's
 // tiles (`done`) only last until the person leaves.
 export default function LearnPage({ signingHand, onSigningHandChange, model = 'small' }) {
   // The letter to make, and each round of it: picking a letter, Try again or
   // Next letter starts a new round, which starts the hold over.
-  const [target, setTarget] = useState(LESSONS[0])
+  // It starts at A, or at the letter in the address (/learn?letter=B, where
+  // the Tutorials page's "Try B with your camera" leads).
+  const [target, setTarget] = useState(() => {
+    const asked = letterInAddress(window.location.search)
+    return LESSONS.includes(asked) ? asked : LESSONS[0]
+  })
   const [round, setRound] = useState(0)
   function startRound(letter) {
     setTarget(letter)
@@ -76,6 +84,9 @@ export default function LearnPage({ signingHand, onSigningHandChange, model = 's
   // has a pose is shown in 3D again.
   const pose = useLetterPose(target)
   const { handView, tourDone, finishTour } = useSettings()
+  // The letters with a step-by-step guide on the Tutorials page (null while
+  // the list loads): those get a link to it under the card.
+  const guideLetters = useGuideLetters()
   // The first-visit tour (tour/): open on the first visit until it's finished
   // or skipped, and again with the Tour button in the top bar (there for now,
   // while Sema is being built; Lanix will decide whether it stays).
@@ -175,6 +186,11 @@ export default function LearnPage({ signingHand, onSigningHandChange, model = 's
               </div>
               <LetterPicture letter={target} hand={drawnHand} view={handView} pose={pose} className="learn-picture" />
             </div>
+            {guideLetters?.includes(target) && (
+              <Link className="learn-how" to={letterPath('tutorials', target)}>
+                How to make {target}, step by step
+              </Link>
+            )}
           </section>
           {loaded.status === 'loading' && <p className="practice-note">Loading the model…</p>}
           {loaded.status === 'error' && (

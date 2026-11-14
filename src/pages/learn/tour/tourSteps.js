@@ -39,8 +39,13 @@ export const TOUR_STEPS = [
     text: 'This button opens the picture large, to study the handshape up close.',
     target: ['.learn-picture .picture-expand'],
   },
-  // The last two ring their links in the menu, or on a phone (where the menu
-  // is folded away) its burger button.
+  // The last three ring their links in the menu, or on a phone (where the
+  // menu is folded away) its burger button.
+  {
+    title: 'New to a letter?',
+    text: 'Tutorials shows how to make a letter step by step, finger by finger, on a large 3D hand. No camera needed.',
+    target: ['#main-menu a[href="/tutorials"]', '.menu-toggle'],
+  },
   {
     title: 'Two quizzes',
     text: 'Quiz tests what you’ve learned, two ways. Fingerspell: sign the letters of words from memory, with your camera. Guess the letter: name the letter a hand sign makes, no camera needed.',
