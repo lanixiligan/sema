@@ -195,10 +195,13 @@ export default function HandshapesPage({ signingHand, onSigningHandChange }) {
             {/* A still guide (no movement made in Eidos yet) is the finished
                 letter alone, with a note instead of the steps. */}
             {!stepByStep && (
-              <p className="handshapes-still-note">
-                A step-by-step guide for {shown} is coming soon. For now, here is the finished letter: turn the hand to
-                see it from every side.
-              </p>
+              <div className="handshapes-still-note">
+                <NoInstructions />
+                <p>
+                  A step-by-step guide for {shown} is coming soon. For now, here is the finished letter: turn the hand
+                  to see it from every side.
+                </p>
+              </div>
             )}
             {stepByStep && (
               <ol className="handshapes-list">
@@ -216,9 +219,10 @@ export default function HandshapesPage({ signingHand, onSigningHandChange }) {
                       </span>
                       <span className="handshapes-step-text">
                         <span className="visually-hidden">Step {i + 1}: </span>
-                        {/* A step with no sentence yet (its text file is shorter
-                            than the movement) shows only its number. */}
-                        {each.say ? <FingerText text={each.say} /> : <>Step {i + 1}</>}
+                        {/* A step with no sentence yet (no text file, or one
+                            shorter than the movement) says so; its number is
+                            in the dot. */}
+                        {each.say ? <FingerText text={each.say} /> : <NoInstructions />}
                         {/* What the step gets right: the finger conditions
                             Learn's checklist will tick (letterShapes.js). */}
                         {i === step && each.checks.length > 0 && (
@@ -295,6 +299,12 @@ export default function HandshapesPage({ signingHand, onSigningHandChange }) {
       </div>
     </Shell>
   )
+}
+
+// The sign for a step, or a whole letter, whose words aren't written yet: an
+// amber pill, so it reads as "not done" rather than as an instruction.
+function NoInstructions() {
+  return <span className="handshapes-no-text">No instructions yet</span>
 }
 
 // The page around every state: the menu bar and the page's frame.

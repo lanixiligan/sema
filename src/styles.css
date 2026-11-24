@@ -7243,9 +7243,30 @@ html:has(.about-page) {
 
 /* A still guide's note, where the steps would be. */
 .handshapes-still-note {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
   max-width: 60ch;
   margin: auto 0;
   color: var(--text-muted);
+}
+
+.handshapes-still-note p {
+  margin: 0;
+}
+
+/* "No instructions yet": a step's, or a still guide's, words aren't written
+   yet. An amber pill, the same size whichever step it's in. */
+.handshapes-no-text {
+  display: inline-block;
+  padding: 3px 12px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--warning-ink);
+  background: var(--warning-bg);
+  border: 1.5px solid var(--warning);
+  border-radius: 999px;
 }
 
 /* One step: its number in a dot, then its sentence. Quiet until it's the step

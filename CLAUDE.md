@@ -298,7 +298,7 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   `src/hand-model/letterGuides.test.js` check them against `RULES`, so a guide can't drift from the
   rules, and that the last step is the letter's own pose). Every letter has a guide (all 26 on the page,
   from `LETTERS`): a letter whose movement isn't made yet has a still guide, a copy of its
-  `letters/` pose with no `motion`, shown as the finished letter alone with a "coming soon" note.
+  `letters/` pose with no `motion`, shown as the finished letter alone with a "coming soon" note under an amber "No instructions yet" pill (2026-11-24); a step with no sentence in its text file (or no text file) shows the same pill.
   `guides/text/index.json` lists the letters with a text file (the browser can't list a folder):
   A, B, L, V and X, as drafts worked out by a script from the finished poses, to be replaced by
   Lanix's from Eidos; Learn's "step by step" link is only for those. The page: the 26 letters as tiles on top (like Learn's guide; one sideways-scrolling row on a phone), then
