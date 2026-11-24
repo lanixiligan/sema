@@ -6970,19 +6970,20 @@ html:has(.about-page) {
 }
 
 /* ---------- Handshapes (/handshapes, 2026-11-14) ----------
-   How to make a letter, step by step: the letters with a guide in a row on
-   top, the 3D hand in a card on the left, the steps on the right. A static
-   page on a desktop window, like Learn: exactly the height under the bar, and
-   the steps scroll inside their column if there are many. */
+   How to make a letter, step by step (2026-11-15): the 26 letters in a row on
+   top, then two columns: the left one is only the hand's card, the right one
+   every step as a list (its numbers are dots joined by a line) with Back and
+   Next step at its bottom, level with the card's bottom edge. A static
+   page on a desktop window, like Learn: exactly the height under the bar, the
+   card taking what the rest leaves; the steps scroll inside their column if
+   there are many. */
 .handshapes {
+  /* The picked letter's tile has the stickers' shadow, as on Learn. */
   --sticker-shadow: 0 10px 24px rgb(12 29 48 / 0.12), 0 2px 5px rgb(12 29 48 / 0.08);
-  display: grid;
-  grid-template-areas:
-    'letters letters'
-    'hand steps';
-  grid-template-rows: auto minmax(0, 1fr);
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-  gap: 20px 48px;
+  --handshapes-zoom: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
   width: 100%;
   max-width: 1600px;
   margin: 0 auto;
@@ -6993,24 +6994,35 @@ html:has(.about-page) {
   --sticker-shadow: 0 12px 28px rgb(0 0 0 / 0.4), 0 2px 6px rgb(0 0 0 / 0.3);
 }
 
+/* On a wide window the page is drawn 1.25x larger, exactly as Learn is
+   (.practice), so the letters' row is the same size on both pages. Lengths
+   inside a zoomed element are zoomed too, so the page's height divides the
+   window's by the zoom. */
+@media (min-width: 1500px) {
+  .handshapes {
+    --handshapes-zoom: 1.25;
+    zoom: var(--handshapes-zoom);
+  }
+}
+
 @media (min-width: 900px) {
   .handshapes {
-    height: calc(100dvh - var(--bar-height));
-    overflow: hidden;
+    height: calc((100dvh - var(--bar-height)) / var(--handshapes-zoom));
+    /* A very short window scrolls instead of squeezing the hand away. */
+    overflow-y: auto;
   }
 }
 
 /* While the guides load, or when there are none. */
 .handshapes-note {
-  grid-column: 1 / -1;
   margin: var(--space-7) 0;
   color: var(--text-muted);
   text-align: center;
 }
 
-/* The letters with a guide: Learn's tiles, as many as there are. */
+/* The letters: Learn's tiles. */
 .handshapes-letters {
-  grid-area: letters;
+  flex: none;
   min-width: 0;
 }
 
@@ -7032,86 +7044,96 @@ html:has(.about-page) {
   }
 }
 
-/* A still guide's note, where the steps would be. */
-.handshapes-still-note {
+/* The stage: the card and the steps' column side by side (Learn's 1.15 : 1
+   split and gap); a notice, if any, above both. */
+.handshapes-stage {
+  display: grid;
+  flex: 1 1 auto;
+  grid-template-areas: 'hand side';
+  grid-template-rows: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: var(--space-4) 48px;
+  min-height: 0;
+}
+
+/* The notice's row exists only with a notice, so no empty gap is left above
+   the card without one. */
+.handshapes-stage:has(.handshapes-notice) {
+  grid-template-areas:
+    'notice notice'
+    'hand side';
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+/* No WebGL: an amber notice above the card, with the way to Learn. */
+.handshapes-notice {
+  display: flex;
+  grid-area: notice;
+  gap: var(--space-4);
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  font-size: var(--text-small);
+  line-height: 1.45;
+  color: var(--warning-ink);
+  background: var(--warning-bg);
+  border: 2px solid var(--warning);
+  border-radius: 18px;
+}
+
+.handshapes-notice p {
+  max-width: 70ch;
   margin: 0;
-  color: var(--text-muted);
+}
+
+.handshapes-notice .handshapes-notice-title {
+  margin-bottom: 2px;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.handshapes-notice-button {
+  flex: none;
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
 }
 
 /* The hand's card, like Learn's: white in the light theme, Deep Cobalt in the
-   dark one. The 3D hand fills it (.hand-model-view is pinned to its frame). */
+   dark one, no shadow. A strip along its top holds the title, then the hand's
+   frame takes the rest. On the last step its edge turns green. */
 .handshapes-card {
-  position: relative;
-  display: grid;
+  display: flex;
   grid-area: hand;
-  place-items: center;
-  min-height: 320px;
+  flex-direction: column;
+  min-height: 300px;
   overflow: hidden;
   background: var(--surface);
+  border: 3px solid transparent;
   border-radius: 28px;
+  transition: border-color 250ms;
 }
 
-/* "Step 2 of 4" in the card's upper right, and the Left hand | Right hand
-   switch in its lower left: over the hand, out of the way of a drag. */
-.handshapes-count {
-  position: absolute;
-  top: 16px;
-  right: 20px;
-  z-index: 1;
-  margin: 0;
-  font-family: var(--font-mono);
-  font-size: var(--text-small);
-  font-weight: 500;
-  color: var(--text-muted);
-  pointer-events: none;
+.handshapes-card.made {
+  border-color: var(--success);
 }
 
-.handshapes-corner {
-  position: absolute;
-  bottom: 12px;
-  left: 12px;
-  z-index: 1;
-}
-
-/* Without WebGL: the finished letter's drawing, and a line that says so. */
-.handshapes-flat {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  align-items: center;
-  max-width: 420px;
-  padding: 56px var(--space-5);
-  font-size: var(--text-small);
-  color: var(--text-muted);
-  text-align: center;
-}
-
-.handshapes-flat img {
-  width: 100%;
-  max-height: 320px;
-  object-fit: contain;
-}
-
-.handshapes-flat p {
-  margin: 0;
-}
-
-/* The steps' column. */
-.handshapes-steps {
-  display: flex;
-  grid-area: steps;
-  flex-direction: column;
-  gap: var(--space-5);
-  min-height: 0;
-  /* Room for the focus rings, which the scroll box would clip. */
-  padding: 4px 6px;
-  overflow-y: auto;
+.handshapes-head {
+  display: grid;
+  flex: none;
+  place-items: center;
+  /* The same height for the title and for "That's B!", so the hand under it
+     doesn't move when one replaces the other. */
+  height: 64px;
+  padding: 10px var(--space-4) 0;
 }
 
 .handshapes-title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(30px, 3vw, 44px);
+  font-size: clamp(26px, 2.6vw, 34px);
   font-weight: 900;
   line-height: 1.05;
   letter-spacing: -0.02em;
@@ -7121,26 +7143,129 @@ html:has(.about-page) {
   color: var(--accent);
 }
 
+/* "That's B!" on the last step, where the title was: green, with a tick,
+   landing with a small spring. */
+.handshapes-made {
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+  margin: 0;
+  padding: 6px 20px 6px 8px;
+  font-family: var(--font-display);
+  font-size: clamp(24px, 2.4vw, 30px);
+  font-weight: 900;
+  line-height: 1.05;
+  color: var(--success-ink);
+  background: var(--success-bg);
+  border-radius: var(--radius-pill);
+  animation: handshapes-made-in 450ms var(--ease-spring) both;
+}
+
+.handshapes-made-tick {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  color: var(--on-accent);
+  background: var(--success);
+  border-radius: 50%;
+}
+
+@keyframes handshapes-made-in {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* The hand's frame (.hand-model-view is pinned to it), with the Left hand |
+   Right hand switch in its lower left: out of the way of a drag. */
+.handshapes-hand {
+  position: relative;
+  display: grid;
+  flex: 1 1 auto;
+  place-items: center;
+  min-height: 0;
+}
+
+/* The switch is Learn's camera-controls pill (HandSideToggle look="camera"),
+   in the same fixed colours in both themes, 16px in from the corner as Learn's
+   is from the camera's bottom edge. */
+.handshapes-corner {
+  position: absolute;
+  bottom: var(--space-4);
+  left: var(--space-4);
+  z-index: 1;
+}
+
+/* Without WebGL: the finished letter's drawing fills the frame. */
+.handshapes-hand .asl-drawing {
+  position: absolute;
+  inset: 16px 16px 24px;
+  width: calc(100% - 32px);
+  height: calc(100% - 40px);
+  object-fit: contain;
+}
+
+/* The right column: the steps, then the buttons at its bottom. */
+.handshapes-side {
+  display: flex;
+  grid-area: side;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-height: 0;
+}
+
+/* The list, in the middle of the height the buttons leave. */
+.handshapes-steps {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  /* Room for the focus rings, which the scroll box would clip. */
+  padding: 4px 6px;
+  overflow-y: auto;
+}
+
 .handshapes-list {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin: 0;
+  /* Centred in the column while it fits, and from the top once it scrolls. */
+  margin: auto 0;
   padding: 0;
   list-style: none;
 }
 
-/* One step: its number in a circle, then its sentence. Quiet until it's the
-   step on screen, which is a card with the accent's edge and larger words. A
-   step already done has a tick for its number. */
+/* A still guide's note, where the steps would be. */
+.handshapes-still-note {
+  max-width: 60ch;
+  margin: auto 0;
+  color: var(--text-muted);
+}
+
+/* One step: its number in a dot, then its sentence. Quiet until it's the step
+   on screen, which is a card with the accent's edge and larger words. A step
+   already done has a green tick for its number. Every step has the same
+   padding, so the dots line up and the line between them is one length. */
+.handshapes-list li {
+  position: relative;
+}
+
 .handshapes-step {
+  --dot: 34px;
   display: grid;
-  grid-template-columns: 32px minmax(0, 1fr);
-  gap: var(--space-3);
+  grid-template-columns: var(--dot) minmax(0, 1fr);
+  gap: 14px;
   align-items: start;
   width: 100%;
-  padding: 12px 16px;
+  padding: 16px 18px;
   font: inherit;
+  font-size: 17px;
   line-height: 1.45;
   color: var(--text-muted);
   text-align: left;
@@ -7169,8 +7294,8 @@ html:has(.about-page) {
 .handshapes-step-number {
   display: grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
+  width: var(--dot);
+  height: var(--dot);
   font-family: var(--font-display);
   font-size: 16px;
   font-weight: 800;
@@ -7186,13 +7311,30 @@ html:has(.about-page) {
 }
 
 .handshapes-step-text {
-  /* Level with the number's middle on a one-line sentence. */
+  /* Level with the dot's middle on a one-line sentence. */
   padding-top: 4px;
 }
 
+/* The line from a step's dot down to the next one's (20px in from the step's
+   edge to the dot, 17px to its middle): green once the step is done. */
+.handshapes-list li:not(:last-child)::after {
+  position: absolute;
+  top: 56px;
+  bottom: -24px;
+  left: 35.5px;
+  width: 3px;
+  pointer-events: none;
+  content: '';
+  background: var(--border-strong);
+  border-radius: 2px;
+}
+
+.handshapes-list li.done::after {
+  background: var(--success);
+}
+
 .handshapes-step[aria-current='step'] {
-  padding: 16px;
-  font-size: 20px;
+  font-size: 21px;
   font-weight: 600;
   line-height: 1.35;
   color: var(--text);
@@ -7244,12 +7386,93 @@ html:has(.about-page) {
   display: none;
 }
 
-/* Back, then the main button: Next step, or on the last step the way to Learn. */
+/* The buttons, at the bottom of the right column: Back at its left, and at its
+   right the main button: Next step, or on the last step the way to Learn. */
 .handshapes-actions {
   display: flex;
+  flex: none;
   flex-wrap: wrap;
   gap: var(--space-3);
   align-items: center;
+  justify-content: space-between;
+}
+
+.handshapes-forward {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  justify-content: flex-end;
+  margin-left: auto;
+}
+
+/* The steps' dots in a row: only on a phone, where one step is listed ("Small
+   screens"). A number in a circle each, joined by a line that is green as far
+   as the step on screen. */
+.handshapes-dots {
+  display: none;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.handshapes-dots li {
+  display: flex;
+  align-items: center;
+}
+
+.handshapes-dots li + li::before {
+  width: clamp(16px, 3vw, 40px);
+  height: 3px;
+  content: '';
+  background: var(--border-strong);
+}
+
+.handshapes-dots li.reached:not(:first-child)::before {
+  background: var(--success);
+}
+
+.handshapes-dot {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--text-muted);
+  cursor: pointer;
+  background: none;
+  border: 2px solid var(--border-strong);
+  border-radius: 50%;
+  transition:
+    background-color 150ms,
+    border-color 150ms,
+    transform 150ms;
+}
+
+.handshapes-dot:hover {
+  border-color: var(--accent);
+}
+
+.handshapes-dot:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.handshapes-dot.done {
+  color: var(--on-accent);
+  background: var(--success);
+  border-color: var(--success);
+}
+
+.handshapes-dot[aria-current='step'] {
+  color: var(--on-accent);
+  background: var(--accent);
+  border-color: var(--accent);
+  transform: scale(1.15);
 }
 
 .handshapes-next {
@@ -7292,6 +7515,18 @@ a.handshapes-next {
 .handshapes-back:focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .handshapes-made {
+    animation: none;
+  }
+
+  .handshapes-card,
+  .handshapes-step,
+  .handshapes-dot {
+    transition: none;
+  }
 }
 
 /* Learn's link to a letter's guide, under the letter card. */
@@ -8218,42 +8453,52 @@ a.handshapes-next {
   }
 }
 
-/* Handshapes below 900px: one column that scrolls, the hand first. The card is
-   a square on a phone and 4:3 from 700px, like the camera frames, and never
-   taller than a little over half the window, so the step's sentence and the
-   buttons stay in view under it. */
+/* Handshapes below 900px: one column, scrolling with the page. The card
+   is as tall as a square on a phone and 4:3 from 700px, like the camera frames,
+   and never taller than a little over half the window, so the step's sentence
+   and the buttons stay in view under it. */
 @media (max-width: 899px) {
   .handshapes {
-    grid-template-areas:
-      'letters'
-      'hand'
-      'steps';
-    grid-template-rows: auto;
-    grid-template-columns: minmax(0, 1fr);
     gap: 16px;
     padding: 16px;
   }
 
+  .handshapes-stage {
+    display: flex;
+    flex-direction: column;
+  }
+
   .handshapes-card {
+    flex: none;
     aspect-ratio: 1;
     min-height: 0;
     max-height: 56dvh;
     width: 100%;
   }
 
+  .handshapes-head {
+    height: 56px;
+  }
+
   .handshapes-steps {
-    gap: var(--space-4);
     padding: 0;
     overflow: visible;
+  }
+
+  .handshapes-list {
+    margin: 0;
   }
 
   .handshapes-step[aria-current='step'] {
     font-size: 18px;
   }
 
-  .handshapes-actions > * {
-    flex: 1 1 auto;
-    justify-content: center;
+  .handshapes-notice {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .handshapes-notice-button {
     text-align: center;
   }
 }
@@ -8264,11 +8509,52 @@ a.handshapes-next {
   }
 }
 
-/* On a phone only the step on screen is listed (the card says "Step 2 of 4"),
-   so the hand, the sentence and the buttons fit in the window together. */
+/* On a phone only the step on screen is listed, so the hand, the sentence and
+   the buttons fit in the window together; the dots show the rest, in a row of
+   their own, and Back and the main button share the next one, each as wide as
+   it can be. */
 @media (max-width: 699px) {
   .handshapes-list li:not(:has([aria-current='step'])) {
     display: none;
+  }
+
+  .handshapes-list li::after {
+    display: none;
+  }
+
+  .handshapes-actions {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .handshapes-dots {
+    display: flex;
+    grid-row: 1;
+    grid-column: 1 / -1;
+    justify-content: center;
+  }
+
+  .handshapes-actions > .handshapes-back {
+    grid-row: 2;
+    grid-column: 1;
+  }
+
+  .handshapes-forward {
+    grid-row: 2;
+    grid-column: 2;
+    margin-left: 0;
+  }
+
+  /* A still guide has no Back: its buttons take the row. */
+  .handshapes-forward:first-child {
+    grid-row: 1;
+    grid-column: 1 / -1;
+  }
+
+  .handshapes-forward > * {
+    flex: 1 1 auto;
+    justify-content: center;
+    text-align: center;
   }
 
   /* The 26 letters: one row that scrolls sideways, tiles at full size. */

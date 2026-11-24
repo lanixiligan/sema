@@ -301,10 +301,22 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   `letters/` pose with no `motion`, shown as the finished letter alone with a "coming soon" note.
   `guides/text/index.json` lists the letters with a text file (the browser can't list a folder):
   A, B, L, V and X, as drafts worked out by a script from the finished poses, to be replaced by
-  Lanix's from Eidos; Learn's "step by step" link is only for those. The page: the 26 letters as tiles on top (like Learn's guide; one sideways-scrolling row on a phone), the 3D hand
-  in a card on the left (always 3D with numbers, whatever `handView` says; the drawing and a line
-  if WebGL is missing; a Left hand | Right hand switch in its corner), and on the right "How to make
-  B" and the steps as a list of buttons. Next step, Back or a click on a step moves the hand there
+  Lanix's from Eidos; Learn's "step by step" link is only for those. The page: the 26 letters as tiles on top (like Learn's guide; one sideways-scrolling row on a phone), then
+  the 3D hand in a card on the left (always 3D with numbers, whatever `handView` says; a Left hand |
+  Right hand switch in its lower left corner that looks exactly like Learn's in the camera controls,
+  the same dark pill with the chosen hand in Bright Sky: `HandSideToggle`'s `look="camera"`, which
+  uses the camera controls' own classes, 2026-11-15; Guess the letter keeps the pale picture look) with "How to make B" in a strip along its top, alone in the left
+  column, and in the right one (2026-11-15) every step as a list of buttons, each with its number in
+  a dot, the dots joined by a line down the list (done ones ticked green), the one on screen a card
+  with its `checks` as chips, and at the column's bottom Back and Next step, level with the card's
+  bottom edge. (That day the page was first one centred column showing one step at a time, then had
+  a row of dots between Back and Next step under both columns; Lanix asked for the left side to be
+  only the 3D hand.) On the last step the title in the card's strip becomes a green "That's B!"
+  with a tick (above the hand, never on it; the heading stays for screen readers) and the card's
+  edge turns green. Without WebGL (`hand3d` in the page, from `HandModelView`'s `onReady` and
+  `onSettled`) an amber notice above the card says the browser can't show the 3D hand and how to
+  fix it, with a Go to Learn button (left out for someone who skipped the camera check), and the
+  drawing takes the card. Next step, Back or a click on a step moves the hand there
   (`HandModelView`'s `duration`: the step's own for Next, 600 ms otherwise; `fitTo`, the whole
   guide, keeps the camera still; `highlight` lights the numbers of the fingers the sentence names).
   The last step has "Try B with your camera", which opens Learn on that letter
@@ -313,7 +325,8 @@ Outside `src/`, `training/` holds the offline Python for 2.2 (`training/README.m
   "How to make B, step by step" link under its card for a letter with a guide, and its tour has
   a Handshapes step. A new visitor is sent to Welcome first; someone who skipped the camera check
   can open it (it's in their menu too, and "Try B with your camera" is left out). On a phone only
-  the step on screen is listed. `docs/hand-poses.md` "Guides".
+  the step on screen is listed, with the dots as a row of buttons of their own (`.handshapes-dots`,
+  hidden on wider windows) above Back and the main button. `docs/hand-poses.md` "Guides".
 - Setup redirects live in `resolveRoute`: a new visitor opening Learn or Quiz goes
   to Welcome; a returning visitor opening `/` goes to Learn. Get started (Welcome's, or About's) opens the camera check, and passing it (its Start learning button) finishes setup and opens Learn. The developer pages, Record
   included, don't need setup.
