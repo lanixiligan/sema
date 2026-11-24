@@ -1,46 +1,212 @@
 {
   "version": 1,
   "pinky": [
-    1.309,
-    2.007,
-    0.262
+    0,
+    0,
+    0
   ],
   "ring": [
-    1.396,
-    1.92,
-    0.349
+    0,
+    0,
+    0
   ],
   "middle": [
-    1.134,
+    0,
     0,
     0
   ],
   "index": [
-    0.873,
+    0,
     0,
     0
   ],
   "thumb": [
-    1.745,
-    0
+    0.279,
+    0.297
   ],
   "spread": {
-    "index": -0.785,
-    "middle": 0.15,
-    "ring": -0.524,
-    "pinky": -0.524,
-    "thumb": -0.96
+    "index": -0.18,
+    "middle": -0.05,
+    "ring": 0,
+    "pinky": 0.157,
+    "thumb": 0.175
   },
   "rotate": {
-    "thumb": -1.309,
+    "thumb": 0.017,
     "index": 0,
     "middle": 0,
-    "ring": 0.698,
-    "pinky": 0.96
+    "ring": 0,
+    "pinky": 0
   },
   "wrist": {
-    "turn": 0.017,
-    "tilt": -0.436,
-    "twist": 0
-  }
+    "turn": -0.175,
+    "tilt": 0.175,
+    "twist": 0.192
+  },
+  "move": {
+    "side": 0,
+    "up": 0
+  },
+  "scale": 1,
+  "motion": [
+    {
+      "duration": 400,
+      "pose": {
+        "pinky": [
+          1.309,
+          2.007,
+          0.262
+        ],
+        "ring": [
+          1.396,
+          1.92,
+          0.349
+        ],
+        "middle": [
+          0,
+          0,
+          0
+        ],
+        "index": [
+          0,
+          0,
+          0
+        ],
+        "thumb": [
+          0.279,
+          0.297
+        ],
+        "spread": {
+          "index": -0.18,
+          "middle": -0.05,
+          "ring": -0.524,
+          "pinky": -0.524,
+          "thumb": 0.175
+        },
+        "rotate": {
+          "thumb": 0.017,
+          "index": 0,
+          "middle": 0,
+          "ring": 0.698,
+          "pinky": 0.96
+        },
+        "wrist": {
+          "turn": -0.175,
+          "tilt": 0.175,
+          "twist": 0.192
+        },
+        "move": {
+          "side": 0,
+          "up": 0
+        },
+        "scale": 1
+      }
+    },
+    {
+      "duration": 400,
+      "pose": {
+        "pinky": [
+          1.309,
+          2.007,
+          0.262
+        ],
+        "ring": [
+          1.396,
+          1.92,
+          0.349
+        ],
+        "middle": [
+          0,
+          0,
+          0
+        ],
+        "index": [
+          0,
+          0,
+          0
+        ],
+        "thumb": [
+          0.279,
+          0.297
+        ],
+        "spread": {
+          "index": -0.436,
+          "middle": 0.175,
+          "ring": -0.524,
+          "pinky": -0.524,
+          "thumb": 0.175
+        },
+        "rotate": {
+          "thumb": 0.017,
+          "index": 0,
+          "middle": 0,
+          "ring": 0.698,
+          "pinky": 0.96
+        },
+        "wrist": {
+          "turn": -0.175,
+          "tilt": 0.175,
+          "twist": 0.192
+        },
+        "move": {
+          "side": 0,
+          "up": 0
+        },
+        "scale": 1
+      }
+    },
+    {
+      "duration": 400,
+      "pose": {
+        "pinky": [
+          1.309,
+          2.007,
+          0.262
+        ],
+        "ring": [
+          1.396,
+          1.92,
+          0.349
+        ],
+        "middle": [
+          1.134,
+          0,
+          0
+        ],
+        "index": [
+          0.873,
+          0,
+          0
+        ],
+        "thumb": [
+          1.745,
+          0
+        ],
+        "spread": {
+          "index": -0.785,
+          "middle": 0.15,
+          "ring": -0.524,
+          "pinky": -0.524,
+          "thumb": -0.96
+        },
+        "rotate": {
+          "thumb": -1.309,
+          "index": 0,
+          "middle": 0,
+          "ring": 0.698,
+          "pinky": 0.96
+        },
+        "wrist": {
+          "turn": 0.017,
+          "tilt": -0.436,
+          "twist": 0
+        },
+        "move": {
+          "side": 0,
+          "up": 0
+        },
+        "scale": 1
+      }
+    }
+  ]
 }
