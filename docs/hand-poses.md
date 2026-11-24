@@ -85,8 +85,8 @@ After that, a letter's guide is two things, both in `public/languages/asl/guides
 - **The words**, `text/B.json`, written by hand: a file per letter in the `text/` folder, one
   entry per motion step, in the same order (the shared first step isn't repeated here). For now
   (2026-11-14, while the guides are remade in Eidos) the counts needn't match: the motion decides
-  how many steps there are, a step with no entry is listed as just "Step 3", and entries past the
-  last step are left out. The card always shows "Step 2 of 3".
+  how many steps there are, a step with no entry shows a "No instructions yet" sign (2026-11-24)
+  beside its number, and entries past the last step are left out.
 
 ```json
 [
@@ -103,12 +103,14 @@ under the step as green chips.
 **Every letter has a guide** (2026-11-14): the page shows all 26, and every letter has a guide
 file. A letter whose movement isn't made yet has a **still guide**: a copy of its finished pose
 from `letters/` with no `motion` (J and Z were copied without their movement). The page shows it
-as the finished letter alone, with "A step-by-step guide for D is coming soon", no step list, no
+as the finished letter alone, with a "No instructions yet" sign and "A step-by-step guide for G is
+coming soon", no step list, no
 Relaxed start and no Back; Try D with your camera and Next letter are still there.
 
 `text/index.json` lists the letters that have a text file (`["A", "B", "L", "V", "X"]`). The
 browser can't list a folder's files, so the page reads this list to know which letters to fetch a
-text file for; a letter not in it has no sentences (its steps show as "Step 2"). Learn's "How to
+text file for; a letter not in it has no sentences (its steps after the first show the "No
+instructions yet" sign). Learn's "How to
 make B, step by step" link is shown only for the letters in it. To give a letter its real guide:
 
 1. In Eidos, open `guides/Relaxed.json` and make the movement from it: a step per finger or group of fingers
@@ -124,7 +126,8 @@ make B, step by step" link is shown only for the letters in it. To give a letter
 
 The first five guides (A, B, L, V, X, 2026-11-14) are **drafts worked out by a script**, not made
 in Eidos: each step is the relaxed hand with some fingers taken from the letter's finished pose.
-They're there so the page can be tried; replace them with ones made in Eidos. J and Z have no
+They're there so the page can be tried; replace them with ones made in Eidos. D, E, F, I, K, M,
+N, T and Y have movements made in Eidos (2026-11-24) but no words yet. J and Z have no
 guide yet (their last step would be the letter's own movement).
 
 The frame is fitted once for the whole guide (`fitTo` on the viewer's `setPose`, Sema's addition

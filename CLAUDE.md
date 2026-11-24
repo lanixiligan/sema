@@ -135,7 +135,7 @@ src/
                     with the camera, QuizFlow and QuizRun) and Guess the letter (name hand
                     pictures, no camera, GuessQuizPage and GuessRun; Letters until 2026-11-04);
                     its state (quizRounds); words from public/languages/asl/words.json
-    guides/      Handshapes (/handshapes, 2026-11-14): how to make a letter, step by step, on a
+    handshapes/     Handshapes (/handshapes, 2026-11-14): how to make a letter, step by step, on a
                     large 3D hand, no camera; the guides come from src/hand-model/letterGuides.js
     not-found/      Page not found, for an address Sema never had (2026-10-29)
     dev/            the developer tools behind an access code: DevArea (the gate, then
