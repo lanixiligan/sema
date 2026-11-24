@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { createHand } from './hand.js'
+import { FINGERS } from './pose.js'
 
 // The 3D hand (Eidos's viewer, hand.js) making a letter's pose, facing the
 // signing hand. Grab it to turn it (the mouse or a finger; it has no keyboard
@@ -25,6 +26,11 @@ import { createHand } from './hand.js'
 // (the effect on `pose` below), with a progress bar along the frame's bottom
 // edge, like a video's: it fills while the hand moves, stays full while it
 // holds the last step, and starts again from empty with the next play.
+// For the Handshapes page (2026-11-14), which shows a letter's guide one step
+// at a time: `duration` (ms) makes the move to a new pose take exactly that
+// long, `fitTo` is the whole guide (a pose with `motion`), so the frame is
+// fitted once for every step and the camera doesn't move between them, and
+// `highlight` is a list of fingers whose fingertip numbers are lit.
 
 // A movement's loop: how long the hand rests on the first step before it
 // moves, holds the last step, and takes to ease back to the first (ms).
@@ -32,7 +38,21 @@ const MOTION_REST_MS = 800
 const MOTION_HOLD_MS = 1200
 const MOTION_BACK_MS = 600
 
-export default function HandModelView({ letter, pose, hand, theme = 'light', numbers = true, fallback, label, instant = false, onReady, onSettled }) {
+export default function HandModelView({
+  letter,
+  pose,
+  hand,
+  theme = 'light',
+  numbers = true,
+  fallback,
+  label,
+  instant = false,
+  duration = 0,
+  fitTo = null,
+  highlight = null,
+  onReady,
+  onSettled,
+}) {
   const containerRef = useRef(null)
   // The movement's progress bar (only for a pose that moves)
   const barRef = useRef(null)
@@ -96,7 +116,7 @@ export default function HandModelView({ letter, pose, hand, theme = 'light', num
   useEffect(() => {
     const viewer = viewerRef.current
     if (!viewer) return
-    viewer.setPose(pose, { instant })
+    viewer.setPose(pose, { instant, duration, fitTo })
     if (!pose.motion) return
     const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const total = pose.motion.reduce((sum, step) => sum + step.duration, 0)
@@ -135,7 +155,25 @@ export default function HandModelView({ letter, pose, hand, theme = 'light', num
       clearTimeout(timer)
       cancelAnimationFrame(frame)
     }
-  }, [pose, instant])
+  }, [pose, instant, duration, fitTo])
+
+  // The fingers whose numbers are lit (the Handshapes page: the ones a step
+  // moves). The numbers are only made once the model has loaded, so this waits
+  // for it. The list is compared as text, so a new array with the same fingers
+  // doesn't run it again.
+  const lit = highlight ? highlight.join(' ') : ''
+  useEffect(() => {
+    const viewer = viewerRef.current
+    if (!viewer) return
+    let cancelled = false
+    viewer.ready.then((loaded) => {
+      if (cancelled || !loaded) return
+      FINGERS.forEach((finger) => viewer.highlightFinger(finger, lit.split(' ').includes(finger)))
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [lit])
 
   // The fingertip numbers, shown or hidden by the Numbers button.
   useEffect(() => {

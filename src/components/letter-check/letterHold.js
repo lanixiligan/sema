@@ -19,11 +19,22 @@ export function showsLetter(guesses) {
 }
 
 // The letter model's reading of one frame: the letter when it's sure, '?'
-// when it isn't, or null with no whole signing hand to read.
+// when it isn't, or null with no whole signing hand to read, or when the hand
+// was judged without the model (its file failed to load, so the guess has no
+// `sure`).
 export function modelReading(guesses) {
   const g = guesses.find((guess) => guess.whole)
-  if (!g) return null
+  if (!g || !('sure' in g)) return null
   return g.sure ? g.letter : '?'
+}
+
+// Can the check start? It always needs the hand model. A still letter also
+// waits while the letter model's file is loading (`modelStatus`: 'loading',
+// 'ready' or 'error'), but not for a file that failed: the model is only a
+// second opinion, so without it the finger rules decide alone, as they always
+// do, and Learn just has no "Model" reading. Traced letters (J, Z) never use it.
+export function checkReady({ handModelReady, traced, modelStatus }) {
+  return handModelReady && (traced || modelStatus !== 'loading')
 }
 
 // The letter model's second opinion on a whole hold: it never decides the

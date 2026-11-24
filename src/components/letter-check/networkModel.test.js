@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { NORMALIZATION_VERSION } from '../../vision/landmarks/normalizeHand.js'
 import { classify, readModel } from './networkModel.js'
@@ -61,5 +62,38 @@ describe('classify', () => {
   it('is not sure when the top percentage is under the threshold', () => {
     expect(classify(readModel(file({ threshold: 0.6 })), [Math.log(2), 0]).sure).toBe(false)
     expect(classify(readModel(file({ threshold: 0.4 })), [Math.log(2), 0]).sure).toBe(true)
+  })
+})
+
+// One real hand per still letter (public ASL-HG photos), with the answers
+// training/small.py's forward() gives for the published model. The Python side
+// checks the same file (training/test_letter_hands.py).
+describe('the published model', () => {
+  const read = (path) => JSON.parse(readFileSync(new URL(path, import.meta.url), 'utf8'))
+  const { hands } = read('../../vision/landmarks/fixtures/letter-hands.json')
+  const model = readModel(read('../../../public/models/asl-letters.json'))
+
+  it.each(hands)('gives $letter hand the answer Python gives', ({ landmarks, model: expected }) => {
+    const guess = classify(model, landmarks)
+    expect(guess.letter).toBe(expected.letter)
+    expect(guess.confidence).toBeCloseTo(expected.confidence, 6)
+  })
+})
+
+describe('readModel on a malformed file', () => {
+  it('refuses a mean that is not as long as the first layer’s input', () => {
+    expect(() => readModel(file({ mean: [0] }))).toThrow(/mean/)
+  })
+
+  it('refuses a scale that is not as long as the mean', () => {
+    expect(() => readModel(file({ scale: [1, 1, 1] }))).toThrow(/scale/)
+  })
+
+  it('refuses a last layer without one output per letter', () => {
+    expect(() => readModel(file({ letters: ['A', 'B'] }))).toThrow(/letters/)
+  })
+
+  it('refuses a layer whose biases do not match its outputs', () => {
+    expect(() => readModel(file({ layers: [{ weights: [[1, 0], [0, 1], [0, 0]], biases: [0, 0] }] }))).toThrow(/biases/)
   })
 })

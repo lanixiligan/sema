@@ -1,5 +1,5 @@
 import { CheckIcon } from '../../components/icons/icons.jsx'
-import { FINGER_NUMBERS } from '../../vision/landmarks/handPoints.js'
+import FingerText from '../../components/FingerText.jsx'
 
 // The letter's finger conditions (letterShapes.js) as a checklist, ticked off
 // live as the signing hand meets them; the hold starts once the letter is
@@ -24,28 +24,5 @@ export default function FingerChecklist({ checks }) {
         ))}
       </ul>
     </section>
-  )
-}
-
-// A condition's text with every {finger} as its number badge and its name in bold.
-function FingerText({ text }) {
-  return text.split(/\{(\w+)\}/).map((part, i) =>
-    // split puts the names in braces at the odd places.
-    i % 2 === 1 ? (
-      <b key={i} className="finger-name">
-        <FingerBadge name={part} />
-        {part}
-      </b>
-    ) : (
-      part
-    ),
-  )
-}
-
-function FingerBadge({ name }) {
-  return (
-    <span className="finger-badge" aria-hidden="true">
-      {FINGER_NUMBERS[name]}
-    </span>
   )
 }

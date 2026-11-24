@@ -1,7 +1,7 @@
 import { NORMALIZATION_VERSION } from '../../vision/landmarks/normalizeHand.js'
 
-// The small model from training/small.py, in the browser, for the Practice
-// page (/practice). training/train_small.py saves it as public/models/asl-letters.json:
+// The small model from training/small.py, in the browser, for Learn
+// (/learn). training/train_small.py saves it as public/models/asl-letters.json:
 // the 63 numbers' mean and scale, then layers of weights. Logistic regression
 // is one layer; the small neural network two. To judge a hand: scale its
 // numbers, then for each layer, every output is its row of weights times the
@@ -16,7 +16,27 @@ export function readModel(json) {
     throw new Error(`The model uses normalization ${json.normalization}; the app uses ${NORMALIZATION_VERSION}.`)
   }
   const { name, letters, threshold, mean, scale, layers } = json
+  checkShapes({ letters, mean, scale, layers })
   return { name, letters, threshold, mean, scale, layers }
+}
+
+// A file whose lists don't fit together would give NaN percentages instead of
+// an error, so the sizes are checked once, when the file is read: the mean and
+// scale are as long as the first layer's input, each layer takes what the one
+// before gives, and the last gives one score per letter.
+function checkShapes({ letters, mean, scale, layers }) {
+  let size = mean.length
+  if (scale.length !== size) throw new Error(`The model's scale has ${scale.length} numbers; its mean has ${size}.`)
+  layers.forEach((layer, i) => {
+    if (layer.weights.some((row) => row.length !== size)) {
+      throw new Error(`The model's layer ${i + 1} doesn't take ${size} numbers (the mean's length, or the layer before's).`)
+    }
+    if (layer.biases.length !== layer.weights.length) {
+      throw new Error(`The model's layer ${i + 1} has ${layer.biases.length} biases for ${layer.weights.length} outputs.`)
+    }
+    size = layer.weights.length
+  })
+  if (size !== letters.length) throw new Error(`The model gives ${size} scores for ${letters.length} letters.`)
 }
 
 // landmarks: a hand's 63 normalized numbers (normalizeHand.js).

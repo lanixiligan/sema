@@ -9,6 +9,7 @@ import AboutPage from '../pages/about/AboutPage.jsx'
 import CameraCheckPage from '../pages/onboarding/CameraCheckPage.jsx'
 import LearnPage from '../pages/learn/LearnPage.jsx'
 import NotFoundPage from '../pages/not-found/NotFoundPage.jsx'
+import HandshapesPage from '../pages/handshapes/HandshapesPage.jsx'
 import WelcomePage from '../pages/onboarding/WelcomePage.jsx'
 import GuessQuizPage from '../pages/quiz/GuessQuizPage.jsx'
 import QuizPage from '../pages/quiz/QuizPage.jsx'
@@ -27,6 +28,7 @@ const TITLES = {
   about: 'About · Sema',
   cameraCheck: 'Camera setup · Sema',
   learn: 'Learn · Sema',
+  handshapes: 'Handshapes · Sema',
   quiz: 'Quiz · Sema',
   quizWords: 'Words quiz · Sema',
   quizGuess: 'Guess the letter · Sema',
@@ -226,6 +228,8 @@ function Page({
           model={devModel}
         />
       )
+    case 'handshapes':
+      return <HandshapesPage signingHand={signingHand} onSigningHandChange={onSigningHandChange} />
     case 'quiz':
       return <QuizPage signingHand={signingHand} />
     case 'quizGuess':

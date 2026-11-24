@@ -1,0 +1,159 @@
+{
+  "version": 1,
+  "pinky": [
+    0,
+    0,
+    0
+  ],
+  "ring": [
+    0,
+    0,
+    0
+  ],
+  "middle": [
+    0,
+    0,
+    0
+  ],
+  "index": [
+    0,
+    0,
+    0
+  ],
+  "thumb": [
+    -0.1,
+    0
+  ],
+  "spread": {
+    "index": -0.18,
+    "middle": -0.05,
+    "ring": 0.08,
+    "pinky": 0.22,
+    "thumb": 0
+  },
+  "rotate": {
+    "thumb": 0,
+    "index": 0,
+    "middle": 0,
+    "ring": 0,
+    "pinky": 0
+  },
+  "wrist": {
+    "turn": -0.175,
+    "tilt": 0.175,
+    "twist": 0.192
+  },
+  "move": {
+    "side": 0,
+    "up": 0,
+    "forward": 0
+  },
+  "motion": [
+    {
+      "duration": 700,
+      "pose": {
+        "pinky": [
+          1.31,
+          1.7,
+          0.25
+        ],
+        "ring": [
+          1.37,
+          1.7,
+          0.2
+        ],
+        "middle": [
+          1.41,
+          1.7,
+          0.18
+        ],
+        "index": [
+          1.39,
+          1.7,
+          0.67
+        ],
+        "thumb": [
+          0.2,
+          0.15
+        ],
+        "spread": {
+          "index": -0.15,
+          "middle": -0.03,
+          "ring": -0.1,
+          "pinky": 0.13,
+          "thumb": 0
+        },
+        "rotate": {
+          "thumb": 0,
+          "index": 0,
+          "middle": 0,
+          "ring": 0,
+          "pinky": 0
+        },
+        "wrist": {
+          "turn": -0.209,
+          "tilt": 0,
+          "twist": 0.262
+        },
+        "move": {
+          "side": 0,
+          "up": 0,
+          "forward": 0
+        }
+      }
+    },
+    {
+      "duration": 700,
+      "pose": {
+        "pinky": [
+          1.31,
+          1.7,
+          0.25
+        ],
+        "ring": [
+          1.37,
+          1.7,
+          0.2
+        ],
+        "middle": [
+          1.41,
+          1.7,
+          0.18
+        ],
+        "index": [
+          1.39,
+          1.7,
+          0.67
+        ],
+        "thumb": [
+          0.79,
+          0.69
+        ],
+        "spread": {
+          "index": -0.15,
+          "middle": -0.03,
+          "ring": -0.1,
+          "pinky": 0.13,
+          "thumb": -0.22
+        },
+        "rotate": {
+          "thumb": 0,
+          "index": 0,
+          "middle": 0,
+          "ring": 0,
+          "pinky": 0
+        },
+        "wrist": {
+          "turn": -0.209,
+          "tilt": 0,
+          "twist": 0.262
+        },
+        "move": {
+          "side": 0,
+          "up": 0,
+          "forward": 0
+        }
+      }
+    }
+  ]
+}

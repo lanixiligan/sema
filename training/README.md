@@ -19,6 +19,7 @@ everything from the project root. The notebooks also need ipykernel and matplotl
 | `clean.py` | Runs the cleaning on one dataset and writes `reports/cleaning-<dataset>.md` |
 | `train.py` | Trains the k-NN, tests it, and writes `reports/knn.md` |
 | `train_small.py` | Trains the small models, tests them next to the k-NN, writes `reports/small.md`, and saves the better one for the browser |
+| `letter_hands.py` | Makes the tests' fixture: one typical public hand per still letter, with the published model's answer (`src/vision/landmarks/fixtures/letter-hands.json`). Run it again after training a new model |
 | `notebooks/` | Jupyter notebooks for looking at results (below); they reuse the files above |
 | `reports/` | Results as counts and public file names only, so they can be committed |
 
@@ -45,6 +46,23 @@ everything from the project root. The notebooks also need ipykernel and matplotl
    small model and the k-NN only shows under `npm run dev`), then open
    http://localhost:5173/learn in Chrome: its "Right now" line shows the model's guess. The
    small model also works on the live site.
+
+6. Remake the tests' fixture, so the tests check the new model:
+   `python3 training/letter_hands.py data/extracted/<asl-hg file>.json` (public photos only),
+   then `npm test` and `python3 -m unittest discover training`.
+7. Measure the finger rules on the same hands: `npm run check-rules -- data/extracted/<file>.json
+   [...] data/raw/<session>.json [...]` writes `reports/rules.md` (below).
+
+## The finger rules report
+
+The letter model is only Learn's second opinion: the finger rules
+(`src/vision/landmarks/letterShapes.js`) decide a pass. `npm run check-rules`
+(`scripts/check-rules.js`, JavaScript, because it calls the app's own `matchLetter`) measures
+them on the same extracted files and session files: per letter, how often its hands pass as
+that letter, which other letters they would also pass as, and each condition's average score.
+Run it before and after changing a rule, and keep a change only if its letter improves and no
+other gets worse. First run, 2026-11-10: 66.3% of ASL-HG's hands and 49.9% of ASLYset's pass as
+their own letter, 95.6% of Lanix's recorded frames (8 letters).
 
 ## Notebooks
 

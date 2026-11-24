@@ -1,0 +1,4 @@
+[
+  {"say": "Straighten {index}, {middle}, {ring} and {pinky}, and press them together.", "checks": ["{index} straight", "{middle} straight", "{ring} straight", "{pinky} straight", "{index} and {middle} together"]},
+  {"say": "Fold {thumb} across your palm.", "checks": ["{thumb} folded across the palm"]}
+]

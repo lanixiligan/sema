@@ -22,6 +22,9 @@
 // movement plays and fits the whole movement in the frame. Sema's own change
 // (2026-11-04): the curve between steps is smoothBetween, which can't overshoot
 // a step (Eidos's catmullRom did, and the hand bounced).
+// Sema's own change (2026-11-14, the Handshapes page): setPose's `fitTo`, a pose
+// whose every step is measured for the fit instead of the pose being set, so
+// the camera stays where it is while a letter's guide goes from step to step.
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
@@ -807,12 +810,14 @@ export function createHand(container, options = {}) {
     /**
      * Ease to a pose (validated; throws on bad data). `duration` (ms) makes it
      * a timed move that arrives exactly then; `instant` jumps straight there.
+     * `fitTo` (Sema) is a pose to fit the frame to instead of this one.
      */
-    setPose(pose, { instant = false, duration = 0 } = {}) {
+    setPose(pose, { instant = false, duration = 0, fitTo = null } = {}) {
       const full = normalizePose(pose);
       // A pose that moves shows its first step, fitted for the whole movement
+      // (or for the whole of `fitTo`, when this pose is one step of it)
       target = stillPose(full);
-      fitPoses = motionSteps(full).map((step) => step.pose);
+      fitPoses = motionSteps(fitTo ? normalizePose(fitTo) : full).map((step) => step.pose);
       tween = null;
       stopPlaying(false);
       if (instant || reducedMotion) Object.assign(state, clonePose(target));

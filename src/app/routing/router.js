@@ -11,6 +11,9 @@ export const PATHS = {
   // The letters one at a time, with the guide of all 26 (Practice's page
   // was merged into it on 2026-10-27): the main page.
   learn: '/learn',
+  // How to make each letter, step by step, on a large 3D hand (2026-11-14).
+  // No camera: it teaches, Learn practises and checks.
+  handshapes: '/handshapes',
   // Test what was learned: the choice between the two kinds of quiz.
   quiz: '/quiz',
   // The two kinds, one page each (2026-11-04): Words, signed with the camera,
@@ -49,7 +52,7 @@ const MOVED = {
 }
 
 // Pages that need setup finished first.
-const NEEDS_SETUP = ['learn', 'quiz', 'quizWords', 'quizGuess']
+const NEEDS_SETUP = ['learn', 'handshapes', 'quiz', 'quizWords', 'quizGuess']
 // Where the camera check may lead once it passes, besides Learn.
 const CHECK_NEXT = [PATHS.learn, PATHS.quizWords]
 
@@ -67,10 +70,25 @@ export function cameraCheckNext(search) {
   return CHECK_NEXT.includes(next) ? next : PATHS.learn
 }
 
+// Learn's and Handshapes' address for one letter: /handshapes?letter=B. The
+// letter is in the query, like the camera check's `next`, so the router still
+// only reads the path. `page` is 'learn' or 'handshapes'.
+export function letterPath(page, letter) {
+  return `${PATHS[page]}?letter=${letter}`
+}
+
+// The letter an address's query names ("?letter=B"), or null: one capital
+// letter, nothing else.
+export function letterInAddress(search) {
+  const letter = new URLSearchParams(search).get('letter')
+  return /^[A-Z]$/.test(letter ?? '') ? letter : null
+}
+
 // Pages closed to someone who finished setup without the camera check (2026-11-08,
 // Lanix's call: before, they could open them, and Learn's camera frame said "Set up
-// your camera"). Until the check passes, only Guess the letter, About and the
-// check itself are open; the rest lead to Guess the letter.
+// your camera"). Until the check passes, only Guess the letter, Handshapes (it
+// needs no camera), About and the check itself are open; the rest lead to
+// Guess the letter.
 const NEEDS_CAMERA_CHECK = ['learn', 'quiz', 'quizWords']
 
 // Which page a path shows, as { page: 'learn' }, or { redirect: '/' } to
